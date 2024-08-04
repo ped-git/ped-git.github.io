@@ -1,0 +1,1056 @@
+<html>
+
+<head>
+
+<style>
+  /* Style for the vertical line */
+  .vertical-line-1 {
+    border-left: 0.3mm solid black; /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-dashed-1 {
+    border-left: 0.3mm dashed black; /* Adjust the color and width as needed */
+    height: 120%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    top: 50%; /* Position the top edge of the line at the vertical center of the container */
+    transform: translateY(-50%);
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-dashed-1-100 {
+    border-left: 0.3mm dashed black; /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    top: 50%; /* Position the top edge of the line at the vertical center of the container */
+    transform: translateY(-50%);
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-red-1 {
+    border-left: 0.3mm solid rgb(205,100,100); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-green-1 {
+    border-left: 0.3mm solid rgb(70,175,70); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-2 {
+    border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 5.4mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-3 {
+    border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 3.4mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-inside {
+    border-left: 0.3mm dotted rgb(220, 220, 220); /* Adjust the color and width as needed */
+    height: 95%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    top: 50%; /* Position the top edge of the line at the vertical center of the container */
+    transform: translateY(-50%);
+    right: 0mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+
+  }
+
+  .diamond-marker{
+    width: 1.2mm;
+    height: 1.2mm;
+    transform: rotate(45deg); /* Rotate to create a diamond shape */
+    position: absolute;
+    
+  }
+
+  .diamond-marker.top-1 {
+	background-color: black;
+    top: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-1 {
+	background-color: black;
+	bottom: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-red-1 {
+	background-color: rgb(205,100,100);
+    top: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-red-1 {
+	background-color: rgb(205,100,100);
+	bottom: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-green-1 {
+	background-color: rgb(70,175,70);
+    top: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-green-1 {
+	background-color: rgb(70,175,70);
+	bottom: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-2 {
+	background-color: rgb(150, 150, 150);
+    top: 0;
+	right: 5.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-2 {
+	background-color: rgb(150, 150, 150);
+	bottom: 0;
+	right: 5.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-3 {
+	background-color: rgb(200, 200, 200);
+    top: 0;
+	right: 3.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-3 {
+	background-color: rgb(200, 200, 200);
+	bottom: 0;
+	right: 3.0mm; /* Adjust the position for alignment */
+  }
+  
+  /* Style for the container */
+  .container {
+    position: relative; /* Set the container as a relative position */
+    page-break-inside: auto; /* or auto */
+  }
+</style>
+
+<style>
+  .inner-paragraph-1 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0mm;
+    width: 106mm;
+    text-indent:0mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-2 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:-1mm;
+    width: 153mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-3 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0mm;
+    width: 136mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-4 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:-1.5mm;
+    width: 128mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-5 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0mm;
+    width: 70mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-6 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:-1.5mm;
+    width: 141mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-7 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0.0mm;
+    width: 161mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-8 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:-3.0mm;
+    width: 163mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-9 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0.0mm;
+    width: 159mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-10 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0.0mm;
+    width: 164mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-11 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:-1.1mm;
+    width: 136mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-12 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0.5mm;
+    width: 64mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-13 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0.0mm;
+    width: 132mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-14 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:1.0mm;
+    width: 80mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-15 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:1.0mm;
+    width: 117mm;
+  }
+</style>
+
+
+<style>
+  .inner-paragraph-continue {
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: center;
+    background-color: rgb(150, 150, 150);
+    margin-top:0mm;
+    text-indent:0mm;
+  }
+</style>
+
+<style>
+  .ordinary-near {
+    margin-top:0mm;
+    margin-right:10mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .ordinary-far {
+    margin-top:0mm;
+    margin-right:10mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .only-bullet-near {
+    margin-top:0mm;
+    margin-right:4mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-4mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-near {
+    margin-top:0mm;
+    margin-right:16.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-6.5mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-far {
+    margin-top:0mm;
+    margin-right:16.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-6.5mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-near-2 {
+    margin-top:0mm;
+    margin-right:14.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-4.5mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-far-2 {
+    margin-top:0mm;
+    margin-right:14.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-4.5mm;'
+  }
+</style>
+
+<style>
+  .big-bullet-near {
+    margin-top:0mm;
+    margin-right:19.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-9.5mm;'
+  }
+</style>
+
+<style>
+  .big-bullet-far {
+    margin-top:0mm;
+    margin-right:19.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-9.5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-first-near {
+    margin-top:0mm;
+    margin-right:25.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-15.5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-first-far {
+    margin-top:0mm;
+    margin-right:25.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-15.5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-next-near {
+    margin-top:0mm;
+    margin-right:24.0mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-next-far {
+    margin-top:0mm;
+    margin-right:24.0mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-zero-near {
+    margin-top:0mm;
+    margin-right:19.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-zero-far {
+    margin-top:0mm;
+    margin-right:19.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .double-small-bullet-first-near {
+    margin-top:0mm;
+    margin-right:15mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-small-bullet-next-near {
+    margin-top:0mm;
+    margin-right:18.4mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-small-bullet-next-far {
+    margin-top:0mm;
+    margin-right:18.4mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .boxed {
+    border: 1px solid rgb(150, 150, 150); /* Set border properties */
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
+  .boxed.square {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 1px solid rgb(100, 100, 100);
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed-dashed {
+    border: 1px dashed rgb(150, 150, 150); /* Set border properties */
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
+  .boxed-dotted {
+    border: 1px dotted rgb(150, 150, 150); /* Set border properties */
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
+  .boxed-dotted.gray {
+    border: 1px dotted rgb(200, 200, 200); /* Set border properties */
+  }
+
+  .boxed-dashed.gray {
+    border: 1px dashed rgb(200, 200, 200); /* Set border properties */
+  }
+
+  .boxed-red {
+    border: 1px solid rgb(255, 220, 220);
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
+  .boxed-green {
+    border: 1px solid rgb(210, 230, 210);
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-green {
+    border-bottom: 1px dashed rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradient {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, black, white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradient-green {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, rgb(190, 210, 190), white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradient-red {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, rgb(235, 200, 200), white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-solidgreen {
+    border-bottom: 1px solid rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blue {
+    border-bottom: 1px dashed rgb(70, 70, 220);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-red {
+    border-bottom: 1px dashed rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-red-far {
+    border-bottom: 1px dashed rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-green-far {
+    border-bottom: 1px dashed rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+  
+  .boxed.underline-solidred-far {
+    border-bottom: 1px solid rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-solidgreen-far {
+    border-bottom: 1px solid rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-solidred-veryfar {
+    border-bottom: 1px solid rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 6px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-solidgreen-veryfar {
+    border-bottom: 1px solid rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 6px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-solidred {
+    border-bottom: 1px solid rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-black-1 {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-black-far {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-black-2 {
+    border-bottom: 1px solid rgb(180, 180, 180);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-black-3 {
+    border-bottom: 1px solid rgb(220, 220, 220);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdashed {
+    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdotted {
+    border-bottom: 1px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdotted-far {
+    border-bottom: 1px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdotted2 {
+    border-bottom: 2px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-three {
+    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 1px dashed rgb(100, 100, 100);
+    border-top: 1px dashed rgb(100, 100, 100);
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-notsure {
+    border-bottom: 0;
+    border-left: 1px dotted rgb(100, 100, 100);;
+    border-right: 1px dotted rgb(100, 100, 100);;
+    border-top: 0;
+    padding: 0px 1px;
+  }
+</style>
+
+
+<style>
+  .zero-margin {
+    margin-top:0mm;
+    margin-right:0mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .zero-margin2 {
+    margin-top:0mm;
+    margin-right:6.5mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-6.5mm;'
+  }
+</style>
+
+<style>
+  .zero-margin2.far {
+    margin-bottom:4.5mm;
+  }
+</style>
+
+<style>
+  .zero-margin3 {
+    margin-top:0mm;
+    margin-right:7mm;
+    margin-bottom:4.5mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .zero-margin4 {
+    margin-top:0mm;
+    margin-right:6mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .zero-margin5 {
+    margin-top:0mm;
+    margin-right:7mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .zero-margin6 {
+    margin-top:0mm;
+    margin-right:4mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-4mm;'
+  }
+</style>
+
+<style>
+  .highlight1 {
+    color:  rgb(70, 175, 70);
+  }
+
+  .highlight2 {
+    color:  rgb(205, 100, 100);
+  }
+
+  .highlight3 {
+    color:  rgb(0, 150, 255);
+  }
+
+  .highlight4 {
+    color:  rgb(201, 129, 22);
+  }
+
+  .highlight5 {
+    color:  rgb(175, 120, 35);
+  }
+
+  .highlight6 {
+    color:  rgb(5, 145, 5);
+  }
+
+  .highlight7 {
+    color:  violet;
+  }
+
+  .highlight8 {
+    color:  sandybrown;
+  }
+
+  .highlight9 {
+    color:  goldenrod;
+  }
+
+  .highlight10 {
+    color:  rgb(180, 26, 26);
+  }
+
+  .highlight11 {
+    color:  rgb(162, 192, 212);
+  }
+
+  .highlight12 {
+    color:  rgb(0, 130, 230);
+  }
+
+  .backhighlight1 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    /*background-color:  rgba(240, 255, 240);*/
+  }
+
+</style>
+
+<style>
+  .line-container {
+    display: flex;
+    justify-content: space-between;
+    width: 95%;
+    /*border-top: 1px solid #000; /* Optional: Add a border for better visibility */
+    padding: 10px; /* Optional: Add padding for better spacing */
+    font-size: 10mm;
+    font-weight: bold;
+    color: rgb(150, 150, 150);
+  }
+
+  .left-word {
+    order: 1; /* Specify the order of the element within the flex container */
+  }
+
+  .right-word {
+    order: 2; /* Specify the order of the element within the flex container */
+  }
+</style>
+
+
+
+<style>
+
+.page-break-after {
+  page-break-after: always;
+}
+
+
+@media print {
+      .header {
+        position: fixed;
+        top: 0mm;
+        left: 40mm;
+        right: 40mm;
+        text-align: left;
+        font-size: 5mm;
+
+      }
+      .content {
+        margin-top: 17mm;
+        margin-bottom: 17mm;
+        margin-left: 10mm;
+        margin-right: 10mm;
+
+      }
+
+      .my-inline-block {
+        margin-bottom: calc(100vh - 20px); /* Example calculation */
+      }
+    }
+
+
+</style>
+
+</head>
+
+
+
+<body lang=AR-SA dir='RTL' text-align:'right' style='width:190mm;font-size:4.5mm;line-height:240%;font-family:"KFGQPC Uthman Taha Naskh"'>
+
+
+<div style='font-size:9.0mm;
+            margin-top:-2mm;
+            margin-right:10mm;
+            margin-bottom:2.5mm;
+            margin-left:10mm;
+            text-align:center;
+            background-color: rgb(220,220,220);
+            font-weight: bold;
+            line-height:150%;'>
+    الحشر
+</div>
+
+<p style='margin-top:0cm;margin-right:10mm;margin-bottom:0.0mm;margin-left:10mm;text-align:center;'>
+بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
+</p>
+
+<p class=ordinary-far>
+  سَبَّحَ لِلَّهِ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۖ وَهُوَ الْعَزِيزُ الْحَكِيمُ<sup>۱</sup>
+</p>
+
+<div class="container">
+  <div class="diamond-marker top-1"></div>
+  <div class="vertical-line-1"></div>
+<p class=ordinary-far>
+هُوَ الَّذِي أَخْرَجَ <span class="boxed underline-blackdotted">الَّذِينَ كَفَرُوا مِنْ أَهْلِ الْكِتَابِ</span> مِن دِيَارِهِمْ لِأَوَّلِ الْحَشْرِ ۚ مَا ظَنَنتُمْ أَن يَخْرُجُوا ۖ وَظَنُّوا أَنَّهُم مَّانِعَتُهُمْ حُصُونُهُم مِّنَ اللَّهِ فَأَتَاهُمُ اللَّهُ مِنْ حَيْثُ لَمْ يَحْتَسِبُوا ۖ وَقَذَفَ فِي قُلُوبِهِمُ الرُّعْبَ ۚ يُخْرِبُونَ بُيُوتَهُم بِأَيْدِيهِمْ وَأَيْدِي الْمُؤْمِنِينَ فَاعْتَبِرُوا يَا أُولِي الْأَبْصَارِ<sup>۲</sup>
+وَلَوْلَا أَن كَتَبَ اللَّهُ عَلَيْهِمُ الْجَلَاءَ لَعَذَّبَهُمْ فِي الدُّنْيَا ۖ وَلَهُمْ فِي الْآخِرَةِ عَذَابُ النَّارِ<sup>۳</sup>
+ذَٰلِكَ بِأَنَّهُمْ شَاقُّوا اللَّهَ وَرَسُولَهُ ۖ وَمَن يُشَاقِّ اللَّهَ فَإِنَّ اللَّهَ شَدِيدُ الْعِقَابِ<sup>۴</sup>
+مَا قَطَعْتُم مِّن لِّينَةٍ أَوْ تَرَكْتُمُوهَا قَائِمَةً عَلَىٰ أُصُولِهَا فَبِإِذْنِ اللَّهِ وَلِيُخْزِيَ الْفَاسِقِينَ<sup>۵</sup>
+</p>
+
+<p class=ordinary-far>
+وَ<span class="boxed underline-gradient">مَا أَفَاءَ اللَّهُ عَلَىٰ رَسُولِهِ</span> مِنْهُمْ فَمَا أَوْجَفْتُمْ عَلَيْهِ مِنْ خَيْلٍ وَلَا رِكَابٍ وَلَـٰكِنَّ اللَّهَ يُسَلِّطُ رُسُلَهُ عَلَىٰ مَن يَشَاءُ ۚ وَاللَّهُ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ<sup>۶</sup>
+<span class="boxed underline-gradient">مَّا أَفَاءَ اللَّهُ عَلَىٰ رَسُولِهِ</span> مِنْ أَهْلِ الْقُرَىٰ <span class="boxed underline-black-far">فَلِلَّهِ</span>
+ وَ<span class="boxed underline-black-far">لِلرَّسُولِ</span>
+  وَ<span class="boxed underline-black-far"><span class="boxed underline-black-1">لِذِي الْقُرْبَىٰ</span>
+ وَ<span class="boxed underline-black-1">الْيَتَامَىٰ</span>
+  وَ<span class="boxed underline-black-1">الْمَسَاكِينِ</span>
+   وَ<span class="boxed underline-black-1">ابْنِ السَّبِيلِ</span></span> كَيْ لَا يَكُونَ دُولَةً بَيْنَ الْأَغْنِيَاءِ مِنكُمْ ۚ وَمَا آتَاكُمُ الرَّسُولُ فَخُذُوهُ وَمَا نَهَاكُمْ عَنْهُ فَانتَهُوا ۚ وَاتَّقُوا اللَّهَ ۖ إِنَّ اللَّهَ شَدِيدُ الْعِقَابِ<sup>۷</sup>
+لِلْفُقَرَاءِ <span class="boxed underline-black-3">الْمُهَاجِرِينَ</span> الَّذِينَ أُخْرِجُوا مِن دِيَارِهِمْ وَأَمْوَالِهِمْ يَبْتَغُونَ فَضْلًا مِّنَ اللَّهِ وَرِضْوَانًا وَيَنصُرُونَ اللَّهَ وَرَسُولَهُ ۚ أُولَـٰئِكَ هُمُ الصَّادِقُونَ<sup>۸</sup>
+وَ<span class="boxed underline-black-3">الَّذِينَ تَبَوَّءُوا الدَّارَ وَالْإِيمَانَ</span> مِن قَبْلِهِمْ يُحِبُّونَ مَنْ هَاجَرَ إِلَيْهِمْ وَلَا يَجِدُونَ فِي صُدُورِهِمْ حَاجَةً مِّمَّا أُوتُوا وَيُؤْثِرُونَ عَلَىٰ أَنفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ ۚ وَمَن يُوقَ شُحَّ نَفْسِهِ فَأُولَـٰئِكَ هُمُ الْمُفْلِحُونَ<sup>۹</sup>
+وَ<span class="boxed underline-black-3">الَّذِينَ جَاءُوا مِن بَعْدِهِمْ</span> <span class="highlight1">يَقُولُونَ</span> رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا الَّذِينَ سَبَقُونَا بِالْإِيمَانِ وَلَا تَجْعَلْ فِي قُلُوبِنَا غِلًّا لِّلَّذِينَ آمَنُوا رَبَّنَا إِنَّكَ رَءُوفٌ رَّحِيمٌ<sup>۱۰</sup>
+</p>
+
+<p class=ordinary-near>
+أَلَمْ تَرَ إِلَى الَّذِينَ نَافَقُوا <span class="highlight2">يَقُولُونَ</span> لِإِخْوَانِهِمُ <span class="boxed underline-blackdotted">الَّذِينَ كَفَرُوا مِنْ أَهْلِ الْكِتَابِ</span> لَئِنْ أُخْرِجْتُمْ لَنَخْرُجَنَّ مَعَكُمْ وَلَا نُطِيعُ فِيكُمْ أَحَدًا أَبَدًا وَإِن قُوتِلْتُمْ لَنَنصُرَنَّكُمْ وَاللَّهُ يَشْهَدُ إِنَّهُمْ لَكَاذِبُونَ<sup>۱۱</sup>
+لَئِنْ أُخْرِجُوا لَا يَخْرُجُونَ مَعَهُمْ وَلَئِن قُوتِلُوا لَا يَنصُرُونَهُمْ وَلَئِن نَّصَرُوهُمْ لَيُوَلُّنَّ الْأَدْبَارَ ثُمَّ لَا يُنصَرُونَ<sup>۱۲</sup>
+لَأَنتُمْ أَشَدُّ رَهْبَةً فِي صُدُورِهِم مِّنَ اللَّهِ ۚ ذَٰلِكَ بِأَنَّهُمْ قَوْمٌ لَّا يَفْقَهُونَ<sup>۱۳</sup>
+لَا يُقَاتِلُونَكُمْ جَمِيعًا إِلَّا فِي قُرًى مُّحَصَّنَةٍ أَوْ مِن وَرَاءِ جُدُرٍ ۚ بَأْسُهُم بَيْنَهُمْ شَدِيدٌ ۚ تَحْسَبُهُمْ جَمِيعًا وَقُلُوبُهُمْ شَتَّىٰ ۚ ذَٰلِكَ بِأَنَّهُمْ قَوْمٌ لَّا يَعْقِلُونَ<sup>۱۴</sup>
+</p>
+
+<p class=small-bullet-near-2>
+  <span style='font-size:5.5mm;line-height:200%;font-family:"Symbol";'>- </span><span> </span>
+كَمَثَلِ الَّذِينَ مِن قَبْلِهِمْ قَرِيبًا ۖ ذَاقُوا وَبَالَ أَمْرِهِمْ وَلَهُمْ عَذَابٌ أَلِيمٌ<sup>۱۵</sup>
+</p>
+
+<p class=small-bullet-far-2>
+  <span style='font-size:5.5mm;line-height:200%;font-family:"Symbol";'>= </span><span> </span>
+كَمَثَلِ الشَّيْطَانِ إِذْ <span class="highlight2">قَالَ</span> لِلْإِنسَانِ اكْفُرْ فَلَمَّا كَفَرَ <span class="highlight2">قَالَ</span> إِنِّي بَرِيءٌ مِّنكَ إِنِّي أَخَافُ اللَّهَ رَبَّ الْعَالَمِينَ<sup>۱۶</sup>
+فَكَانَ عَاقِبَتَهُمَا أَنَّهُمَا فِي النَّارِ خَالِدَيْنِ فِيهَا ۚ وَذَٰلِكَ جَزَاءُ الظَّالِمِينَ<sup>۱۷</sup>
+</p>
+<div class="diamond-marker bottom-1"></div>
+</div>
+
+<p class=big-bullet-far>
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Wingdings 3";'>^ </span><span> </span>
+يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَلْتَنظُرْ نَفْسٌ مَّا قَدَّمَتْ لِغَدٍ ۖ وَاتَّقُوا اللَّهَ ۚ إِنَّ اللَّهَ خَبِيرٌ بِمَا تَعْمَلُونَ<sup>۱۸</sup>
+وَلَا تَكُونُوا كَالَّذِينَ نَسُوا اللَّهَ فَأَنسَاهُمْ أَنفُسَهُمْ ۚ أُولَـٰئِكَ هُمُ الْفَاسِقُونَ<sup>۱۹</sup>
+لَا يَسْتَوِي أَصْحَابُ النَّارِ وَأَصْحَابُ الْجَنَّةِ ۚ أَصْحَابُ الْجَنَّةِ هُمُ الْفَائِزُونَ<sup>۲۰</sup>
+</p>
+
+<p class=ordinary-far>
+لَوْ أَنزَلْنَا هَـٰذَا الْقُرْآنَ عَلَىٰ جَبَلٍ لَّرَأَيْتَهُ خَاشِعًا مُّتَصَدِّعًا مِّنْ خَشْيَةِ اللَّهِ ۚ وَتِلْكَ الْأَمْثَالُ نَضْرِبُهَا لِلنَّاسِ لَعَلَّهُمْ يَتَفَكَّرُونَ<sup>۲۱</sup>
+</p>
+
+<p class=big-bullet-near>
+  <span style='font-size:4.5mm;line-height:200%;font-family:Wingdings;'>— </span><span> </span>
+هُوَ اللَّهُ الَّذِي لَا إِلَـٰهَ إِلَّا هُوَ ۖ عَالِمُ الْغَيْبِ وَالشَّهَادَةِ ۖ هُوَ الرَّحْمَـٰنُ الرَّحِيمُ<sup>۲۲</sup>
+</p>
+
+<p class=big-bullet-near>
+  <span style='font-size:4.5mm;line-height:200%;font-family:Wingdings;'>— </span><span> </span>
+هُوَ اللَّهُ الَّذِي لَا إِلَـٰهَ إِلَّا هُوَ الْمَلِكُ الْقُدُّوسُ السَّلَامُ الْمُؤْمِنُ الْمُهَيْمِنُ الْعَزِيزُ الْجَبَّارُ الْمُتَكَبِّرُ ۚ سُبْحَانَ اللَّهِ عَمَّا يُشْرِكُونَ<sup>۲۳</sup>
+</p>
+
+<p class=big-bullet-far>
+  <span style='font-size:4.5mm;line-height:200%;font-family:Wingdings;'>— </span><span> </span>
+هُوَ اللَّهُ الْخَالِقُ الْبَارِئُ الْمُصَوِّرُ ۖ لَهُ الْأَسْمَاءُ الْحُسْنَىٰ ۚ يُسَبِّحُ لَهُ مَا فِي السَّمَاوَاتِ وَالْأَرْضِ ۖ وَهُوَ الْعَزِيزُ الْحَكِيمُ<sup>۲۴</sup>
+</p>
+
+
+
+</body>
+
+</html>
+
