@@ -1,0 +1,40 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" >
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+<metadata>
+Created by FontForge 20200314 at Thu Jan  1 08:00:00 1970
+ By Unknown
+</metadata>
+<defs>
+<font id="AAAAAB+Webdings" horiz-adv-x="500" >
+  <font-face 
+    font-family="AAAAAB+Webdings"
+    font-weight="400"
+    font-stretch="normal"
+    units-per-em="1000"
+    panose-1="2 0 5 3 0 0 0 0 0 0"
+    ascent="800"
+    descent="-200"
+    bbox="63 -11 814.211 605"
+    underline-thickness="50"
+    underline-position="-150"
+  />
+<missing-glyph 
+d="M437 0h-374v605h374v-605zM135 533v-461h230v461h-230z" />
+    <glyph glyph-name=".notdef" 
+d="M437 0h-374v605h374v-605zM135 533v-461h230v461h-230z" />
+    <glyph glyph-name=".null" horiz-adv-x="0" 
+ />
+    <glyph glyph-name="nonmarkingreturn" horiz-adv-x="333" 
+ />
+    <glyph glyph-name="pointofinterest" horiz-adv-x="1000" 
+d="M797 498l17 -324q2 -20 -15 -29q-3 -2 -33 -14q-12 -35 -42 -57q-29 -22 -67 -22q-32 0 -63 22l-213 -73q-36 -12 -68 -12q-45 0 -121 76q-4 17 -4 31v370q0 15 35 21q32 4 48 5v14q23 12 54 12q41 0 54 -11v-2l61 6l39 47l83 10l36 -16l19 -26l43 4v25q19 3 28 3
+q5 0 17 -5h8q29 0 38 -14l26 -1q19 0 20 -40zM725 523q12 0 12 7q0 4 -9 6l-8 -3l-24 2q24 -12 29 -12zM664 412l129 32v54l-141 -24zM558 552l11 1l-18 13l-10 -3zM492 460l141 20l-39 68l-79 -11zM515 548l11 1l-18 12l-10 -3zM624 362q24 0 49 -6l-11 48l-164 -34l3 8
+l159 32l-4 21l-151 -29l4 42l138 23l-1 7l-156 -24l-15 -150q22 25 69 44q46 18 80 18zM789 150l13 12l-31 -10l-2 -9zM741 111q24 35 24 77q0 43 -24 67q-22 25 -66 25q-41 0 -67 -36q-24 -32 -24 -75q0 -41 21 -68q24 -28 65 -28q42 0 71 38zM679 307q19 0 30 -4
+q-16 13 -52 13q-53 0 -91 -39q-37 -38 -37 -94q0 -58 44 -94v2q-32 43 -32 90q0 126 138 126zM321 488q23 0 44 9q-5 0 -43 -2q-10 -1 -38 4q14 -11 37 -11zM643 336q7 0 47 -2q-23 10 -40 10q-85 0 -130 -45q-39 -39 -39 -100q0 -91 69 -110q-53 36 -53 102q0 54 41 98
+q44 47 105 47zM469 372l11 78q-15 -2 -45.5 -5t-45.5 -4q-69 -9 -79 -24q-6 -10 -17 -76q40 3 89 13zM408 258q12 44 12 57t-14 13q-5 0 -40 -62q13 5 22 5q10 0 20 -13zM432 233q10 0 10 12q0 9 -11 9q-9 0 -9 -12q0 -9 10 -9zM241 358q34 -17 48 -17q-7 69 -18 83
+q-5 4 -76 37v-78q8 -5 17 -9.5t17.5 -9t11.5 -6.5zM397 233q7 6 7 12q0 19 -20 19t-20 -19q0 -5 7 -12q6 -6 12 -6q7 0 14 6zM369 9l216 73q-5 1 -16 6l-201 -68q-35 -13 -49 -13q-26 0 -83 27q53 -37 72 -37q25 0 61 12zM691 224q26 -18 26 -46q0 -34 -50 -51q28 34 28 49
+q0 23 -4 48zM719 260q39 -28 39 -69q0 -54 -34 -87q-25 -25 -51 -25q-29 0 -51 16q48 0 79 24q37 27 37 75q0 34 -19 66zM614 235q15 25 33 26q-11 -22 -20 -39q-4 -10 -23 -37q3 24 10 50zM407 315q5 0 5 -6q0 -13 -8 -34l-14 3q-2 -1 -10 -3q19 40 27 40zM256 410
+q9 0 9 -17q0 -18 -9 -18q-4 0 -13 6t-9 13q0 6 10 11q8 5 12 5zM253 382l1 18q-10 -6 -10 -7q0 -2 9 -11z" />
+  </font>
+</defs></svg>
