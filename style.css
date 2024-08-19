@@ -1,0 +1,206 @@
+
+@font-face {
+  font-family: 'KFGQPC_Uthman_Taha_Naskh';
+  src: url('fonts/KFGQPC_Uthman_Taha_Naskh.ttf') format('truetype'),
+       url('fonts/KFGQPC_Uthman_Taha_Naskh.woff') format('woff'),
+       url('fonts/KFGQPC_Uthman_Taha_Naskh.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face{
+  font-family: "Wingdings 2 V1";
+  src: url("d6478dbc2e84b8def5dc115dcda0b29d.eot");
+  src: url("d6478dbc2e84b8def5dc115dcda0b29d.eot?#iefix")format("embedded-opentype"),
+      url("d6478dbc2e84b8def5dc115dcda0b29d.woff")format("woff"),
+      url("d6478dbc2e84b8def5dc115dcda0b29d.woff2")format("woff2"),
+      url("d6478dbc2e84b8def5dc115dcda0b29d.ttf")format("truetype"),
+      url("d6478dbc2e84b8def5dc115dcda0b29d.svg#Wingdings 2 V1")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "Webdings V1";
+  src: url("1a56b45a66b07b4c576d5ead048ed992.eot");
+  src: url("1a56b45a66b07b4c576d5ead048ed992.eot?#iefix")format("embedded-opentype"),
+      url("1a56b45a66b07b4c576d5ead048ed992.woff")format("woff"),
+      url("1a56b45a66b07b4c576d5ead048ed992.woff2")format("woff2"),
+      url("1a56b45a66b07b4c576d5ead048ed992.ttf")format("truetype"),
+      url("1a56b45a66b07b4c576d5ead048ed992.svg#Webdings V1")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+
+@font-face{
+  font-family: "symbol";
+  src: url("39a0230c9a2f421123a02f97cd0d451e.eot");
+  src: url("39a0230c9a2f421123a02f97cd0d451e.eot?#iefix")format("embedded-opentype"),
+      url("39a0230c9a2f421123a02f97cd0d451e.woff")format("woff"),
+      url("39a0230c9a2f421123a02f97cd0d451e.woff2")format("woff2"),
+      url("39a0230c9a2f421123a02f97cd0d451e.ttf")format("truetype"),
+      url("39a0230c9a2f421123a02f97cd0d451e.svg#symbol")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "Wingdings 3";
+  src: url("6ffe077a0058332e71fa05151a519699.eot");
+  src: url("6ffe077a0058332e71fa05151a519699.eot?#iefix")format("embedded-opentype"),
+      url("6ffe077a0058332e71fa05151a519699.woff")format("woff"),
+      url("6ffe077a0058332e71fa05151a519699.woff2")format("woff2"),
+      url("6ffe077a0058332e71fa05151a519699.ttf")format("truetype"),
+      url("6ffe077a0058332e71fa05151a519699.svg#Wingdings 3")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "Wingdings 2";
+  src: url("f0f870099e5e748e93a126ea16dcaeba.eot");
+  src: url("f0f870099e5e748e93a126ea16dcaeba.eot?#iefix")format("embedded-opentype"),
+      url("f0f870099e5e748e93a126ea16dcaeba.woff")format("woff"),
+      url("f0f870099e5e748e93a126ea16dcaeba.woff2")format("woff2"),
+      url("f0f870099e5e748e93a126ea16dcaeba.ttf")format("truetype"),
+      url("f0f870099e5e748e93a126ea16dcaeba.svg#Wingdings 2")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "Webdings W95 Regular";
+  src: url("b32d2514d2c96619a7529fe9b085606f.eot");
+  src: url("b32d2514d2c96619a7529fe9b085606f.eot?#iefix")format("embedded-opentype"),
+      url("b32d2514d2c96619a7529fe9b085606f.woff")format("woff"),
+      url("b32d2514d2c96619a7529fe9b085606f.woff2")format("woff2"),
+      url("b32d2514d2c96619a7529fe9b085606f.ttf")format("truetype"),
+      url("b32d2514d2c96619a7529fe9b085606f.svg#Webdings W95 Regular")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "AAAAAB+Webdings";
+  src: url("7d133cb3ba75737f1a54c45f319bee0e.eot");
+  src: url("7d133cb3ba75737f1a54c45f319bee0e.eot?#iefix")format("embedded-opentype"),
+      url("7d133cb3ba75737f1a54c45f319bee0e.woff")format("woff"),
+      url("7d133cb3ba75737f1a54c45f319bee0e.woff2")format("woff2"),
+      url("7d133cb3ba75737f1a54c45f319bee0e.ttf")format("truetype"),
+      url("7d133cb3ba75737f1a54c45f319bee0e.svg#AAAAAB+Webdings")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face{
+  font-family: "KFGQPC Uthman Taha Naskh";
+  src: url("f0034555c887b9dbfb67c6fd228d8f33.eot");
+  src: url("f0034555c887b9dbfb67c6fd228d8f33.eot?#iefix")format("embedded-opentype"),
+      url("f0034555c887b9dbfb67c6fd228d8f33.woff")format("woff"),
+      url("f0034555c887b9dbfb67c6fd228d8f33.woff2")format("woff2"),
+      url("f0034555c887b9dbfb67c6fd228d8f33.ttf")format("truetype"),
+      url("f0034555c887b9dbfb67c6fd228d8f33.svg#KFGQPC Uthman Taha Naskh")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+
+@font-face{
+  font-family: "Webdings V2";
+  src: url("41520189ce8c64a5b902302c16e2b97b.eot");
+  src: url("41520189ce8c64a5b902302c16e2b97b.eot?#iefix")format("embedded-opentype"),
+      url("41520189ce8c64a5b902302c16e2b97b.woff")format("woff"),
+      url("41520189ce8c64a5b902302c16e2b97b.woff2")format("woff2"),
+      url("41520189ce8c64a5b902302c16e2b97b.ttf")format("truetype"),
+      url("41520189ce8c64a5b902302c16e2b97b.svg#Webdings V2")format("svg");
+  font-weight:normal;
+  font-style:normal;
+  font-display:swap;
+}
+
+@font-face {
+  font-family: 'Webdings-Regular';
+  src: url('fonts/Webdings-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Wingdings-Regular-Font';
+  src: url('fonts/Wingdings-Regular-Font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'WINGDNG3';
+  src: url('fonts/WINGDNG3.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Wingdings_2';
+  src: url('fonts/Wingdings_2.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'symbol_1';
+  src: url('fonts/symbol_1.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  text-align: right;
+  width: 190.9mm;
+  font-size: 4.5mm;
+  line-height: 240%;
+  font-family: 'KFGQPC_Uthman_Taha_Naskh', "Wingdings 2 V1", "symbol_1", "Wingdings_2", "WINGDNG3", "Wingdings-Regular-Font",
+  "Webdings-Regular", "Webdings V2", "KFGQPC Uthman Taha Naskh", "AAAAAB+Webdings", "Webdings W95 Regular", 
+  "Wingdings 2", "Wingdings 3", "symbol", "Webdings V1", "Wingdings 2 V1", serif;
+}
+
+
+/* Additional styles for better viewing */
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  font-weight: normal;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Style for lists */
+ul, ol {
+  padding-left: 20px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+/* Style for images */
+img {
+  max-width: 100%;
+  height: auto;
+}
