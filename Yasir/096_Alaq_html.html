@@ -1,0 +1,339 @@
+<html>
+
+<head>
+
+<link rel="stylesheet" href="../fonts.css">
+
+<style>
+  /* Style for the vertical line */
+  .vertical-line-1 {
+    border-left: 0.3mm solid black; /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 7.4mm; /* Position the line at the left edge of the container */
+  }
+
+  .vertical-line-2 {
+    border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 5.4mm; /* Position the line at the left edge of the container */
+  }
+
+  .vertical-line-3 {
+    border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 3.4mm; /* Position the line at the left edge of the container */
+  }
+
+  .diamond-marker{
+    width: 1.2mm;
+    height: 1.2mm;
+    transform: rotate(45deg); /* Rotate to create a diamond shape */
+    position: absolute;
+    
+  }
+
+  .diamond-marker.top-1 {
+	background-color: black;
+    top: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-1 {
+	background-color: black;
+	bottom: 0;
+	right: 7.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-2 {
+	background-color: rgb(150, 150, 150);
+    top: 0;
+	right: 5.05mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-2 {
+	background-color: rgb(150, 150, 150);
+	bottom: 0;
+	right: 5.05mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.top-3 {
+	background-color: rgb(200, 200, 200);
+    top: 0;
+	right: 3.0mm; /* Adjust the position for alignment */
+  }
+
+  .diamond-marker.bottom-3 {
+	background-color: rgb(200, 200, 200);
+	bottom: 0;
+	right: 3.0mm; /* Adjust the position for alignment */
+  }
+  
+  /* Style for the container */
+  .container {
+    position: relative; /* Set the container as a relative position */
+  }
+</style>
+
+<style>
+  .inner-paragraph-1 {
+    display: inline-block;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0mm;
+    width: 185mm;
+    text-indent:0mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-2 {
+    display: inline-block;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:2mm;
+    width: 123.7mm;
+  }
+</style>
+
+<style>
+  .inner-paragraph-continue {
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: justify;
+    margin-top:0mm;
+    text-indent:0mm;
+  }
+</style>
+
+<style>
+  .ordinary-near {
+    margin-top:0mm;
+    margin-right:10mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .ordinary-far {
+    margin-top:0mm;
+    margin-right:10mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:0mm;'
+  }
+</style>
+
+<style>
+  .only-bullet-near {
+    margin-top:0mm;
+    margin-right:4mm;
+    margin-bottom:0mm;
+    margin-left:0mm;
+    text-align:justify;
+    text-indent:-4mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-near {
+    margin-top:0mm;
+    margin-right:15mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .small-bullet-far {
+    margin-top:0mm;
+    margin-right:15mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .big-bullet-near {
+    margin-top:0mm;
+    margin-right:16.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-6.5mm;'
+  }
+</style>
+
+<style>
+  .big-bullet-far {
+    margin-top:0mm;
+    margin-right:16.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-6.5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-first-near {
+    margin-top:0mm;
+    margin-right:21.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-11mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-first-far {
+    margin-top:0mm;
+    margin-right:21.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-11mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-next-near {
+    margin-top:0mm;
+    margin-right:21.5mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-bullet-next-far {
+    margin-top:0mm;
+    margin-right:21.5mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-small-bullet-next-near {
+    margin-top:0mm;
+    margin-right:20mm;
+    margin-bottom:0mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style>
+
+<style>
+  .double-small-bullet-next-far {
+    margin-top:0mm;
+    margin-right:20mm;
+    margin-bottom:4.5mm;
+    margin-left:10mm;
+    text-align:justify;
+    text-indent:-5mm;'
+  }
+</style></head>
+
+
+
+<body lang=AR-SA dir='RTL' text-align:'right' style='width:210mm;font-size:4.5mm;line-height:200%;font-family:"KFGQPC Uthman Taha Naskh"'>
+
+<p class=ordinary-far>
+بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ<sup>1</sup>
+</p>
+
+<p class=ordinary-far>
+خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ<sup>2</sup>
+</p>
+
+<p class=ordinary-far>
+اقْرَأْ وَرَبُّكَ الْأَكْرَمُ<sup>3</sup>
+</p>
+
+<p class=ordinary-far>
+الَّذِي عَلَّمَ بِالْقَلَمِ<sup>4</sup>
+</p>
+
+<p class=ordinary-far>
+عَلَّمَ الْإِنسَانَ مَا لَمْ يَعْلَمْ<sup>5</sup>
+</p>
+
+<p class=ordinary-far>
+كَلَّا إِنَّ الْإِنسَانَ لَيَطْغَىٰ<sup>6</sup>
+</p>
+
+<p class=ordinary-far>
+أَن رَّآهُ اسْتَغْنَىٰ<sup>7</sup>
+</p>
+
+<p class=ordinary-far>
+إِنَّ إِلَىٰ رَبِّكَ الرُّجْعَىٰ<sup>8</sup>
+</p>
+
+<p class=ordinary-far>
+أَرَأَيْتَ الَّذِي يَنْهَىٰ<sup>9</sup>
+</p>
+
+<p class=ordinary-far>
+عَبْدًا إِذَا صَلَّىٰ<sup>10</sup>
+</p>
+
+<p class=ordinary-far>
+أَرَأَيْتَ إِن كَانَ عَلَى الْهُدَىٰ<sup>11</sup>
+</p>
+
+<p class=ordinary-far>
+أَوْ أَمَرَ بِالتَّقْوَىٰ<sup>12</sup>
+</p>
+
+<p class=ordinary-far>
+أَرَأَيْتَ إِن كَذَّبَ وَتَوَلَّىٰ<sup>13</sup>
+</p>
+
+<p class=ordinary-far>
+أَلَمْ يَعْلَم بِأَنَّ اللَّهَ يَرَىٰ<sup>14</sup>
+</p>
+
+<p class=ordinary-far>
+كَلَّا لَئِن لَّمْ يَنتَهِ لَنَسْفَعًا بِالنَّاصِيَةِ<sup>15</sup>
+</p>
+
+<p class=ordinary-far>
+نَاصِيَةٍ كَاذِبَةٍ خَاطِئَةٍ<sup>16</sup>
+</p>
+
+<p class=ordinary-far>
+فَلْيَدْعُ نَادِيَهُ<sup>17</sup>
+</p>
+
+<p class=ordinary-far>
+سَنَدْعُ الزَّبَانِيَةَ<sup>18</sup>
+</p>
+
+<p class=ordinary-far>
+كَلَّا لَا تُطِعْهُ وَاسْجُدْ وَاقْتَرِب ۩<sup>19</sup>
+</p>
+
+
+
+</body>
+
+</html>
+
