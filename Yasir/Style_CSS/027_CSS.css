@@ -590,6 +590,16 @@
     border-top: 0;
   }
 
+  .boxed.underline-gradient-far {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, black, white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-gradient-far2 {
     border-bottom: 1px solid;
     border-image: linear-gradient(to left, black, white); /* Define the gradient from black to white */
@@ -766,7 +776,7 @@
   }
 
   .boxed.underline-black-far {
-    border-bottom: 1px solid rgb(150, 150, 150);
+    border-bottom: 1px solid rgb(180, 180, 180);
     border-left: 0;
     border-right: 0;
     border-top: 0;
