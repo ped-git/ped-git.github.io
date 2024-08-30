@@ -736,7 +736,7 @@
     padding: 3px 0px; /* Add padding inside the box */
   }
 
-  .boxed.underline-dottedred-far2 {
+  .boxed.underline-dottedred-far-2 {
     border-bottom: 1px dotted rgb(240, 170, 170);
     border-left: 0;
     border-right: 0;
