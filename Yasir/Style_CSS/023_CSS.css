@@ -1,3 +1,4 @@
+ 
   /* Style for the vertical line */
   .vertical-line-1 {
     border-left: 0.3mm solid black; /* Adjust the color and width as needed */
@@ -155,7 +156,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-1 {
     display: inline-block;
     page-break-inside: auto;
@@ -167,18 +168,18 @@
   }
  
 
-  
+ 
   .inner-paragraph-2 {
     display: inline-block;
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 114mm;
+    width: 144mm;
   }
  
 
-  
+ 
   .inner-paragraph-4 {
     display: inline-block;
     page-break-inside: auto;
@@ -189,7 +190,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-5 {
     display: inline-block;
     page-break-inside: auto;
@@ -200,7 +201,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-6 {
     display: inline-block;
     page-break-inside: auto;
@@ -211,7 +212,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-7 {
     display: inline-block;
     page-break-inside: auto;
@@ -222,7 +223,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-8 {
     display: inline-block;
     page-break-inside: auto;
@@ -233,7 +234,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-9 {
     display: inline-block;
     page-break-inside: auto;
@@ -244,7 +245,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-10 {
     display: inline-block;
     page-break-inside: auto;
@@ -255,7 +256,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-11 {
     display: inline-block;
     page-break-inside: auto;
@@ -266,7 +267,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-12 {
     display: inline-block;
     page-break-inside: auto;
@@ -277,7 +278,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-13 {
     display: inline-block;
     page-break-inside: auto;
@@ -288,7 +289,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-14 {
     display: inline-block;
     page-break-inside: auto;
@@ -299,7 +300,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-15 {
     display: inline-block;
     page-break-inside: auto;
@@ -310,7 +311,7 @@
   }
  
 
-  
+ 
   .inner-paragraph-16 {
     display: inline-block;
     page-break-inside: auto;
@@ -322,7 +323,7 @@
  
 
 
-  
+ 
   .inner-paragraph-continue {
     display: inline-block;
     vertical-align: bottom;
@@ -333,7 +334,7 @@
   }
  
 
-  
+ 
   .ordinary-near {
     margin-top:0mm;
     margin-right:10mm;
@@ -344,7 +345,7 @@
   }
  
 
-  
+ 
   .ordinary-far {
     margin-top:0mm;
     margin-right:10mm;
@@ -355,7 +356,7 @@
   }
  
 
-  
+ 
   .only-bullet-near {
     margin-top:0mm;
     margin-right:4mm;
@@ -366,7 +367,7 @@
   }
  
 
-  
+ 
   .small-bullet-near {
     margin-top:0mm;
     margin-right:16.5mm;
@@ -377,7 +378,7 @@
   }
  
 
-  
+ 
   .small-bullet-far {
     margin-top:0mm;
     margin-right:16.5mm;
@@ -388,7 +389,7 @@
   }
  
 
-  
+ 
   .small-bullet-near-2 {
     margin-top:0mm;
     margin-right:14.5mm;
@@ -399,7 +400,7 @@
   }
  
 
-  
+ 
   .small-bullet-far-2 {
     margin-top:0mm;
     margin-right:14.5mm;
@@ -410,7 +411,7 @@
   }
  
 
-  
+ 
   .big-bullet-near {
     margin-top:0mm;
     margin-right:19.5mm;
@@ -421,7 +422,7 @@
   }
  
 
-  
+ 
   .big-bullet-far {
     margin-top:0mm;
     margin-right:19.5mm;
@@ -432,7 +433,7 @@
   }
  
 
-  
+ 
   .double-bullet-first-near {
     margin-top:0mm;
     margin-right:25.5mm;
@@ -443,7 +444,7 @@
   }
  
 
-  
+ 
   .double-bullet-first-far {
     margin-top:0mm;
     margin-right:25.5mm;
@@ -454,7 +455,7 @@
   }
  
 
-  
+ 
   .double-bullet-next-near {
     margin-top:0mm;
     margin-right:24.0mm;
@@ -465,7 +466,7 @@
   }
  
 
-  
+ 
   .double-bullet-next-far {
     margin-top:0mm;
     margin-right:24.0mm;
@@ -476,7 +477,7 @@
   }
  
 
-  
+ 
   .double-bullet-zero-near {
     margin-top:0mm;
     margin-right:19.5mm;
@@ -487,7 +488,7 @@
   }
  
 
-  
+ 
   .double-bullet-zero-far {
     margin-top:0mm;
     margin-right:19.5mm;
@@ -498,7 +499,7 @@
   }
  
 
-  
+ 
   .double-small-bullet-first-near {
     margin-top:0mm;
     margin-right:15mm;
@@ -509,7 +510,7 @@
   }
  
 
-  
+ 
   .double-small-bullet-next-near {
     margin-top:0mm;
     margin-right:18.4mm;
@@ -520,7 +521,7 @@
   }
  
 
-  
+ 
   .double-small-bullet-next-far {
     margin-top:0mm;
     margin-right:18.4mm;
@@ -531,7 +532,7 @@
   }
  
 
-  
+ 
   .boxed {
     border: 1px solid rgb(150, 150, 150); /* Set border properties */
     padding: 1px 2px; /* Add padding inside the box */
@@ -865,7 +866,7 @@
  
 
 
-  
+ 
   .zero-margin {
     margin-top:0mm;
     margin-right:0mm;
@@ -876,13 +877,13 @@
   }
  
 
-  
+ 
   .zero-margin.far {
     margin-bottom:4.5mm;
   }
  
 
-  
+ 
   .zero-margin1 {
     margin-top:0mm;
     margin-right:2mm;
@@ -893,7 +894,7 @@
   }
  
 
-  
+ 
   .zero-margin2 {
     margin-top:0mm;
     margin-right:6.5mm;
@@ -904,13 +905,13 @@
   }
  
 
-  
+ 
   .zero-margin2.far {
     margin-bottom:4.5mm;
   }
  
 
-  
+ 
   .zero-margin3 {
     margin-top:0mm;
     margin-right:7mm;
@@ -921,7 +922,7 @@
   }
  
 
-  
+ 
   .zero-margin4 {
     margin-top:0mm;
     margin-right:6mm;
@@ -932,7 +933,7 @@
   }
  
 
-  
+ 
   .zero-margin5 {
     margin-top:0mm;
     margin-right:7mm;
@@ -943,7 +944,7 @@
   }
  
 
-  
+ 
   .zero-margin6 {
     margin-top:0mm;
     margin-right:4mm;
@@ -954,7 +955,7 @@
   }
  
 
-  
+ 
   .zero-margin7 {
     margin-top:0mm;
     margin-right:9.5mm;
@@ -965,7 +966,7 @@
   }
  
 
-  
+ 
   .zero-margin8 {
     margin-top:0mm;
     margin-right:9.5mm;
@@ -976,7 +977,7 @@
   }
  
 
-  
+ 
   .highlight1 {
     color:  rgb(70, 175, 70);
   }
@@ -1045,7 +1046,7 @@
 
  
 
-  
+ 
   .line-container {
     display: flex;
     justify-content: space-between;
@@ -1068,7 +1069,7 @@
 
 
 
-  
+ 
 
 .page-break-after {
   page-break-after: always;
@@ -1101,11 +1102,10 @@
 
 
 
-
-body {lang=AR-SA;
-  direction: rtl;
-  text-align:'right';
-  width:190mm;
-  font-size:4.5mm;
-  line-height:240%;
-  font-family:"KFGQPC Uthman Taha Naskh"}
+    body {lang=AR-SA;
+        direction: rtl;
+        text-align:'right';
+        width:190mm;
+        font-size:4.5mm;
+        line-height:240%;
+        font-family:"KFGQPC Uthman Taha Naskh"}
