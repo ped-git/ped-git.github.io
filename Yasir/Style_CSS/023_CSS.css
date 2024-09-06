@@ -177,6 +177,16 @@
     margin-top:0mm;
     width: 144mm;
   }
+
+  .inner-paragraph-3 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top:0mm;
+    flex: 1;
+    text-indent:0mm;
+  }
  
 
  
@@ -185,8 +195,8 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:-1mm;
-    width: 161mm;
+    margin-top:0mm;
+    width: 154mm;
   }
  
 
