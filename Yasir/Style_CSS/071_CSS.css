@@ -658,6 +658,14 @@
     padding: 3px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-green-far2 {
+    border-bottom: 1px dashed rgb(140, 220, 140);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 5px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-gradientgreen {
     border-bottom: 1px solid;
     border-image: linear-gradient(to right, white, rgb(100, 180, 100)); /* Define the gradient from black to white */
@@ -718,6 +726,14 @@
     border-right: 0;
     border-top: 0;
     padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-red-far {
+    border-bottom: 1px dashed rgb(240, 170, 170);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-dottedred {
