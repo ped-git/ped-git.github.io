@@ -783,6 +783,14 @@
     padding: 3px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-black-double {
+    border-bottom: 2px double rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 1px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-black-far2 {
     border-bottom: 1px solid rgb(200, 200, 200);
     border-left: 0;
@@ -1047,6 +1055,10 @@
 
   .highlight15 {
     color:  rgb(100, 130, 150);
+  }
+
+  .highlight16 {
+    color:  rgb(0, 105, 105);
   }
 
   .backhighlight1 {
