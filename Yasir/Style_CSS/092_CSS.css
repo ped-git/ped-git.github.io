@@ -163,7 +163,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    flex: 1;
+    width: 137mm;
     text-indent:0mm;
   }
  
@@ -680,12 +680,29 @@
     padding: 5px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-dottedgreen {
+    border-bottom: 1px dotted rgb(100, 180, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+  }
+
+  .boxed.underline-dottedgreen-far {
+    border-bottom: 1px dotted rgb(120, 200, 120);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-blue {
     border-bottom: 1px dashed rgb(70, 70, 220);
     border-left: 0;
     border-right: 0;
     border-top: 0;
   }
+
+
 
   .boxed.underline-solidblue {
     border-bottom: 1px solid rgb(70, 70, 220);
