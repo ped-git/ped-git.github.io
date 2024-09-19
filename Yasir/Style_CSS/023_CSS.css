@@ -767,6 +767,21 @@
     border-top: 0;
   }
 
+  .boxed.underline-solidyellow {
+    border-bottom: 1px solid sandybrown;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+  }
+
+  .boxed.underline-solidyellow-far {
+    border-bottom: 1px solid sandybrown;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-black-1 {
     border-bottom: 1px solid rgb(100, 100, 100);
     border-left: 0;
