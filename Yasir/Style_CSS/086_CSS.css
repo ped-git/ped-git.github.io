@@ -1,4 +1,14 @@
  
+ .inline-line {
+  display: inline-block;
+  width: 1cm;            /* Set the length of the line */
+  height: 0.3mm;           /* Set the thickness of the line */
+  background-color: rgb(200, 200, 200); /* Set the color of the line */
+  vertical-align: middle;  /* Align the line vertically with the text */
+  margin: 0 5px;           /* Optional: Add horizontal spacing around the line */
+}
+  
+  
   /* Style for the vertical line */
   .vertical-line-1 {
     border-left: 0.3mm solid black; /* Adjust the color and width as needed */

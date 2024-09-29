@@ -3,332 +3,86 @@
 <head>
 
 <link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="Style_CSS/087_CSS.css">
 
-<style>
-  /* Style for the vertical line */
-  .vertical-line-1 {
-    border-left: 0.3mm solid black; /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.4mm; /* Position the line at the left edge of the container */
-  }
+</head>
 
-  .vertical-line-2 {
-    border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 5.4mm; /* Position the line at the left edge of the container */
-  }
+<body>
 
-  .vertical-line-3 {
-    border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 3.4mm; /* Position the line at the left edge of the container */
-  }
+<p style='font-size:9.0mm;
+  margin-top:-3mm;
+  margin-right:10mm;
+  margin-bottom:4.5mm;
+  margin-left:10mm;
+  text-align:center;
+  background-color: rgb(220,220,220);
+  font-weight: bold;
+  line-height:150%;'>
+الأعلى
+</p>
 
-  .diamond-marker{
-    width: 1.2mm;
-    height: 1.2mm;
-    transform: rotate(45deg); /* Rotate to create a diamond shape */
-    position: absolute;
-    
-  }
+<p style='margin-top:0cm;margin-right:10mm;margin-bottom:0.5mm;margin-left:10mm;text-align:center;'>
+  بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
+</p>
 
-  .diamond-marker.top-1 {
-	background-color: black;
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
+<div class=ordinary-far>
+  سَبِّحِ اسْمَ رَبِّكَ الْأَعْلَى<sup>۱</sup>
+<div class="inner-paragraph-1">
 
-  .diamond-marker.bottom-1 {
-	background-color: black;
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
+  <p class="zero-margin6">
+    <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+الَّذِي خَلَقَ فَسَوَّىٰ<sup>۲</sup>
+</p>
 
-  .diamond-marker.top-2 {
-	background-color: rgb(150, 150, 150);
-    top: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
+<p class="zero-margin6">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+وَالَّذِي قَدَّرَ فَهَدَىٰ<sup>۳</sup>
+</p>
 
-  .diamond-marker.bottom-2 {
-	background-color: rgb(150, 150, 150);
-	bottom: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-3 {
-	background-color: rgb(200, 200, 200);
-    top: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-3 {
-	background-color: rgb(200, 200, 200);
-	bottom: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-  
-  /* Style for the container */
-  .container {
-    position: relative; /* Set the container as a relative position */
-  }
-</style>
-
-<style>
-  .inner-paragraph-1 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:0mm;
-    width: 185mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-2 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:2mm;
-    width: 123.7mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-continue {
-    display: inline-block;
-    vertical-align: bottom;
-    text-align: justify;
-    margin-top:0mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .ordinary-near {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .ordinary-far {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .only-bullet-near {
-    margin-top:0mm;
-    margin-right:4mm;
-    margin-bottom:0mm;
-    margin-left:0mm;
-    text-align:justify;
-    text-indent:-4mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-near {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-far {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-near {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-far {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-near {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-far {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style></head>
-
-
-
-<body lang=AR-SA dir='RTL' text-align:'right' style='width:210mm;font-size:4.5mm;line-height:200%;font-family:"KFGQPC Uthman Taha Naskh"'>
+<p class="zero-margin6">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+وَالَّذِي أَخْرَجَ الْمَرْعَىٰ<sup>۴</sup>
+فَجَعَلَهُ غُثَاءً أَحْوَىٰ<sup>۵</sup>
+</p>
+</div>
+</div>
 
 <p class=ordinary-far>
-بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ سَبِّحِ اسْمَ رَبِّكَ الْأَعْلَى<sup>1</sup>
+سَنُقْرِئُكَ فَلَا تَنسَىٰ<sup>۶</sup>
+إِلَّا مَا شَاءَ اللَّهُ ۚ إِنَّهُ يَعْلَمُ الْجَهْرَ وَمَا يَخْفَىٰ<sup>۷</sup>
 </p>
 
 <p class=ordinary-far>
-الَّذِي خَلَقَ فَسَوَّىٰ<sup>2</sup>
+وَنُيَسِّرُكَ لِلْيُسْرَىٰ<sup>۸</sup>
 </p>
 
 <p class=ordinary-far>
-وَالَّذِي قَدَّرَ فَهَدَىٰ<sup>3</sup>
+فَذَكِّرْ إِن نَّفَعَتِ الذِّكْرَىٰ<sup>۹</sup>
 </p>
 
 <p class=ordinary-far>
-وَالَّذِي أَخْرَجَ الْمَرْعَىٰ<sup>4</sup>
+سَيَذَّكَّرُ مَن يَخْشَىٰ<sup>۱۰</sup>
 </p>
 
 <p class=ordinary-far>
-فَجَعَلَهُ غُثَاءً أَحْوَىٰ<sup>5</sup>
+وَيَتَجَنَّبُهَا الْأَشْقَى<sup>۱۱</sup>
+الَّذِي يَصْلَى النَّارَ الْكُبْرَىٰ<sup>۱۲</sup>
+ثُمَّ لَا يَمُوتُ فِيهَا وَلَا يَحْيَىٰ<sup>۱۳</sup>
 </p>
 
 <p class=ordinary-far>
-سَنُقْرِئُكَ فَلَا تَنسَىٰ<sup>6</sup>
+قَدْ أَفْلَحَ مَن تَزَكَّىٰ<sup>۱۴</sup>
+وَذَكَرَ اسْمَ رَبِّهِ فَصَلَّىٰ<sup>۱۵</sup>
 </p>
 
 <p class=ordinary-far>
-إِلَّا مَا شَاءَ اللَّهُ ۚ إِنَّهُ يَعْلَمُ الْجَهْرَ وَمَا يَخْفَىٰ<sup>7</sup>
+بَلْ تُؤْثِرُونَ الْحَيَاةَ الدُّنْيَا<sup>۱۶</sup>
+وَالْآخِرَةُ خَيْرٌ وَأَبْقَىٰ<sup>۱۷</sup>
 </p>
 
 <p class=ordinary-far>
-وَنُيَسِّرُكَ لِلْيُسْرَىٰ<sup>8</sup>
-</p>
-
-<p class=ordinary-far>
-فَذَكِّرْ إِن نَّفَعَتِ الذِّكْرَىٰ<sup>9</sup>
-</p>
-
-<p class=ordinary-far>
-سَيَذَّكَّرُ مَن يَخْشَىٰ<sup>10</sup>
-</p>
-
-<p class=ordinary-far>
-وَيَتَجَنَّبُهَا الْأَشْقَى<sup>11</sup>
-</p>
-
-<p class=ordinary-far>
-الَّذِي يَصْلَى النَّارَ الْكُبْرَىٰ<sup>12</sup>
-</p>
-
-<p class=ordinary-far>
-ثُمَّ لَا يَمُوتُ فِيهَا وَلَا يَحْيَىٰ<sup>13</sup>
-</p>
-
-<p class=ordinary-far>
-قَدْ أَفْلَحَ مَن تَزَكَّىٰ<sup>14</sup>
-</p>
-
-<p class=ordinary-far>
-وَذَكَرَ اسْمَ رَبِّهِ فَصَلَّىٰ<sup>15</sup>
-</p>
-
-<p class=ordinary-far>
-بَلْ تُؤْثِرُونَ الْحَيَاةَ الدُّنْيَا<sup>16</sup>
-</p>
-
-<p class=ordinary-far>
-وَالْآخِرَةُ خَيْرٌ وَأَبْقَىٰ<sup>17</sup>
-</p>
-
-<p class=ordinary-far>
-إِنَّ هَـٰذَا لَفِي الصُّحُفِ الْأُولَىٰ<sup>18</sup>
-</p>
-
-<p class=ordinary-far>
-صُحُفِ إِبْرَاهِيمَ وَمُوسَىٰ<sup>19</sup>
+إِنَّ هَـٰذَا لَفِي الصُّحُفِ الْأُولَىٰ<sup>۱۸</sup>
+صُحُفِ إِبْرَاهِيمَ وَمُوسَىٰ<sup>۱۹</sup>
 </p>
 
 
