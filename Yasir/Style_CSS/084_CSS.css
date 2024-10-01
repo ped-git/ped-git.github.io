@@ -175,7 +175,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 114mm;
+    width: 70mm;
   }
  
 
@@ -688,6 +688,13 @@
     border-right: 0;
     border-top: 0;
     padding: 5px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-dottedgreen {
+    border-bottom: 1px dotted rgb(140, 220, 140);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
   }
 
   .boxed.underline-blue {
