@@ -35,7 +35,7 @@
   }
 
   .vertical-line-blue-1 {
-    border-left: 0.3mm solid rgb(0, 130, 230); /* Adjust the color and width as needed */
+    border-left: 0.3mm solid rgb(0, 90, 190); /* Adjust the color and width as needed */
     height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     right: 7.5mm; /* Position the line at the left edge of the container */
@@ -44,6 +44,22 @@
 
   .vertical-line-2 {
     border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 5.4mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-red-2 {
+    border-left: 0.3mm solid rgb(235,130,130); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 5.4mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
+  .vertical-line-green-2 {
+    border-left: 0.3mm solid rgb(110,215,110); /* Adjust the color and width as needed */
     height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     right: 5.4mm; /* Position the line at the left edge of the container */
@@ -114,13 +130,13 @@
   }
 
   .diamond-marker.top-blue-1 {
-	background-color: rgb(0, 130, 230);
+	background-color: rgb(0, 90, 190);
     top: 0;
 	right: 7.0mm; /* Adjust the position for alignment */
   }
 
   .diamond-marker.bottom-blue-1 {
-	background-color: rgb(0, 130, 230);
+	background-color: rgb(0, 90, 190);
 	bottom: 0;
 	right: 7.0mm; /* Adjust the position for alignment */
   }
@@ -136,6 +152,30 @@
 	bottom: 0;
 	right: 5.0mm; /* Adjust the position for alignment */
   }
+
+  .diamond-marker.top-red-2 {
+    background-color: rgb(235,130,130);
+      top: 0;
+    right: 5.0mm; /* Adjust the position for alignment */
+    }
+  
+    .diamond-marker.bottom-red-2 {
+    background-color: rgb(235,130,130);
+    bottom: 0;
+    right: 5.0mm; /* Adjust the position for alignment */
+    }
+
+    .diamond-marker.top-green-2 {
+      background-color: rgb(110,215,110);
+        top: 0;
+      right: 5.0mm; /* Adjust the position for alignment */
+      }
+    
+      .diamond-marker.bottom-green-2 {
+      background-color: rgb(110,215,110);
+      bottom: 0;
+      right: 5.0mm; /* Adjust the position for alignment */
+      }
 
   .diamond-marker.top-3 {
 	background-color: rgb(200, 200, 200);
