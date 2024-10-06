@@ -154,8 +154,8 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:-1mm;
-width: 153mm;
+margin-top:0mm;
+width: 110mm;
 }
 
 
