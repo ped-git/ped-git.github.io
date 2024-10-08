@@ -823,6 +823,14 @@
 
   }
 
+  .boxed.underline-blackdashed2-far {
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-blackdotted {
     border-bottom: 1px dotted rgb(100, 100, 100);
     border-left: 0;
