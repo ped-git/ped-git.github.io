@@ -163,8 +163,9 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    flex: 1;
+    width: 147mm;
     text-indent:0mm;
+    margin-left: 0;
   }
  
 
@@ -174,8 +175,9 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:0mm;
+    margin-top:-1mm;
     width: 114mm;
+    margin-left: 0;
   }
  
 
@@ -674,6 +676,13 @@
     border-top: 0;
   }
 
+  .boxed.underline-dottedgreen {
+    border-bottom: 1px dotted rgb(100, 180, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+  }
+
   .boxed.underline-solidgreen-far {
     border-bottom: 1px solid rgb(120, 200, 120);
     border-left: 0;
@@ -950,7 +959,7 @@
     margin-bottom:0mm;
     margin-left:0mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -961,7 +970,7 @@
     margin-bottom:0mm;
     margin-left:0mm;
     text-align:justify;
-    text-indent:-4mm;'
+    text-indent:-4mm;
   }
  
 
@@ -972,7 +981,7 @@
     margin-bottom:0mm;
     margin-left:0mm;
     text-align:justify;
-    text-indent:-9.5mm;'
+    text-indent:-9.5mm;
   }
  
 
