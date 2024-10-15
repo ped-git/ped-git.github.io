@@ -142,7 +142,7 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:0mm;
+margin-top:-1mm;
 width: 106mm;
 text-indent:0mm;
 }
@@ -581,6 +581,15 @@ border-right: 0;
 border-top: 0;
 }
 
+.boxed.underline-gradient1 {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, white, black); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    }
+
 .boxed.underline-solidgreen {
 border-bottom: 1px solid rgb(190, 210, 190);
 border-left: 0;
@@ -659,6 +668,15 @@ padding: 0px 0px; /* Add padding inside the box */
 
 }
 
+.boxed.underline-blackdashed-far {
+    border-bottom: 1px dashed rgb(150, 150, 150);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+    
+    }
+
 .boxed.underline-blackdotted {
 border-bottom: 1px dotted rgb(100, 100, 100);
 border-left: 0;
@@ -685,11 +703,11 @@ padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-three {
-border-bottom: 1px dashed rgb(100, 100, 100);
+border-bottom: 0.3mm dashed rgb(100, 100, 100);
 border-left: 0;
-border-right: 1px dashed rgb(100, 100, 100);
-border-top: 1px dashed rgb(100, 100, 100);
-padding: 0px 0px; /* Add padding inside the box */
+border-right: 0.3mm dashed rgb(100, 100, 100);
+border-top: 0.3mm dashed rgb(100, 100, 100);
+padding: 0.2mm 1mm 0.2mm 0.1mm; /* Add padding inside the box */
 }
 
 .boxed.underline-notsure {
