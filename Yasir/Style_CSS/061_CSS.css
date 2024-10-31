@@ -775,6 +775,14 @@
     padding: 1px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-black-double {
+    border-bottom: 0.8mm double rgb(180, 180, 180);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0mm 0mm; /* Add padding inside the box */
+  }
+
   .boxed.underline-black-far {
     border-bottom: 1px solid rgb(180, 180, 180);
     border-left: 0;
