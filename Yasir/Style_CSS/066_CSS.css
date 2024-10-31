@@ -588,6 +588,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-gradient-far {
@@ -665,6 +666,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-solidgreen {
@@ -766,6 +768,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-black-1 {
