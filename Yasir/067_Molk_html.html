@@ -3,376 +3,167 @@
 <head>
 
 <link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="Style_CSS/066_CSS.css">
 
-<style>
-  /* Style for the vertical line */
-  .vertical-line-1 {
-    border-left: 0.3mm solid black; /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.4mm; /* Position the line at the left edge of the container */
-  }
+</head>
 
-  .vertical-line-2 {
-    border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 5.4mm; /* Position the line at the left edge of the container */
-  }
+<body>
 
-  .vertical-line-3 {
-    border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 3.4mm; /* Position the line at the left edge of the container */
-  }
+<p style='font-size:9.0mm;
+  margin-top:-1mm;
+  margin-right:10mm;
+  margin-bottom:4.5mm;
+  margin-left:10mm;
+  text-align:center;
+  background-color: rgb(220,220,220);
+  font-weight: bold;
+  line-height:150%;'>
+الملك
+</p>
 
-  .diamond-marker{
-    width: 1.2mm;
-    height: 1.2mm;
-    transform: rotate(45deg); /* Rotate to create a diamond shape */
-    position: absolute;
-    
-  }
-
-  .diamond-marker.top-1 {
-	background-color: black;
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-1 {
-	background-color: black;
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-2 {
-	background-color: rgb(150, 150, 150);
-    top: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-2 {
-	background-color: rgb(150, 150, 150);
-	bottom: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-3 {
-	background-color: rgb(200, 200, 200);
-    top: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-3 {
-	background-color: rgb(200, 200, 200);
-	bottom: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-  
-  /* Style for the container */
-  .container {
-    position: relative; /* Set the container as a relative position */
-  }
-</style>
-
-<style>
-  .inner-paragraph-1 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:0mm;
-    width: 185mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-2 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:2mm;
-    width: 123.7mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-continue {
-    display: inline-block;
-    vertical-align: bottom;
-    text-align: justify;
-    margin-top:0mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .ordinary-near {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .ordinary-far {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .only-bullet-near {
-    margin-top:0mm;
-    margin-right:4mm;
-    margin-bottom:0mm;
-    margin-left:0mm;
-    text-align:justify;
-    text-indent:-4mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-near {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-far {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-near {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-far {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-near {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-far {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style></head>
-
-
-
-<body lang=AR-SA dir='RTL' text-align:'right' style='width:210mm;font-size:4.5mm;line-height:200%;font-family:"KFGQPC Uthman Taha Naskh"'>
-
-<p class=ordinary-far>
-بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ<sup>1</sup>
+<p style='margin-top:0cm;margin-right:10mm;margin-bottom:4.5mm;margin-left:10mm;text-align:center;'>
+  بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
 </p>
 
 <p class=ordinary-far>
-الَّذِي خَلَقَ الْمَوْتَ وَالْحَيَاةَ لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا ۚ وَهُوَ الْعَزِيزُ الْغَفُورُ<sup>2</sup>
+تَبَارَكَ الَّذِي <span class="boxed underline-black-2">بِيَدِهِ الْمُلْكُ</span>
+ وَ<span class="boxed underline-black-2">هُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ</span><sup>۱</sup>
+الَّذِي خَلَقَ <span class="boxed underline-blackdashed2">الْمَوْتَ</span>
+ وَ<span class="boxed underline-blackdashed2">الْحَيَاةَ</span> لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا ۚ وَهُوَ الْعَزِيزُ الْغَفُورُ<sup>۲</sup>
+الَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقًا ۖ مَّا تَرَىٰ فِي خَلْقِ الرَّحْمَـٰنِ مِن تَفَاوُتٍ ۖ فَارْجِعِ الْبَصَرَ هَلْ تَرَىٰ مِن فُطُورٍ<sup>۳</sup>
+ثُمَّ ارْجِعِ الْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ الْبَصَرُ خَاسِئًا وَهُوَ حَسِيرٌ<sup>۴</sup>
+وَلَقَدْ زَيَّنَّا السَّمَاءَ الدُّنْيَا بِمَصَابِيحَ وَجَعَلْنَاهَا رُجُومًا لِّلشَّيَاطِينِ ۖ وَأَعْتَدْنَا لَهُمْ عَذَابَ السَّعِيرِ<sup>۵</sup>
+</p>
+
+<div class=big-bullet-far>
+  <span style='font-size:4.5mm;line-height:240%;font-family:Wingdings; color: rgb(205,100,100);'>— </span><span> </span>
+  <div class="inner-paragraph-1">
+وَلِلَّذِينَ كَفَرُوا بِرَبِّهِمْ عَذَابُ جَهَنَّمَ ۖ وَبِئْسَ الْمَصِيرُ<sup>۶</sup>
+إِذَا أُلْقُوا فِيهَا سَمِعُوا لَهَا شَهِيقًا وَهِيَ تَفُورُ<sup>۷</sup>
+تَكَادُ تَمَيَّزُ مِنَ الْغَيْظِ ۖ كُلَّمَا أُلْقِيَ فِيهَا فَوْجٌ 
+<p class="zero-margin2" style="margin-right: 15mm;">
+  <span style='font-size:3.0mm;line-height:240%;font-family:Wingdings;'><span class="boxed underline-black-1">u</span> </span><span> </span>
+سَأَلَهُمْ خَزَنَتُهَا أَلَمْ يَأْتِكُمْ نَذِيرٌ<sup>۸</sup>
+</p>
+<div class="zero-margin2">
+  <span style='font-size:3.0mm;line-height:240%;font-family:Wingdings;'>o </span><span> </span>
+  <div class="inner-paragraph-1">
+قَالُوا بَلَىٰ قَدْ جَاءَنَا نَذِيرٌ فَكَذَّبْنَا 
+<p class="zero-margin2" style="margin-right: 15mm;">
+  <span style='font-size:3.0mm;line-height:240%;font-family:Wingdings;'>o </span><span> </span>
+وَقُلْنَا مَا نَزَّلَ اللَّهُ مِن شَيْءٍ إِنْ أَنتُمْ إِلَّا فِي ضَلَالٍ كَبِيرٍ<sup>۹</sup>
+</p>
+</div>
+</div>
+<p class="zero-margin2">
+  <span style='font-size:3.0mm;line-height:240%;font-family:Wingdings;'>o </span><span> </span>
+وَقَالُوا لَوْ كُنَّا <span class="boxed underline-black-2">نَسْمَعُ</span>
+ أَوْ <span class="boxed underline-black-2">نَعْقِلُ</span> مَا كُنَّا فِي أَصْحَابِ السَّعِيرِ<sup>۱۰</sup>
+</p>
+<p class="zero-margin">
+فَاعْتَرَفُوا بِذَنبِهِمْ فَسُحْقًا لِّأَصْحَابِ السَّعِيرِ<sup>۱۱</sup>
+</p>
+  </div>
+</div>
+
+<p class=big-bullet-far>
+  <span style='font-size:4.5mm;line-height:240%;font-family:Wingdings; color: rgb(70,175,70);'>— </span><span> </span>
+إِنَّ الَّذِينَ يَخْشَوْنَ رَبَّهُم بِالْغَيْبِ لَهُم <span class="boxed underline-black-2">مَّغْفِرَةٌ</span>
+ وَ<span class="boxed underline-black-2">أَجْرٌ كَبِيرٌ</span><sup>۱۲</sup>
 </p>
 
 <p class=ordinary-far>
-الَّذِي خَلَقَ سَبْعَ سَمَاوَاتٍ طِبَاقًا ۖ مَّا تَرَىٰ فِي خَلْقِ الرَّحْمَـٰنِ مِن تَفَاوُتٍ ۖ فَارْجِعِ الْبَصَرَ هَلْ تَرَىٰ مِن فُطُورٍ<sup>3</sup>
+وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ ۖ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ<sup>۱۳</sup>
+أَلَا يَعْلَمُ مَنْ <span class="boxed underline-black-2">خَلَقَ</span>
+ وَ<span class="boxed underline-black-2">هُوَ اللَّطِيفُ الْخَبِيرُ</span><sup>۱۴</sup>
 </p>
 
 <p class=ordinary-far>
-ثُمَّ ارْجِعِ الْبَصَرَ كَرَّتَيْنِ يَنقَلِبْ إِلَيْكَ الْبَصَرُ خَاسِئًا وَهُوَ حَسِيرٌ<sup>4</sup>
+هُوَ الَّذِي جَعَلَ لَكُمُ الْأَرْضَ ذَلُولًا فَ<span class="boxed underline-blackdashed">امْشُوا فِي مَنَاكِبِهَا</span>
+ وَ<span class="boxed underline-blackdashed">كُلُوا مِن رِّزْقِهِ</span> ۖ وَإِلَيْهِ النُّشُورُ<sup>۱۵</sup>
+</p>
+
+<p class="small-bullet-near">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+أَ<span class="boxed underline-gradient">أَمِنتُم مَّن فِي السَّمَاءِ أَن </span>يَخْسِفَ بِكُمُ الْأَرْضَ فَإِذَا هِيَ تَمُورُ<sup>۱۶</sup>
+</p>
+
+<p class="small-bullet-near">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+أَمْ <span class="boxed underline-gradient">أَمِنتُم مَّن فِي السَّمَاءِ أَن </span>يُرْسِلَ عَلَيْكُمْ حَاصِبًا ۖ فَسَتَعْلَمُونَ كَيْفَ نَذِيرِ<sup>۱۷</sup>
 </p>
 
 <p class=ordinary-far>
-وَلَقَدْ زَيَّنَّا السَّمَاءَ الدُّنْيَا بِمَصَابِيحَ وَجَعَلْنَاهَا رُجُومًا لِّلشَّيَاطِينِ ۖ وَأَعْتَدْنَا لَهُمْ عَذَابَ السَّعِيرِ<sup>5</sup>
+وَلَقَدْ كَذَّبَ الَّذِينَ مِن قَبْلِهِمْ فَكَيْفَ كَانَ نَكِيرِ<sup>۱۸</sup>
 </p>
 
 <p class=ordinary-far>
-وَلِلَّذِينَ كَفَرُوا بِرَبِّهِمْ عَذَابُ جَهَنَّمَ ۖ وَبِئْسَ الْمَصِيرُ<sup>6</sup>
+أَوَلَمْ يَرَوْا إِلَى الطَّيْرِ فَوْقَهُمْ <span class="boxed underline-blackdashed2">صَافَّاتٍ</span>
+ وَ<span class="boxed underline-blackdashed2">يَقْبِضْنَ</span> ۚ مَا يُمْسِكُهُنَّ إِلَّا الرَّحْمَـٰنُ ۚ إِنَّهُ بِكُلِّ شَيْءٍ بَصِيرٌ<sup>۱۹</sup>
+</p>
+
+<p class="small-bullet-near">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+أَمَّنْ هَـٰذَا الَّذِي هُوَ جُندٌ لَّكُمْ يَنصُرُكُم مِّن دُونِ الرَّحْمَـٰنِ ۚ إِنِ الْكَافِرُونَ إِلَّا فِي غُرُورٍ<sup>۲۰</sup>
+</p>
+
+<p class="small-bullet-far">
+  <span style='font-size:4.5mm;line-height:240%;font-family:"Symbol";'>– </span>
+أَمَّنْ هَـٰذَا الَّذِي يَرْزُقُكُمْ إِنْ أَمْسَكَ رِزْقَهُ ۚ بَل لَّجُّوا فِي <span class="boxed underline-blackdotted">عُتُوٍّ</span>
+ وَ<span class="boxed underline-blackdotted">نُفُورٍ</span><sup>۲۱</sup>
 </p>
 
 <p class=ordinary-far>
-إِذَا أُلْقُوا فِيهَا سَمِعُوا لَهَا شَهِيقًا وَهِيَ تَفُورُ<sup>7</sup>
+أَفَ<span class="boxed underline-gradient">مَن يَمْشِي </span><span class="boxed underline-blackdashed2">مُكِبًّا عَلَىٰ وَجْهِهِ</span>
+ أَهْدَىٰ أَ<span class="boxed underline-gradient">مَّن يَمْشِي </span><span class="boxed underline-blackdashed2">سَوِيًّا عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ</span><sup>۲۲</sup>
 </p>
 
-<p class=ordinary-far>
-تَكَادُ تَمَيَّزُ مِنَ الْغَيْظِ ۖ كُلَّمَا أُلْقِيَ فِيهَا فَوْجٌ سَأَلَهُمْ خَزَنَتُهَا أَلَمْ يَأْتِكُمْ نَذِيرٌ<sup>8</sup>
+<p class="small-bullet-far">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ هُوَ الَّذِي أَنشَأَكُمْ وَجَعَلَ لَكُمُ <span class="boxed underline-blackdashed">السَّمْعَ</span>
+ وَ<span class="boxed underline-blackdashed">الْأَبْصَارَ</span>
+  وَ<span class="boxed underline-blackdashed">الْأَفْئِدَةَ</span> ۖ قَلِيلًا مَّا تَشْكُرُونَ<sup>۲۳</sup>
 </p>
 
-<p class=ordinary-far>
-قَالُوا بَلَىٰ قَدْ جَاءَنَا نَذِيرٌ فَكَذَّبْنَا وَقُلْنَا مَا نَزَّلَ اللَّهُ مِن شَيْءٍ إِنْ أَنتُمْ إِلَّا فِي ضَلَالٍ كَبِيرٍ<sup>9</sup>
+<p class="small-bullet-near">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ هُوَ الَّذِي ذَرَأَكُمْ فِي الْأَرْضِ وَإِلَيْهِ تُحْشَرُونَ<sup>۲۴</sup>
 </p>
 
-<p class=ordinary-far>
-وَقَالُوا لَوْ كُنَّا نَسْمَعُ أَوْ نَعْقِلُ مَا كُنَّا فِي أَصْحَابِ السَّعِيرِ<sup>10</sup>
+<p class="small-bullet-near">
+  <span style='font-size:3.5mm;line-height:240%;font-family:"Webdings";'>. </span><span> </span>
+وَيَقُولُونَ مَتَىٰ هَـٰذَا الْوَعْدُ إِن كُنتُمْ صَادِقِينَ<sup>۲۵</sup>
 </p>
 
-<p class=ordinary-far>
-فَاعْتَرَفُوا بِذَنبِهِمْ فَسُحْقًا لِّأَصْحَابِ السَّعِيرِ<sup>11</sup>
+<p class="small-bullet-near">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ <span class="boxed underline-gradient">إِنَّمَا </span><span class="boxed underline-black-2">الْعِلْمُ عِندَ اللَّهِ</span>
+ وَ<span class="boxed underline-gradient">إِنَّمَا </span><span class="boxed underline-black-2">أَنَا نَذِيرٌ مُّبِينٌ</span><sup>۲۶</sup>
 </p>
 
-<p class=ordinary-far>
-إِنَّ الَّذِينَ يَخْشَوْنَ رَبَّهُم بِالْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ<sup>12</sup>
+<p class=ordinary-near>
+فَلَمَّا رَأَوْهُ زُلْفَةً سِيئَتْ وُجُوهُ الَّذِينَ كَفَرُوا 
+</p>
+<p class="small-bullet-far" style="margin-right: 25mm;">
+  <span style='font-size:3.5mm;line-height:240%;font-family:Wingdings;'><span class="boxed underline-black-1">l</span> </span><span> </span>
+  وَقِيلَ هَـٰذَا الَّذِي كُنتُم بِهِ تَدَّعُونَ<sup>۲۷</sup>
 </p>
 
-<p class=ordinary-far>
-وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ ۖ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ<sup>13</sup>
+<p class="small-bullet-far">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ أَرَأَيْتُمْ إِنْ <span class="boxed underline-black-far">أَهْلَكَنِ<span class="boxed underline-black-2">يَ</span>
+ اللَّهُ وَ<span class="boxed underline-black-2">مَن مَّعِيَ</span></span> أَوْ <span class="boxed underline-black-far">رَحِمَنَا</span> فَمَن يُجِيرُ الْكَافِرِينَ مِنْ عَذَابٍ أَلِيمٍ<sup>۲۸</sup>
 </p>
 
-<p class=ordinary-far>
-أَلَا يَعْلَمُ مَنْ خَلَقَ وَهُوَ اللَّطِيفُ الْخَبِيرُ<sup>14</sup>
+<p class="small-bullet-far">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ هُوَ الرَّحْمَـٰنُ <span class="boxed underline-black-2">آمَنَّا بِهِ</span>
+ وَ<span class="boxed underline-black-2">عَلَيْهِ تَوَكَّلْنَا</span> ۖ فَسَتَعْلَمُونَ مَنْ هُوَ فِي ضَلَالٍ مُّبِينٍ<sup>۲۹</sup>
 </p>
 
-<p class=ordinary-far>
-هُوَ الَّذِي جَعَلَ لَكُمُ الْأَرْضَ ذَلُولًا فَامْشُوا فِي مَنَاكِبِهَا وَكُلُوا مِن رِّزْقِهِ ۖ وَإِلَيْهِ النُّشُورُ<sup>15</sup>
-</p>
-
-<p class=ordinary-far>
-أَأَمِنتُم مَّن فِي السَّمَاءِ أَن يَخْسِفَ بِكُمُ الْأَرْضَ فَإِذَا هِيَ تَمُورُ<sup>16</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ أَمِنتُم مَّن فِي السَّمَاءِ أَن يُرْسِلَ عَلَيْكُمْ حَاصِبًا ۖ فَسَتَعْلَمُونَ كَيْفَ نَذِيرِ<sup>17</sup>
-</p>
-
-<p class=ordinary-far>
-وَلَقَدْ كَذَّبَ الَّذِينَ مِن قَبْلِهِمْ فَكَيْفَ كَانَ نَكِيرِ<sup>18</sup>
-</p>
-
-<p class=ordinary-far>
-أَوَلَمْ يَرَوْا إِلَى الطَّيْرِ فَوْقَهُمْ صَافَّاتٍ وَيَقْبِضْنَ ۚ مَا يُمْسِكُهُنَّ إِلَّا الرَّحْمَـٰنُ ۚ إِنَّهُ بِكُلِّ شَيْءٍ بَصِيرٌ<sup>19</sup>
-</p>
-
-<p class=ordinary-far>
-أَمَّنْ هَـٰذَا الَّذِي هُوَ جُندٌ لَّكُمْ يَنصُرُكُم مِّن دُونِ الرَّحْمَـٰنِ ۚ إِنِ الْكَافِرُونَ إِلَّا فِي غُرُورٍ<sup>20</sup>
-</p>
-
-<p class=ordinary-far>
-أَمَّنْ هَـٰذَا الَّذِي يَرْزُقُكُمْ إِنْ أَمْسَكَ رِزْقَهُ ۚ بَل لَّجُّوا فِي عُتُوٍّ وَنُفُورٍ<sup>21</sup>
-</p>
-
-<p class=ordinary-far>
-أَفَمَن يَمْشِي مُكِبًّا عَلَىٰ وَجْهِهِ أَهْدَىٰ أَمَّن يَمْشِي سَوِيًّا عَلَىٰ صِرَاطٍ مُّسْتَقِيمٍ<sup>22</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ هُوَ الَّذِي أَنشَأَكُمْ وَجَعَلَ لَكُمُ السَّمْعَ وَالْأَبْصَارَ وَالْأَفْئِدَةَ ۖ قَلِيلًا مَّا تَشْكُرُونَ<sup>23</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ هُوَ الَّذِي ذَرَأَكُمْ فِي الْأَرْضِ وَإِلَيْهِ تُحْشَرُونَ<sup>24</sup>
-</p>
-
-<p class=ordinary-far>
-وَيَقُولُونَ مَتَىٰ هَـٰذَا الْوَعْدُ إِن كُنتُمْ صَادِقِينَ<sup>25</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ إِنَّمَا الْعِلْمُ عِندَ اللَّهِ وَإِنَّمَا أَنَا نَذِيرٌ مُّبِينٌ<sup>26</sup>
-</p>
-
-<p class=ordinary-far>
-فَلَمَّا رَأَوْهُ زُلْفَةً سِيئَتْ وُجُوهُ الَّذِينَ كَفَرُوا وَقِيلَ هَـٰذَا الَّذِي كُنتُم بِهِ تَدَّعُونَ<sup>27</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ أَرَأَيْتُمْ إِنْ أَهْلَكَنِيَ اللَّهُ وَمَن مَّعِيَ أَوْ رَحِمَنَا فَمَن يُجِيرُ الْكَافِرِينَ مِنْ عَذَابٍ أَلِيمٍ<sup>28</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ هُوَ الرَّحْمَـٰنُ آمَنَّا بِهِ وَعَلَيْهِ تَوَكَّلْنَا ۖ فَسَتَعْلَمُونَ مَنْ هُوَ فِي ضَلَالٍ مُّبِينٍ<sup>29</sup>
-</p>
-
-<p class=ordinary-far>
-قُلْ أَرَأَيْتُمْ إِنْ أَصْبَحَ مَاؤُكُمْ غَوْرًا فَمَن يَأْتِيكُم بِمَاءٍ مَّعِينٍ<sup>30</sup>
+<p class="small-bullet-far">
+  <span style='font-size:3.0mm;line-height:240%;font-family:"Wingdings 3";'>t </span><span> </span>
+قُلْ أَرَأَيْتُمْ إِنْ أَصْبَحَ مَاؤُكُمْ غَوْرًا فَمَن يَأْتِيكُم بِمَاءٍ مَّعِينٍ<sup>۳۰</sup>
 </p>
 
 
