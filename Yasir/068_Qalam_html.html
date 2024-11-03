@@ -3,464 +3,196 @@
 <head>
 
 <link rel="stylesheet" href="../fonts.css">
+<link rel="stylesheet" href="Style_CSS/067_CSS.css">
 
-<style>
-  /* Style for the vertical line */
-  .vertical-line-1 {
-    border-left: 0.3mm solid black; /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.4mm; /* Position the line at the left edge of the container */
-  }
+</head>
 
-  .vertical-line-2 {
-    border-left: 0.3mm solid rgb(150, 150, 150); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 5.4mm; /* Position the line at the left edge of the container */
-  }
+<body>
 
-  .vertical-line-3 {
-    border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 3.4mm; /* Position the line at the left edge of the container */
-  }
+<p style='font-size:9.0mm;
+  margin-top:-5mm;
+  margin-right:10mm;
+  margin-bottom:4.5mm;
+  margin-left:10mm;
+  text-align:center;
+  background-color: rgb(220,220,220);
+  font-weight: bold;
+  line-height:150%;'>
+القلم
+</p>
 
-  .diamond-marker{
-    width: 1.2mm;
-    height: 1.2mm;
-    transform: rotate(45deg); /* Rotate to create a diamond shape */
-    position: absolute;
-    
-  }
-
-  .diamond-marker.top-1 {
-	background-color: black;
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-1 {
-	background-color: black;
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-2 {
-	background-color: rgb(150, 150, 150);
-    top: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-2 {
-	background-color: rgb(150, 150, 150);
-	bottom: 0;
-	right: 5.05mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-3 {
-	background-color: rgb(200, 200, 200);
-    top: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-3 {
-	background-color: rgb(200, 200, 200);
-	bottom: 0;
-	right: 3.0mm; /* Adjust the position for alignment */
-  }
-  
-  /* Style for the container */
-  .container {
-    position: relative; /* Set the container as a relative position */
-  }
-</style>
-
-<style>
-  .inner-paragraph-1 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:0mm;
-    width: 185mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-2 {
-    display: inline-block;
-    vertical-align: top;
-    text-align: justify;
-    margin-top:2mm;
-    width: 123.7mm;
-  }
-</style>
-
-<style>
-  .inner-paragraph-continue {
-    display: inline-block;
-    vertical-align: bottom;
-    text-align: justify;
-    margin-top:0mm;
-    text-indent:0mm;
-  }
-</style>
-
-<style>
-  .ordinary-near {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .ordinary-far {
-    margin-top:0mm;
-    margin-right:10mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:0mm;'
-  }
-</style>
-
-<style>
-  .only-bullet-near {
-    margin-top:0mm;
-    margin-right:4mm;
-    margin-bottom:0mm;
-    margin-left:0mm;
-    text-align:justify;
-    text-indent:-4mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-near {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .small-bullet-far {
-    margin-top:0mm;
-    margin-right:15mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-near {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .big-bullet-far {
-    margin-top:0mm;
-    margin-right:16.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-6.5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-first-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-11mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-near {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-bullet-next-far {
-    margin-top:0mm;
-    margin-right:21.5mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-near {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:0mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style>
-
-<style>
-  .double-small-bullet-next-far {
-    margin-top:0mm;
-    margin-right:20mm;
-    margin-bottom:4.5mm;
-    margin-left:10mm;
-    text-align:justify;
-    text-indent:-5mm;'
-  }
-</style></head>
-
-
-
-<body lang=AR-SA dir='RTL' text-align:'right' style='width:210mm;font-size:4.5mm;line-height:200%;font-family:"KFGQPC Uthman Taha Naskh"'>
-
-<p class=ordinary-far>
-بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ ن ۚ وَالْقَلَمِ وَمَا يَسْطُرُونَ<sup>1</sup>
+<p style='margin-top:0cm;margin-right:10mm;margin-bottom:4.5mm;margin-left:10mm;text-align:center;'>
+  بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
 </p>
 
 <p class=ordinary-far>
-مَا أَنتَ بِنِعْمَةِ رَبِّكَ بِمَجْنُونٍ<sup>2</sup>
+  ن ۚ وَالْقَلَمِ وَمَا يَسْطُرُونَ<sup>۱</sup>
 </p>
 
 <p class=ordinary-far>
-وَإِنَّ لَكَ لَأَجْرًا غَيْرَ مَمْنُونٍ<sup>3</sup>
+مَا أَنتَ بِنِعْمَةِ رَبِّكَ بِمَجْنُونٍ<sup>۲</sup>
 </p>
 
 <p class=ordinary-far>
-وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ<sup>4</sup>
+وَإِنَّ لَكَ لَأَجْرًا غَيْرَ مَمْنُونٍ<sup>۳</sup>
 </p>
 
 <p class=ordinary-far>
-فَسَتُبْصِرُ وَيُبْصِرُونَ<sup>5</sup>
+وَإِنَّكَ لَعَلَىٰ خُلُقٍ عَظِيمٍ<sup>۴</sup>
 </p>
 
 <p class=ordinary-far>
-بِأَييِّكُمُ الْمَفْتُونُ<sup>6</sup>
+فَسَتُبْصِرُ وَيُبْصِرُونَ<sup>۵</sup>
 </p>
 
 <p class=ordinary-far>
-إِنَّ رَبَّكَ هُوَ أَعْلَمُ بِمَن ضَلَّ عَن سَبِيلِهِ وَهُوَ أَعْلَمُ بِالْمُهْتَدِينَ<sup>7</sup>
+بِأَييِّكُمُ الْمَفْتُونُ<sup>۶</sup>
 </p>
 
 <p class=ordinary-far>
-فَلَا تُطِعِ الْمُكَذِّبِينَ<sup>8</sup>
+إِنَّ رَبَّكَ هُوَ أَعْلَمُ بِمَن ضَلَّ عَن سَبِيلِهِ وَهُوَ أَعْلَمُ بِالْمُهْتَدِينَ<sup>۷</sup>
 </p>
 
 <p class=ordinary-far>
-وَدُّوا لَوْ تُدْهِنُ فَيُدْهِنُونَ<sup>9</sup>
+فَلَا تُطِعِ الْمُكَذِّبِينَ<sup>۸</sup>
 </p>
 
 <p class=ordinary-far>
-وَلَا تُطِعْ كُلَّ حَلَّافٍ مَّهِينٍ<sup>10</sup>
+وَدُّوا لَوْ تُدْهِنُ فَيُدْهِنُونَ<sup>۹</sup>
 </p>
 
 <p class=ordinary-far>
-هَمَّازٍ مَّشَّاءٍ بِنَمِيمٍ<sup>11</sup>
+وَلَا تُطِعْ كُلَّ حَلَّافٍ مَّهِينٍ<sup>۱۰</sup>
+هَمَّازٍ مَّشَّاءٍ بِنَمِيمٍ<sup>۱۱</sup>
+مَّنَّاعٍ لِّلْخَيْرِ مُعْتَدٍ أَثِيمٍ<sup>۱۲</sup>
+عُتُلٍّ بَعْدَ ذَٰلِكَ زَنِيمٍ<sup>۱۳</sup>
+أَن كَانَ ذَا مَالٍ وَبَنِينَ<sup>۱۴</sup>
+إِذَا تُتْلَىٰ عَلَيْهِ آيَاتُنَا قَالَ أَسَاطِيرُ الْأَوَّلِينَ<sup>۱۵</sup>
 </p>
 
 <p class=ordinary-far>
-مَّنَّاعٍ لِّلْخَيْرِ مُعْتَدٍ أَثِيمٍ<sup>12</sup>
+سَنَسِمُهُ عَلَى الْخُرْطُومِ<sup>۱۶</sup>
+</p>
+
+<div class="container">
+  <div class="diamond-marker top-1"></div>
+  <div class="vertical-line-1"></div>
+
+<p class=ordinary-far>
+إِنَّا بَلَوْنَاهُمْ كَمَا بَلَوْنَا أَصْحَابَ الْجَنَّةِ إِذْ أَقْسَمُوا لَيَصْرِمُنَّهَا مُصْبِحِينَ<sup>۱۷</sup>
+وَلَا يَسْتَثْنُونَ<sup>۱۸</sup>
 </p>
 
 <p class=ordinary-far>
-عُتُلٍّ بَعْدَ ذَٰلِكَ زَنِيمٍ<sup>13</sup>
+فَطَافَ عَلَيْهَا طَائِفٌ مِّن رَّبِّكَ وَهُمْ نَائِمُونَ<sup>۱۹</sup>
+فَأَصْبَحَتْ كَالصَّرِيمِ<sup>۲۰</sup>
 </p>
 
 <p class=ordinary-far>
-أَن كَانَ ذَا مَالٍ وَبَنِينَ<sup>14</sup>
+فَتَنَادَوْا مُصْبِحِينَ<sup>۲۱</sup>
+أَنِ اغْدُوا عَلَىٰ حَرْثِكُمْ إِن كُنتُمْ صَارِمِينَ<sup>۲۲</sup>
 </p>
 
 <p class=ordinary-far>
-إِذَا تُتْلَىٰ عَلَيْهِ آيَاتُنَا قَالَ أَسَاطِيرُ الْأَوَّلِينَ<sup>15</sup>
+فَانطَلَقُوا وَهُمْ يَتَخَافَتُونَ<sup>۲۳</sup>
+أَن لَّا يَدْخُلَنَّهَا الْيَوْمَ عَلَيْكُم مِّسْكِينٌ<sup>۲۴</sup>
 </p>
 
 <p class=ordinary-far>
-سَنَسِمُهُ عَلَى الْخُرْطُومِ<sup>16</sup>
+وَغَدَوْا عَلَىٰ حَرْدٍ قَادِرِينَ<sup>۲۵</sup>
 </p>
 
 <p class=ordinary-far>
-إِنَّا بَلَوْنَاهُمْ كَمَا بَلَوْنَا أَصْحَابَ الْجَنَّةِ إِذْ أَقْسَمُوا لَيَصْرِمُنَّهَا مُصْبِحِينَ<sup>17</sup>
+فَلَمَّا رَأَوْهَا قَالُوا إِنَّا لَضَالُّونَ<sup>۲۶</sup>
+بَلْ نَحْنُ مَحْرُومُونَ<sup>۲۷</sup>
 </p>
 
 <p class=ordinary-far>
-وَلَا يَسْتَثْنُونَ<sup>18</sup>
+قَالَ أَوْسَطُهُمْ أَلَمْ أَقُل لَّكُمْ لَوْلَا تُسَبِّحُونَ<sup>۲۸</sup>
 </p>
 
 <p class=ordinary-far>
-فَطَافَ عَلَيْهَا طَائِفٌ مِّن رَّبِّكَ وَهُمْ نَائِمُونَ<sup>19</sup>
+قَالُوا سُبْحَانَ رَبِّنَا إِنَّا كُنَّا ظَالِمِينَ<sup>۲۹</sup>
 </p>
 
 <p class=ordinary-far>
-فَأَصْبَحَتْ كَالصَّرِيمِ<sup>20</sup>
+فَأَقْبَلَ بَعْضُهُمْ عَلَىٰ بَعْضٍ يَتَلَاوَمُونَ<sup>۳۰</sup>
 </p>
 
 <p class=ordinary-far>
-فَتَنَادَوْا مُصْبِحِينَ<sup>21</sup>
+قَالُوا يَا وَيْلَنَا إِنَّا كُنَّا طَاغِينَ<sup>۳۱</sup>
+عَسَىٰ رَبُّنَا أَن يُبْدِلَنَا خَيْرًا مِّنْهَا إِنَّا إِلَىٰ رَبِّنَا رَاغِبُونَ<sup>۳۲</sup>
+</p>
+
+<div class="diamond-marker bottom-1"></div>
+</div>
+
+<p class=ordinary-far>
+كَذَٰلِكَ الْعَذَابُ ۖ وَلَعَذَابُ الْآخِرَةِ أَكْبَرُ ۚ لَوْ كَانُوا يَعْلَمُونَ<sup>۳۳</sup>
 </p>
 
 <p class=ordinary-far>
-أَنِ اغْدُوا عَلَىٰ حَرْثِكُمْ إِن كُنتُمْ صَارِمِينَ<sup>22</sup>
+إِنَّ لِلْمُتَّقِينَ عِندَ رَبِّهِمْ جَنَّاتِ النَّعِيمِ<sup>۳۴</sup>
 </p>
 
 <p class=ordinary-far>
-فَانطَلَقُوا وَهُمْ يَتَخَافَتُونَ<sup>23</sup>
+أَفَنَجْعَلُ الْمُسْلِمِينَ كَالْمُجْرِمِينَ<sup>۳۵</sup>
 </p>
 
 <p class=ordinary-far>
-أَن لَّا يَدْخُلَنَّهَا الْيَوْمَ عَلَيْكُم مِّسْكِينٌ<sup>24</sup>
+مَا لَكُمْ كَيْفَ تَحْكُمُونَ<sup>۳۶</sup>
 </p>
 
 <p class=ordinary-far>
-وَغَدَوْا عَلَىٰ حَرْدٍ قَادِرِينَ<sup>25</sup>
+أَمْ لَكُمْ كِتَابٌ فِيهِ تَدْرُسُونَ<sup>۳۷</sup>
 </p>
 
 <p class=ordinary-far>
-فَلَمَّا رَأَوْهَا قَالُوا إِنَّا لَضَالُّونَ<sup>26</sup>
+إِنَّ لَكُمْ فِيهِ لَمَا تَخَيَّرُونَ<sup>۳۸</sup>
 </p>
 
 <p class=ordinary-far>
-بَلْ نَحْنُ مَحْرُومُونَ<sup>27</sup>
+أَمْ لَكُمْ أَيْمَانٌ عَلَيْنَا بَالِغَةٌ إِلَىٰ يَوْمِ الْقِيَامَةِ ۙ إِنَّ لَكُمْ لَمَا تَحْكُمُونَ<sup>۳۹</sup>
 </p>
 
 <p class=ordinary-far>
-قَالَ أَوْسَطُهُمْ أَلَمْ أَقُل لَّكُمْ لَوْلَا تُسَبِّحُونَ<sup>28</sup>
+سَلْهُمْ أَيُّهُم بِذَٰلِكَ زَعِيمٌ<sup>۴۰</sup>
 </p>
 
 <p class=ordinary-far>
-قَالُوا سُبْحَانَ رَبِّنَا إِنَّا كُنَّا ظَالِمِينَ<sup>29</sup>
+أَمْ لَهُمْ شُرَكَاءُ فَلْيَأْتُوا بِشُرَكَائِهِمْ إِن كَانُوا صَادِقِينَ<sup>۴۱</sup>
 </p>
 
 <p class=ordinary-far>
-فَأَقْبَلَ بَعْضُهُمْ عَلَىٰ بَعْضٍ يَتَلَاوَمُونَ<sup>30</sup>
+يَوْمَ يُكْشَفُ عَن سَاقٍ وَيُدْعَوْنَ إِلَى السُّجُودِ فَلَا يَسْتَطِيعُونَ<sup>۴۲</sup>
+خَاشِعَةً أَبْصَارُهُمْ تَرْهَقُهُمْ ذِلَّةٌ ۖ وَقَدْ كَانُوا يُدْعَوْنَ إِلَى السُّجُودِ وَهُمْ سَالِمُونَ<sup>۴۳</sup>
 </p>
 
 <p class=ordinary-far>
-قَالُوا يَا وَيْلَنَا إِنَّا كُنَّا طَاغِينَ<sup>31</sup>
+فَذَرْنِي وَمَن يُكَذِّبُ بِهَـٰذَا الْحَدِيثِ ۖ سَنَسْتَدْرِجُهُم مِّنْ حَيْثُ لَا يَعْلَمُونَ<sup>۴۴</sup>
+وَأُمْلِي لَهُمْ ۚ إِنَّ كَيْدِي مَتِينٌ<sup>۴۵</sup>
 </p>
 
 <p class=ordinary-far>
-عَسَىٰ رَبُّنَا أَن يُبْدِلَنَا خَيْرًا مِّنْهَا إِنَّا إِلَىٰ رَبِّنَا رَاغِبُونَ<sup>32</sup>
+أَمْ تَسْأَلُهُمْ أَجْرًا فَهُم مِّن مَّغْرَمٍ مُّثْقَلُونَ<sup>۴۶</sup>
 </p>
 
 <p class=ordinary-far>
-كَذَٰلِكَ الْعَذَابُ ۖ وَلَعَذَابُ الْآخِرَةِ أَكْبَرُ ۚ لَوْ كَانُوا يَعْلَمُونَ<sup>33</sup>
+أَمْ عِندَهُمُ الْغَيْبُ فَهُمْ يَكْتُبُونَ<sup>۴۷</sup>
 </p>
 
 <p class=ordinary-far>
-إِنَّ لِلْمُتَّقِينَ عِندَ رَبِّهِمْ جَنَّاتِ النَّعِيمِ<sup>34</sup>
+فَاصْبِرْ لِحُكْمِ رَبِّكَ وَلَا تَكُن كَصَاحِبِ الْحُوتِ إِذْ نَادَىٰ وَهُوَ مَكْظُومٌ<sup>۴۸</sup>
+لَّوْلَا أَن تَدَارَكَهُ نِعْمَةٌ مِّن رَّبِّهِ لَنُبِذَ بِالْعَرَاءِ وَهُوَ مَذْمُومٌ<sup>۴۹</sup>
+فَاجْتَبَاهُ رَبُّهُ فَجَعَلَهُ مِنَ الصَّالِحِينَ<sup>۵۰</sup>
 </p>
 
 <p class=ordinary-far>
-أَفَنَجْعَلُ الْمُسْلِمِينَ كَالْمُجْرِمِينَ<sup>35</sup>
+وَإِن يَكَادُ الَّذِينَ كَفَرُوا لَيُزْلِقُونَكَ بِأَبْصَارِهِمْ لَمَّا سَمِعُوا الذِّكْرَ وَيَقُولُونَ إِنَّهُ لَمَجْنُونٌ<sup>۵۱</sup>
 </p>
 
 <p class=ordinary-far>
-مَا لَكُمْ كَيْفَ تَحْكُمُونَ<sup>36</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ لَكُمْ كِتَابٌ فِيهِ تَدْرُسُونَ<sup>37</sup>
-</p>
-
-<p class=ordinary-far>
-إِنَّ لَكُمْ فِيهِ لَمَا تَخَيَّرُونَ<sup>38</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ لَكُمْ أَيْمَانٌ عَلَيْنَا بَالِغَةٌ إِلَىٰ يَوْمِ الْقِيَامَةِ ۙ إِنَّ لَكُمْ لَمَا تَحْكُمُونَ<sup>39</sup>
-</p>
-
-<p class=ordinary-far>
-سَلْهُمْ أَيُّهُم بِذَٰلِكَ زَعِيمٌ<sup>40</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ لَهُمْ شُرَكَاءُ فَلْيَأْتُوا بِشُرَكَائِهِمْ إِن كَانُوا صَادِقِينَ<sup>41</sup>
-</p>
-
-<p class=ordinary-far>
-يَوْمَ يُكْشَفُ عَن سَاقٍ وَيُدْعَوْنَ إِلَى السُّجُودِ فَلَا يَسْتَطِيعُونَ<sup>42</sup>
-</p>
-
-<p class=ordinary-far>
-خَاشِعَةً أَبْصَارُهُمْ تَرْهَقُهُمْ ذِلَّةٌ ۖ وَقَدْ كَانُوا يُدْعَوْنَ إِلَى السُّجُودِ وَهُمْ سَالِمُونَ<sup>43</sup>
-</p>
-
-<p class=ordinary-far>
-فَذَرْنِي وَمَن يُكَذِّبُ بِهَـٰذَا الْحَدِيثِ ۖ سَنَسْتَدْرِجُهُم مِّنْ حَيْثُ لَا يَعْلَمُونَ<sup>44</sup>
-</p>
-
-<p class=ordinary-far>
-وَأُمْلِي لَهُمْ ۚ إِنَّ كَيْدِي مَتِينٌ<sup>45</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ تَسْأَلُهُمْ أَجْرًا فَهُم مِّن مَّغْرَمٍ مُّثْقَلُونَ<sup>46</sup>
-</p>
-
-<p class=ordinary-far>
-أَمْ عِندَهُمُ الْغَيْبُ فَهُمْ يَكْتُبُونَ<sup>47</sup>
-</p>
-
-<p class=ordinary-far>
-فَاصْبِرْ لِحُكْمِ رَبِّكَ وَلَا تَكُن كَصَاحِبِ الْحُوتِ إِذْ نَادَىٰ وَهُوَ مَكْظُومٌ<sup>48</sup>
-</p>
-
-<p class=ordinary-far>
-لَّوْلَا أَن تَدَارَكَهُ نِعْمَةٌ مِّن رَّبِّهِ لَنُبِذَ بِالْعَرَاءِ وَهُوَ مَذْمُومٌ<sup>49</sup>
-</p>
-
-<p class=ordinary-far>
-فَاجْتَبَاهُ رَبُّهُ فَجَعَلَهُ مِنَ الصَّالِحِينَ<sup>50</sup>
-</p>
-
-<p class=ordinary-far>
-وَإِن يَكَادُ الَّذِينَ كَفَرُوا لَيُزْلِقُونَكَ بِأَبْصَارِهِمْ لَمَّا سَمِعُوا الذِّكْرَ وَيَقُولُونَ إِنَّهُ لَمَجْنُونٌ<sup>51</sup>
-</p>
-
-<p class=ordinary-far>
-وَمَا هُوَ إِلَّا ذِكْرٌ لِّلْعَالَمِينَ<sup>52</sup>
+وَمَا هُوَ إِلَّا ذِكْرٌ لِّلْعَالَمِينَ<sup>۵۲</sup>
 </p>
 
 
