@@ -599,6 +599,17 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradientgray {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, rgb(150,150,150), white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-gradient-far {
