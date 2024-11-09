@@ -50,6 +50,17 @@
     page-break-inside: auto; /* or auto */
   }
 
+
+  .vertical-line-dashed-2 {
+    border-left: 0.3mm dashed rgb(150, 150, 150); /* Adjust the color and width as needed */
+    height: 120%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    top: 50%; /* Position the top edge of the line at the vertical center of the container */
+    transform: translateY(-50%);
+    right: 5.4mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
   .vertical-line-3 {
     border-left: 0.3mm solid rgb(200, 200, 200); /* Adjust the color and width as needed */
     height: 100%; /* Ensure the line spans the height of the content */
