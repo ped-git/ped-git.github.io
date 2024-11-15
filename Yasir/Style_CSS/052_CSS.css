@@ -733,6 +733,15 @@
     padding: 3px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-solidblue-far {
+    border-bottom: 1px solid rgb(150, 150, 255);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
+
   .boxed.underline-red {
     border-bottom: 1px dashed rgb(220, 150, 150);
     border-left: 0;
