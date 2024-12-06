@@ -58,6 +58,20 @@
     page-break-inside: auto; /* or auto */
   }
 
+  .vertical-line-gradblue-3 {
+    width: 0.3mm; /* Set the thickness of the line */
+    height: 100%; /* Ensure the line spans the height of the container */
+    background: linear-gradient(to bottom, rgb(0, 150, 255) 0%,
+                                           rgb(0, 150, 255) 55%,
+                                           rgb(255, 255, 255) 70%,
+                                           rgb(50, 50, 255) 85%,
+                                           rgb(50, 50, 255) 100%); /* Gradient from blue to white */
+    position: absolute; /* Position the line absolutely */
+    right: 3.4mm; /* Position the line at the desired location */
+    page-break-inside: auto; /* Ensure proper page breaks */
+  }
+
+
   .vertical-line-inside {
     border-left: 0.6mm dashed rgb(150, 150, 150); /* Adjust the color and width as needed */
     height: 90%; /* Ensure the line spans the height of the content */
@@ -147,6 +161,32 @@
 	background-color: rgb(200, 200, 200);
 	bottom: 0;
 	right: 3.0mm; /* Adjust the position for alignment */
+  }
+
+
+  .diamond-marker.top-lightblue-3 {
+    background-color: rgb(0, 150, 255);
+      top: 0;
+    right: 3.0mm; /* Adjust the position for alignment */
+    }
+  
+  .diamond-marker.bottom-lightblue-3 {
+  background-color: rgb(0, 150, 255);
+  bottom: 0;
+  right: 3.0mm; /* Adjust the position for alignment */
+  }
+
+
+  .diamond-marker.top-darkblue-3 {
+    background-color: rgb(50, 50, 255);
+      top: 0;
+    right: 3.0mm; /* Adjust the position for alignment */
+    }
+  
+  .diamond-marker.bottom-darkblue-3 {
+  background-color: rgb(50, 50, 255);
+  bottom: 0;
+  right: 3.0mm; /* Adjust the position for alignment */
   }
   
   /* Style for the container */
@@ -1014,6 +1054,14 @@
     border-right: 0;
     border-top: 0;
     padding: 2px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdashed-far2 {
+    border-bottom: 1px dashed rgb(150, 150, 150);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 4px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-blackdashed2 {
