@@ -294,8 +294,8 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:1mm;
-    width: 120mm;
+    margin-top:2mm;
+    flex: 1;
     text-indent:0mm;
   }
 
@@ -789,6 +789,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-green-far {
@@ -799,13 +800,32 @@
     padding: 3px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-dottedgreen {
+    border-bottom: 1px dotted rgb(100, 180, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-gradientgreen {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, rgb(170, 255, 170), rgb(100, 180, 100)); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradientgreen-far {
     border-bottom: 1px solid;
     border-image: linear-gradient(to right, white, rgb(100, 180, 100)); /* Define the gradient from black to white */
     border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-solidgreen {
@@ -813,6 +833,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-solidgreen-far {
@@ -870,11 +891,20 @@
     padding: 0px 0px; /* Add padding inside the box */
   }
 
+  .boxed.underline-red-far {
+    border-bottom: 1px dashed rgb(220, 150, 150);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-dottedred {
     border-bottom: 1px dotted rgb(220, 150, 150);
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-dottedred-far {
@@ -890,6 +920,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-solidred-far {
@@ -910,11 +941,22 @@
 
   .boxed.underline-gradientred {
     border-bottom: 1px solid;
+    border-image: linear-gradient(to right, rgb(255, 230, 230), rgb(220, 150, 150)); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradientred-far {
+    border-bottom: 1px solid;
     border-image: linear-gradient(to right, white, rgb(220, 150, 150)); /* Define the gradient from black to white */
     border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-black-1 {
@@ -1002,6 +1044,14 @@
 
   .boxed.underline-blackdotted2 {
     border-bottom: 2px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-blackdotted3 {
+    border-bottom: 3px dotted rgb(100, 100, 100);
     border-left: 0;
     border-right: 0;
     border-top: 0;
