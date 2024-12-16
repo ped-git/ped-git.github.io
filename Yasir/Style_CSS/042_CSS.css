@@ -810,7 +810,7 @@
 
   .boxed.underline-gradientgreen {
     border-bottom: 1px solid;
-    border-image: linear-gradient(to right, rgb(170, 255, 170), rgb(100, 180, 100)); /* Define the gradient from black to white */
+    border-image: linear-gradient(to right, rgb(230, 255, 230), rgb(100, 180, 100)); /* Define the gradient from black to white */
     border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
     border-left: 0;
     border-right: 0;
