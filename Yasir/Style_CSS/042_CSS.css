@@ -8,6 +8,14 @@
     page-break-inside: auto; /* or auto */
   }
 
+  .vertical-line-gray-1 {
+    border-left: 0.3mm solid rgb(200,200,200); /* Adjust the color and width as needed */
+    height: 100%; /* Ensure the line spans the height of the content */
+    position: absolute; /* Position the line absolutely */
+    right: 7.5mm; /* Position the line at the left edge of the container */
+    page-break-inside: auto; /* or auto */
+  }
+
   .vertical-line-dashed-1 {
     border-left: 0.3mm dashed black; /* Adjust the color and width as needed */
     height: 120%; /* Ensure the line spans the height of the content */
@@ -88,6 +96,18 @@
 	bottom: 0;
 	right: 7.0mm; /* Adjust the position for alignment */
   }
+
+  .diamond-marker.top-gray-1 {
+    background-color: rgb(200,200,200);;
+      top: 0;
+    right: 7.0mm; /* Adjust the position for alignment */
+    }
+  
+    .diamond-marker.bottom-gray-1 {
+    background-color: rgb(200,200,200);;
+    bottom: 0;
+    right: 7.0mm; /* Adjust the position for alignment */
+    }
 
   .diamond-marker.top-red-1 {
 	background-color: rgb(205,100,100);
@@ -1247,6 +1267,10 @@
 
   .highlight15 {
     color:  rgb(100, 130, 150);
+  }
+
+  .highlight16 {
+    color:  rgb(150, 0, 150);
   }
 
   .backhighlight1 {
