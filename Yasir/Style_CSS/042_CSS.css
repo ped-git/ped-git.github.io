@@ -1262,7 +1262,7 @@
 
   .highlight14 {
     color:  rgb(50, 50, 50);
-    filter: blur(0.1mm); /* Adjust the blur radius as needed */
+    filter: blur(0.15mm); /* Adjust the blur radius as needed */
   }
 
   .highlight15 {
