@@ -302,8 +302,8 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:-1mm;
-    width: 80mm;
+    margin-top:-3mm;
+    flex: 1;
     text-indent:0mm;
   }
  
@@ -1033,7 +1033,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
-    padding: 2px 0px; /* Add padding inside the box */
+    padding: 3px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-blackdashed2 {
@@ -1082,6 +1082,14 @@
     border-bottom: 1px dashed rgb(100, 100, 100);
     border-left: 0;
     border-right: 1px dashed rgb(100, 100, 100);
+    border-top: 1px dashed rgb(100, 100, 100);
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-three1 {
+    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-left: 1px dashed rgb(100, 100, 100);
+    border-right: 0;
     border-top: 1px dashed rgb(100, 100, 100);
     padding: 0px 0px; /* Add padding inside the box */
   }
