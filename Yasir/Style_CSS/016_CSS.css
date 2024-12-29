@@ -302,7 +302,7 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:-1mm;
+    margin-top:0mm;
     width: 80mm;
     text-indent:0mm;
   }
@@ -838,6 +838,17 @@
     padding: 0px 0px; /* Add padding inside the box */
   }
 
+
+  .boxed.underline-gradientgreen1 {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, rgb(100, 180, 100), rgb(230, 255, 230)); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
   .boxed.underline-gradientgreen-far {
     border-bottom: 1px solid;
     border-image: linear-gradient(to right, white, rgb(100, 180, 100)); /* Define the gradient from black to white */
@@ -962,6 +973,16 @@
   .boxed.underline-gradientred {
     border-bottom: 1px solid;
     border-image: linear-gradient(to right, rgb(255, 230, 230), rgb(220, 150, 150)); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+  }
+
+  .boxed.underline-gradientred1 {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, rgb(220, 150, 150), rgb(255, 230, 230)); /* Define the gradient from black to white */
     border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
     border-left: 0;
     border-right: 0;
