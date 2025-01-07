@@ -175,7 +175,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 114mm;
+    width: 132mm;
   }
  
 
@@ -539,8 +539,8 @@
   }
 
   .boxed-gray {
-    border: 1px solid rgb(200, 200, 200); /* Set border properties */
-    padding: 2px 2px; /* Add padding inside the box */
+    border: 1px solid rgb(220, 220, 220); /* Set border properties */
+    padding: 1px 1px 0px 1px; /* Add padding inside the box */
   }
 
   .boxed.square {
@@ -570,13 +570,13 @@
   }
 
   .boxed-red {
-    border: 1px solid rgb(150, 50, 50);
-    padding: 1px 2px; /* Add padding inside the box */
+    border: 1px solid rgb(220, 180, 180);
+    padding: 2px 1px; /* Add padding inside the box */
   }
 
   .boxed-green {
-    border: 1px solid rgb(210, 230, 210);
-    padding: 1px 2px; /* Add padding inside the box */
+    border: 1px solid rgb(180, 220, 180);
+    padding: 2px 1px; /* Add padding inside the box */
   }
 
  
@@ -1055,6 +1055,10 @@
 
   .highlight15 {
     color:  rgb(100, 130, 150);
+  }
+
+  .highlight16 {
+    color:  purple;
   }
 
   .backhighlight1 {
