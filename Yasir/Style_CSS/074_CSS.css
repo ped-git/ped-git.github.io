@@ -59,15 +59,44 @@
   }
 
   .vertical-line-inside {
-    border-left: 0.3mm dotted rgb(220, 220, 220); /* Adjust the color and width as needed */
-    height: 95%; /* Ensure the line spans the height of the content */
+    border-left: 0.6mm dashed rgb(200, 200, 200); /* Adjust the color and width as needed */
+    height: 90%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     top: 50%; /* Position the top edge of the line at the vertical center of the container */
     transform: translateY(-50%);
-    right: 0mm; /* Position the line at the left edge of the container */
+    left: -3mm; /* Position the line at the left edge of the container */
     page-break-inside: auto; /* or auto */
 
   }
+
+
+  .thin-vertical-line-1 {
+    border-left: 0.5mm solid rgb(200, 200, 200);; /* Adjust the color and width as needed */
+    top: 78mm;
+    bottom: 25mm;
+    position: absolute; /* Position the line absolutely */
+    left: 10mm; /* Position the line at the left edge of the container */
+  }
+
+  .line-marker{
+    height: 0.5mm;
+    position: absolute;
+  }
+
+  .line-marker.top-1 {
+    width: 13mm;
+	background-color: rgb(200, 200, 200);
+    top: 78.0mm;
+	  left: 10.0mm; /* Adjust the position for alignment */
+  }
+
+  .line-marker.bottom-1 {
+    width: 30mm;
+	background-color: rgb(200, 200, 200);
+	bottom: 25.0mm;
+	left: 10.0mm; /* Adjust the position for alignment */
+  }
+
 
   .diamond-marker{
     width: 1.2mm;
@@ -184,8 +213,8 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:-1mm;
-    flex: 1;
+    margin-top:0mm;
+    width: 100mm;
     text-indent:0mm;
   }
  
@@ -197,7 +226,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 155mm;
+    width: 137mm;
   }
  
 
