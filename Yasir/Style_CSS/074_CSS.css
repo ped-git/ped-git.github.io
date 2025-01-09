@@ -59,7 +59,7 @@
   }
 
   .vertical-line-inside {
-    border-left: 0.6mm dashed rgb(200, 200, 200); /* Adjust the color and width as needed */
+    border-left: 0.6mm dashed rgb(230, 230, 230); /* Adjust the color and width as needed */
     height: 90%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     top: 50%; /* Position the top edge of the line at the vertical center of the container */
@@ -71,11 +71,11 @@
 
 
   .thin-vertical-line-1 {
-    border-left: 0.5mm solid rgb(200, 200, 200);; /* Adjust the color and width as needed */
+    border-left: 0.5mm solid rgb(230, 230, 230);; /* Adjust the color and width as needed */
     top: 78mm;
     bottom: 25mm;
     position: absolute; /* Position the line absolutely */
-    left: 10mm; /* Position the line at the left edge of the container */
+    left: 15mm; /* Position the line at the left edge of the container */
   }
 
   .line-marker{
@@ -84,17 +84,17 @@
   }
 
   .line-marker.top-1 {
-    width: 11mm;
-	background-color: rgb(200, 200, 200);
+    width: 6mm;
+	background-color: rgb(230, 230, 230);
     top: 78.0mm;
-	  left: 10.0mm; /* Adjust the position for alignment */
+	  left: 15.0mm; /* Adjust the position for alignment */
   }
 
   .line-marker.bottom-1 {
-    width: 29mm;
-	background-color: rgb(200, 200, 200);
+    width: 23mm;
+	background-color: rgb(230, 230, 230);
 	bottom: 25.0mm;
-	left: 10.0mm; /* Adjust the position for alignment */
+	left: 15.0mm; /* Adjust the position for alignment */
   }
 
 
@@ -226,7 +226,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 137mm;
+    width: 138mm;
   }
  
 
@@ -236,8 +236,8 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:0.5mm;
-    width: 161mm;
+    margin-top:0.0mm;
+    width: 154mm;
   }
  
 
