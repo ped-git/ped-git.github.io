@@ -154,8 +154,8 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:-1mm;
-width: 153mm;
+margin-top:0mm;
+width: 75mm;
 }
 
 
@@ -538,8 +538,8 @@ padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed-dashed {
-border: 1px dashed rgb(150, 150, 150); /* Set border properties */
-padding: 1px 2px; /* Add padding inside the box */
+border: 1px dashed rgb(200, 200, 200); /* Set border properties */
+padding: 2px 2px; /* Add padding inside the box */
 }
 
 .boxed-dotted {
