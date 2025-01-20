@@ -4,50 +4,7 @@
     border-left: 0.3mm solid black; /* Adjust the color and width as needed */
     height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-gray-1 {
-    border-left: 0.3mm solid rgb(200,200,200); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-dashed-1 {
-    border-left: 0.3mm dashed black; /* Adjust the color and width as needed */
-    height: 120%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    top: 50%; /* Position the top edge of the line at the vertical center of the container */
-    transform: translateY(-50%);
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-red-1 {
-    border-left: 0.3mm solid rgb(205,100,100); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-green-1 {
-    border-left: 0.3mm solid rgb(70,175,70); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-blue-1 {
-    border-left: 0.3mm solid rgb(0, 130, 230); /* Adjust the color and width as needed */
-    height: 100%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    right: 7.5mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
+    right: 7.4mm; /* Position the line at the left edge of the container */
   }
 
   .vertical-line-2 {
@@ -55,7 +12,6 @@
     height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     right: 5.4mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
   }
 
   .vertical-line-3 {
@@ -63,18 +19,6 @@
     height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     right: 3.4mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-  }
-
-  .vertical-line-inside {
-    border-left: 0.6mm dashed rgb(150, 150, 150); /* Adjust the color and width as needed */
-    height: 90%; /* Ensure the line spans the height of the content */
-    position: absolute; /* Position the line absolutely */
-    top: 50%; /* Position the top edge of the line at the vertical center of the container */
-    transform: translateY(-50%);
-    left: -1mm; /* Position the line at the left edge of the container */
-    page-break-inside: auto; /* or auto */
-
   }
 
   .diamond-marker{
@@ -93,54 +37,6 @@
 
   .diamond-marker.bottom-1 {
 	background-color: black;
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-gray-1 {
-    background-color: rgb(200,200,200);;
-      top: 0;
-    right: 7.0mm; /* Adjust the position for alignment */
-    }
-  
-    .diamond-marker.bottom-gray-1 {
-    background-color: rgb(200,200,200);;
-    bottom: 0;
-    right: 7.0mm; /* Adjust the position for alignment */
-    }
-
-  .diamond-marker.top-red-1 {
-	background-color: rgb(205,100,100);
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-red-1 {
-	background-color: rgb(205,100,100);
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-green-1 {
-	background-color: rgb(70,175,70);
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-green-1 {
-	background-color: rgb(70,175,70);
-	bottom: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.top-blue-1 {
-	background-color: rgb(0, 130, 230);
-    top: 0;
-	right: 7.0mm; /* Adjust the position for alignment */
-  }
-
-  .diamond-marker.bottom-blue-1 {
-	background-color: rgb(0, 130, 230);
 	bottom: 0;
 	right: 7.0mm; /* Adjust the position for alignment */
   }
@@ -172,7 +68,6 @@
   /* Style for the container */
   .container {
     position: relative; /* Set the container as a relative position */
-    page-break-inside: auto; /* or auto */
   }
  
 
@@ -303,7 +198,7 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    width: 80mm;
+    width: 69mm;
     text-indent:0mm;
   }
  
@@ -314,7 +209,7 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:2mm;
+    margin-top:-1mm;
     flex: 1;
     text-indent:0mm;
   }
