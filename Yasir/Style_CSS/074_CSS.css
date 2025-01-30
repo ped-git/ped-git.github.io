@@ -192,7 +192,10 @@
     vertical-align: top;
     text-align: justify;
     margin-top:0mm;
-    flex-grow: 1;
+
+    width: auto; /* Allows the box to expand without affecting font size */
+    max-width: 100%;
+
     text-indent:0mm;
     font-size: inherit;
   }
