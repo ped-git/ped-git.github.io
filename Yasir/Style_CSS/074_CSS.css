@@ -188,17 +188,17 @@
  
   .inner-paragraph-1 {
     display: inline-block;
+    width: auto; /* Makes it fill the remaining width */
+    max-width: 100%; /* Ensures it does not exceed the parent container */
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:0mm;
-
-    width: auto; /* Allows the box to expand without affecting font size */
-    max-width: 100%;
-
-    text-indent:0mm;
-    font-size: inherit;
-  }
+    margin-top: 0mm;
+    text-indent: 0mm;
+    font-size: 1rem; /* Ensures consistent font size */
+    box-sizing: border-box; /* Ensures padding/margins don’t affect width */
+    word-wrap: break-word; /* Prevents text from overflowing */
+}
  
  
   .inner-paragraph-2 {
