@@ -194,9 +194,9 @@
     margin-top:0mm;
     flex: 1;
     text-indent:0mm;
+    font-size: inherit;
   }
  
-
  
   .inner-paragraph-2 {
     display: inline-block;

@@ -314,7 +314,7 @@
     page-break-inside: auto;
     vertical-align: top;
     text-align: justify;
-    margin-top:2mm;
+    margin-top:0mm;
     flex: 1;
     text-indent:0mm;
   }
@@ -492,7 +492,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:0mm;'
+    text-indent:0mm;
   }
  
 
@@ -503,7 +503,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:0mm;'
+    text-indent:0mm;
   }
  
 
@@ -514,7 +514,7 @@
     margin-bottom:0mm;
     margin-left:0mm;
     text-align:justify;
-    text-indent:-4mm;'
+    text-indent:-4mm;
   }
  
 
@@ -525,7 +525,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-6.5mm;'
+    text-indent:-6.5mm;
   }
  
 
@@ -536,7 +536,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-6.5mm;'
+    text-indent:-6.5mm;
   }
  
 
@@ -547,7 +547,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-4.5mm;'
+    text-indent:-4.5mm;
   }
  
 
@@ -558,7 +558,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-4.5mm;'
+    text-indent:-4.5mm;
   }
  
 
@@ -569,7 +569,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-9.5mm;'
+    text-indent:-9.5mm;
   }
  
 
@@ -580,7 +580,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-9.5mm;'
+    text-indent:-9.5mm;
   }
  
 
@@ -591,7 +591,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-15.5mm;'
+    text-indent:-15.5mm;
   }
  
 
@@ -602,7 +602,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-15.5mm;'
+    text-indent:-15.5mm;
   }
  
 
@@ -613,7 +613,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -624,7 +624,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -635,7 +635,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:0mm;'
+    text-indent:0mm;
   }
  
 
@@ -646,7 +646,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:0mm;'
+    text-indent:0mm;
   }
  
 
@@ -657,7 +657,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -668,7 +668,7 @@
     margin-bottom:0mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -679,7 +679,7 @@
     margin-bottom:4.5mm;
     margin-left:10mm;
     text-align:justify;
-    text-indent:-5mm;'
+    text-indent:-5mm;
   }
  
 
@@ -789,6 +789,16 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+  }
+
+  .boxed.underline-gradient1-far {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, white, black); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-gradient1-far2 {
