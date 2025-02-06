@@ -556,6 +556,11 @@
     padding: 1px 2px; /* Add padding inside the box */
   }
 
+  .boxed-dashed-gray {
+    border: 1px dashed rgb(200, 200, 200); /* Set border properties */
+    padding: 1px 2px; /* Add padding inside the box */
+  }
+
   .boxed-dotted {
     border: 1px dotted rgb(150, 150, 150); /* Set border properties */
     padding: 1px 2px; /* Add padding inside the box */

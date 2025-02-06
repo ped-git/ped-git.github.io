@@ -860,11 +860,11 @@
   }
 
   .boxed.underline-three {
-    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-bottom: 1px solid rgb(100, 100, 100);
     border-left: 0;
-    border-right: 1px dashed rgb(100, 100, 100);
-    border-top: 1px dashed rgb(100, 100, 100);
-    padding: 0px 0px; /* Add padding inside the box */
+    border-right: 1px solid rgb(100, 100, 100);
+    border-top: 1px solid rgb(100, 100, 100);
+    padding: 0px 2px; /* Add padding inside the box */
   }
 
   .boxed.underline-notsure {
