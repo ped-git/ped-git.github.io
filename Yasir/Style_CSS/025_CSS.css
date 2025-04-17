@@ -617,6 +617,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-gradientdotted {
@@ -655,6 +656,7 @@
     border-left: 0;
     border-right: 0;
     border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
   }
 
   .boxed.underline-gradient1-far2 {
@@ -674,6 +676,20 @@
                                           rgb(230, 230, 230) 15%, 
                                           rgb(230, 230, 230) 85%, 
                                           rgb(100, 100, 100) 100%);
+  border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; /* Add padding inside the box */
+}
+
+.boxed.underline-gradientsym2 {
+  width: 100%;
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, rgb(230, 230, 230) 0%, 
+                                          rgb(100, 100, 100) 40%, 
+                                          rgb(100, 100, 100) 60%, 
+                                          rgb(230, 230, 230) 100%);
   border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
   border-left: 0;
   border-right: 0;
