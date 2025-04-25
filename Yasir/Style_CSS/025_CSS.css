@@ -10,7 +10,7 @@
 
   .vertical-line-dashed-1 {
     border-left: 0.3mm dashed black; /* Adjust the color and width as needed */
-    height: 120%; /* Ensure the line spans the height of the content */
+    height: 100%; /* Ensure the line spans the height of the content */
     position: absolute; /* Position the line absolutely */
     top: 50%; /* Position the top edge of the line at the vertical center of the container */
     transform: translateY(-50%);
