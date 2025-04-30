@@ -670,6 +670,15 @@ padding: 0px 0px; /* Add padding inside the box */
 
 }
 
+.boxed.underline-blackdashed-thick {
+    border-bottom: 0.6mm dashed rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+    
+    }
+
 .boxed.underline-blackdashed-far {
     border-bottom: 1px dashed rgb(100, 100, 100);
     border-left: 0;
