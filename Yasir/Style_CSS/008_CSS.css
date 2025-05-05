@@ -175,7 +175,7 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:1.5mm;
+margin-top:0mm;
 width: 142mm;
 }
 
@@ -186,7 +186,7 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:-1.5mm;
+margin-top:0.5mm;
 width: 119mm;
 }
 
@@ -592,6 +592,26 @@ border-top: 0;
 padding: 0px 0px; /* Add padding inside the box */
 }
 
+.boxed.underline-gradientgreen {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, rgb(0, 200, 0), white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+    }
+
+.boxed.underline-gradientred {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, rgb(220, 0, 0), white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+    }
+
 .boxed.underline-solidgreen {
 border-bottom: 1px solid rgb(190, 210, 190);
 border-left: 0;
@@ -629,12 +649,21 @@ padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-black-far {
-border-bottom: 1px solid rgb(100, 100, 100);
+border-bottom: 1px solid rgb(150, 150, 150);
 border-left: 0;
 border-right: 0;
 border-top: 0;
 padding: 3px 0px; /* Add padding inside the box */
 }
+
+
+.boxed.underline-black-far2 {
+    border-bottom: 1px solid rgb(200, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 6px 0px; /* Add padding inside the box */
+    }
 
 .boxed.underline-black-2 {
 border-bottom: 1px solid rgb(180, 180, 180);
