@@ -197,8 +197,8 @@ display: inline-block;
 page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
-margin-top:0mm;
-width: 70mm;
+margin-top:1mm;
+width: 161mm;
 }
 
 
@@ -582,15 +582,25 @@ border-right: 0;
 border-top: 0;
 }
 
-.boxed.underline-gradient {
+.boxed.underline-gradientrev {
 border-bottom: 1px solid;
-border-image: linear-gradient(to left, black, white); /* Define the gradient from black to white */
+border-image: linear-gradient(to left, white, black); /* Define the gradient from black to white */
 border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
 border-left: 0;
 border-right: 0;
 border-top: 0;
 padding: 0px 0px; /* Add padding inside the box */
 }
+
+.boxed.underline-gradient {
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to left, black, white); /* Define the gradient from black to white */
+    border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px; /* Add padding inside the box */
+    }
 
 .boxed.underline-gradientgreen {
     border-bottom: 1px solid;
