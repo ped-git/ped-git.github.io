@@ -683,6 +683,14 @@ border-top: 0;
 padding: 0px 0px; /* Add padding inside the box */
 }
 
+.boxed.underline-black-2-thick {
+    border-bottom: 0.7mm solid rgb(180, 180, 180);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0.7mm 0px; /* Add padding inside the box */
+    }
+
 .boxed.underline-black-3 {
 border-bottom: 1px solid rgb(220, 220, 220);
 border-left: 0;
@@ -710,11 +718,11 @@ padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-blackdashed-thick {
-    border-bottom: 0.6mm dashed rgb(100, 100, 100);
+    border-bottom: 0.7mm dashed rgb(180, 180, 180);
     border-left: 0;
     border-right: 0;
     border-top: 0;
-    padding: 0px 0px; /* Add padding inside the box */
+    padding: 0.7mm 0px; /* Add padding inside the box */
     
     }
 
