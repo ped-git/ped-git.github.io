@@ -581,6 +581,15 @@ border-right: 0;
 border-top: 0;
 }
 
+.boxed.underline-gradientrev {
+border-bottom: 1px solid;
+border-image: linear-gradient(to left, white, black); /* Define the gradient from black to white */
+border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+border-left: 0;
+border-right: 0;
+border-top: 0;
+}
+
 .boxed.underline-gradientgreen {
     border-bottom: 1px solid;
     border-image: linear-gradient(to left, rgb(100, 180, 100), white); /* Define the gradient from black to white */
