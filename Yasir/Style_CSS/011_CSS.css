@@ -579,6 +579,7 @@ border-image-slice: 1; /* Ensure the entire border is filled with the gradient *
 border-left: 0;
 border-right: 0;
 border-top: 0;
+padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-gradientrev {
@@ -665,11 +666,19 @@ padding: 0px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-black-far {
-border-bottom: 1px solid rgb(100, 100, 100);
+border-bottom: 1px solid rgb(150, 150, 150);
 border-left: 0;
 border-right: 0;
 border-top: 0;
 padding: 3px 0px; /* Add padding inside the box */
+}
+
+.boxed.underline-black-far2 {
+border-bottom: 1px solid rgb(200, 200, 200);
+border-left: 0;
+border-right: 0;
+border-top: 0;
+padding: 6px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-black-2 {
@@ -694,6 +703,15 @@ border-left: 0;
 border-right: 0;
 border-top: 0;
 padding: 0px 0px; /* Add padding inside the box */
+
+}
+
+.boxed.underline-blackdashed-far {
+border-bottom: 1px dashed rgb(150, 150, 150);
+border-left: 0;
+border-right: 0;
+border-top: 0;
+padding: 3px 0px; /* Add padding inside the box */
 
 }
 
