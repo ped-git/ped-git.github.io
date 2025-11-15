@@ -1,0 +1,1177 @@
+/* ========================================
+   Cross-Browser & Mobile-Responsive CSS for Quranic Text
+   Compatible with: Chrome, Firefox, Safari, Edge, IE11+
+   Responsive: Desktop, Tablet, Mobile
+   ======================================== */
+
+/* CSS Reset for better cross-browser consistency */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* ========================================
+   BODY STYLES
+   ======================================== */
+body {
+    direction: rtl;
+    text-align: right;
+    max-width: 190mm;
+    width: 100%;
+    margin: 0 auto;
+    font-size: 4.5mm;
+    line-height: 240%;
+    font-family: "KFGQPC Uthman Taha Naskh", "Traditional Arabic", "Arabic Typesetting", serif;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   CHAPTER TITLE STYLES
+   ======================================== */
+.chapter-title {
+    font-size: 9.0mm;
+    margin-top: -3mm;
+    margin-right: 10mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: center;
+    background-color: rgb(220, 220, 220);
+    font-weight: bold;
+    line-height: 150%;
+}
+
+.bismillah {
+    margin-top: 0cm;
+    margin-right: 10mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: center;
+}
+
+/* ========================================
+   SPEECH QUOTATION MARKS
+   ======================================== */
+speech {
+    font-size: 6mm;
+    display: inline;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Insert the character */
+speech[open]::before,
+speech[open]:before {
+    content: "«";
+}
+
+speech[close]::before,
+speech[close]:before {
+    content: "»";
+}
+
+/* Underline option */
+speech[underline]::before,
+speech[underline]:before {
+    text-decoration: underline;
+}
+
+/* Color options */
+speech[green]::before,
+speech[green]:before {
+    color: rgb(70, 175, 70);
+}
+
+speech[red]::before,
+speech[red]:before {
+    color: rgb(205, 100, 100);
+}
+
+speech[blue]::before,
+speech[blue]:before {
+    color: rgb(70, 70, 220);
+}
+
+/* ========================================
+   BULLET SYMBOL STYLES
+   ======================================== */
+.bullet-symbol {
+    font-size: 4.5mm;
+    line-height: 240%;
+    font-family: "Symbol", sans-serif;
+}
+
+.bullet-wingdings-red {
+    font-size: 4.5mm;
+    line-height: 240%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+    color: rgb(205, 100, 100);
+}
+
+.bullet-wingdings-green {
+    font-size: 4.5mm;
+    line-height: 240%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+    color: rgb(70, 175, 70);
+}
+
+.bullet-wingdings-black {
+    font-size: 4.5mm;
+    line-height: 200%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+}
+
+.bullet-times {
+    font-size: 4.5mm;
+    line-height: 200%;
+    font-family: "Times New Roman", Times, serif;
+}
+
+/* Sub-bullet styles */
+.sub-bullet-down {
+    font-size: 3.0mm;
+    line-height: 200%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+}
+
+.sub-bullet-up {
+    font-size: 3.5mm;
+    line-height: 200%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+}
+
+.sub-bullet-female {
+    font-size: 3.0mm;
+    line-height: 200%;
+    font-family: Wingdings, "Segoe UI Symbol", sans-serif;
+}
+
+/* ========================================
+   SPACING HELPERS
+   ======================================== */
+.spacing-22mm {
+    margin-right: 22mm;
+}
+
+.spacing-76mm {
+    margin-right: 76mm;
+}
+
+.spacing-59mm {
+    margin-right: 59mm;
+}
+
+.spacing-40mm {
+    margin-right: 40mm;
+}
+
+/* ========================================
+   VERTICAL LINES AND MARKERS
+   ======================================== */
+.vertical-line-1 {
+    border-left: 0.3mm solid black;
+    height: 100%;
+    position: absolute;
+    right: 7.5mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-dashed-1 {
+    border-left: 0.3mm dashed black;
+    height: 120%;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    right: 7.5mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-red-1 {
+    border-left: 0.3mm solid rgb(205, 100, 100);
+    height: 100%;
+    position: absolute;
+    right: 7.5mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-green-1 {
+    border-left: 0.3mm solid rgb(70, 175, 70);
+    height: 100%;
+    position: absolute;
+    right: 7.5mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-2 {
+    border-left: 0.3mm solid rgb(150, 150, 150);
+    height: 100%;
+    position: absolute;
+    right: 5.4mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-3 {
+    border-left: 0.3mm solid rgb(200, 200, 200);
+    height: 100%;
+    position: absolute;
+    right: 3.4mm;
+    page-break-inside: auto;
+}
+
+.vertical-line-inside {
+    border-left: 0.3mm dotted rgb(220, 220, 220);
+    height: 95%;
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+    right: 0mm;
+    page-break-inside: auto;
+}
+
+/* ========================================
+   DIAMOND MARKERS
+   ======================================== */
+.diamond-marker {
+    width: 1.2mm;
+    height: 1.2mm;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    position: absolute;
+}
+
+.diamond-marker.top-1 {
+    background-color: black;
+    top: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.bottom-1 {
+    background-color: black;
+    bottom: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.top-red-1 {
+    background-color: rgb(205, 100, 100);
+    top: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.bottom-red-1 {
+    background-color: rgb(205, 100, 100);
+    bottom: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.top-green-1 {
+    background-color: rgb(70, 175, 70);
+    top: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.bottom-green-1 {
+    background-color: rgb(70, 175, 70);
+    bottom: 0;
+    right: 7.0mm;
+}
+
+.diamond-marker.top-2 {
+    background-color: rgb(150, 150, 150);
+    top: 0;
+    right: 5.0mm;
+}
+
+.diamond-marker.bottom-2 {
+    background-color: rgb(150, 150, 150);
+    bottom: 0;
+    right: 5.0mm;
+}
+
+.diamond-marker.top-3 {
+    background-color: rgb(200, 200, 200);
+    top: 0;
+    right: 3.0mm;
+}
+
+.diamond-marker.bottom-3 {
+    background-color: rgb(200, 200, 200);
+    bottom: 0;
+    right: 3.0mm;
+}
+
+/* ========================================
+   CONTAINER STYLES
+   ======================================== */
+.container {
+    position: relative;
+    page-break-inside: auto;
+}
+
+/* ========================================
+   INNER PARAGRAPH STYLES
+   ======================================== */
+.inner-paragraph-1 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: -2mm;
+    width: 161mm;
+    max-width: 100%;
+    text-indent: 0mm;
+}
+
+.inner-paragraph-2 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 160mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-3 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 70mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-4 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: -1.5mm;
+    width: 119mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-5 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 70mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-6 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: -1.5mm;
+    width: 141mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-7 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 161mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-8 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: -3.0mm;
+    width: 163mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-9 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 159mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-10 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 164mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-11 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: -1.1mm;
+    width: 136mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-12 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0.5mm;
+    width: 64mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-13 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0.5mm;
+    width: 132mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-14 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 1.0mm;
+    width: 80mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-15 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 1.0mm;
+    width: 117mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-16 {
+    display: inline-block;
+    page-break-inside: auto;
+    vertical-align: top;
+    text-align: justify;
+    margin-top: 0mm;
+    width: 79mm;
+    max-width: 100%;
+}
+
+.inner-paragraph-continue {
+    display: inline-block;
+    vertical-align: bottom;
+    text-align: center;
+    background-color: rgb(150, 150, 150);
+    margin-top: 0mm;
+    text-indent: 0mm;
+}
+
+/* ========================================
+   PARAGRAPH STYLES
+   ======================================== */
+.ordinary-near {
+    margin-top: 0mm;
+    margin-right: 10mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.ordinary-far {
+    margin-top: 0mm;
+    margin-right: 10mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.only-bullet-near {
+    margin-top: 0mm;
+    margin-right: 4mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: -4mm;
+}
+
+.small-bullet-near {
+    margin-top: 0mm;
+    margin-right: 16.5mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -6.5mm;
+}
+
+.small-bullet-far {
+    margin-top: 0mm;
+    margin-right: 16.5mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -6.5mm;
+}
+
+.small-bullet-near-2 {
+    margin-top: 0mm;
+    margin-right: 14.5mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -4.5mm;
+}
+
+.small-bullet-far-2 {
+    margin-top: 0mm;
+    margin-right: 14.5mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -4.5mm;
+}
+
+.big-bullet-near {
+    margin-top: 0mm;
+    margin-right: 19.5mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -9.5mm;
+}
+
+.big-bullet-far {
+    margin-top: 0mm;
+    margin-right: 19.5mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -9.5mm;
+}
+
+.double-bullet-first-near {
+    margin-top: 0mm;
+    margin-right: 25.5mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -15.5mm;
+}
+
+.double-bullet-first-far {
+    margin-top: 0mm;
+    margin-right: 25.5mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -15.5mm;
+}
+
+.double-bullet-next-near {
+    margin-top: 0mm;
+    margin-right: 24.0mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.double-bullet-next-far {
+    margin-top: 0mm;
+    margin-right: 24.0mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.double-bullet-zero-near {
+    margin-top: 0mm;
+    margin-right: 19.5mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.double-bullet-zero-far {
+    margin-top: 0mm;
+    margin-right: 19.5mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.double-small-bullet-first-near {
+    margin-top: 0mm;
+    margin-right: 15mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.double-small-bullet-next-near {
+    margin-top: 0mm;
+    margin-right: 18.4mm;
+    margin-bottom: 0mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.double-small-bullet-next-far {
+    margin-top: 0mm;
+    margin-right: 18.4mm;
+    margin-bottom: 4.5mm;
+    margin-left: 10mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+/* ========================================
+   BOXED TEXT STYLES
+   ======================================== */
+.boxed {
+    border: 1px solid rgb(150, 150, 150);
+    padding: 1px 2px;
+}
+
+.boxed.square {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 1px solid rgb(100, 100, 100);
+    padding: 0px 0px;
+}
+
+.boxed-dashed {
+    border: 1px dashed rgb(150, 150, 150);
+    padding: 1px 2px;
+}
+
+.boxed-dotted {
+    border: 1px dotted rgb(150, 150, 150);
+    padding: 1px 2px;
+}
+
+.boxed-dotted.gray {
+    border: 1px dotted rgb(200, 200, 200);
+}
+
+.boxed-dashed.gray {
+    border: 1px dashed rgb(200, 200, 200);
+}
+
+.boxed-red {
+    border: 1px solid rgb(255, 220, 220);
+    padding: 1px 2px;
+}
+
+.boxed-green {
+    border: 1px solid rgb(210, 230, 210);
+    padding: 1px 2px;
+}
+
+.boxed.underline-green {
+    border-bottom: 1px dashed rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+
+.boxed.underline-gradient {
+    border-bottom: 1px solid;
+    border-image: -webkit-linear-gradient(right, black, white);
+    border-image: -moz-linear-gradient(right, black, white);
+    border-image: -o-linear-gradient(right, black, white);
+    border-image: linear-gradient(to left, black, white);
+    border-image-slice: 1;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen {
+    border-bottom: 1px solid rgb(190, 210, 190);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+
+.boxed.underline-blue {
+    border-bottom: 1px dashed rgb(70, 70, 220);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+
+.boxed.underline-red {
+    border-bottom: 1px dashed rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+
+.boxed.underline-solidred {
+    border-bottom: 1px solid rgb(235, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+}
+
+.boxed.underline-black-1 {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-black-far {
+    border-bottom: 1px solid rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px;
+}
+
+.boxed.underline-black-2 {
+    border-bottom: 1px solid rgb(180, 180, 180);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-black-3 {
+    border-bottom: 1px solid rgb(220, 220, 220);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed {
+    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed2 {
+    border-bottom: 1px dashed rgb(200, 200, 200);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-blackdotted {
+    border-bottom: 1px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-blackdotted-far {
+    border-bottom: 1px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 3px 0px;
+}
+
+.boxed.underline-blackdotted2 {
+    border-bottom: 2px dotted rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    padding: 0px 0px;
+}
+
+.boxed.underline-three {
+    border-bottom: 1px dashed rgb(100, 100, 100);
+    border-left: 0;
+    border-right: 1px dashed rgb(100, 100, 100);
+    border-top: 1px dashed rgb(100, 100, 100);
+    padding: 0px 0px;
+}
+
+.boxed.underline-notsure {
+    border-bottom: 0;
+    border-left: 1px dotted rgb(100, 100, 100);
+    border-right: 1px dotted rgb(100, 100, 100);
+    border-top: 0;
+    padding: 0px 1px;
+}
+
+/* ========================================
+   MARGIN UTILITIES
+   ======================================== */
+.zero-margin {
+    margin-top: 0mm;
+    margin-right: 0mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.zero-margin2 {
+    margin-top: 0mm;
+    margin-right: 6.5mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: -6.5mm;
+}
+
+.zero-margin2.far {
+    margin-bottom: 4.5mm;
+}
+
+.zero-margin3 {
+    margin-top: 0mm;
+    margin-right: 7mm;
+    margin-bottom: 4.5mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.zero-margin4 {
+    margin-top: 0mm;
+    margin-right: 6mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: 0mm;
+}
+
+.zero-margin5 {
+    margin-top: 0mm;
+    margin-right: 7mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: -5mm;
+}
+
+.zero-margin6 {
+    margin-top: 0mm;
+    margin-right: 4mm;
+    margin-bottom: 0mm;
+    margin-left: 0mm;
+    text-align: justify;
+    text-indent: -4mm;
+}
+
+/* ========================================
+   HIGHLIGHT COLORS
+   ======================================== */
+.highlight1 {
+    color: rgb(70, 175, 70);
+}
+
+.highlight2 {
+    color: rgb(205, 100, 100);
+}
+
+.highlight3 {
+    color: rgb(0, 150, 255);
+}
+
+.highlight4 {
+    color: rgb(201, 129, 22);
+}
+
+.highlight5 {
+    color: rgb(175, 120, 35);
+}
+
+.highlight6 {
+    color: goldenrod;
+}
+
+.highlight7 {
+    color: violet;
+}
+
+.highlight8 {
+    color: sandybrown;
+}
+
+.highlight9 {
+    color: rgb(5, 145, 5);
+}
+
+.highlight10 {
+    color: rgb(180, 26, 26);
+}
+
+.highlight11 {
+    color: rgb(162, 192, 212);
+}
+
+.highlight12 {
+    color: rgb(0, 130, 230);
+}
+
+.backhighlight1 {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ========================================
+   LINE CONTAINER FOR FLEX LAYOUT
+   ======================================== */
+.line-container {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    width: 95%;
+    padding: 10px;
+    font-size: 10mm;
+    font-weight: bold;
+    color: rgb(150, 150, 150);
+}
+
+.left-word {
+    -webkit-box-ordinal-group: 2;
+    -webkit-order: 1;
+    -moz-box-ordinal-group: 2;
+    -ms-flex-order: 1;
+    order: 1;
+}
+
+.right-word {
+    -webkit-box-ordinal-group: 3;
+    -webkit-order: 2;
+    -moz-box-ordinal-group: 3;
+    -ms-flex-order: 2;
+    order: 2;
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+.page-break-after {
+    page-break-after: always;
+    -webkit-page-break-after: always;
+}
+
+@media print {
+    .header {
+        position: fixed;
+        top: 0mm;
+        left: 40mm;
+        right: 40mm;
+        text-align: left;
+        font-size: 5mm;
+    }
+    
+    .content {
+        margin-top: 17mm;
+        margin-bottom: 17mm;
+        margin-left: 10mm;
+        margin-right: 10mm;
+    }
+    
+    .my-inline-block {
+        margin-bottom: calc(100vh - 20px);
+    }
+}
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Tablets and smaller (max-width: 768px) */
+@media screen and (max-width: 768px) {
+    body {
+        font-size: 5mm;
+        padding: 0 5mm;
+    }
+    
+    .chapter-title,
+    .bismillah,
+    .ordinary-near,
+    .ordinary-far,
+    .small-bullet-near,
+    .small-bullet-far,
+    .small-bullet-near-2,
+    .small-bullet-far-2,
+    .big-bullet-near,
+    .big-bullet-far {
+        margin-right: 5mm;
+        margin-left: 5mm;
+    }
+    
+    .spacing-22mm {
+        margin-right: 10mm;
+    }
+    
+    .spacing-76mm {
+        margin-right: 20mm;
+    }
+    
+    .spacing-59mm {
+        margin-right: 15mm;
+    }
+    
+    .spacing-40mm {
+        margin-right: 10mm;
+    }
+    
+    .vertical-line-1,
+    .vertical-line-dashed-1,
+    .vertical-line-red-1,
+    .vertical-line-green-1 {
+        right: 3mm;
+    }
+    
+    .diamond-marker.top-1,
+    .diamond-marker.bottom-1,
+    .diamond-marker.top-red-1,
+    .diamond-marker.bottom-red-1,
+    .diamond-marker.top-green-1,
+    .diamond-marker.bottom-green-1 {
+        right: 2.5mm;
+    }
+    
+    .inner-paragraph-3 {
+        width: 100%;
+        margin-right: 0mm;
+    }
+}
+
+/* Mobile phones (max-width: 480px) */
+@media screen and (max-width: 480px) {
+    body {
+        font-size: 4.8mm;
+        padding: 0 3mm;
+    }
+    
+    .chapter-title {
+        font-size: 7mm;
+        margin-right: 3mm;
+        margin-left: 3mm;
+    }
+    
+    .bismillah,
+    .ordinary-near,
+    .ordinary-far {
+        margin-right: 3mm;
+        margin-left: 3mm;
+    }
+    
+    .small-bullet-near,
+    .small-bullet-far,
+    .small-bullet-near-2,
+    .small-bullet-far-2 {
+        margin-right: 8mm;
+        margin-left: 3mm;
+        text-indent: -5mm;
+    }
+    
+    .big-bullet-near,
+    .big-bullet-far {
+        margin-right: 10mm;
+        margin-left: 3mm;
+        text-indent: -7mm;
+    }
+    
+    .spacing-22mm,
+    .spacing-40mm,
+    .spacing-59mm,
+    .spacing-76mm {
+        margin-right: 5mm;
+    }
+    
+    .vertical-line-1,
+    .vertical-line-dashed-1,
+    .vertical-line-red-1,
+    .vertical-line-green-1 {
+        right: 1.5mm;
+    }
+    
+    .diamond-marker.top-1,
+    .diamond-marker.bottom-1,
+    .diamond-marker.top-red-1,
+    .diamond-marker.bottom-red-1,
+    .diamond-marker.top-green-1,
+    .diamond-marker.bottom-green-1 {
+        right: 1mm;
+    }
+    
+    .zero-margin2 {
+        margin-right: 5mm;
+        text-indent: -5mm;
+    }
+    
+    .inner-paragraph-1,
+    .inner-paragraph-2,
+    .inner-paragraph-3 {
+        width: 100%;
+        margin-right: 0mm;
+    }
+}
+
+/* ========================================
+   BROWSER-SPECIFIC FIXES
+   ======================================== */
+
+/* Internet Explorer 11 fixes */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .inner-paragraph-1,
+    .inner-paragraph-2,
+    .inner-paragraph-3 {
+        display: block;
+    }
+}
+
+/* Edge legacy fixes */
+@supports (-ms-ime-align: auto) {
+    .boxed.underline-gradient {
+        border-image: linear-gradient(to left, black, white);
+    }
+}
