@@ -193,7 +193,7 @@ page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
 margin-top:-1mm;
-width: 153mm;
+width: 161mm;
 }
 
 
@@ -204,7 +204,7 @@ page-break-inside: auto;
 vertical-align: top;
 text-align: justify;
 margin-top:1.5mm;
-width: 142mm;
+width: 56mm;
 }
 
 
@@ -687,6 +687,14 @@ border-right: 0;
 border-top: 0;
 padding: 0px 0px; /* Add padding inside the box */
 
+}
+
+.boxed.underline-blackdashed-far {
+border-bottom: 1px dashed rgb(100, 100, 100);
+border-left: 0;
+border-right: 0;
+border-top: 0;
+padding: 2px 0px; /* Add padding inside the box */
 }
 
 .boxed.underline-blackdashed2 {
