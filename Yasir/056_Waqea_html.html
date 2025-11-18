@@ -4,7 +4,48 @@
 
 <link rel="stylesheet" href="../fonts.css">
 
+
 <style>
+
+
+speech {
+  font-size: 6mm;
+  display: inline;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Insert the character */
+speech[open]::before {
+  content: "«";
+}
+
+speech[close]::before {
+  content: "»";
+}
+
+/* Underline option */
+speech[underline]::before {
+  text-decoration: underline;
+}
+
+/* Color options */
+speech[green]::before {
+  color: rgb(70,175,70);
+}
+
+speech[red]::before {
+  color: rgb(205,100,100);
+}
+
+speech[blue]::before {
+  color: rgb(70, 70, 220);
+}
+
+speech[gray]::before {
+  color: rgb(150, 150, 150);
+}
+
   /* Style for the vertical line */
   .vertical-line-1 {
     border-left: 0.3mm solid black; /* Adjust the color and width as needed */
@@ -576,6 +617,19 @@
     border-top: 0;
   }
 
+  .boxed.underline-gradientsym {
+  width: 100%;
+  border-bottom: 0.4mm solid;
+  border-image: linear-gradient(to right, rgb(250, 250, 250) 0%, 
+                                          rgb(150, 150, 150) 50%, 
+                                          rgb(250, 250, 250) 100%);
+  border-image-slice: 1; /* Ensure the entire border is filled with the gradient */
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; /* Add padding inside the box */
+}
+
   .boxed.underline-solidgreen {
     border-bottom: 1px solid rgb(190, 210, 190);
     border-left: 0;
@@ -1008,7 +1062,9 @@
 <p class=small-bullet-near-2>
   <span style='font-size:5.5mm;line-height:240%;font-family:"Symbol";'>- </span><span> </span>
   <span class="boxed underline-gradient">أَفَرَأَيْتُم</span> مَّا تُمْنُونَ<sup>۵۸</sup>
-أَأَنتُمْ تَخْلُقُونَهُ أَمْ نَحْنُ الْخَالِقُونَ<sup>۵۹</sup>
+  <span style="margin-right: 15mm;"></span>
+<span class="boxed underline-gradientsym">أَأَنتُمْ</span> تَخْلُقُونَهُ أَمْ نَحْنُ الْخَالِقُونَ<sup>۵۹</sup>
+  <span style="margin-right: 17mm;"></span>
 نَحْنُ قَدَّرْنَا بَيْنَكُمُ الْمَوْتَ وَمَا نَحْنُ بِمَسْبُوقِينَ<sup>۶۰</sup>
 عَلَىٰ أَن نُّبَدِّلَ أَمْثَالَكُمْ وَنُنشِئَكُمْ فِي مَا لَا تَعْلَمُونَ<sup>۶۱</sup>
 وَلَقَدْ عَلِمْتُمُ النَّشْأَةَ الْأُولَىٰ فَلَوْلَا تَذَكَّرُونَ<sup>۶۲</sup>
@@ -1017,23 +1073,31 @@
 <p class=small-bullet-near-2>
   <span style='font-size:5.5mm;line-height:240%;font-family:"Symbol";'>- </span><span> </span>
   <span class="boxed underline-gradient">أَفَرَأَيْتُم</span> مَّا تَحْرُثُونَ<sup>۶۳</sup>
-أَأَنتُمْ تَزْرَعُونَهُ أَمْ نَحْنُ الزَّارِعُونَ<sup>۶۴</sup>
+  <span style="margin-right: 15mm;"></span>
+<span class="boxed underline-gradientsym">أَأَنتُمْ</span> تَزْرَعُونَهُ أَمْ نَحْنُ الزَّارِعُونَ<sup>۶۴</sup>
+  <span style="margin-right: 15mm;"></span>
 لَوْ نَشَاءُ لَجَعَلْنَاهُ حُطَامًا فَظَلْتُمْ تَفَكَّهُونَ<sup>۶۵</sup>
+<speech open gray underline></speech>
 إِنَّا لَمُغْرَمُونَ<sup>۶۶</sup>
 بَلْ نَحْنُ مَحْرُومُونَ<sup>۶۷</sup>
+<speech close gray underline></speech>
 </p>
 
 <p class=small-bullet-near-2>
   <span style='font-size:5.5mm;line-height:240%;font-family:"Symbol";'>- </span><span> </span>
   <span class="boxed underline-gradient">أَفَرَأَيْتُمُ</span> الْمَاءَ الَّذِي تَشْرَبُونَ<sup>۶۸</sup>
-أَأَنتُمْ أَنزَلْتُمُوهُ مِنَ الْمُزْنِ أَمْ نَحْنُ الْمُنزِلُونَ<sup>۶۹</sup>
+  <span style="margin-right: 3mm;"></span>
+<span class="boxed underline-gradientsym">أَأَنتُمْ</span> أَنزَلْتُمُوهُ مِنَ الْمُزْنِ أَمْ نَحْنُ الْمُنزِلُونَ<sup>۶۹</sup>
+  <span style="margin-right: 3mm;"></span>
 لَوْ نَشَاءُ جَعَلْنَاهُ أُجَاجًا فَلَوْلَا تَشْكُرُونَ<sup>۷۰</sup>
 </p>
 
 <p class=small-bullet-far-2>
   <span style='font-size:5.5mm;line-height:240%;font-family:"Symbol";'>- </span><span> </span>
   <span class="boxed underline-gradient">أَفَرَأَيْتُمُ</span> النَّارَ الَّتِي تُورُونَ<sup>۷۱</sup>
-أَأَنتُمْ أَنشَأْتُمْ شَجَرَتَهَا أَمْ نَحْنُ الْمُنشِئُونَ<sup>۷۲</sup>
+  <span style="margin-right: 7mm;"></span>
+<span class="boxed underline-gradientsym">أَأَنتُمْ</span> أَنشَأْتُمْ شَجَرَتَهَا أَمْ نَحْنُ الْمُنشِئُونَ<sup>۷۲</sup>
+  <span style="margin-right: 5mm;"></span>
 نَحْنُ جَعَلْنَاهَا تَذْكِرَةً وَمَتَاعًا لِّلْمُقْوِينَ<sup>۷۳</sup>
 </p>
 
