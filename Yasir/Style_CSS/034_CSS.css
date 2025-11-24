@@ -1,0 +1,184 @@
+.vertical-line-1 {
+  border-left: 0.3mm solid black;
+  height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
+.vertical-line-2 {
+  border-left: 0.3mm solid rgb(150, 150, 150);
+  height: 100%;
+  position: absolute;
+  right: 5.4mm; ;
+}
+
+.diamond-marker{
+  width: 1.2mm;
+  height: 1.2mm;
+  -ms-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+  position: absolute;
+}
+
+.diamond-marker.top-1 {
+  background-color: black;
+  top: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.bottom-1 {
+  background-color: black;
+  bottom: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.top-2 {
+  background-color: rgb(150, 150, 150);
+  top: 0;
+  right: 5.0mm; ;
+}
+
+.diamond-marker.bottom-2 {
+  background-color: rgb(150, 150, 150);
+  bottom: 0;
+  right: 5.0mm; ;
+}
+
+.diamond-marker.top-3 {
+  background-color: rgb(200, 200, 200);
+  top: 0;
+  right: 3.0mm; ;
+}
+
+.diamond-marker.bottom-3 {
+  background-color: rgb(200, 200, 200);
+  bottom: 0;
+  right: 3.0mm; ;
+}
+
+.container {
+  position: relative; ;
+}
+
+.inner-paragraph-1 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 145mm;
+  text-indent: 0mm;
+}
+
+.inner-paragraph-2 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 189.5mm;
+}
+
+.inner-paragraph-continue {
+  display: inline-block;
+  vertical-align: bottom;
+  text-align: justify;
+  margin-top: 0mm;
+  margin-right: 3.6mm;
+  text-indent: 0mm;
+}
+
+.ordinary-near {
+  margin-top: 0mm;
+  margin-right: 10mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: 0mm;
+}
+
+.ordinary-far {
+  margin-top: 0mm;
+  margin-right: 10mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: 0mm;
+}
+
+.small-bullet-near {
+  margin-top: 0mm;
+  margin-right: 15mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -5mm;
+}
+
+.big-bullet-near {
+  margin-top: 0mm;
+  margin-right: 16.5mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.big-bullet-far {
+  margin-top: 0mm;
+  margin-right: 16.5mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.zero-margin {
+  margin-top: 0mm;
+  margin-right: 0mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: 0mm;
+}
+
+.zero-margin-bullet {
+  margin-top: 0mm;
+  margin-right: 5mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -5mm;
+}
+
+@media print {
+  .header {
+    position: fixed;
+    top: 0mm;
+    left: 40mm;
+    right: 40mm;
+    text-align: left;
+    font-size: 5mm;
+  }
+
+  .content {
+    margin-top: 17mm;
+    margin-bottom: 17mm;
+    margin-left: 10mm;
+    margin-right: 10mm;
+  }
+
+  .my-inline-block {
+    margin-bottom: calc(100vh - 20px); ;
+  }
+
+}
+
+body {
+  direction: rtl;
+  text-align: right;
+  width: 210mm;
+  font-size: 4.5mm;
+  line-height: 200%;
+  font-family: 'KFGQPC Uthman Taha Naskh';
+}

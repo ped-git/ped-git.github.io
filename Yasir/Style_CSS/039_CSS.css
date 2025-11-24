@@ -1,0 +1,338 @@
+.vertical-line-1 {
+  border-left: 0.3mm solid black;
+  height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
+.diamond-marker.top-1 {
+  background-color: black;
+  top: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.bottom-1 {
+  background-color: black;
+  bottom: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.top-2 {
+  background-color: rgb(150, 150, 150);
+  top: 0;
+  right: 5.05mm; ;
+}
+
+.diamond-marker.bottom-2 {
+  background-color: rgb(150, 150, 150);
+  bottom: 0;
+  right: 5.05mm; ;
+}
+
+.diamond-marker.top-3 {
+  background-color: rgb(200, 200, 200);
+  top: 0;
+  right: 3.0mm; ;
+}
+
+.diamond-marker.bottom-3 {
+  background-color: rgb(200, 200, 200);
+  bottom: 0;
+  right: 3.0mm; ;
+}
+
+.thin-vertical-line-1 {
+  border-left: 0.1mm solid rgb(0, 0, 0);
+
+  top: 6.5mm;
+  bottom: 4.5mm;
+  position: absolute;
+  right: 7.5mm; ;
+}
+
+.thin-vertical-line-2 {
+  border-left: 0.1mm solid rgb(50, 50, 50);
+  top: 4.5mm;
+  bottom: 4.5mm;
+  position: absolute;
+  right: 6.5mm; ;
+}
+
+.thin-vertical-line-3 {
+  border-left: 0.1mm solid rgb(100, 100, 100);
+  top: 6.0mm;
+  bottom: 4.5mm;
+  position: absolute;
+  right: 5.5mm; ;
+}
+
+.thin-vertical-line-4 {
+  border-left: 0.1mm solid rgb(150,150, 150);
+  top: 4.5mm;
+  bottom: 4.5mm;
+  position: absolute;
+  right: 4.5mm; ;
+}
+
+.line-marker{
+  height: 1.0mm;
+  position: absolute;
+}
+
+.line-marker.top-1 {
+  width: 2mm;
+  background-color: rgb(0, 0, 0);
+  top: 6.0mm;
+  right: 7.5mm; ;
+}
+
+.line-marker.bottom-1 {
+  width: 2mm;
+  background-color: rgb(0, 0, 0);
+  bottom: 4.0mm;
+  right: 7.5mm; ;
+}
+
+.line-marker.top-2 {
+  width: 3mm;
+  background-color: rgb(50, 50, 50);
+  top: 4.5mm;
+  right: 6.5mm; ;
+}
+
+.line-marker.bottom-2 {
+  width: 3mm;
+  background-color: rgb(50, 50, 50);
+  bottom: 4.0mm;
+  right: 6.5mm; ;
+}
+
+.line-marker.top-3 {
+  width: 4mm;
+  background-color: rgb(100, 100, 100);
+  top: 6.0mm;
+  right: 5.5mm; ;
+}
+
+.line-marker.bottom-3 {
+  width: 4mm;
+  background-color: rgb(100, 100, 100);
+  bottom: 4.0mm;
+  right: 5.5mm; ;
+}
+
+.line-marker.top-4 {
+  width: 5mm;
+  background-color: rgb(150, 150, 150);
+  top: 4.5mm;
+  right: 4.5mm; ;
+}
+
+.line-marker.bottom-4 {
+  width: 5mm;
+  background-color: rgb(150, 150, 150);
+  bottom: 4.0mm;
+  right: 4.5mm; ;
+}
+
+.container {
+  position: relative; ;
+}
+
+.inner-paragraph-1 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: -1.0mm;
+  width: 175mm;
+  text-indent: 0mm;
+}
+
+.inner-paragraph-2 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 75mm;
+}
+
+.inner-paragraph-3 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 75mm;
+}
+
+.inner-paragraph-4 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 150mm;
+}
+
+.ordinary-near {
+  margin-top: 0mm;
+  margin-right: 10mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: 0mm;
+}
+
+.ordinary-far {
+  margin-top: 0mm;
+  margin-right: 10mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: 0mm;
+}
+
+.small-bullet-near {
+  margin-top: 0mm;
+  margin-right: 15mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -5mm;
+}
+
+.big-bullet-near {
+  margin-top: 0mm;
+  margin-right: 16.5mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.big-bullet-far {
+  margin-top: 0mm;
+  margin-right: 16.5mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.boxed {
+  border: 1px dashed rgb(150, 150, 150);
+  padding: 2px 0.529166mm; ;
+}
+
+.boxed.underline-green {
+  border-bottom: 1px dashed rgb(70, 175, 70);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(150, 210, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-blue {
+  border-bottom: 1px dashed rgb(70, 70, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-red {
+  border-bottom: 1px dashed rgb(205, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(255, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-black {
+  border-bottom: 1px solid rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-blackdashed {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-notsure {
+  border-bottom: 0;
+  border-left: 1px dotted rgb(100, 100, 100);
+  border-right: 1px dotted rgb(100, 100, 100);
+  border-top: 0;
+  padding: 0px 0.264583mm;
+}
+
+.zero-margin {
+  margin-top: 0mm;
+  margin-right: 13mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -13mm;
+}
+
+.zero-margin2 {
+  margin-top: 0mm;
+  margin-right: 10mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -10mm;
+}
+
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
+
+.highlight2 {
+  color:  rgb(205, 100, 100);
+}
+
+@media print {
+  .header {
+    position: fixed;
+    top: 0mm;
+    left: 40mm;
+    right: 40mm;
+    text-align: left;
+    font-size: 5mm;
+  }
+
+  .content {
+    margin-top: 17mm;
+    margin-bottom: 17mm;
+    margin-left: 10mm;
+    margin-right: 10mm;
+  }
+
+  .my-inline-block {
+    margin-bottom: calc(100vh - 20px); ;
+  }
+
+}
+
+body {
+  direction: rtl;
+  text-align: right;
+  width: 210mm;
+  font-size: 4.5mm;
+  line-height: 200%;
+  font-family: 'KFGQPC Uthman Taha Naskh';
+}

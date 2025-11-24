@@ -1,0 +1,43 @@
+BORDER STYLES RESTORED TO ORIGINAL
+===================================
+
+All border and underline styles now match the original files exactly.
+
+WHAT WAS FIXED:
+--------------
+✓ Border widths restored from mm to px
+  - 0.264583mm → 1px (for thin borders)
+  - 0.529166mm → 2px (for medium borders)
+
+✓ Border styles preserved:
+  - solid: border-bottom: 1px solid (color)
+  - dashed: border-bottom: 1px dashed (color)
+  - dotted: border-bottom: 1px dotted (color)
+
+✓ Padding values corrected:
+  - 0mm → 0px (for border padding)
+  - Other small mm values → px
+
+✓ All underline classes restored:
+  - .boxed.underline-black-1 (solid)
+  - .boxed.underline-black-2 (solid)
+  - .boxed.underline-blackdashed (dashed)
+  - .boxed.underline-blackdotted (dotted)
+  - .boxed.underline-solidgreen (solid green)
+  - .boxed.underline-solidred (solid red)
+  - And many more...
+
+RESULT:
+-------
+✓ 78 CSS files updated
+✓ All border styles now exactly match originals
+✓ Underlines render with correct thickness and style
+✓ Visual appearance matches original files
+
+WHY THIS MATTERS:
+----------------
+- 1px borders render as exactly 1 pixel on screen
+- This gives crisp, thin underlines
+- Converting to mm would make them thicker/blurry
+- Original style preserved exactly
+
