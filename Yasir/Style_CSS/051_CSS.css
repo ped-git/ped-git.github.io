@@ -19,6 +19,8 @@ speech[close]::before {
 
 speech[underline]::before {
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0mm;
 }
 
 speech[green]::before {
