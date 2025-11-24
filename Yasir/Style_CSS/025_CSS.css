@@ -7,10 +7,14 @@ speech {
 
 speech[open]::before {
   content: "«";
+  position: relative;
+  top: 1.5mm;
 }
 
 speech[close]::before {
   content: "»";
+  position: relative;
+  top: 1.5mm;
 }
 
 speech[underline]::before {
