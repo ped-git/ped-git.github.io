@@ -7,14 +7,20 @@ speech {
 
 speech[open]::before {
   content: "«";
+  position: relative;
+  top: 1.5mm;
 }
 
 speech[close]::before {
   content: "»";
+  position: relative;
+  top: 1.5mm;
 }
 
 speech[underline]::before {
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0mm;
 }
 
 speech[green]::before {
@@ -27,6 +33,10 @@ speech[red]::before {
 
 speech[blue]::before {
   color: rgb(70, 70, 220);
+}
+
+speech[gray]::before {
+  color: rgb(150, 150, 150);
 }
 
 .vertical-line-1 {
