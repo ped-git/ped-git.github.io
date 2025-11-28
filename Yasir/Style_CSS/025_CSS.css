@@ -35,6 +35,14 @@ speech[blue]::before {
   color: rgb(70, 70, 220);
 }
 
+speech[gray]::before {
+  color: rgb(150, 150, 150);
+}
+
+speech[black]::before {
+  color: rgb(0, 0, 0);
+}
+
 .vertical-line-1 {
   border-left: 0.3mm solid black;
   height: 100%;
