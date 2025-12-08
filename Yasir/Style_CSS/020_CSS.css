@@ -120,6 +120,16 @@
   text-indent: 0mm;
 }
 
+.inner-paragraph-4 {
+  display: inline-block;
+  page-break-inside: auto;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: -2mm;
+  width: 163mm;
+  text-indent: 0mm;
+}
+
 .ordinary-near {
   margin-top: 0mm;
   margin-right: 10mm;

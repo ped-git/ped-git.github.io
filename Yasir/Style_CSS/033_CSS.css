@@ -164,6 +164,14 @@ speech[black]::before {
   text-indent: -9.5mm;
 }
 
+.boxed.underline-black-1 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-black-2 {
   border-bottom: 1px solid rgb(180, 180, 180);
   border-left: 0;
@@ -212,6 +220,14 @@ speech[black]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+}
+
+.boxed.underline-black-far {
+  border-bottom: 1px solid rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
 }
 
 .highlight1 {
