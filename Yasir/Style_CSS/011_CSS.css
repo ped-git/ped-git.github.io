@@ -500,6 +500,10 @@ speech[gray]::before {
   color:  rgb(0, 130, 230);
 }
 
+.backhighlight1 {
+  text-shadow: 0.7mm 0.7mm 1.1mm rgba(0, 0, 0, 0.8);
+}
+
 @media print {
   .header {
     position: fixed;
