@@ -140,7 +140,7 @@ speech[gray]::before {
   page-break-inside: auto;
   vertical-align: top;
   text-align: justify;
-  margin-top: 0mm;
+  margin-top: -1.5mm;
   width: 160mm;
   text-indent: 0mm;
 }
