@@ -292,11 +292,19 @@ speech[gray]::before {
 }
 
 .boxed.underline-solidgreen-far {
-  border-bottom: 1px solid rgb(120, 200, 120);
+  border-bottom: 1px solid rgb(160, 220, 160);
   border-left: 0;
   border-right: 0;
   border-top: 0;
   padding: 3px 0mm;
+}
+
+.boxed.underline-solidgreen-far2 {
+  border-bottom: 1px solid rgb(170, 230, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 6px 0mm;
 }
 
 .boxed.underline-blue {
@@ -372,6 +380,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-notsure {
