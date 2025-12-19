@@ -276,11 +276,20 @@ speech[gray]::before {
   padding: 2px 0.529166mm; ;
 }
 
+.boxed.underline-greendotted {
+  border-bottom: 1px dotted rgb(70, 175, 70);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0mm;
+}
+
 .boxed.underline-green {
   border-bottom: 1px dashed rgb(70, 175, 70);
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-solidgreen {
@@ -312,6 +321,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-red {
@@ -319,6 +329,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-solidred {
@@ -337,7 +348,7 @@ speech[gray]::before {
   padding: 3px 0mm;
 }
 
-.boxed.underline-black {
+.boxed.underline-black-1 {
   border-bottom: 1px solid rgb(100, 100, 100);
   border-left: 0;
   border-right: 0;
@@ -345,8 +356,16 @@ speech[gray]::before {
   padding: 0px 0mm;
 }
 
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0mm;
+}
+
 .boxed.underline-black-3 {
-  border-bottom: 1px solid rgb(180, 180, 180);
+  border-bottom: 1px solid rgb(200, 200, 200);
   border-left: 0;
   border-right: 0;
   border-top: 0;
@@ -366,6 +385,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-blackdashed {
@@ -373,6 +393,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm;
 }
 
 .boxed.underline-blackdashed2 {
