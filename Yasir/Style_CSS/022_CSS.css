@@ -60,7 +60,7 @@
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 131mm;
+  width: 102mm;
   text-indent: 0mm;
 }
 
@@ -77,7 +77,16 @@
   vertical-align: top;
   text-align: justify;
   margin-top: 1mm;
-  width: 170mm;
+  width: 142mm;
+}
+
+.inner-paragraph-4 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 151mm;
+  text-indent: 0mm;
 }
 
 .ordinary-near {
@@ -109,23 +118,23 @@
 
 .big-bullet-near {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 0mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
 .big-bullet-far {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 4.5mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
-.no-margin-near {
+.zero-margin {
   margin-top: 0mm;
   margin-right: 0mm;
   margin-bottom: 0mm;
@@ -134,13 +143,25 @@
   text-indent: 0mm;
 }
 
-.no-margin-far-space {
-  margin-top: 4.5mm;
-  margin-right: 0mm;
+.zero-margin.far {
   margin-bottom: 4.5mm;
+}
+
+.zero-margin2 {
+  margin-top: 0mm;
+  margin-right: 6.5mm;
+  margin-bottom: 0mm;
   margin-left: 0mm;
   text-align: justify;
-  text-indent: 0mm;
+  text-indent: -6.5mm;
+}
+
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
+
+.highlight2 {
+  color:  rgb(205, 100, 100);
 }
 
 @media print {
@@ -169,8 +190,8 @@
 body {
   direction: rtl;
   text-align: right;
-  width: 210mm;
+  width: 190mm;
   font-size: 4.5mm;
-  line-height: 200%;
+  line-height: 240%;
   font-family: 'KFGQPC Uthman Taha Naskh';
 }
