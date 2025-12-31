@@ -984,7 +984,7 @@ const morphologyData = {};
     // Get the first div (surah header)
     function getSurahHeader() {
         // Try to find by id first (for backward compatibility)
-        let header = document.getElementById('surah-header');
+        let header = document.getElementById('header');
         if (header) return header;
         
         // Otherwise, find the first div in body
@@ -996,6 +996,11 @@ const morphologyData = {};
         return null;
     }
     
+    // Mobile mode state
+    let isMobileMode = false;
+    let mobileContentWrapper = null;
+    let visibleHighlight = null, minimap = null;
+
     // Create toggle button and add it to the first div
     function createToggleButton() {
         const surahHeader = getSurahHeader();
@@ -1010,10 +1015,10 @@ const morphologyData = {};
             surahHeader.style.position = 'relative';
         }
         
-        // Create button
+        // Create minimap toggle button
         const toggleBtn = document.createElement('button');
         toggleBtn.id = 'toggle-minimap-btn';
-        toggleBtn.textContent = 'پنهان کردن نقشه';
+        toggleBtn.textContent = 'نقشه';
         toggleBtn.style.cssText = `
             position: absolute;
             left: 10px;
@@ -1031,6 +1036,345 @@ const morphologyData = {};
         
         toggleBtn.addEventListener('click', toggleMinimapAndRootList);
         surahHeader.appendChild(toggleBtn);
+        
+        // Create mobile mode toggle button
+        const mobileToggleBtn = document.createElement('button');
+        mobileToggleBtn.id = 'toggle-mobile-mode-btn';
+        mobileToggleBtn.textContent = 'کوچک';
+        mobileToggleBtn.style.cssText = `
+            position: absolute;
+            left: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            z-index: 10000;
+        `;
+        
+        mobileToggleBtn.addEventListener('click', toggleMobileMode);
+        surahHeader.appendChild(mobileToggleBtn);
+    }
+    
+    // Toggle mobile mode
+    function toggleMobileMode() {
+        isMobileMode = !isMobileMode;
+        const mobileToggleBtn = document.getElementById('toggle-mobile-mode-btn');
+        
+        if (isMobileMode) {
+            enableMobileMode();
+            if (mobileToggleBtn) {
+                // mobileToggleBtn.textContent = 'حالت عادی';
+                // mobileToggleBtn.style.background = '#FF9800';
+            }
+        } else {
+            disableMobileMode();
+            if (mobileToggleBtn) {
+                // mobileToggleBtn.textContent = 'حالت موبایل';
+                // mobileToggleBtn.style.background = '#2196F3';
+            }
+        }
+        setTimeout(() => {
+            let wordRects = calculateWordRects();
+            const minTop = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.top)) : 0;
+            const maxBottom = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.bottom)) : documentHeight;
+            const minLeft = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.left)) : 0;
+            const maxRight = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.right)) : documentWidth;
+            const contentHeight = maxBottom - minTop;
+            const contentWidth = (maxRight - minLeft);
+    
+            minimap._wordRects = wordRects;
+            minimap._minTop = minTop;
+            minimap._minLeft = minLeft;
+            minimap._contentWidth = contentWidth;
+            minimap._contentHeight = contentHeight;
+
+            const windowWidth = isMobileMode ? calculateWindowWidthForMobile() : calculateWindowWidth();
+            minimap.style.width = windowWidth + 'px';
+            minimap.style.flex = `0 0 ${windowWidth}px`;
+            minimap.style.maxWidth = `${windowWidth}px`;
+            minimap._availableWidth = windowWidth;
+
+
+            updateMinimap(minimap, document.getElementById('minimap-content'), wordRects, document.getElementById('minimap-visible-highlight'));
+            updateVisibleHighlight();
+        }, 100);
+    }
+    
+    // Enable mobile mode: wrap content in top row, position minimap/roots in bottom row
+    function enableMobileMode() {
+        // Create wrapper for main content (top row)
+        if (!mobileContentWrapper) {
+            mobileContentWrapper = document.createElement('div');
+            mobileContentWrapper.id = 'mobile-content-wrapper';
+            
+            // Get header height to position content below it
+            // const surahHeader = getSurahHeader();
+            // let headerHeight = 0;
+            // if (surahHeader) {
+            //     const rect = surahHeader.getBoundingClientRect();
+            //     headerHeight = rect.height;
+            // }
+            
+            mobileContentWrapper.style.cssText = `
+                position: fixed;
+                top: ${0}px;
+                left: 0;
+                right: 0;
+                bottom: 120px;
+                overflow-y: auto;
+                overflow-x: auto;
+                z-index: 1;
+                background: white;
+            `;
+            
+            // Get all body children except the header, minimap, root panel, and buttons
+            const minimap = document.getElementById('morphology-minimap');
+            const rootPanel = document.getElementById('highlighted-roots-panel');
+            const body = document.body;
+            
+            // Move all children except header, minimap, root panel, and mobile containers into wrapper
+            const childrenToMove = [];
+            for (let i = 0; i < body.children.length; i++) {
+                const child = body.children[i];
+                //child !== surahHeader &&
+                if ( child !== minimap && child !== rootPanel && 
+                    child.id !== 'mobile-content-wrapper' && child.id !== 'mobile-bottom-row' &&
+                    !child.id.includes('toggle-')) {
+                    childrenToMove.push(child);
+                }
+            }
+            
+            childrenToMove.forEach(child => {
+                mobileContentWrapper.appendChild(child);
+            });
+            
+            body.appendChild(mobileContentWrapper);
+        }
+        
+        // Create bottom row container for minimap and roots
+        let bottomRow = document.getElementById('mobile-bottom-row');
+        if (!bottomRow) {
+            const body = document.body;
+            bottomRow = document.createElement('div');
+            bottomRow.id = 'mobile-bottom-row';
+            const bottomRowHeight = 120;
+            bottomRow.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: ${bottomRowHeight}px;
+                background: #f0f0f0;
+                border-top: 2px solid #ccc;
+                display: flex;
+                flex-direction: row;
+                gap: 5px;
+                padding: 5px;
+                box-sizing: border-box;
+                z-index: 10000;
+                overflow: hidden;
+            `;
+            body.appendChild(bottomRow);
+        }
+        
+        // Move minimap and root panel to bottom row
+        const minimap = document.getElementById('morphology-minimap');
+        const rootPanel = document.getElementById('highlighted-roots-panel');
+        const bottomRowHeight = 120;
+        const bottomRowPadding = 5;
+        const gap = 5;
+        const availableHeight = bottomRowHeight - (bottomRowPadding * 2);
+        
+        if (minimap) {
+            // Remove from current parent if it exists
+            if (minimap.parentElement && minimap.parentElement !== bottomRow) {
+                minimap.parentElement.removeChild(minimap);
+            }
+            
+            // Apply mobile mode styles
+            minimap.style.position = 'relative';
+            minimap.style.top = 'auto';
+            minimap.style.left = 'auto';
+            
+            // In flex container, use flex-basis with fixed width and let root panel take remaining space
+            const fixedWidth = calculateWindowWidth();
+            minimap.style.width = `${fixedWidth}px`;
+            minimap.style.flex = `0 0 ${fixedWidth}px`; // flex-grow: 0, flex-shrink: 0, flex-basis: fixedWidth
+            minimap.style.maxWidth = `${fixedWidth}px`; // Prevent growing beyond fixed width
+            minimap.style.height = `${availableHeight}px`;
+            minimap.style.maxHeight = `${availableHeight}px`;
+            minimap.style.minHeight = `${availableHeight}px`;
+            minimap.style.margin = '0';
+            minimap.style.display = 'block'; // Ensure it's visible
+
+            // Append to bottom row if not already there
+            if (!bottomRow.contains(minimap)) {
+                bottomRow.appendChild(minimap);
+            }
+        }
+        
+        if (rootPanel) {
+            // Remove from current parent if it exists
+            if (rootPanel.parentElement && rootPanel.parentElement !== bottomRow) {
+                rootPanel.parentElement.removeChild(rootPanel);
+            }
+            
+            // Apply mobile mode styles
+            rootPanel.style.position = 'relative';
+            rootPanel.style.top = 'auto';
+            rootPanel.style.left = 'auto';
+            rootPanel.style.flex = '1 1 auto'; // Take remaining space after minimap
+            rootPanel.style.minWidth = '0'; // Allow shrinking if needed
+            rootPanel.style.height = `${availableHeight}px`;
+            rootPanel.style.maxHeight = `${availableHeight}px`;
+            rootPanel.style.minHeight = `${availableHeight}px`;
+            rootPanel.style.margin = '0';
+            rootPanel.style.display = 'block'; // Ensure it's visible
+            
+            // Append to bottom row if not already there
+            if (!bottomRow.contains(rootPanel)) {
+                bottomRow.appendChild(rootPanel);
+            }
+        }
+        
+        // Update minimap content if needed
+        if (minimap) {
+            const minimapContent = document.getElementById('minimap-content');
+            const visibleHighlight = document.getElementById('minimap-visible-highlight');
+            const wordRects = minimap._wordRects;
+            if (minimapContent && visibleHighlight && wordRects) {
+                setTimeout(() => {
+                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                }, 50);
+            }
+        }
+        
+        // Add scroll listener to mobile content wrapper
+        if (mobileContentWrapper) {
+            let scrollTimeout;
+            function handleMobileScroll() {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(updateVisibleHighlight, 10);
+            }
+            mobileContentWrapper.addEventListener('scroll', handleMobileScroll, { passive: true });
+        }
+    }
+    
+    // Disable mobile mode: restore original layout
+    function disableMobileMode() {
+        const body = document.body;
+        const bottomRow = document.getElementById('mobile-bottom-row');
+        
+        // First, extract minimap and root panel from bottom row BEFORE removing it
+        const minimap = document.getElementById('morphology-minimap');
+        const rootPanel = document.getElementById('highlighted-roots-panel');
+        
+        if (bottomRow) {
+            // Remove minimap and root panel from bottom row and append to body
+            if (minimap && bottomRow.contains(minimap)) {
+                bottomRow.removeChild(minimap);
+                body.appendChild(minimap);
+            }
+            if (rootPanel && bottomRow.contains(rootPanel)) {
+                bottomRow.removeChild(rootPanel);
+                body.appendChild(rootPanel);
+            }
+            // Now remove the bottom row container
+            bottomRow.remove();
+        }
+        
+        // Restore content from wrapper back to body
+        if (mobileContentWrapper) {
+            const childrenToRestore = [];
+            for (let i = 0; i < mobileContentWrapper.children.length; i++) {
+                childrenToRestore.push(mobileContentWrapper.children[i]);
+            }
+            
+            childrenToRestore.forEach(child => {
+                body.appendChild(child);
+            });
+            
+            mobileContentWrapper.remove();
+            mobileContentWrapper = null;
+        }
+        
+        // Restore minimap and root panel to fixed positioning
+        const surahHeader = getSurahHeader();
+        
+        if (minimap) {
+            minimap.style.position = 'fixed';
+            minimap.style.width = calculateWindowWidth() + 'px';
+            minimap.style.maxWidth = ''; // Clear maxWidth from mobile mode
+            minimap.style.maxHeight = '300px';
+            minimap.style.minHeight = '';
+            minimap.style.height = 'auto';
+            minimap.style.margin = '';
+            minimap.style.flexShrink = '';
+            
+            let topPosition = 10;
+            if (surahHeader) {
+                const rect = surahHeader.getBoundingClientRect();
+                topPosition = rect.bottom + 10;
+            }
+            minimap.style.top = topPosition + 'px';
+            minimap.style.left = '10px';
+            
+            // Preserve visibility state
+            const wasVisible = minimap.style.display !== 'none' && minimap.style.display !== '';
+            if (!wasVisible) {
+                minimap.style.display = 'none';
+            } else {
+                minimap.style.display = 'block';
+            }
+            
+            // Update minimap content
+            const minimapContent = document.getElementById('minimap-content');
+            const visibleHighlight = document.getElementById('minimap-visible-highlight');
+            const wordRects = minimap._wordRects;
+            if (minimapContent && visibleHighlight && wordRects) {
+                setTimeout(() => {
+                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                }, 50);
+            }
+        }
+        
+        if (rootPanel) {
+            rootPanel.style.position = 'fixed';
+            rootPanel.style.width = calculateWindowWidth() + 'px';
+            rootPanel.style.maxHeight = '400px';
+            rootPanel.style.minHeight = '';
+            rootPanel.style.height = 'auto';
+            rootPanel.style.margin = '';
+            rootPanel.style.flexShrink = '';
+            
+            let topPosition = 10;
+            if (surahHeader) {
+                const rect = surahHeader.getBoundingClientRect();
+                topPosition = rect.bottom + 10;
+            }
+            if (minimap) {
+                setTimeout(() => {
+                    const minimapHeight = minimap.offsetHeight || 300;
+                    rootPanel.style.top = (topPosition + minimapHeight + 10) + 'px';
+                }, 50);
+            } else {
+                rootPanel.style.top = topPosition + 'px';
+            }
+            rootPanel.style.left = '10px';
+            
+            // Preserve visibility state
+            const wasVisible = rootPanel.style.display !== 'none' && rootPanel.style.display !== '';
+            if (!wasVisible) {
+                rootPanel.style.display = 'none';
+            } else {
+                rootPanel.style.display = 'block';
+            }
+        }
     }
     
     // Calculate responsive width for windows (minimum 120px, responsive to viewport)
@@ -1051,7 +1395,21 @@ const morphologyData = {};
             return Math.round(minWidth + (maxWidth - minWidth) * ratio);
         }
     }
-    
+    function calculateWindowWidthForMobile() {
+        const viewportWidth = window.innerWidth;
+        const minWidth = 120;
+        const maxWidth = 180;
+        const space = 10;
+        const ratio = (viewportWidth - 2*minWidth - space) / (2*maxWidth + space);
+        const c = minWidth + space + ratio * (2*maxWidth + space);
+        if (c > maxWidth) {
+            return maxWidth;
+        } else if (c < minWidth) {
+            return minWidth;
+        }
+        return c;
+    }
+
     // Toggle minimap and root list visibility
     function toggleMinimapAndRootList() {
         const minimap = document.getElementById('morphology-minimap');
@@ -1065,56 +1423,63 @@ const morphologyData = {};
         if (isVisible) {
             minimap.style.display = 'none';
             rootPanel.style.display = 'none';
-            toggleBtn.textContent = 'نمایش نقشه';
+            // toggleBtn.textContent = 'نمایش نقشه';
         } else {
-            // Update positions in case the header moved or on first show
-            const surahHeader = getSurahHeader();
-            if (surahHeader) {
-                const rect = surahHeader.getBoundingClientRect();
-                const topPosition = rect.bottom + 10;
-                const windowWidth = calculateWindowWidth();
-                
-                minimap.style.top = topPosition + 'px';
-                minimap.style.width = windowWidth + 'px';
-                
-                // Show minimap first to calculate its height
-                minimap.style.display = 'block';
-                
-                // Update root panel position below minimap (stacked)
-                setTimeout(() => {
-                    const minimapHeight = minimap.offsetHeight || 300;
-                    const rootListTop = topPosition + minimapHeight + 10;
-                    rootPanel.style.top = rootListTop + 'px';
-                    rootPanel.style.left = '10px'; // Same left as minimap
-                    rootPanel.style.width = windowWidth + 'px';
-                    
-                    // Recalculate max-height for root list to allow scrolling
-                    const viewportHeight = window.innerHeight;
-                    const availableHeight = viewportHeight - rootListTop - 20; // Leave 20px margin at bottom
-                    const rootListMaxHeight = Math.min(400, availableHeight);
-                    rootPanel.style.maxHeight = rootListMaxHeight + 'px';
-                    
-                    // Update minimap content positions
-                    const minimapContent = document.getElementById('minimap-content');
-                    const visibleHighlight = document.getElementById('minimap-visible-highlight');
-                    const wordRects = minimap._wordRects;
-                    if (minimapContent && visibleHighlight && wordRects) {
-                        updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
-                    }
-                    
-                    rootPanel.style.display = 'block';
-                }, 10);
-            } else {
+            // In mobile mode, just show them (they're already positioned in bottom row)
+            if (isMobileMode) {
                 minimap.style.display = 'block';
                 rootPanel.style.display = 'block';
+            } else {
+                // Update positions in case the header moved or on first show
+                const surahHeader = getSurahHeader();
+                if (surahHeader) {
+                    const rect = surahHeader.getBoundingClientRect();
+                    const topPosition = rect.bottom + 10;
+                    const windowWidth = calculateWindowWidth();
+                    
+                    minimap.style.top = topPosition + 'px';
+                    minimap.style.width = windowWidth + 'px';
+                    
+                    // Show minimap first to calculate its height
+                    minimap.style.display = 'block';
+                    
+                    // Update root panel position below minimap (stacked)
+                    setTimeout(() => {
+                        const minimapHeight = minimap.offsetHeight || 300;
+                        const rootListTop = topPosition + minimapHeight + 10;
+                        rootPanel.style.top = rootListTop + 'px';
+                        rootPanel.style.left = '10px'; // Same left as minimap
+                        rootPanel.style.width = windowWidth + 'px';
+                        
+                        // Recalculate max-height for root list to allow scrolling
+                        const viewportHeight = window.innerHeight;
+                        const availableHeight = viewportHeight - rootListTop - 20; // Leave 20px margin at bottom
+                        const rootListMaxHeight = Math.min(400, availableHeight);
+                        rootPanel.style.maxHeight = rootListMaxHeight + 'px';
+                        
+                        // Update minimap content positions
+                        const minimapContent = document.getElementById('minimap-content');
+                        const visibleHighlight = document.getElementById('minimap-visible-highlight');
+                        const wordRects = minimap._wordRects;
+                        if (minimapContent && visibleHighlight && wordRects) {
+                            updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                        }
+                        
+                        rootPanel.style.display = 'block';
+                    }, 10);
+                } else {
+                    minimap.style.display = 'block';
+                    rootPanel.style.display = 'block';
+                }
             }
-            toggleBtn.textContent = 'پنهان کردن نقشه';
+            // toggleBtn.textContent = 'پنهان کردن نقشه';
         }
     }
 
-    let visibleHighlight = null, minimap = null;
     // Function to update visible area highlight
     function updateVisibleHighlight() {
+        if (!visibleHighlight || !minimap) return;
+        
         // Use stored values from minimap object (which get updated on resize)
         const currentScaleFactor = minimap._scaleFactor || scaleFactor;
         const currentMinTop = minimap._minTop || minTop;
@@ -1122,10 +1487,57 @@ const morphologyData = {};
         const currentAvailableWidth = minimap._availableWidth || availableWidth;
         const currentScaledHeight = currentContentHeight * currentScaleFactor;
         const currentScaledContentWidth = minimap._contentWidth * currentScaleFactor;
+
+        let surahHeader = getSurahHeader();
+        const surahHeaderHeight = surahHeader ? surahHeader.offsetHeight : 0;
+        // console.log('surahHeaderHeight: ', surahHeaderHeight);
+
         
-        const scrollTop = window.scrollY || window.pageYOffset || 0;
-        const viewportHeight = window.innerHeight;
-        const viewportBottom = scrollTop + viewportHeight;
+        // In mobile mode, use the content wrapper's scroll position
+        let scrollTop, viewportHeight, viewportBottom;
+        if (isMobileMode && mobileContentWrapper) {
+            const wrapperScrollTop = mobileContentWrapper.scrollTop - (surahHeader ? surahHeader.offsetHeight + surahHeaderHeight : 0) || 0;
+            // console.log('wrapperScrollTop: ', mobileContentWrapper.scrollTop, 'surahHeaderHeight: ', surahHeaderHeight);
+            viewportHeight = mobileContentWrapper.clientHeight;
+            
+            // Find the first word element to calculate the offset
+            if (minimap._wordRects && minimap._wordRects.length > 0) {
+                const firstWordElement = minimap._wordRects[0].element;
+                if (firstWordElement && mobileContentWrapper.contains(firstWordElement)) {
+                    // Get current positions
+                    const wrapperRect = mobileContentWrapper.getBoundingClientRect();
+                    const firstWordRect = firstWordElement.getBoundingClientRect();
+                    
+                    // Calculate the offset of the first word from the wrapper top
+                    // When scrollTop = 0, this offset tells us where content starts
+                    const currentOffset = firstWordRect.top - wrapperRect.top;
+                    
+                    // The first word's document position is currentMinTop
+                    // When wrapper scrolls by wrapperScrollTop, the visible content in document coordinates
+                    // starts at: currentMinTop + (wrapperScrollTop - initialOffset)
+                    // But we need to find the initial offset
+                    // When scrollTop = 0, firstWordRect.top - wrapperRect.top = initialOffset
+                    // So: scrollTop = currentMinTop + wrapperScrollTop - currentOffset
+                    // But that's not quite right either...
+                    
+                    // Simpler: The wrapper scrollTop tells us how much content we've scrolled
+                    // The first word is at currentMinTop in document coordinates
+                    // When we scroll the wrapper, we're scrolling the content
+                    // So visible area starts at: currentMinTop + wrapperScrollTop
+                    scrollTop = currentMinTop + wrapperScrollTop;
+                } else {
+                    // Fallback: use wrapper scroll + minTop
+                    scrollTop = currentMinTop + wrapperScrollTop;
+                }
+            } else {
+                scrollTop = currentMinTop + wrapperScrollTop;
+            }
+            viewportBottom = scrollTop + viewportHeight;
+        } else {
+            scrollTop = window.scrollY || window.pageYOffset || 0;
+            viewportHeight = window.innerHeight;
+            viewportBottom = scrollTop + viewportHeight;
+        }
         const extraSpace = minimap._extraSpace || 5;
         
         // Calculate visible area position in minimap using the current scale factor
@@ -1158,12 +1570,32 @@ const morphologyData = {};
         const extraSpace = minimap._extraSpace || 5;
         
         // Calculate new scaling factors based on current window width
-        const minimapWindowWidth = calculateWindowWidth();
+        // In mobile mode, use the actual minimap width (50% of bottom row)
+        let minimapWindowWidth;
+        if (isMobileMode && minimap.parentElement && minimap.parentElement.id === 'mobile-bottom-row') {
+            // Get actual width of minimap in mobile mode (50% of bottom row minus gap)
+            const bottomRow = minimap.parentElement;
+            const bottomRowWidth = bottomRow.offsetWidth || window.innerWidth;
+            const gap = 5;
+            // minimapWindowWidth = Math.floor((bottomRowWidth - gap) / 2); // Half width minus half gap
+            minimapWindowWidth = calculateWindowWidthForMobile();
+        } else {
+            minimapWindowWidth = calculateWindowWidth();
+        }
         const containerPadding = 12; // 6px padding on each side
         const availableWidth = minimapWindowWidth - containerPadding - extraSpace; // Content area width
         
+        // In mobile mode, also consider the available height for scaling
+        let availableHeightForScaling = 400; // Default
+        if (isMobileMode && minimap.parentElement && minimap.parentElement.id === 'mobile-bottom-row') {
+            const bottomRowHeight = 120;
+            const bottomRowPadding = 5;
+            availableHeightForScaling = bottomRowHeight - (bottomRowPadding * 2) - containerPadding;
+        }
+        
         // Calculate scale factors to fit in minimap
-        const scaleY = Math.max(0.3, (400 - 20) / contentHeight); // max-height minus some padding
+        // In mobile mode, use the available height from bottom row; otherwise use default
+        const scaleY = Math.max(0.3, (availableHeightForScaling - 20) / contentHeight); // max-height minus some padding
         const scaleX = availableWidth / contentWidth; // Scale to fit in content area
         const scaleFactor = Math.min(scaleX, scaleY); // Use smaller scale to ensure fit
 
@@ -1254,97 +1686,15 @@ const morphologyData = {};
         minimap._availableWidth = availableWidth;
         // updateVisibleHighlight();
     }
-    
-    // Create minimap showing all words as small rectangles
-    function createMinimap() {
-        // Remove existing minimap if it exists
-        const existingMinimap = document.getElementById('morphology-minimap');
-        const existingRootPanel = document.getElementById('highlighted-roots-panel');
-        let wasMinimapVisible = false;
-        let wasRootPanelVisible = false;
-        if (existingMinimap) {
-            wasMinimapVisible = existingMinimap.style.display !== 'none' && existingMinimap.style.display !== '';
-            existingMinimap.remove();
-        }
-        if (existingRootPanel) {
-            wasRootPanelVisible = existingRootPanel.style.display !== 'none' && existingRootPanel.style.display !== '';
-        }
-        
+
+    function calculateWordRects() {
         // Try to find sure element, fallback to body
         let sureElement = document.querySelector('sure');
         if (!sureElement) {
             sureElement = document.body;
         }
         if (!sureElement) return;
-
-        // Create minimap container
-        minimap = document.createElement('div');
-        minimap.id = 'morphology-minimap';
-        // Calculate position below the first div (surah header)
-        const surahHeader = getSurahHeader();
-        let topPosition = 10;
-        if (surahHeader) {
-            const rect = surahHeader.getBoundingClientRect();
-            const scrollY = window.scrollY || window.pageYOffset || 0;
-            topPosition = rect.bottom + scrollY + 10;
-            // // Use absolute position (rect.top + scrollY) to get document position
-            // // But for fixed positioning, we need viewport position, so use rect.bottom directly
-            // const headerBottom = rect.bottom;
-            // // Ensure it's within viewport bounds
-            // if (headerBottom > 0 && headerBottom < window.innerHeight) {
-            //     topPosition = headerBottom + 10; // Position 10px below the header
-            // } else if (headerBottom <= 0) {
-            //     // Header is above viewport, position at top
-            //     topPosition = 10;
-            // } else {
-            //     // Header is below viewport, position at top
-            //     topPosition = 10;
-            // }
-        }
         
-        // Calculate responsive width and max height
-        const windowWidth = calculateWindowWidth();
-        const viewportHeight = window.innerHeight;
-        const availableHeight = viewportHeight - topPosition - 20; // Leave 20px margin at bottom
-        const maxHeight = Math.min(300, Math.floor(availableHeight / 2) - 15); // Half for each, minus spacing
-        
-        minimap.style.cssText = `
-            position: fixed;
-            top: ${topPosition}px;
-            left: 10px;
-            width: ${windowWidth}px;
-            max-height: ${maxHeight}px;
-            height: auto;
-            background: #e3e3e3;
-            border: 1px solid #aaa;
-            border-radius: 4px;
-            padding: 6px;
-            z-index: 9999;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-            direction: rtl;
-            font-size: 0;
-            line-height: 1.5px;
-            box-sizing: border-box;
-            display: block;
-        `;
-
-        // Create minimap content container
-        const minimapContent = document.createElement('div');
-        minimapContent.id = 'minimap-content';
-        minimapContent.style.cssText = `
-            position: relative;
-            min-height: 100px;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            cursor: pointer;
-        `;
-
         // Get all words and ayah markers from sure element
         const allWords = sureElement.querySelectorAll('.morph-word');
         const allAyahs = sureElement.querySelectorAll('sup');
@@ -1414,7 +1764,95 @@ const morphologyData = {};
             });
         });
 
-        console.log(wordRects);
+        return wordRects;
+    }
+
+    // Create minimap showing all words as small rectangles
+    function createMinimap() {
+        // Remove existing minimap if it exists
+        const existingMinimap = document.getElementById('morphology-minimap');
+        const existingRootPanel = document.getElementById('highlighted-roots-panel');
+        let wasMinimapVisible = false;
+        let wasRootPanelVisible = false;
+        if (existingMinimap) {
+            wasMinimapVisible = existingMinimap.style.display !== 'none' && existingMinimap.style.display !== '';
+            existingMinimap.remove();
+        }
+        if (existingRootPanel) {
+            wasRootPanelVisible = existingRootPanel.style.display !== 'none' && existingRootPanel.style.display !== '';
+        }
+
+        let wordRects = calculateWordRects();
+        
+        // Create minimap container
+        minimap = document.createElement('div');
+        minimap.id = 'morphology-minimap';
+        // Calculate position below the first div (surah header)
+        const surahHeader = getSurahHeader();
+        let topPosition = 10;
+        if (surahHeader) {
+            const rect = surahHeader.getBoundingClientRect();
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            topPosition = rect.bottom + scrollY + 10;
+            // // Use absolute position (rect.top + scrollY) to get document position
+            // // But for fixed positioning, we need viewport position, so use rect.bottom directly
+            // const headerBottom = rect.bottom;
+            // // Ensure it's within viewport bounds
+            // if (headerBottom > 0 && headerBottom < window.innerHeight) {
+            //     topPosition = headerBottom + 10; // Position 10px below the header
+            // } else if (headerBottom <= 0) {
+            //     // Header is above viewport, position at top
+            //     topPosition = 10;
+            // } else {
+            //     // Header is below viewport, position at top
+            //     topPosition = 10;
+            // }
+        }
+        
+        // Calculate responsive width and max height
+        const windowWidth = calculateWindowWidth();
+        const viewportHeight = window.innerHeight;
+        const availableHeight = viewportHeight - topPosition - 20; // Leave 20px margin at bottom
+        const maxHeight = Math.min(300, Math.floor(availableHeight / 2) - 15); // Half for each, minus spacing
+        
+        minimap.style.cssText = `
+            position: fixed;
+            top: ${topPosition}px;
+            left: 10px;
+            width: ${windowWidth}px;
+            max-height: ${maxHeight}px;
+            height: auto;
+            background: #e3e3e3;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 6px;
+            z-index: 9999;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            direction: rtl;
+            font-size: 0;
+            line-height: 1.5px;
+            box-sizing: border-box;
+            display: block;
+        `;
+
+        // Create minimap content container
+        const minimapContent = document.createElement('div');
+        minimapContent.id = 'minimap-content';
+        minimapContent.style.cssText = `
+            position: relative;
+            min-height: 100px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            cursor: pointer;
+        `;
+
+        // console.log(wordRects);
 
         // Create visible area highlight overlay
         // Note: This must be appended AFTER word divs so it appears on top, OR use higher z-index
@@ -1736,16 +2174,36 @@ const morphologyData = {};
             // Therefore: docY = minTop + (minimapY / scaleFactor)
             const targetScrollTop = currentMinTop + (clickY / currentScaleFactor);
             
-            // Center the viewport on the clicked position
-            // Scroll so that the clicked point is in the middle of the viewport
-            const viewportHeight = window.innerHeight;
-            const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
-            
-            // Scroll to the calculated position
-            window.scrollTo({
-                top: Math.max(0, centeredScrollTop),
-                behavior: 'smooth'
-            });
+            // In mobile mode, scroll the content wrapper; otherwise scroll the window
+            if (isMobileMode && mobileContentWrapper) {
+                // Center the viewport on the clicked position
+                const viewportHeight = mobileContentWrapper.clientHeight;
+                const surahHeader = getSurahHeader();
+                let headerHeight = 0;
+                if (surahHeader) {
+                    const rect = surahHeader.getBoundingClientRect();
+                    headerHeight = rect.height;
+                }
+                // Adjust targetScrollTop to account for header
+                const adjustedTargetScrollTop = targetScrollTop - headerHeight;
+                const centeredScrollTop = adjustedTargetScrollTop - (viewportHeight / 2);
+                
+                mobileContentWrapper.scrollTo({
+                    top: Math.max(0, centeredScrollTop),
+                    behavior: 'smooth'
+                });
+            } else {
+                // Center the viewport on the clicked position
+                // Scroll so that the clicked point is in the middle of the viewport
+                const viewportHeight = window.innerHeight;
+                const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
+                
+                // Scroll to the calculated position
+                window.scrollTo({
+                    top: Math.max(0, centeredScrollTop),
+                    behavior: 'smooth'
+                });
+            }
             
             // The scroll event will trigger updateVisibleHighlight automatically
         });
@@ -1823,6 +2281,25 @@ const morphologyData = {};
                 window.addEventListener('resize', function() {
                     clearTimeout(resizeTimeout);
                     resizeTimeout = setTimeout(function() {
+                        // In mobile mode, update minimap content but keep positioning
+                        if (isMobileMode) {
+                            const minimap = document.getElementById('morphology-minimap');
+                            if (minimap) {
+                                const minimapContent = document.getElementById('minimap-content');
+                                const visibleHighlight = document.getElementById('minimap-visible-highlight');
+                                const wordRects = minimap._wordRects;
+                                if (minimapContent && visibleHighlight && wordRects) {
+                                    const windowWidth = calculateWindowWidthForMobile();
+                                    minimap.style.width = windowWidth + 'px';
+                                    minimap.style.flex = `0 0 ${windowWidth}px`;
+                                    minimap.style.maxWidth = `${windowWidth}px`;
+                                    minimap._availableWidth = windowWidth;
+                                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                                }
+                            }
+                            return;
+                        }
+                        
                         // Only update if minimap is visible
                         const minimap = document.getElementById('morphology-minimap');
                         const rootPanel = document.getElementById('highlighted-roots-panel');
