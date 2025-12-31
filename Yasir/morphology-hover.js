@@ -1172,8 +1172,15 @@ const morphologyData = {};
       
         function textWidthPx(text, { fontSize = 16, fontFamily = "Arial", fontWeight = "normal", fontStyle = "normal" } = {}) {
           _ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-          return _ctx.measureText(String(text)).width;
+          const metrics = _ctx.measureText(String(text));
+          // Calculate height from bounding box metrics
+          // Use actualBoundingBox if available, otherwise fall back to fontBoundingBox
+          const height = (metrics.actualBoundingBoxAscent || metrics.fontBoundingBoxAscent || 0) + 
+                         (metrics.actualBoundingBoxDescent || metrics.fontBoundingBoxDescent || 0);
+          return [metrics.width, height];
         }
+
+        let ayeNumberFontSize = null;
         
         // Update existing divs - reposition and resize them
         wordRects.forEach((wordRect, index) => {
@@ -1185,19 +1192,31 @@ const morphologyData = {};
                 );
                 if (ayahDiv) {
                     const ayahText = String(wordRect.ayah);
-                    const fontSize = 8;
-                    const measuredWidth = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
+                    const height = Math.max(1, wordRect.height * scaleFactor);
                     
+                    if (ayeNumberFontSize === null) {
+                        ayeNumberFontSize = 8;
+                        let [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: ayeNumberFontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
+                        console.log('measuredHeight: ', measuredHeight, 'height: ', height);
+                        while (measuredHeight > height && ayeNumberFontSize > 1) {
+                            ayeNumberFontSize--;
+                            [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: ayeNumberFontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
+                        }
+                        console.log('ayeNumberFontSize: ', ayeNumberFontSize);
+                    }
+                    const fontSize = ayeNumberFontSize;
+                    const [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
+
                     const top = (wordRect.top - minTop) * scaleFactor;
                     let left = (wordRect.left - minLeft) * scaleFactor - measuredWidth;
                     let width = measuredWidth;
-                    const height = Math.max(1, wordRect.height * scaleFactor);
                     
                     ayahDiv.style.top = top + 'px';
                     ayahDiv.style.left = (left + extraSpace) + 'px';
                     ayahDiv.style.width = width + 'px';
                     ayahDiv.style.height = height + 'px';
                     ayahDiv.style.lineHeight = height + 'px';
+                    ayahDiv.style.fontSize = fontSize + 'px';
                 }
             }
 
@@ -1350,7 +1369,8 @@ const morphologyData = {};
                     left: rect.left + scrollX,
                     right: rect.right + scrollX,
                     height: rect.height,
-                    width: rect.width
+                    width: rect.width, 
+                    index: index
                 });
             }
         });
@@ -1389,7 +1409,8 @@ const morphologyData = {};
                 lineBreak: lineBreak,
                 index: index,
                 ayah: wordAyah,
-                wordIndex: wordIndex
+                wordIndex: wordIndex,
+                index: index
             });
         });
 
@@ -1463,7 +1484,8 @@ const morphologyData = {};
                 wordDiv.setAttribute('data-ayah', wordRect.ayah);
                 wordDiv.setAttribute('data-word-index', "number");
                 wordDiv.setAttribute('data-is-ayah-number', 'true');
-                
+                wordDiv.setAttribute('data-index', wordRect.index);
+
                 // Calculate position and size based on wordRect
                 const top = (wordRect.top - minTop) * scaleFactor;
                 let left = (wordRect.left - minLeft) * scaleFactor - measuredWidth;
