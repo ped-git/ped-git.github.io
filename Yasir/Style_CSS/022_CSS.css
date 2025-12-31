@@ -85,8 +85,98 @@
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 151mm;
+  width: 161mm;
   text-indent: 0mm;
+}
+
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-gradientrev {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, white, black);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-black-1 {
+  border-bottom: 1px solid rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-black-far {
+  border-bottom: 1px solid rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-black-3 {
+  border-bottom: 1px solid rgb(220, 220, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed2 {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdotted {
+  border-bottom: 1px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdotted-far {
+  border-bottom: 1px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-blackdotted2 {
+  border-bottom: 2px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
 }
 
 .ordinary-near {
@@ -162,6 +252,15 @@
 
 .highlight2 {
   color:  rgb(205, 100, 100);
+}
+
+.highlight3 {
+  color:  rgb(0, 150, 255);
+}
+
+
+.highlight8 {
+  color:  sandybrown;
 }
 
 @media print {
