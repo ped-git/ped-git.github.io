@@ -1165,6 +1165,19 @@ const morphologyData = {};
 
     // Create minimap showing all words as small rectangles
     function createMinimap() {
+        // Remove existing minimap if it exists
+        const existingMinimap = document.getElementById('morphology-minimap');
+        const existingRootPanel = document.getElementById('highlighted-roots-panel');
+        let wasMinimapVisible = false;
+        let wasRootPanelVisible = false;
+        if (existingMinimap) {
+            wasMinimapVisible = existingMinimap.style.display !== 'none' && existingMinimap.style.display !== '';
+            existingMinimap.remove();
+        }
+        if (existingRootPanel) {
+            wasRootPanelVisible = existingRootPanel.style.display !== 'none' && existingRootPanel.style.display !== '';
+        }
+        
         // Try to find sure element, fallback to body
         let sureElement = document.querySelector('sure');
         if (!sureElement) {
@@ -1317,8 +1330,10 @@ const morphologyData = {};
         const minLeft = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.left)) : 0;
         const maxRight = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.right)) : documentWidth;
         
+        // const widthAtRightForLabels = 40; // 10px at right for labels
+        const minimapOffsetLeft = 20;
         const contentHeight = maxBottom - minTop;
-        const contentWidth = maxRight - minLeft;
+        const contentWidth = (maxRight - minLeft) + minimapOffsetLeft;
         
         // Calculate scale factors to fit in minimap
         // The minimapContent is inside a container with 6px padding
@@ -1353,51 +1368,98 @@ const morphologyData = {};
         
         wordRects.forEach((wordRect, index) => {
             // Check if we need to add ayah number
+            let bg_color = '#ccc';
             if (index == wordRects.length - 1 || (wordRect.ayah !== wordRects[index + 1].ayah)) {
-                // Calculate ayah number width based on text measurement
+                // // Calculate ayah number width based on text measurement
                 const ayahText = String(wordRect.ayah);
                 const fontSize = 8;
                 const measuredWidth = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
-                // Add padding (2px on each side) and ensure minimum width
-                const ayeNumberWidthPx = Math.max(measuredWidth + 4, 12);
-                // Scale the width for minimap
-                const ayeNumberWidthScaled = ayeNumberWidthPx;
+                // // Add padding (2px on each side) and ensure minimum width
+                // const ayeNumberWidthPx = Math.max(measuredWidth + 4, 12);
+                // // Scale the width for minimap
+                // const ayeNumberWidthScaled = ayeNumberWidthPx;
                 
-                // Add ayah number
-                const ayahLabel = document.createElement('div');
-                ayahLabel.setAttribute('data-ayah-label', 'true');
-                ayahLabel.setAttribute('data-ayah-num', wordRect.ayah);
-                const ayahTop = (wordRect.top - minTop) * scaleFactor;
-                const ayahHeight = Math.max(1, wordRect.height * scaleFactor);
-                // Calculate left position: position it to the left of the first word of this ayah
-                // We need to subtract the scaled width from the word's left position
-                const wordLeftScaled = (wordRect.left - minLeft) * scaleFactor;
-                const ayahLeft = Math.max(0, wordLeftScaled - ayeNumberWidthScaled);
+                // // Add ayah number
+                // const ayahLabel = document.createElement('div');
+                // ayahLabel.setAttribute('data-ayah-label', 'true');
+                // ayahLabel.setAttribute('data-ayah-num', wordRect.ayah);
+                // const ayahTop = (wordRect.top - minTop) * scaleFactor;
+                // const ayahHeight = Math.max(1, wordRect.height * scaleFactor);
+                // // Calculate left position: position it to the left of the first word of this ayah
+                // // We need to subtract the scaled width from the word's left position
+                // const wordLeftScaled = (wordRect.left - minLeft) * scaleFactor;
+                // const ayahLeft = Math.max(0, wordLeftScaled - ayeNumberWidthScaled);
                 
-                ayahLabel.style.cssText = `
+                // ayahLabel.style.cssText = `
+                //     position: absolute;
+                //     top: ${ayahTop}px;
+                //     left: ${ayahLeft}px;
+                //     width: ${ayeNumberWidthScaled}px;
+                //     font-size: ${fontSize}px;
+                //     font-family: "Arial", sans-serif;
+                //     font-style: normal;
+                //     font-weight: bold;
+                //     color: #333;
+                //     text-align: center;
+                //     line-height: ${ayahHeight}px;
+                //     height: ${ayahHeight}px;
+                //     background: rgba(0, 200, 200, 0.5);
+                //     direction: rtl;
+                //     z-index: 5;
+                //     overflow: hidden;
+                //     white-space: nowrap;
+                //     box-sizing: border-box;
+                //     padding: 0px 0px;
+                // `;
+                // ayahLabel.textContent = ayahText;
+                // minimapContent.appendChild(ayahLabel);
+                // bg_color = '#c800c8'; # debug
+
+                // Create div for this word positioned absolutely
+                const wordDiv = document.createElement('div');
+                wordDiv.className = 'minimap-word';
+                
+                // Calculate position and size based on wordRect
+                const top = (wordRect.top - minTop) * scaleFactor;
+                // Position words from left edge of minimapContent (which is already inside padded container)
+                // This aligns everything from the left, just like the text
+                let left = (wordRect.left - minLeft) * scaleFactor - measuredWidth;
+                let width = measuredWidth;
+                const height = Math.max(1, wordRect.height * scaleFactor);
+                
+                // Ensure words don't exceed the minimapContent width
+                // The rightmost word's right edge should be at availableWidth, leaving space for container's right padding
+                // const maxRight = availableWidth;
+                // if (left + width > maxRight) {
+                //     width = Math.max(1, maxRight - left);
+                // }
+                
+                wordDiv.style.cssText = `
                     position: absolute;
-                    top: ${ayahTop}px;
-                    left: ${ayahLeft}px;
-                    width: ${ayeNumberWidthScaled}px;
+                    top: ${top}px;
+                    left: ${left+minimapOffsetLeft}px;
+                    width: ${width}px;
+                    height: ${height}px;
                     font-size: ${fontSize}px;
                     font-family: "Arial", sans-serif;
                     font-style: normal;
                     font-weight: bold;
-                    color: #333;
-                    text-align: center;
-                    line-height: ${ayahHeight}px;
-                    width: ${ayeNumberWidthScaled}px;
-                    height: ${ayahHeight}px;
                     background: rgba(0, 200, 200, 0.5);
-                    direction: rtl;
                     z-index: 5;
+                    text-align: center;
+                    line-height: ${Math.max(1, wordRect.height * scaleFactor)}px;
+                    height: ${Math.max(1, wordRect.height * scaleFactor)}px;
+                    direction: rtl;
                     overflow: hidden;
                     white-space: nowrap;
                     box-sizing: border-box;
                     padding: 0px 0px;
                 `;
-                ayahLabel.textContent = ayahText;
-                minimapContent.appendChild(ayahLabel);
+                wordDiv.setAttribute('data-ayah', wordRect.ayah);
+                wordDiv.setAttribute('data-word-index', "number");
+                wordDiv.textContent = ayahText;
+
+                minimapContent.appendChild(wordDiv);
             }
 
             // Create div for this word positioned absolutely
@@ -1411,7 +1473,6 @@ const morphologyData = {};
             let left = (wordRect.left - minLeft) * scaleFactor;
             let width = Math.max(1, wordRect.width * scaleFactor);
             const height = Math.max(1, wordRect.height * scaleFactor);
-            const bg_color = '#ccc';
             
             // Ensure words don't exceed the minimapContent width
             // The rightmost word's right edge should be at availableWidth, leaving space for container's right padding
@@ -1423,7 +1484,7 @@ const morphologyData = {};
             wordDiv.style.cssText = `
                 position: absolute;
                 top: ${top}px;
-                left: ${left}px;
+                left: ${left+minimapOffsetLeft}px;
                 width: ${width}px;
                 height: ${height}px;
                 background: ${bg_color};
@@ -1472,6 +1533,18 @@ const morphologyData = {};
         minimap.appendChild(minimapContent);
         document.body.appendChild(minimap);
         
+        // Restore visibility if it was visible before
+        if (wasMinimapVisible) {
+            minimap.style.display = 'block';
+            // Also show root panel if it was visible
+            if (wasRootPanelVisible) {
+                const rootPanel = document.getElementById('highlighted-roots-panel');
+                if (rootPanel) {
+                    rootPanel.style.display = 'block';
+                }
+            }
+        }
+        
         // Store data needed for recalculation on resize
         minimap._wordRects = wordRects;
         minimap._minTop = minTop;
@@ -1482,86 +1555,86 @@ const morphologyData = {};
         minimap._availableWidth = availableWidth;
         
         // Function to recalculate minimap content scale and reposition elements
-        minimap.recalculateScale = function(newAvailableWidth) {
-            const wordRects = this._wordRects;
-            const minTop = this._minTop;
-            const minLeft = this._minLeft;
-            const contentWidth = this._contentWidth;
-            const contentHeight = this._contentHeight;
+        // minimap.recalculateScale = function(newAvailableWidth) {
+        //     const wordRects = this._wordRects;
+        //     const minTop = this._minTop;
+        //     const minLeft = this._minLeft;
+        //     const contentWidth = this._contentWidth;
+        //     const contentHeight = this._contentHeight;
             
-            // Recalculate scale factors
-            const scaleY = Math.max(0.3, (400 - 20) / contentHeight);
-            const scaleX = newAvailableWidth / contentWidth;
-            const newScaleFactor = Math.min(scaleX, scaleY);
+        //     // Recalculate scale factors
+        //     const scaleY = Math.max(0.3, (400 - 20) / contentHeight);
+        //     const scaleX = newAvailableWidth / contentWidth;
+        //     const newScaleFactor = Math.min(scaleX, scaleY);
             
-            const minimapContent = document.getElementById('minimap-content');
-            if (!minimapContent) return;
+        //     const minimapContent = document.getElementById('minimap-content');
+        //     if (!minimapContent) return;
             
-            // Update all word divs using data attributes
-            wordRects.forEach((wordRect) => {
-                const wordDiv = minimapContent.querySelector(
-                    `.minimap-word[data-ayah="${wordRect.ayah}"][data-word-index="${wordRect.wordIndex}"]`
-                );
-                if (!wordDiv) return;
+        //     // Update all word divs using data attributes
+        //     wordRects.forEach((wordRect) => {
+        //         const wordDiv = minimapContent.querySelector(
+        //             `.minimap-word[data-ayah="${wordRect.ayah}"][data-word-index="${wordRect.wordIndex}"]`
+        //         );
+        //         if (!wordDiv) return;
                 
-                const top = (wordRect.top - minTop) * newScaleFactor;
-                let left = (wordRect.left - minLeft) * newScaleFactor;
-                let width = Math.max(1, wordRect.width * newScaleFactor);
-                const height = Math.max(1, wordRect.height * newScaleFactor);
+        //         const top = (wordRect.top - minTop) * newScaleFactor;
+        //         let left = (wordRect.left - minLeft) * newScaleFactor;
+        //         let width = Math.max(1, wordRect.width * newScaleFactor);
+        //         const height = Math.max(1, wordRect.height * newScaleFactor);
                 
-                // Ensure words don't exceed the minimapContent width
-                const maxRight = newAvailableWidth;
-                if (left + width > maxRight) {
-                    width = Math.max(1, maxRight - left);
-                }
+        //         // Ensure words don't exceed the minimapContent width
+        //         const maxRight = newAvailableWidth;
+        //         if (left + width > maxRight) {
+        //             width = Math.max(1, maxRight - left);
+        //         }
                 
-                wordDiv.style.top = top + 'px';
-                wordDiv.style.left = left + 'px';
-                wordDiv.style.width = width + 'px';
-                wordDiv.style.height = height + 'px';
-            });
+        //         wordDiv.style.top = top + 'px';
+        //         wordDiv.style.left = left + 'px';
+        //         wordDiv.style.width = width + 'px';
+        //         wordDiv.style.height = height + 'px';
+        //     });
             
-            // Update all ayah labels
-            const ayahLabels = minimapContent.querySelectorAll('[data-ayah-label]');
-            ayahLabels.forEach((ayahLabel) => {
-                const ayahNum = parseInt(ayahLabel.getAttribute('data-ayah-num'));
-                const wordRect = wordRects.find(w => w.ayah === ayahNum);
-                if (!wordRect) return;
+        //     // Update all ayah labels
+        //     const ayahLabels = minimapContent.querySelectorAll('[data-ayah-label]');
+        //     ayahLabels.forEach((ayahLabel) => {
+        //         const ayahNum = parseInt(ayahLabel.getAttribute('data-ayah-num'));
+        //         const wordRect = wordRects.find(w => w.ayah === ayahNum);
+        //         if (!wordRect) return;
                 
-                const ayahTop = (wordRect.top - minTop) * newScaleFactor;
-                const ayahHeight = Math.max(1, wordRect.height * newScaleFactor);
-                const wordLeftScaled = (wordRect.left - minLeft) * newScaleFactor;
+        //         const ayahTop = (wordRect.top - minTop) * newScaleFactor;
+        //         const ayahHeight = Math.max(1, wordRect.height * newScaleFactor);
+        //         const wordLeftScaled = (wordRect.left - minLeft) * newScaleFactor;
                 
-                // Recalculate ayah number width
-                const ayahText = String(ayahNum);
-                const fontSize = 8;
-                const _c = document.createElement("canvas");
-                const _ctx = _c.getContext("2d");
-                _ctx.font = `normal bold ${fontSize}px Arial`;
-                const measuredWidth = _ctx.measureText(ayahText).width;
-                const ayeNumberWidthScaled = Math.max(measuredWidth + 4, 12);
-                const ayahLeft = Math.max(0, wordLeftScaled - ayeNumberWidthScaled);
+        //         // Recalculate ayah number width
+        //         const ayahText = String(ayahNum);
+        //         const fontSize = 8;
+        //         const _c = document.createElement("canvas");
+        //         const _ctx = _c.getContext("2d");
+        //         _ctx.font = `normal bold ${fontSize}px Arial`;
+        //         const measuredWidth = _ctx.measureText(ayahText).width;
+        //         const ayeNumberWidthScaled = Math.max(measuredWidth + 4, 12);
+        //         const ayahLeft = Math.max(0, wordLeftScaled - ayeNumberWidthScaled);
                 
-                ayahLabel.style.top = ayahTop + 'px';
-                ayahLabel.style.left = ayahLeft + 'px';
-                ayahLabel.style.height = ayahHeight + 'px';
-                ayahLabel.style.width = ayeNumberWidthScaled + 'px';
-            });
+        //         ayahLabel.style.top = ayahTop + 'px';
+        //         ayahLabel.style.left = ayahLeft + 'px';
+        //         ayahLabel.style.height = ayahHeight + 'px';
+        //         ayahLabel.style.width = ayeNumberWidthScaled + 'px';
+        //     });
             
-            // Update minimap content dimensions
-            const scaledHeight = contentHeight * newScaleFactor;
-            minimapContent.style.height = scaledHeight + 'px';
-            minimapContent.style.width = newAvailableWidth + 'px';
+        //     // Update minimap content dimensions
+        //     const scaledHeight = contentHeight * newScaleFactor;
+        //     minimapContent.style.height = scaledHeight + 'px';
+        //     minimapContent.style.width = newAvailableWidth + 'px';
             
-            // Update stored values
-            this._scaleFactor = newScaleFactor;
-            this._availableWidth = newAvailableWidth;
+        //     // Update stored values
+        //     this._scaleFactor = newScaleFactor;
+        //     this._availableWidth = newAvailableWidth;
             
-            // Update visible highlight if it exists
-            if (this.updateHighlight) {
-                this.updateHighlight();
-            }
-        };
+        //     // Update visible highlight if it exists
+        //     if (this.updateHighlight) {
+        //         this.updateHighlight();
+        //     }
+        // };
         
         // Update root list panel position to be below minimap
         setTimeout(() => {
@@ -1736,11 +1809,47 @@ const morphologyData = {};
                 createHighlightedRootsPanel();
                 updateHighlightedRootsPanel();
                 
-                // Add resize event listener to update window sizes
+                // Add resize event listener to recreate minimap
                 let resizeTimeout;
                 window.addEventListener('resize', function() {
                     clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(updateWindowSizes, 100); // Debounce resize events
+                    resizeTimeout = setTimeout(function() {
+                        // Only recreate if minimap is visible
+                        const minimap = document.getElementById('morphology-minimap');
+                        const rootPanel = document.getElementById('highlighted-roots-panel');
+                        const wasMinimapVisible = minimap && minimap.style.display !== 'none' && minimap.style.display !== '';
+                        const wasRootPanelVisible = rootPanel && rootPanel.style.display !== 'none' && rootPanel.style.display !== '';
+                        
+                        if (wasMinimapVisible) {
+                            createMinimap();
+                            // Update root panel position after minimap is recreated
+                            setTimeout(function() {
+                                const newMinimap = document.getElementById('morphology-minimap');
+                                const newRootPanel = document.getElementById('highlighted-roots-panel');
+                                if (newMinimap) {
+                                    const surahHeader = getSurahHeader();
+                                    let topPosition = 10;
+                                    if (surahHeader) {
+                                        const rect = surahHeader.getBoundingClientRect();
+                                        topPosition = rect.bottom + 10;
+                                    }
+                                    const windowWidth = calculateWindowWidth();
+                                    const minimapHeight = newMinimap.offsetHeight || 300;
+                                    
+                                    if (newRootPanel && wasRootPanelVisible) {
+                                        const rootListTop = topPosition + minimapHeight + 10;
+                                        newRootPanel.style.top = rootListTop + 'px';
+                                        newRootPanel.style.width = windowWidth + 'px';
+                                        
+                                        const viewportHeight = window.innerHeight;
+                                        const availableHeight = viewportHeight - rootListTop - 20;
+                                        const rootListMaxHeight = Math.min(400, availableHeight);
+                                        newRootPanel.style.maxHeight = rootListMaxHeight + 'px';
+                                    }
+                                }
+                            }, 100);
+                        }
+                    }, 100); // Debounce resize events
                 });
             }
         });
