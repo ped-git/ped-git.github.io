@@ -2329,16 +2329,19 @@ const morphologyData = {};
                                 const newRootPanel = document.getElementById('highlighted-roots-panel');
                                 if (newMinimap) {
                                     const surahHeader = getSurahHeader();
-                                    let topPosition = 10;
-                                    if (surahHeader) {
-                                        const rect = surahHeader.getBoundingClientRect();
-                                        topPosition = rect.bottom + 10;
-                                    }
+                                    const scrollY = window.scrollY || window.pageYOffset || 0;
+                                    let minimapBottom = newMinimap.offsetHeight + newMinimap.offsetTop;
+                                    // if (surahHeader) {
+                                    //     const rect = surahHeader.getBoundingClientRect();
+                                    //     topPosition = rect.bottom + 10;
+                                    //     console.log('topPosition: ', topPosition, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
+                                    // }
                                     const windowWidth = calculateWindowWidth();
-                                    const minimapHeight = newMinimap.offsetHeight || 300;
+
+                                    console.log('minimapBottom: ', minimapBottom);
                                     
                                     if (newRootPanel && wasRootPanelVisible) {
-                                        const rootListTop = topPosition + minimapHeight + 10;
+                                        const rootListTop = minimapBottom + 10;
                                         newRootPanel.style.top = rootListTop + 'px';
                                         newRootPanel.style.width = windowWidth + 'px';
                                         
