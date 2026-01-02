@@ -15,6 +15,10 @@ const morphologyData = {};
     const highlightedRoots = {};
     let nextColorIndex = 1;
     
+    // Currently searched root and selected word
+    let currentSearchedRoot = null;
+    let currentSelectedWord = null; // {ayah, wordIndex}
+    
     // Color palette for highlighting (using distinct colors)
     const highlightColors = [
         '#FFE5E5', // Light red
@@ -714,6 +718,20 @@ const morphologyData = {};
         // Remove highlight from all words with this root
         removeRootHighlightFromWords(root);
         
+        // Remove selection if this root was being searched
+        if (currentSearchedRoot === root && currentSelectedWord) {
+            const { ayah, wordIndex } = currentSelectedWord;
+            const wordElements = document.querySelectorAll(
+                `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
+            );
+            wordElements.forEach(el => {
+                el.classList.remove('root-selected-word');
+                el.style.outline = '';
+            });
+            currentSearchedRoot = null;
+            currentSelectedWord = null;
+        }
+        
         // Remove from highlighted roots
         delete highlightedRoots[root];
     }
@@ -909,6 +927,305 @@ const morphologyData = {};
         return panel;
     }
     
+    // Find all words with a given root, sorted in RTL order (by ayah and wordIndex)
+    function findAllWordsWithRoot(root) {
+        const words = rootToWordsMap[root] || [];
+        
+        // Sort by ayah first, then by wordIndex (RTL order - as they appear in text)
+        const sortedWords = [...words].sort((a, b) => {
+            if (a.ayah !== b.ayah) {
+                return a.ayah - b.ayah;
+            }
+            return a.wordIndex - b.wordIndex;
+        });
+        
+        return sortedWords;
+    }
+    
+    // Find visible words with a given root in the viewport
+    function findVisibleWordsWithRoot(root) {
+        const words = rootToWordsMap[root] || [];
+        const visibleWords = [];
+        
+        // Get viewport dimensions
+        let viewportTop, viewportBottom, viewportLeft, viewportRight;
+        if (isMobileMode && mobileContentWrapper) {
+            const wrapperRect = mobileContentWrapper.getBoundingClientRect();
+            viewportTop = wrapperRect.top;
+            viewportBottom = wrapperRect.bottom;
+            viewportLeft = wrapperRect.left;
+            viewportRight = wrapperRect.right;
+        } else {
+            viewportTop = 0;
+            viewportBottom = window.innerHeight;
+            viewportLeft = 0;
+            viewportRight = window.innerWidth;
+        }
+        
+        words.forEach(({ ayah, wordIndex }) => {
+            const wordElements = document.querySelectorAll(
+                `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
+            );
+            
+            wordElements.forEach(element => {
+                const rect = element.getBoundingClientRect();
+                
+                // Check if element is visible in viewport
+                if (rect.top >= viewportTop && rect.bottom <= viewportBottom &&
+                    rect.left >= viewportLeft && rect.right <= viewportRight &&
+                    rect.width > 0 && rect.height > 0) {
+                    visibleWords.push({ ayah, wordIndex, element, rect });
+                }
+            });
+        });
+        
+        // Sort by position in RTL order (ayah, then wordIndex)
+        visibleWords.sort((a, b) => {
+            if (a.ayah !== b.ayah) {
+                return a.ayah - b.ayah;
+            }
+            return a.wordIndex - b.wordIndex;
+        });
+        
+        return visibleWords;
+    }
+    
+    // Select and highlight a word, scroll it to top
+    function selectWord(ayah, wordIndex, root) {
+        // Remove previous selection (if any)
+        if (currentSelectedWord) {
+            const prevAyah = currentSelectedWord.ayah;
+            const prevWordIndex = currentSelectedWord.wordIndex;
+            const prevElements = document.querySelectorAll(
+                `.morph-word[data-ayah="${prevAyah}"][data-word-index="${prevWordIndex}"]`
+            );
+            prevElements.forEach(el => {
+                el.classList.remove('root-selected-word');
+                el.style.outline = '';
+            });
+        }
+        
+        // Add selection to current word
+        currentSearchedRoot = root;
+        currentSelectedWord = { ayah, wordIndex };
+        const wordElements = document.querySelectorAll(
+            `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
+        );
+        
+        wordElements.forEach(el => {
+            el.classList.add('root-selected-word');
+            el.style.outline = '1px dotted red';
+            // el.style.borderRadius = '2px';
+            
+            // Scroll to top of viewport (handle mobile mode)
+            const rect = el.getBoundingClientRect();
+            if (isMobileMode && mobileContentWrapper) {
+                // In mobile mode, scroll the wrapper
+                const wrapperRect = mobileContentWrapper.getBoundingClientRect();
+                const relativeTop = rect.top - wrapperRect.top + mobileContentWrapper.scrollTop;
+                mobileContentWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
+            } else {
+                // Normal mode, scroll window
+                const scrollY = window.scrollY || window.pageYOffset;
+                const targetY = scrollY + rect.top;
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+            }
+        });
+        
+        // Update panel to show which root is being searched
+        updateHighlightedRootsPanel();
+    }
+    
+    // Find and select next word for a root (RTL search - circular, starting from viewport)
+    function selectNextWordForRoot(root, direction = 'next') {
+        const allWords = findAllWordsWithRoot(root);
+        if (allWords.length === 0) return;
+
+        // find first visible word
+
+
+        function getVisibleMorphWordRange() {
+            const spans = document.querySelectorAll('span.morph-word');
+        
+            let firstAyah = Infinity, firstWord = Infinity;
+            let lastAyah = -Infinity, lastWord = -Infinity;
+        
+            const vh = window.innerHeight;
+            const vw = window.innerWidth;
+        
+            for (const el of spans) {
+                const rect = el.getBoundingClientRect();
+        
+                const isVisible =
+                    rect.bottom > 0 &&
+                    rect.top < vh &&
+                    rect.right > 0 &&
+                    rect.left < vw;
+        
+                if (!isVisible) continue;
+        
+                const ayah = Number(el.dataset.ayah);
+                const word = Number(el.dataset.wordIndex);
+        
+                if (ayah < firstAyah || (ayah === firstAyah && word < firstWord)) {
+                    firstAyah = ayah;
+                    firstWord = word;
+                }
+                if (ayah > lastAyah || (ayah === lastAyah && word > lastWord)) {
+                    lastAyah = ayah;
+                    lastWord = word;
+                }
+            }
+        
+            if (firstAyah === Infinity) return null; // nothing visible
+            return { firstAyah, firstWord, lastAyah, lastWord };
+        }
+        
+        
+        let nextWord;
+        
+        if (currentSearchedRoot === root && currentSelectedWord) {
+
+            if (direction === 'next') {
+                const nextIndex = allWords.findIndex(
+                        w => w.ayah === currentSelectedWord.ayah && w.wordIndex > currentSelectedWord.wordIndex || 
+                        w.ayah > currentSelectedWord.ayah
+                    );
+                nextWord = nextIndex >= 0 ? allWords[nextIndex] : allWords[0];
+            } else {
+                const nextIndex = allWords.findIndex(
+                    w => w.ayah === currentSelectedWord.ayah && w.wordIndex === currentSelectedWord.wordIndex
+                );
+                nextWord = nextIndex > 0 ? allWords[nextIndex - 1] : allWords[allWords.length - 1];
+            }
+            
+            // if (currentIndex >= 0) {
+            //     // Select next word (circular - wrap to beginning if at end)
+            //     const nextIndex = (currentIndex + 1) % allWords.length;
+            //     nextWord = allWords[nextIndex];
+            // } else {
+            //     // Current selection not found in all words, start from visible words
+            //     const visibleWords = findVisibleWordsWithRoot(root);
+            //     if (visibleWords.length > 0) {
+            //         nextWord = visibleWords[0];
+            //     } else {
+            //         nextWord = allWords[0];
+            //     }
+            // }
+
+            // // Check if current selection is visible
+            // const currentWordElements = document.querySelectorAll(
+            //     `.morph-word[data-ayah="${currentSelectedWord.ayah}"][data-word-index="${currentSelectedWord.wordIndex}"]`
+            // );
+            // let isCurrentVisible = false;
+            // let viewportTop, viewportBottom, viewportLeft, viewportRight;
+            
+            // if (isMobileMode && mobileContentWrapper) {
+            //     const wrapperRect = mobileContentWrapper.getBoundingClientRect();
+            //     viewportTop = wrapperRect.top;
+            //     viewportBottom = wrapperRect.bottom;
+            //     viewportLeft = wrapperRect.left;
+            //     viewportRight = wrapperRect.right;
+            // } else {
+            //     viewportTop = 0;
+            //     viewportBottom = window.innerHeight;
+            //     viewportLeft = 0;
+            //     viewportRight = window.innerWidth;
+            // }
+            
+            // for (let el of currentWordElements) {
+            //     const rect = el.getBoundingClientRect();
+            //     if (rect.top >= viewportTop && rect.bottom <= viewportBottom &&
+            //         rect.left >= viewportLeft && rect.right <= viewportRight &&
+            //         rect.width > 0 && rect.height > 0) {
+            //         isCurrentVisible = true;
+            //         break;
+            //     }
+            // }
+            
+            // if (isCurrentVisible) {
+            //     // Current is visible, find next word after it (RTL order)
+            //     const currentIndex = allWords.findIndex(
+            //         w => w.ayah === currentSelectedWord.ayah && w.wordIndex === currentSelectedWord.wordIndex
+            //     );
+                
+            //     if (currentIndex >= 0) {
+            //         // Select next word (circular - wrap to beginning if at end)
+            //         const nextIndex = (currentIndex + 1) % allWords.length;
+            //         nextWord = allWords[nextIndex];
+            //     } else {
+            //         // Current selection not found in all words, start from visible words
+            //         const visibleWords = findVisibleWordsWithRoot(root);
+            //         if (visibleWords.length > 0) {
+            //             nextWord = visibleWords[0];
+            //         } else {
+            //             nextWord = allWords[0];
+            //         }
+            //     }
+            // } else {
+            //     // Current is not visible, start from visible words in viewport
+            //     const visibleWords = findVisibleWordsWithRoot(root);
+            //     if (visibleWords.length > 0) {
+            //         nextWord = visibleWords[0];
+            //     } else {
+            //         // No visible words, continue from current position
+            //         const currentIndex = allWords.findIndex(
+            //             w => w.ayah === currentSelectedWord.ayah && w.wordIndex === currentSelectedWord.wordIndex
+            //         );
+            //         if (currentIndex >= 0) {
+            //             const nextIndex = (currentIndex + 1) % allWords.length;
+            //             nextWord = allWords[nextIndex];
+            //         } else {
+            //             nextWord = allWords[0];
+            //         }
+            //     }
+            // }
+        } else {
+            // // Different root or no current selection, start from visible words in viewport
+            // const visibleWords = findVisibleWordsWithRoot(root);
+            // if (visibleWords.length > 0) {
+            //     nextWord = visibleWords[0];
+            // } else {
+            //     // No visible words, start from beginning of all words
+            //     nextWord = allWords[0];
+            // }
+            let ayah, wordIndex;
+            if (currentSelectedWord) {
+                ayah = currentSelectedWord.ayah;
+                wordIndex = currentSelectedWord.wordIndex;
+            } else {
+                const { firstAyah, firstWord, lastAyah, lastWord } = getVisibleMorphWordRange();
+                ayah = firstAyah;
+                wordIndex = firstWord;
+            }
+            const nextIndex = allWords.findIndex(
+                w => w.ayah === ayah && w.wordIndex >= wordIndex || 
+                w.ayah > ayah
+            );
+            nextWord = nextIndex >= 0 ? allWords[nextIndex] : allWords[0];
+
+        }
+        
+        selectWord(nextWord.ayah, nextWord.wordIndex, root);
+    }
+    
+    // Unhighlight currently selected word (but keep root in list)
+    function unhighlightCurrentSelection() {
+        if (currentSelectedWord) {
+            const { ayah, wordIndex } = currentSelectedWord;
+            const wordElements = document.querySelectorAll(
+                `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
+            );
+            wordElements.forEach(el => {
+                el.classList.remove('root-selected-word');
+                el.style.border = '';
+            });
+        }
+        currentSearchedRoot = null;
+        currentSelectedWord = null;
+        updateHighlightedRootsPanel();
+    }
+    
     // Update the highlighted roots panel
     function updateHighlightedRootsPanel() {
         const content = document.getElementById('highlighted-roots-content');
@@ -923,9 +1240,31 @@ const morphologyData = {};
         // Clear existing content
         content.innerHTML = '';
         
+        // Add button to unhighlight currently selected word
+        const unhighlightBtn = document.createElement('button');
+        unhighlightBtn.textContent = 'لغو برجسته‌سازی';
+        unhighlightBtn.style.cssText = `
+            width: 100%;
+            padding: 4px;
+            margin-bottom: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            background: #ff8800;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            font-family: Arial, sans-serif;
+        `;
+        unhighlightBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            unhighlightCurrentSelection();
+        });
+        content.appendChild(unhighlightBtn);
+        
         roots.forEach(root => {
             const { colorIndex, color } = highlightedRoots[root];
             const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
+            const isBeingSearched = currentSearchedRoot === root;
             
             const rootDiv = document.createElement('div');
             rootDiv.setAttribute('data-root', root);
@@ -934,7 +1273,7 @@ const morphologyData = {};
                 align-items: center;
                 gap: 2px;
                 background: ${color};
-                border: 1px solid #ccc;
+                border: ${isBeingSearched ? '2px solid red' : '1px solid #ccc'};
                 border-radius: 2px;
                 cursor: pointer;
                 padding: 1px 3px;
@@ -942,11 +1281,10 @@ const morphologyData = {};
                 line-height: 1.1;
             `;
             
-            // Make entire div clickable
+            // Make root div clickable to search for next instance
             rootDiv.addEventListener('click', function(e) {
                 e.stopPropagation();
-                removeRootHighlight(root);
-                updateHighlightedRootsPanel();
+                selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
             });
             
             const colorBox = document.createElement('span');
@@ -959,7 +1297,12 @@ const morphologyData = {};
                 border-radius: 1px;
                 flex-shrink: 0;
             `;
-            
+
+            // colorBox.addEventListener('click', function(e) {
+            //     e.stopPropagation();
+            //     removeRootHighlight(root);
+            // });
+
             const rootText = document.createElement('span');
             rootText.textContent = root;
             rootText.style.cssText = 'font-weight: bold;';
