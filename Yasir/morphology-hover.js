@@ -1278,11 +1278,11 @@ const morphologyData = {};
             // Remove minimap and root panel from bottom row and append to body
             if (minimap && bottomRow.contains(minimap)) {
                 bottomRow.removeChild(minimap);
-                body.appendChild(minimap);
+                // body.appendChild(minimap);
             }
             if (rootPanel && bottomRow.contains(rootPanel)) {
                 bottomRow.removeChild(rootPanel);
-                body.appendChild(rootPanel);
+                // body.appendChild(rootPanel);
             }
             // Now remove the bottom row container
             bottomRow.remove();
@@ -1307,6 +1307,8 @@ const morphologyData = {};
         const surahHeader = getSurahHeader();
         
         if (minimap) {
+            body.appendChild(minimap);
+
             minimap.style.position = 'fixed';
             minimap.style.width = calculateWindowWidth() + 'px';
             minimap.style.maxWidth = ''; // Clear maxWidth from mobile mode
@@ -1315,14 +1317,17 @@ const morphologyData = {};
             minimap.style.height = 'auto';
             minimap.style.margin = '';
             minimap.style.flexShrink = '';
-            
+
             let topPosition = 10;
             if (surahHeader) {
                 const rect = surahHeader.getBoundingClientRect();
-                topPosition = rect.bottom + 10;
+                const scrollY = window.scrollY || window.pageYOffset || 0;
+                topPosition = rect.bottom + scrollY + 10;
+                // console.log('topPosition: ', topPosition, 'scrollY: ', scrollY, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
             }
             minimap.style.top = topPosition + 'px';
             minimap.style.left = '10px';
+            // error('topPosition: ', topPosition, 'scrollY: ', scrollY, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
             
             // Preserve visibility state
             const wasVisible = minimap.style.display !== 'none' && minimap.style.display !== '';
@@ -1336,6 +1341,7 @@ const morphologyData = {};
             const minimapContent = document.getElementById('minimap-content');
             const visibleHighlight = document.getElementById('minimap-visible-highlight');
             const wordRects = minimap._wordRects;
+            
             if (minimapContent && visibleHighlight && wordRects) {
                 setTimeout(() => {
                     updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
@@ -1344,6 +1350,7 @@ const morphologyData = {};
         }
         
         if (rootPanel) {
+            body.appendChild(rootPanel);
             rootPanel.style.position = 'fixed';
             rootPanel.style.width = calculateWindowWidth() + 'px';
             rootPanel.style.maxHeight = '400px';
@@ -1629,12 +1636,12 @@ const morphologyData = {};
                     if (ayeNumberFontSize === null) {
                         ayeNumberFontSize = 8;
                         let [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: ayeNumberFontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
-                        console.log('measuredHeight: ', measuredHeight, 'height: ', height);
+                        // console.log('measuredHeight: ', measuredHeight, 'height: ', height);
                         while (measuredHeight > height && ayeNumberFontSize > 1) {
                             ayeNumberFontSize--;
                             [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: ayeNumberFontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
                         }
-                        console.log('ayeNumberFontSize: ', ayeNumberFontSize);
+                        // console.log('ayeNumberFontSize: ', ayeNumberFontSize);
                     }
                     const fontSize = ayeNumberFontSize;
                     const [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
@@ -1807,6 +1814,7 @@ const morphologyData = {};
             //     // Header is below viewport, position at top
             //     topPosition = 10;
             // }
+            // console.log('topPosition: ', topPosition, 'scrollY: ', scrollY, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
         }
         
         // Calculate responsive width and max height
@@ -1814,7 +1822,8 @@ const morphologyData = {};
         const viewportHeight = window.innerHeight;
         const availableHeight = viewportHeight - topPosition - 20; // Leave 20px margin at bottom
         const maxHeight = Math.min(300, Math.floor(availableHeight / 2) - 15); // Half for each, minus spacing
-        
+
+
         minimap.style.cssText = `
             position: fixed;
             top: ${topPosition}px;
