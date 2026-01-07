@@ -196,6 +196,14 @@ speech[gray]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-blackdashedbold {
+  border-bottom: 2px dashed rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-blackdashed-far {
   border-bottom: 1px dashed rgb(150, 150, 150);
   border-left: 0;
