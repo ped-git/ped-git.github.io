@@ -19,6 +19,14 @@ const morphologyData = {};
     let currentSearchedRoot = null;
     let currentSelectedWord = null; // {ayah, wordIndex}
     
+    // Roots frequency data
+    let rootsFreqData = null;
+    // Store roots data for current sura
+    let currentSuraTopRoots = null;
+    let currentSuraDistinctiveRoots = null;
+    let currentSuraHighKlRoots = null;
+    let currentSuraN2NRoots = null;
+    
     // Color palette for highlighting (using distinct colors)
     const highlightColors = [
         '#FFE5E5', // Light red
@@ -128,6 +136,35 @@ const morphologyData = {};
         '_': ''     // U+0640 Tatweel (extended)
     };
 
+    // Create reverse mapping from Arabic to Buckwalter
+    const arabicToBuckwalter = {};
+    for (const [buckwalter, arabic] of Object.entries(buckwalterToArabic)) {
+        if (arabic && arabic !== '') {
+            // Handle multiple Buckwalter chars mapping to same Arabic (like 'A' and '{' both map to 'ا')
+            if (!arabicToBuckwalter[arabic]) {
+                arabicToBuckwalter[arabic] = buckwalter;
+            }
+        }
+    }
+    
+    // Convert Arabic to Buckwalter transliteration
+    function convertArabicToBuckwalter(text) {
+        if (!text) return '';
+        
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const buckwalterChar = arabicToBuckwalter[char];
+            if (buckwalterChar) {
+                result += buckwalterChar;
+            } else {
+                // If no mapping found, keep original character
+                result += char;
+            }
+        }
+        return result;
+    }
+    
     // Convert Buckwalter transliteration to Arabic
     function convertBuckwalterToArabic(text) {
         if (!text) return '';
@@ -213,7 +250,7 @@ const morphologyData = {};
                 }
             }
             
-            // Build root-to-words map
+            // Build root-to-words map (root is already in Arabic from line 230)
             if (root) {
                 if (!rootToWordsMap[root]) {
                     rootToWordsMap[root] = [];
@@ -873,6 +910,24 @@ const morphologyData = {};
         });
     }
     
+    // Load roots frequency data from JSON
+    async function loadRootsFreqData() {
+        if (rootsFreqData) return rootsFreqData; // Already loaded
+        
+        try {
+            const response = await fetch('../data/roots-freq.json');
+            if (!response.ok) {
+                console.warn('Could not load roots-freq.json');
+                return null;
+            }
+            rootsFreqData = await response.json();
+            return rootsFreqData;
+        } catch (error) {
+            console.warn('Error loading roots-freq.json:', error);
+            return null;
+        }
+    }
+    
     // Create panel for showing highlighted roots
     function createHighlightedRootsPanel() {
         // Check if panel already exists
@@ -915,13 +970,16 @@ const morphologyData = {};
             font-family: Arial, sans-serif;
             font-size: 9px;
             box-sizing: border-box;
-            display: none;
+            display: block;
         `;
         
         const content = document.createElement('div');
         content.id = 'highlighted-roots-content';
-        content.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';
+        content.style.cssText = 'display: flex; flex-direction: column; gap: 5px;';
         panel.appendChild(content);
+        
+        // Create sections for top roots, selective roots, and third section
+        // These will be added inside the content div
         
         document.body.appendChild(panel);
         return panel;
@@ -1231,37 +1289,54 @@ const morphologyData = {};
         const content = document.getElementById('highlighted-roots-content');
         if (!content) return;
         
-        const roots = Object.keys(highlightedRoots);
-        if (roots.length === 0) {
-            content.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای مشخص نشده</div>';
-            return;
-        }
-        
         // Clear existing content
         content.innerHTML = '';
         
-        // Add button to unhighlight currently selected word
-        const unhighlightBtn = document.createElement('button');
-        unhighlightBtn.textContent = 'لغو برجسته‌سازی';
-        unhighlightBtn.style.cssText = `
-            width: 100%;
-            padding: 4px;
-            margin-bottom: 4px;
-            font-size: 9px;
-            cursor: pointer;
-            background: #ff8800;
-            color: white;
-            border: none;
-            border-radius: 2px;
-            font-family: Arial, sans-serif;
-        `;
-        unhighlightBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            unhighlightCurrentSelection();
-        });
-        content.appendChild(unhighlightBtn);
+        // Section 1: Selected roots
+        const selectedSection = document.createElement('div');
+        selectedSection.style.cssText = 'margin-bottom: 8px;';
         
-        roots.forEach(root => {
+        const selectedTitle = document.createElement('div');
+        selectedTitle.textContent = 'ریشه‌های انتخاب شده';
+        selectedTitle.style.cssText = `
+            font-weight: bold;
+            margin-bottom: 3px;
+            padding: 2px;
+            border-bottom: 1px solid #ccc;
+            font-size: 9px;
+            line-height: 100%;
+        `;
+        selectedSection.appendChild(selectedTitle);
+        
+        const selectedContent = document.createElement('div');
+        selectedContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';
+        
+        const roots = Object.keys(highlightedRoots);
+        if (roots.length === 0) {
+            selectedContent.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای مشخص نشده</div>';
+        } else {
+            // Add button to unhighlight currently selected word
+            const unhighlightBtn = document.createElement('button');
+            unhighlightBtn.textContent = 'لغو برجسته‌سازی';
+            unhighlightBtn.style.cssText = `
+                width: 100%;
+                padding: 4px;
+                margin-bottom: 4px;
+                font-size: 9px;
+                cursor: pointer;
+                background: #ff8800;
+                color: white;
+                border: none;
+                border-radius: 2px;
+                font-family: Arial, sans-serif;
+            `;
+            unhighlightBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                unhighlightCurrentSelection();
+            });
+            selectedContent.appendChild(unhighlightBtn);
+            
+            roots.forEach(root => {
             const { colorIndex, color } = highlightedRoots[root];
             const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
             const isBeingSearched = currentSearchedRoot === root;
@@ -1284,7 +1359,11 @@ const morphologyData = {};
             // Make root div clickable to search for next instance
             rootDiv.addEventListener('click', function(e) {
                 e.stopPropagation();
-                selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
+                if (e.ctrlKey) {
+                    toggleRootHighlight(root);
+                } else {
+                    selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
+                }
             });
             
             const colorBox = document.createElement('span');
@@ -1304,7 +1383,7 @@ const morphologyData = {};
             // });
 
             const rootText = document.createElement('span');
-            rootText.textContent = root;
+            rootText.textContent = convertBuckwalterToArabic(root);
             rootText.style.cssText = 'font-weight: bold;';
             
             const countText = document.createElement('span');
@@ -1314,8 +1393,216 @@ const morphologyData = {};
             rootDiv.appendChild(colorBox);
             rootDiv.appendChild(rootText);
             rootDiv.appendChild(countText);
-            content.appendChild(rootDiv);
-        });
+            selectedContent.appendChild(rootDiv);
+            });
+        }
+        
+        selectedSection.appendChild(selectedContent);
+        content.appendChild(selectedSection);
+        
+        // Section 2: Top roots (if data is loaded)
+        if (currentSuraTopRoots) {
+            const topRootsSection = createRootListSection('top-roots-section', 'ریشه‌های پرتکرار', currentSuraTopRoots, 'top_roots');
+            content.appendChild(topRootsSection);
+        }
+        
+        // Section 3: Distinctive roots (if data is loaded)
+        if (currentSuraDistinctiveRoots) {
+            const distinctiveRootsSection = createRootListSection('selective-roots-section', 'ریشه‌های متمایز', currentSuraDistinctiveRoots, 'distinctive_roots');
+            content.appendChild(distinctiveRootsSection);
+        }
+        
+        // Section 4: High KL roots (if data is loaded)
+        if (currentSuraHighKlRoots) {
+            const highKlRootsSection = createRootListSection('high-kl-roots-section', 'ریشه‌های با KL بالا', currentSuraHighKlRoots, 'high_kl_roots');
+            content.appendChild(highKlRootsSection);
+        }
+        
+        // Section 5: N2N roots (if data is loaded)
+        if (currentSuraN2NRoots) {
+            const n2nRootsSection = createRootListSection('n2n-roots-section', 'ریشه‌های N2N', currentSuraN2NRoots, 'n2_N_roots');
+            content.appendChild(n2nRootsSection);
+        }
+    }
+    
+    // Format tooltip text for root data
+    function formatRootTooltip(rootData, sectionType) {
+        if (!rootData || typeof rootData === 'string') {
+            return '';
+        }
+        
+        let tooltip = '';
+        
+        if (sectionType === 'top_roots') {
+            // top_roots: root, count, rel_in_sura
+            tooltip = `تعداد: ${rootData.count || 0}\n`;
+            if (rootData.rel_in_sura !== undefined) {
+                tooltip += `نسبت در سوره: ${(rootData.rel_in_sura * 100).toFixed(2)}%`;
+            }
+        } else if (sectionType === 'distinctive_roots') {
+            // distinctive_roots: root, count, rel_in_sura, rel_elsewhere, ratio, log_ratio
+            tooltip = `تعداد: ${rootData.count || 0}\n`;
+            if (rootData.rel_in_sura !== undefined) {
+                tooltip += `نسبت در سوره: ${(rootData.rel_in_sura * 100).toFixed(2)}%\n`;
+            }
+            if (rootData.rel_elsewhere !== undefined) {
+                tooltip += `نسبت در جاهای دیگر: ${(rootData.rel_elsewhere * 100).toFixed(4)}%\n`;
+            }
+            if (rootData.ratio !== undefined) {
+                tooltip += `نسبت: ${rootData.ratio.toFixed(2)}\n`;
+            }
+            if (rootData.log_ratio !== undefined) {
+                tooltip += `لگاریتم نسبت: ${rootData.log_ratio.toFixed(2)}`;
+            }
+        } else if (sectionType === 'high_kl_roots') {
+            // high_kl_roots: root, count, p_sura, p_else, kl
+            tooltip = `تعداد: ${rootData.count || 0}\n`;
+            if (rootData.p_sura !== undefined) {
+                tooltip += `احتمال در سوره: ${(rootData.p_sura * 100).toFixed(4)}%\n`;
+            }
+            if (rootData.p_else !== undefined) {
+                tooltip += `احتمال در جاهای دیگر: ${(rootData.p_else * 100).toFixed(4)}%\n`;
+            }
+            if (rootData.kl !== undefined) {
+                tooltip += `KL: ${rootData.kl.toFixed(4)}`;
+            }
+        } else if (sectionType === 'n2_N_roots') {
+            // n2_N_roots: root, count, global, m
+            tooltip = `تعداد: ${rootData.count || 0}\n`;
+            if (rootData.global !== undefined) {
+                tooltip += `تعداد کل: ${rootData.global}\n`;
+            }
+            if (rootData.p !== undefined) {
+                tooltip += `احتمال در سوره: ${(rootData.p * 100).toFixed(4)}%\n`;
+            }
+            if (rootData.q !== undefined) {
+                tooltip += `احتمال کل: ${(rootData.q * 100).toFixed(4)}%\n`;
+            }
+            if (rootData.m !== undefined) {
+                tooltip += `m: ${(rootData.m).toFixed(2)}`;
+            }
+        }
+        
+        return tooltip.trim();
+    }
+    
+    // Create a root list section (for top roots, selective roots, etc.)
+    function createRootListSection(sectionId, title, roots, sectionType = null) {
+        const section = document.createElement('div');
+        section.id = sectionId;
+        section.style.cssText = 'margin-bottom: 8px;';
+        
+        // Add title
+        const titleDiv = document.createElement('div');
+        titleDiv.textContent = title;
+        titleDiv.style.cssText = `
+            font-weight: bold;
+            margin-bottom: 3px;
+            padding: 2px;
+            border-bottom: 1px solid #ccc;
+            font-size: 9px;
+            line-height: 100%;
+        `;
+        section.appendChild(titleDiv);
+        
+        // Add content container
+        const contentDiv = document.createElement('div');
+        contentDiv.id = sectionId + '-content';
+        contentDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';
+        section.appendChild(contentDiv);
+        
+        // Populate with roots
+        if (!roots || roots.length === 0) {
+            contentDiv.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای یافت نشد</div>';
+        } else {
+            roots.forEach((rootData) => {
+                const root = typeof rootData === 'string' ? rootData : rootData.root;
+                const count = rootData.count || 0;
+                // Convert root to Arabic for lookup (rootToWordsMap stores roots in Arabic)
+                // If root is already in Arabic, convertArabicToBuckwalter will return the original
+                // If root is in Buckwalter, we need to convert it to Arabic
+                const arabicRoot = convertBuckwalterToArabic(root);
+                // Also try the root as-is in case it's already in Arabic
+                const wordsInMap = rootToWordsMap[arabicRoot] || rootToWordsMap[root];
+                const wordCount = wordsInMap ? wordsInMap.length : 0;
+                
+                // Debug: log if root is not found
+                if (!wordsInMap && dataLoaded) {
+                    console.warn('Root from JSON not found in rootToWordsMap:', root, 'Arabic version:', arabicRoot, 'Available roots:', Object.keys(rootToWordsMap).slice(0, 10));
+                }
+                
+                const rootDiv = document.createElement('div');
+                // Store Arabic root in data attribute for lookups
+                rootDiv.setAttribute('data-root', arabicRoot);
+                
+                // Add tooltip with root data information
+                if (sectionType && typeof rootData === 'object') {
+                    const tooltipText = formatRootTooltip(rootData, sectionType);
+                    if (tooltipText) {
+                        rootDiv.setAttribute('title', tooltipText);
+                    }
+                }
+                
+                rootDiv.style.cssText = `
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 2px;
+                    background: #e8e8e8;
+                    border: 1px solid #ccc;
+                    border-radius: 2px;
+                    cursor: pointer;
+                    padding: 1px 3px;
+                    font-size: 8px;
+                    line-height: 1.1;
+                `;
+                
+                // Make root div clickable to add to highlighted roots
+                rootDiv.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // Get the root from data attribute to ensure we use the correct format
+                    const clickedRoot = rootDiv.getAttribute('data-root');
+                    if (!highlightedRoots[clickedRoot]) {
+                        // Check if root exists in rootToWordsMap
+                        if (!rootToWordsMap[clickedRoot] || rootToWordsMap[clickedRoot].length === 0) {
+                            console.warn('Root not found in rootToWordsMap:', clickedRoot);
+                            // Still add it to highlighted roots, but don't highlight words
+                            const colorIndex = nextColorIndex % highlightColors.length;
+                            const color = highlightColors[colorIndex];
+                            highlightedRoots[clickedRoot] = { colorIndex, color };
+                            nextColorIndex++;
+                        } else {
+                            // Add root to highlighted roots
+                            const colorIndex = nextColorIndex % highlightColors.length;
+                            const color = highlightColors[colorIndex];
+                            highlightedRoots[clickedRoot] = { colorIndex, color };
+                            nextColorIndex++;
+                            
+                            // Apply highlight
+                            applyRootHighlight(clickedRoot, color);
+                        }
+                        updateHighlightedRootsPanel();
+                    }
+                });
+                
+                const rootText = document.createElement('span');
+                // Display root in Arabic (it's already converted or was already Arabic)
+                rootText.textContent = arabicRoot;
+                rootText.style.cssText = 'font-weight: bold;';
+                
+                const countText = document.createElement('span');
+                // Use wordCount from rootToWordsMap if available, otherwise use count from JSON
+                // This ensures we show the actual number of words in the text
+                const displayCount = wordCount > 0 ? wordCount : (count > 0 ? count : 0);
+                countText.textContent = `(${displayCount})`;
+                countText.style.cssText = 'color: #666; font-size: 7px;';
+                
+                rootDiv.appendChild(rootText);
+                rootDiv.appendChild(countText);
+                contentDiv.appendChild(rootDiv);
+            });
+        }
+        
+        return section;
     }
     
     // Expose remove function globally for onclick handlers
@@ -1544,16 +1831,16 @@ const morphologyData = {};
             minimap.style.top = 'auto';
             minimap.style.left = 'auto';
             
-            // In flex container, use flex-basis with fixed width and let root panel take remaining space
+            // In flex container, use flex-basis with fixed width
             const fixedWidth = calculateWindowWidth();
             minimap.style.width = `${fixedWidth}px`;
-            minimap.style.flex = `0 0 ${fixedWidth}px`; // flex-grow: 0, flex-shrink: 0, flex-basis: fixedWidth
-            minimap.style.maxWidth = `${fixedWidth}px`; // Prevent growing beyond fixed width
+            minimap.style.flex = `0 0 ${fixedWidth}px`;
+            minimap.style.maxWidth = `${fixedWidth}px`;
             minimap.style.height = `${availableHeight}px`;
             minimap.style.maxHeight = `${availableHeight}px`;
             minimap.style.minHeight = `${availableHeight}px`;
             minimap.style.margin = '0';
-            minimap.style.display = 'block'; // Ensure it's visible
+            minimap.style.display = 'block';
 
             // Append to bottom row if not already there
             if (!bottomRow.contains(minimap)) {
@@ -1571,13 +1858,13 @@ const morphologyData = {};
             rootPanel.style.position = 'relative';
             rootPanel.style.top = 'auto';
             rootPanel.style.left = 'auto';
-            rootPanel.style.flex = '1 1 auto'; // Take remaining space after minimap
-            rootPanel.style.minWidth = '0'; // Allow shrinking if needed
+            rootPanel.style.flex = '1 1 auto'; // Take remaining space after minimap and other panels
+            rootPanel.style.minWidth = '0';
             rootPanel.style.height = `${availableHeight}px`;
             rootPanel.style.maxHeight = `${availableHeight}px`;
             rootPanel.style.minHeight = `${availableHeight}px`;
             rootPanel.style.margin = '0';
-            rootPanel.style.display = 'block'; // Ensure it's visible
+            rootPanel.style.display = 'block';
             
             // Append to bottom row if not already there
             if (!bottomRow.contains(rootPanel)) {
@@ -1613,12 +1900,15 @@ const morphologyData = {};
         const body = document.body;
         const bottomRow = document.getElementById('mobile-bottom-row');
         
-        // First, extract minimap and root panel from bottom row BEFORE removing it
+        // First, extract minimap and all root panels from bottom row BEFORE removing it
         const minimap = document.getElementById('morphology-minimap');
         const rootPanel = document.getElementById('highlighted-roots-panel');
+        const topRootsPanel = document.getElementById('top-roots-panel');
+        const selectiveRootsPanel = document.getElementById('selective-roots-panel');
+        const thirdRootsPanel = document.getElementById('third-roots-panel');
         
         if (bottomRow) {
-            // Remove minimap and root panel from bottom row and append to body
+            // Remove minimap and all root panels from bottom row and append to body
             if (minimap && bottomRow.contains(minimap)) {
                 bottomRow.removeChild(minimap);
                 // body.appendChild(minimap);
@@ -1725,6 +2015,7 @@ const morphologyData = {};
                 rootPanel.style.display = 'block';
             }
         }
+        
     }
     
     // Calculate responsive width for windows (minimum 120px, responsive to viewport)
@@ -1806,6 +2097,12 @@ const morphologyData = {};
                         const availableHeight = viewportHeight - rootListTop - 20; // Leave 20px margin at bottom
                         const rootListMaxHeight = Math.min(400, availableHeight);
                         rootPanel.style.maxHeight = rootListMaxHeight + 'px';
+                        
+                        // Show and position three new root panels below highlighted roots panel
+                        if (topRootsPanel) topRootsPanel.style.display = 'block';
+                        if (selectiveRootsPanel) selectiveRootsPanel.style.display = 'block';
+                        if (thirdRootsPanel) thirdRootsPanel.style.display = 'block';
+                        positionRootPanels();
                         
                         // Update minimap content positions
                         const minimapContent = document.getElementById('minimap-content');
@@ -2627,6 +2924,22 @@ const morphologyData = {};
                 // Create highlighted roots panel
                 createHighlightedRootsPanel();
                 updateHighlightedRootsPanel();
+                
+                // Load and store root frequency data for current sura
+                loadRootsFreqData().then((data) => {
+                    if (data && data.suras && data.suras[sureNumber]) {
+                        const suraData = data.suras[sureNumber];
+                        
+                        // Store roots data for use in updateHighlightedRootsPanel
+                        currentSuraTopRoots = suraData.top_roots || null;
+                        currentSuraDistinctiveRoots = suraData.distinctive_roots || null;
+                        currentSuraHighKlRoots = suraData.high_kl_roots || null;
+                        currentSuraN2NRoots = suraData.n2_N_roots || null;
+                        
+                        // Update the panel to include these sections
+                        updateHighlightedRootsPanel();
+                    }
+                });
                 
                 // Add resize event listener to update minimap
                 let resizeTimeout;
