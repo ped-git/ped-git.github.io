@@ -934,12 +934,11 @@ const morphologyData = {};
         let panel = document.getElementById('highlighted-roots-panel');
         if (panel) return panel;
         
-        // Calculate position - place root panel below minimap (stacked)
+        // Calculate position - in desktop mode, it's inside wrapper; in mobile mode, it's standalone
         const surahHeader = getSurahHeader();
         let topPosition = 420;
         if (surahHeader) {
             const rect = surahHeader.getBoundingClientRect();
-            // Will be positioned below minimap dynamically
             topPosition = rect.bottom + 10;
         }
         
@@ -950,14 +949,20 @@ const morphologyData = {};
         // Allow root list to use remaining space, but cap at reasonable max
         const rootListMaxHeight = Math.min(400, availableHeight - 10); // Leave 10px margin
         
+        // Get or create wrapper for desktop mode
+        const wrapper = createCombinedPanelWrapper();
+        
         panel = document.createElement('div');
         panel.id = 'highlighted-roots-panel';
         panel.style.cssText = `
-            position: fixed;
-            top: ${topPosition}px;
-            left: 10px;
+            ${wrapper ? 'position: relative;' : 'position: fixed;'}
+            ${wrapper ? '' : `top: ${topPosition}px;`}
+            ${wrapper ? '' : 'left: 10px;'}
             width: ${windowWidth}px;
-            max-height: ${rootListMaxHeight}px;
+            ${wrapper ? 'flex: 0 0 50%;' : `max-height: ${rootListMaxHeight}px;`}
+            ${wrapper ? 'height: 50%;' : ''}
+            ${wrapper ? 'max-height: none; top: auto;' : ''}
+            min-height: 0;
             background: #f5f5f5;
             border: 1px solid #aaa;
             border-radius: 4px;
@@ -973,6 +978,12 @@ const morphologyData = {};
             display: block;
         `;
         
+        // Explicitly remove top and max-height if in wrapper (to override any previous inline styles)
+        if (wrapper) {
+            panel.style.removeProperty('top');
+            panel.style.removeProperty('max-height');
+        }
+        
         const content = document.createElement('div');
         content.id = 'highlighted-roots-content';
         content.style.cssText = 'display: flex; flex-direction: column; gap: 5px;';
@@ -981,7 +992,12 @@ const morphologyData = {};
         // Create sections for top roots, selective roots, and third section
         // These will be added inside the content div
         
-        document.body.appendChild(panel);
+        // Append to wrapper if in desktop mode, otherwise to body
+        if (wrapper) {
+            wrapper.appendChild(panel);
+        } else {
+            document.body.appendChild(panel);
+        }
         return panel;
     }
     
@@ -1337,63 +1353,63 @@ const morphologyData = {};
             selectedContent.appendChild(unhighlightBtn);
             
             roots.forEach(root => {
-            const { colorIndex, color } = highlightedRoots[root];
-            const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
-            const isBeingSearched = currentSearchedRoot === root;
-            
-            const rootDiv = document.createElement('div');
-            rootDiv.setAttribute('data-root', root);
-            rootDiv.style.cssText = `
-                display: inline-flex;
-                align-items: center;
-                gap: 2px;
-                background: ${color};
-                border: ${isBeingSearched ? '2px solid red' : '1px solid #ccc'};
-                border-radius: 2px;
-                cursor: pointer;
-                padding: 1px 3px;
-                font-size: 8px;
-                line-height: 1.1;
-            `;
-            
-            // Make root div clickable to search for next instance
-            rootDiv.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (e.ctrlKey) {
-                    toggleRootHighlight(root);
-                } else {
-                    selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
-                }
-            });
-            
-            const colorBox = document.createElement('span');
-            colorBox.style.cssText = `
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                background: ${color};
-                border: 1px solid #666;
-                border-radius: 1px;
-                flex-shrink: 0;
-            `;
+                const { colorIndex, color } = highlightedRoots[root];
+                const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
+                const isBeingSearched = currentSearchedRoot === root;
+                
+                const rootDiv = document.createElement('div');
+                rootDiv.setAttribute('data-root', root);
+                rootDiv.style.cssText = `
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 2px;
+                    background: ${color};
+                    border: ${isBeingSearched ? '2px solid red' : '1px solid #ccc'};
+                    border-radius: 2px;
+                    cursor: pointer;
+                    padding: 1px 3px;
+                    font-size: 8px;
+                    line-height: 1.1;
+                `;
+                
+                // Make root div clickable to search for next instance
+                rootDiv.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (e.ctrlKey) {
+                        toggleRootHighlight(root);
+                    } else {
+                        selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
+                    }
+                });
+                
+                const colorBox = document.createElement('span');
+                colorBox.style.cssText = `
+                    display: inline-block;
+                    width: 8px;
+                    height: 8px;
+                    background: ${color};
+                    border: 1px solid #666;
+                    border-radius: 1px;
+                    flex-shrink: 0;
+                `;
 
-            // colorBox.addEventListener('click', function(e) {
-            //     e.stopPropagation();
-            //     removeRootHighlight(root);
-            // });
+                // colorBox.addEventListener('click', function(e) {
+                //     e.stopPropagation();
+                //     removeRootHighlight(root);
+                // });
 
-            const rootText = document.createElement('span');
-            rootText.textContent = convertBuckwalterToArabic(root);
-            rootText.style.cssText = 'font-weight: bold;';
-            
-            const countText = document.createElement('span');
-            countText.textContent = `(${wordCount})`;
-            countText.style.cssText = 'color: #666; font-size: 7px;';
-            
-            rootDiv.appendChild(colorBox);
-            rootDiv.appendChild(rootText);
-            rootDiv.appendChild(countText);
-            selectedContent.appendChild(rootDiv);
+                const rootText = document.createElement('span');
+                rootText.textContent = convertBuckwalterToArabic(root);
+                rootText.style.cssText = 'font-weight: bold;';
+                
+                const countText = document.createElement('span');
+                countText.textContent = `(${wordCount})`;
+                countText.style.cssText = 'color: #666; font-size: 7px;';
+                
+                rootDiv.appendChild(colorBox);
+                rootDiv.appendChild(rootText);
+                rootDiv.appendChild(countText);
+                selectedContent.appendChild(rootDiv);
             });
         }
         
@@ -1626,6 +1642,340 @@ const morphologyData = {};
         return null;
     }
     
+    // Sura names mapping (number to Arabic name)
+    // This will be populated from the current page and file names
+    const suraNames = {
+        1: 'الفاتحة', 2: 'البقرة', 3: 'آل عمران', 4: 'النساء', 5: 'المائدة',
+        6: 'الأنعام', 7: 'الأعراف', 8: 'الأنفال', 9: 'التوبة', 10: 'يونس',
+        11: 'هود', 12: 'يوسف', 13: 'الرعد', 14: 'إبراهيم', 15: 'الحجر',
+        16: 'النحل', 17: 'الإسراء', 18: 'الكهف', 19: 'مريم', 20: 'طه',
+        21: 'الأنبياء', 22: 'الحج', 23: 'المؤمنون', 24: 'النور', 25: 'الفرقان',
+        26: 'الشعراء', 27: 'النمل', 28: 'القصص', 29: 'العنكبوت', 30: 'الروم',
+        31: 'لقمان', 32: 'السجدة', 33: 'الأحزاب', 34: 'سبأ', 35: 'فاطر',
+        36: 'يس', 37: 'الصافات', 38: 'ص', 39: 'الزمر', 40: 'غافر',
+        41: 'فصلت', 42: 'الشورى', 43: 'الزخرف', 44: 'الدخان', 45: 'الجاثية',
+        46: 'الأحقاف', 47: 'محمد', 48: 'الفتح', 49: 'الحجرات', 50: 'ق',
+        51: 'الذاريات', 52: 'الطور', 53: 'النجم', 54: 'القمر', 55: 'الرحمن',
+        56: 'الواقعة', 57: 'الحديد', 58: 'المجادلة', 59: 'الحشر', 60: 'الممتحنة',
+        61: 'الصف', 62: 'الجمعة', 63: 'المنافقون', 64: 'التغابن', 65: 'الطلاق',
+        66: 'التحريم', 67: 'الملك', 68: 'القلم', 69: 'الحاقة', 70: 'المعارج',
+        71: 'نوح', 72: 'الجن', 73: 'المزمل', 74: 'المدثر', 75: 'القيامة',
+        76: 'الإنسان', 77: 'المرسلات', 78: 'النبأ', 79: 'النازعات', 80: 'عبس',
+        81: 'التكوير', 82: 'الانفطار', 83: 'المطففين', 84: 'الانشقاق', 85: 'البروج',
+        86: 'الطارق', 87: 'الأعلى', 88: 'الغاشية', 89: 'الفجر', 90: 'البلد',
+        91: 'الشمس', 92: 'الليل', 93: 'الضحى', 94: 'الشرح', 95: 'التين',
+        96: 'العلق', 97: 'القدر', 98: 'البينة', 99: 'الزلزلة', 100: 'العاديات',
+        101: 'القارعة', 102: 'التكاثر', 103: 'العصر', 104: 'الهمزة', 105: 'الفيل',
+        106: 'قريش', 107: 'الماعون', 108: 'الكوثر', 109: 'الكافرون', 110: 'النصر',
+        111: 'المسد', 112: 'الإخلاص', 113: 'الفلق', 114: 'الناس'
+    };
+    
+    // Get sura name from current page
+    function getCurrentSuraName() {
+        const header = getSurahHeader();
+        if (header) {
+            return header.textContent.trim();
+        }
+        return null;
+    }
+    
+    // Sura number to filename mapping
+    const suraFileNames = {
+        1: '001_Fatiha_html.html', 2: '002_Baqarah_html.html', 3: '003_AleImran_html.html',
+        4: '004_Nissa_html.html', 5: '005_Maedah_html.html', 6: '006_Anaam_html.html',
+        7: '007_Araf_html.html', 8: '008_Anfal_html.html', 9: '009_Tawbah_html.html',
+        10: '010_Yunus_html.html', 11: '011_Hud_html.html', 12: '012_Yusof_html.html',
+        13: '013_Raad_html.html', 14: '014_Ibrahim_html.html', 15: '015_Hejr_html.html',
+        16: '016_Nahl_html.html', 17: '017_Esra_html.html', 18: '018_Kahf_html.html',
+        19: '019_Maryam_html.html', 20: '020_Taha_html.html', 21: '021_Anbia_html.html',
+        22: '022_Haj_html.html', 23: '023_Momenun_html.html', 24: '024_Noor_html.html',
+        25: '025_Forqan_html.html', 26: '026_Shoara_html.html', 27: '027_Naml_html.html',
+        28: '028_Qasas_html.html', 29: '029_Ankabut_html.html', 30: '030_Rum_html.html',
+        31: '031_Loqman_html.html', 32: '032_Sajda_html.html', 33: '033_Ahzab_html.html',
+        34: '034_Saba_html.html', 35: '035_Fater_html.html', 36: '036_Yasin_html.html',
+        37: '037_Saffat_html.html', 38: '038_Saad_html.html', 39: '039_Zomar_html.html',
+        40: '040_Ghafer_html.html', 41: '041_Fussilat_html.html', 42: '042_Showra_html.html',
+        43: '043_Zokhrof_html.html', 44: '044_Dokhan_html.html', 45: '045_Jathiah_html.html',
+        46: '046_Ahqaf_html.html', 47: '047_Muhammad_html.html', 48: '048_Fath_html.html',
+        49: '049_Hojorat_html.html', 50: '050_Qaf_html.html', 51: '051_Zariyat_html.html',
+        52: '052_Tur_html.html', 53: '053_Najm_html.html', 54: '054_Qamar_html.html',
+        55: '055_AlRahman_html.html', 56: '056_Waqea_html.html', 57: '057_Hadid_html.html',
+        58: '058_Mojadala_html.html', 59: '059_Hashr_html.html', 60: '060_Momtahena_html.html',
+        61: '061_Saff_html.html', 62: '062_Jome_html.html', 63: '063_Monafequn_html.html',
+        64: '064_Taqabon_html.html', 65: '065_Talaq_html.html', 66: '066_Tahrim_html.html',
+        67: '067_Molk_html.html', 68: '068_Qalam_html.html', 69: '069_Haqqa_html.html',
+        70: '070_Maarij_html.html', 71: '071_Nuh_html.html', 72: '072_Jin_html.html',
+        73: '073_Mozamel_html.html', 74: '074_Modathir_html.html', 75: '075_Qiyamah_html.html',
+        76: '076_Ensan_html.html', 77: '077_Morsalat_html.html', 78: '078_Nabaa_html.html',
+        79: '079_Nazeat_html.html', 80: '080_Abas_html.html', 81: '081_Takwir_html.html',
+        82: '082_Enfetar_html.html', 83: '083_Motafefin_html.html', 84: '084_Ensheqaq_html.html',
+        85: '085_Boruj_html.html', 86: '086_Tareq_html.html', 87: '087_Aala_html.html',
+        88: '088_Qashiya_html.html', 89: '089_Fajr_html.html', 90: '090_Balad_html.html',
+        91: '091_Shams_html.html', 92: '092_Layl_html.html', 93: '093_Dhoha_html.html',
+        94: '094_Sharh_html.html', 95: '095_Tin_html.html', 96: '096_Alaq_html.html',
+        97: '097_Qadr_html.html', 98: '098_Bayyenah_html.html', 99: '099_Zelzelah_html.html',
+        100: '100_Aadiyat_html.html', 101: '101_Qareah_html.html', 102: '102_Takathor_html.html',
+        103: '103_Aasr_html.html', 104: '104_Homazah_html.html', 105: '105_Fil_html.html',
+        106: '106_Qoraysh_html.html', 107: '107_Maaun_html.html', 108: '108_Kawthar_html.html',
+        109: '109_Kaferun_html.html', 110: '110_Nasr_html.html', 111: '111_Masad_html.html',
+        112: '112_Ekhlas_html.html', 113: '113_Falaq_html.html', 114: '114_Nas_html.html'
+    };
+    
+    // Get sura file name from sura number
+    function getSuraFileName(suraNumber) {
+        return suraFileNames[suraNumber] || null;
+    }
+    
+    // Create sura selection menu
+    function createSuraSelectionMenu() {
+        // Check if menu already exists
+        let menu = document.getElementById('sura-selection-menu');
+        if (menu) {
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            if (menu.style.display === 'block') {
+                updateSuraMenu();
+            }
+            return menu;
+        }
+        
+        const currentSura = sureNumber || parseInt(window.location.pathname.match(/(\d+)_/)?.[1]) || 1;
+        
+        menu = document.createElement('div');
+        menu.id = 'sura-selection-menu';
+        menu.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            max-width: 90vw;
+            max-height: 80vh;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            direction: rtl;
+            font-family: Arial, sans-serif;
+        `;
+        
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕';
+        closeBtn.style.cssText = `
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10002;
+        `;
+        closeBtn.addEventListener('click', () => {
+            menu.style.display = 'none';
+        });
+        menu.appendChild(closeBtn);
+        
+        // Title
+        const title = document.createElement('div');
+        title.textContent = 'انتخاب سوره';
+        title.style.cssText = `
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            background: #f5f5f5;
+        `;
+        menu.appendChild(title);
+        
+        // Search box
+        const searchContainer = document.createElement('div');
+        searchContainer.style.cssText = 'padding: 10px; border-bottom: 1px solid #ddd;';
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'جستجوی سوره...';
+        searchInput.id = 'sura-search-input';
+        searchInput.style.cssText = `
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            direction: rtl;
+            box-sizing: border-box;
+        `;
+        searchContainer.appendChild(searchInput);
+        menu.appendChild(searchContainer);
+        
+        // Sura list container
+        const listContainer = document.createElement('div');
+        listContainer.id = 'sura-list-container';
+        listContainer.style.cssText = `
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(80vh - 150px);
+        `;
+        menu.appendChild(listContainer);
+        
+        document.body.appendChild(menu);
+        
+        // Populate sura list
+        updateSuraMenu();
+        
+        // Add search functionality
+        searchInput.addEventListener('input', function() {
+            filterSuraList(this.value);
+        });
+        
+        // Close on outside click
+        menu.addEventListener('click', function(e) {
+            if (e.target === menu) {
+                menu.style.display = 'none';
+            }
+        });
+        
+        return menu;
+    }
+    
+    // Update sura menu list
+    function updateSuraMenu() {
+        const listContainer = document.getElementById('sura-list-container');
+        if (!listContainer) return;
+        
+        const currentSura = sureNumber || parseInt(window.location.pathname.match(/(\d+)_/)?.[1]) || 1;
+        
+        listContainer.innerHTML = '';
+        
+        // Create sura list items
+        for (let i = 1; i <= 114; i++) {
+            const suraName = suraNames[i] || `سوره ${i}`;
+            const suraItem = document.createElement('div');
+            suraItem.className = 'sura-menu-item';
+            suraItem.setAttribute('data-sura-number', i);
+            suraItem.style.cssText = `
+                padding: 10px 15px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: background-color 0.2s;
+                ${i === currentSura ? 'background: #e3f2fd; font-weight: bold;' : ''}
+            `;
+            
+            suraItem.innerHTML = `
+                <span>${i}. ${suraName}</span>
+            `;
+            
+            suraItem.addEventListener('mouseenter', function() {
+                if (i !== currentSura) {
+                    this.style.background = '#f5f5f5';
+                }
+            });
+            
+            suraItem.addEventListener('mouseleave', function() {
+                if (i !== currentSura) {
+                    this.style.background = '';
+                }
+            });
+            
+            suraItem.addEventListener('click', function() {
+                navigateToSura(i);
+            });
+            
+            listContainer.appendChild(suraItem);
+        }
+        
+        // Scroll to current sura
+        const currentItem = listContainer.querySelector(`[data-sura-number="${currentSura}"]`);
+        if (currentItem) {
+            currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+    
+    // Filter sura list based on search
+    function filterSuraList(searchText) {
+        const listContainer = document.getElementById('sura-list-container');
+        if (!listContainer) return;
+        
+        const items = listContainer.querySelectorAll('.sura-menu-item');
+        if (!searchText || searchText.trim() === '') {
+            items.forEach(item => {
+                item.style.display = 'flex';
+            });
+            return;
+        }
+        
+        // Convert Persian/Arabic numbers to English for search
+        const persianToEnglish = {
+            '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+            '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
+            'ي': 'ی', 'ك': 'ک', 'إ': 'ا', 'أ': 'ا', 'ؤ': 'و', 'ئ': 'ء',
+            'ة': 'ه', '‌': ' '
+            
+        };
+        const normalizedSearch = searchText.split('').map(char => persianToEnglish[char] || char).join('').toLowerCase();
+        
+        items.forEach(item => {
+            const text = item.textContent;
+            // Normalize text for comparison
+            const normalizedText = text.split('').map(char => persianToEnglish[char] || char).join('').toLowerCase();
+            const matches = normalizedText.includes(normalizedSearch);
+            item.style.display = matches ? 'flex' : 'none';
+        });
+    }
+    
+    // Navigate to a sura
+    function navigateToSura(suraNumber) {
+        const fileName = getSuraFileName(suraNumber);
+        if (fileName) {
+            // Get current directory
+            const currentPath = window.location.pathname;
+            const baseDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+            window.location.href = baseDir + fileName;
+        } else {
+            console.warn('Could not find filename for sura:', suraNumber);
+        }
+    }
+    
+    // Make sura header clickable
+    function makeSuraHeaderClickable() {
+        const header = getSurahHeader();
+        if (!header) return;
+        
+        // Check if already made clickable
+        if (header.hasAttribute('data-clickable')) return;
+        header.setAttribute('data-clickable', 'true');
+        
+        // Make header look clickable
+        header.style.cursor = 'pointer';
+        header.style.userSelect = 'none';
+        
+        // Add hover effect
+        const originalBg = header.style.backgroundColor || 'rgb(220,220,220)';
+        header.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'rgb(200,200,200)';
+        });
+        header.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = originalBg;
+        });
+        
+        // Add click handler
+        header.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const menu = createSuraSelectionMenu();
+            menu.style.display = 'block';
+        });
+    }
+    
     // Mobile mode state
     let isMobileMode = false;
     let mobileContentWrapper = null;
@@ -1664,7 +2014,10 @@ const morphologyData = {};
             z-index: 10000;
         `;
         
-        toggleBtn.addEventListener('click', toggleMinimapAndRootList);
+        toggleBtn.addEventListener('click', function(e) { 
+            e.stopPropagation(); // prevents bubbling up to the div
+            toggleMinimapAndRootList();
+        });
         surahHeader.appendChild(toggleBtn);
         
         // Create mobile mode toggle button
@@ -1686,7 +2039,10 @@ const morphologyData = {};
             z-index: 10000;
         `;
         
-        mobileToggleBtn.addEventListener('click', toggleMobileMode);
+        mobileToggleBtn.addEventListener('click', function(e) { 
+            e.stopPropagation(); // prevents bubbling up to the div
+            toggleMobileMode();
+        });
         surahHeader.appendChild(mobileToggleBtn);
     }
     
@@ -1936,31 +2292,57 @@ const morphologyData = {};
             mobileContentWrapper = null;
         }
         
-        // Restore minimap and root panel to fixed positioning
+        // Restore minimap and root panel to wrapper (desktop mode)
         const surahHeader = getSurahHeader();
+        // Get or create wrapper - if it exists, we'll reuse it; otherwise create new one
+        let wrapper = document.getElementById('morphology-combined-panel');
+        if (!wrapper) {
+            wrapper = createCombinedPanelWrapper();
+        }
         
-        if (minimap) {
-            body.appendChild(minimap);
+        if (minimap && wrapper) {
+            // Add minimap to wrapper
+            wrapper.appendChild(minimap);
 
-            minimap.style.position = 'fixed';
-            minimap.style.width = calculateWindowWidth() + 'px';
-            minimap.style.maxWidth = ''; // Clear maxWidth from mobile mode
-            minimap.style.maxHeight = '300px';
-            minimap.style.minHeight = '';
-            minimap.style.height = 'auto';
-            minimap.style.margin = '';
-            minimap.style.flexShrink = '';
-
+            const windowWidth = calculateWindowWidth();
+            const viewportHeight = window.innerHeight;
             let topPosition = 10;
             if (surahHeader) {
                 const rect = surahHeader.getBoundingClientRect();
-                const scrollY = window.scrollY || window.pageYOffset || 0;
-                topPosition = rect.bottom + scrollY + 10;
-                // console.log('topPosition: ', topPosition, 'scrollY: ', scrollY, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
+                // Use viewport-relative position (getBoundingClientRect is already viewport-relative)
+                // If header is visible in viewport (even partially), position below it
+                if (rect.bottom > 0 && rect.bottom < window.innerHeight) {
+                    topPosition = rect.bottom + 10;
+                } else {
+                    // Header is scrolled off-screen - use minimum position
+                    topPosition = 10;
+                }
+                // Ensure minimum top position
+                topPosition = Math.max(10, topPosition);
             }
-            minimap.style.top = topPosition + 'px';
-            minimap.style.left = '10px';
-            // error('topPosition: ', topPosition, 'scrollY: ', scrollY, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
+            // Ensure availableHeight doesn't exceed viewport and is positive
+            const availableHeight = Math.max(200, Math.min(viewportHeight - topPosition - 20, viewportHeight - 30));
+
+            // First, remove ALL mobile-specific properties to ensure clean state
+            minimap.style.removeProperty('flex');
+            minimap.style.removeProperty('max-width');
+            minimap.style.removeProperty('min-width');
+            minimap.style.removeProperty('height');
+            minimap.style.removeProperty('max-height');
+            minimap.style.removeProperty('min-height');
+            
+            // Then set desktop mode properties explicitly
+            minimap.style.position = 'relative';
+            minimap.style.top = '';
+            minimap.style.left = '';
+            minimap.style.width = windowWidth + 'px';
+            minimap.style.flex = '0 0 50%';
+            minimap.style.maxWidth = '';
+            minimap.style.maxHeight = '';
+            minimap.style.minHeight = '0';
+            minimap.style.height = '50%';
+            minimap.style.margin = '';
+            minimap.style.flexShrink = '';
             
             // Preserve visibility state
             const wasVisible = minimap.style.display !== 'none' && minimap.style.display !== '';
@@ -1978,34 +2360,66 @@ const morphologyData = {};
             if (minimapContent && visibleHighlight && wordRects) {
                 setTimeout(() => {
                     updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                    // Ensure flex and other properties are still correct after updateMinimap
+                    // Use double requestAnimationFrame to ensure DOM is fully updated
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            minimap.style.flex = '0 0 50%';
+                            minimap.style.height = '50%';
+                            minimap.style.removeProperty('max-width');
+                            minimap.style.removeProperty('min-width');
+                        });
+                    });
                 }, 50);
+            } else {
+                // Even if minimap content isn't ready, ensure flex is set correctly
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        minimap.style.flex = '0 0 50%';
+                        minimap.style.height = '50%';
+                    });
+                });
             }
         }
         
-        if (rootPanel) {
-            body.appendChild(rootPanel);
-            rootPanel.style.position = 'fixed';
-            rootPanel.style.width = calculateWindowWidth() + 'px';
-            rootPanel.style.maxHeight = '400px';
-            rootPanel.style.minHeight = '';
-            rootPanel.style.height = 'auto';
-            rootPanel.style.margin = '';
-            rootPanel.style.flexShrink = '';
+        if (rootPanel && wrapper) {
+            // Add root panel to wrapper
+            wrapper.appendChild(rootPanel);
             
+            const windowWidth = calculateWindowWidth();
+            const viewportHeight = window.innerHeight;
             let topPosition = 10;
             if (surahHeader) {
                 const rect = surahHeader.getBoundingClientRect();
-                topPosition = rect.bottom + 10;
+                // Use viewport-relative position (getBoundingClientRect is already viewport-relative)
+                // If header is visible in viewport (even partially), position below it
+                if (rect.bottom > 0 && rect.bottom < window.innerHeight) {
+                    topPosition = rect.bottom + 10;
+                } else {
+                    // Header is scrolled off-screen - use minimum position
+                    topPosition = 10;
+                }
+                // Ensure minimum top position
+                topPosition = Math.max(10, topPosition);
             }
-            if (minimap) {
-                setTimeout(() => {
-                    const minimapHeight = minimap.offsetHeight || 300;
-                    rootPanel.style.top = (topPosition + minimapHeight + 10) + 'px';
-                }, 50);
-            } else {
-                rootPanel.style.top = topPosition + 'px';
-            }
-            rootPanel.style.left = '10px';
+            // Ensure availableHeight doesn't exceed viewport and is positive
+            const availableHeight = Math.max(200, Math.min(viewportHeight - topPosition - 20, viewportHeight - 30));
+            
+            rootPanel.style.position = 'relative';
+            rootPanel.style.top = '';
+            rootPanel.style.left = '';
+            rootPanel.style.width = windowWidth + 'px';
+            rootPanel.style.maxHeight = '';
+            rootPanel.style.minHeight = '0';
+            rootPanel.style.height = '50%';
+            rootPanel.style.margin = '';
+            rootPanel.style.flexShrink = '';
+            rootPanel.style.flex = '0 0 50%';
+            // Explicitly remove any mobile-specific or leftover properties
+            rootPanel.style.removeProperty('top');
+            rootPanel.style.removeProperty('max-height');
+            rootPanel.style.removeProperty('min-width');
+            rootPanel.style.removeProperty('max-width');
             
             // Preserve visibility state
             const wasVisible = rootPanel.style.display !== 'none' && rootPanel.style.display !== '';
@@ -2014,6 +2428,13 @@ const morphologyData = {};
             } else {
                 rootPanel.style.display = 'block';
             }
+            
+            // Update wrapper position and size with safe constraints
+            wrapper.style.top = topPosition + 'px';
+            wrapper.style.width = windowWidth + 'px';
+            wrapper.style.height = availableHeight + 'px';
+            wrapper.style.maxHeight = availableHeight + 'px';
+            wrapper.style.display = (minimap && minimap.style.display !== 'none') ? 'flex' : 'none';
         }
         
     }
@@ -2056,14 +2477,22 @@ const morphologyData = {};
         const minimap = document.getElementById('morphology-minimap');
         const rootPanel = document.getElementById('highlighted-roots-panel');
         const toggleBtn = document.getElementById('toggle-minimap-btn');
+        const wrapper = document.getElementById('morphology-combined-panel');
         
         if (!minimap || !rootPanel || !toggleBtn) return;
         
-        const isVisible = minimap.style.display !== 'none' && minimap.style.display !== '';
+        // In desktop mode, check wrapper visibility; in mobile mode, check individual panels
+        const isVisible = isMobileMode 
+            ? (minimap.style.display !== 'none' && minimap.style.display !== '')
+            : (wrapper && wrapper.style.display !== 'none' && wrapper.style.display !== '');
         
         if (isVisible) {
-            minimap.style.display = 'none';
-            rootPanel.style.display = 'none';
+            if (isMobileMode) {
+                minimap.style.display = 'none';
+                rootPanel.style.display = 'none';
+            } else {
+                if (wrapper) wrapper.style.display = 'none';
+            }
             // toggleBtn.textContent = 'نمایش نقشه';
         } else {
             // In mobile mode, just show them (they're already positioned in bottom row)
@@ -2071,50 +2500,53 @@ const morphologyData = {};
                 minimap.style.display = 'block';
                 rootPanel.style.display = 'block';
             } else {
-                // Update positions in case the header moved or on first show
-                const surahHeader = getSurahHeader();
-                if (surahHeader) {
-                    const rect = surahHeader.getBoundingClientRect();
-                    const topPosition = rect.bottom + 10;
-                    const windowWidth = calculateWindowWidth();
-                    
-                    minimap.style.top = topPosition + 'px';
-                    minimap.style.width = windowWidth + 'px';
-                    
-                    // Show minimap first to calculate its height
-                    minimap.style.display = 'block';
-                    
-                    // Update root panel position below minimap (stacked)
-                    setTimeout(() => {
-                        const minimapHeight = minimap.offsetHeight || 300;
-                        const rootListTop = topPosition + minimapHeight + 10;
-                        rootPanel.style.top = rootListTop + 'px';
-                        rootPanel.style.left = '10px'; // Same left as minimap
-                        rootPanel.style.width = windowWidth + 'px';
-                        
-                        // Recalculate max-height for root list to allow scrolling
-                        const viewportHeight = window.innerHeight;
-                        const availableHeight = viewportHeight - rootListTop - 20; // Leave 20px margin at bottom
-                        const rootListMaxHeight = Math.min(400, availableHeight);
-                        rootPanel.style.maxHeight = rootListMaxHeight + 'px';
-                        
-                        // Show and position three new root panels below highlighted roots panel
-                        if (topRootsPanel) topRootsPanel.style.display = 'block';
-                        if (selectiveRootsPanel) selectiveRootsPanel.style.display = 'block';
-                        if (thirdRootsPanel) thirdRootsPanel.style.display = 'block';
-                        positionRootPanels();
-                        
-                        // Update minimap content positions
-                        const minimapContent = document.getElementById('minimap-content');
-                        const visibleHighlight = document.getElementById('minimap-visible-highlight');
-                        const wordRects = minimap._wordRects;
-                        if (minimapContent && visibleHighlight && wordRects) {
-                            updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                // In desktop mode, show the wrapper (which contains both panels)
+                if (wrapper) {
+                    // Update wrapper position in case header moved
+                    const surahHeader = getSurahHeader();
+                    let topPosition = 10;
+                    if (surahHeader) {
+                        const rect = surahHeader.getBoundingClientRect();
+                        // Use viewport-relative position (getBoundingClientRect is already viewport-relative)
+                        // If header is visible in viewport (even partially), position below it
+                        if (rect.bottom > 0 && rect.bottom < window.innerHeight) {
+                            topPosition = rect.bottom + 10;
+                        } else {
+                            // Header is scrolled off-screen - use minimum position
+                            topPosition = 10;
                         }
-                        
-                        rootPanel.style.display = 'block';
-                    }, 10);
+                        // Ensure minimum top position
+                        topPosition = Math.max(10, topPosition);
+                    }
+                    wrapper.style.top = topPosition + 'px';
+                    
+                    // Also update height to match viewport
+                    const viewportHeight = window.innerHeight;
+                    const availableHeight = Math.max(200, Math.min(viewportHeight - topPosition - 20, viewportHeight - 30));
+                    wrapper.style.height = availableHeight + 'px';
+                    wrapper.style.maxHeight = availableHeight + 'px';
+                    
+                    const windowWidth = calculateWindowWidth();
+                    wrapper.style.width = windowWidth + 'px';
+                    
+                    // Update minimap content positions
+                    const minimapContent = document.getElementById('minimap-content');
+                    const visibleHighlight = document.getElementById('minimap-visible-highlight');
+                    const wordRects = minimap._wordRects;
+                    if (minimapContent && visibleHighlight && wordRects) {
+                        updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                    }
+                    
+                    // Show wrapper (which contains both minimap and root panel)
+                    wrapper.style.display = 'flex';
+                    
+                    // Show and position three new root panels below highlighted roots panel
+                    if (topRootsPanel) topRootsPanel.style.display = 'block';
+                    if (selectiveRootsPanel) selectiveRootsPanel.style.display = 'block';
+                    if (thirdRootsPanel) thirdRootsPanel.style.display = 'block';
+                    positionRootPanels();
                 } else {
+                    // Fallback: show individual panels
                     minimap.style.display = 'block';
                     rootPanel.style.display = 'block';
                 }
@@ -2414,11 +2846,70 @@ const morphologyData = {};
         return wordRects;
     }
 
+    // Create or get the combined panel wrapper (desktop mode only)
+    function createCombinedPanelWrapper() {
+        // Only create wrapper in desktop mode
+        if (isMobileMode) return null;
+        
+        let wrapper = document.getElementById('morphology-combined-panel');
+        if (wrapper) return wrapper;
+        
+        // Calculate position below the surah header
+        const surahHeader = getSurahHeader();
+        let topPosition = 10;
+        if (surahHeader) {
+            const rect = surahHeader.getBoundingClientRect();
+            // Use viewport-relative position (getBoundingClientRect is already viewport-relative)
+            // If header is visible in viewport, position below it
+            if (rect.bottom > 0 && rect.bottom < window.innerHeight) {
+                topPosition = rect.bottom + 10;
+            } else if (rect.bottom <= 0) {
+                // Header is scrolled above viewport - use document position
+                const scrollY = window.scrollY || window.pageYOffset || 0;
+                const headerBottom = rect.bottom + scrollY + surahHeader.offsetHeight;
+                // For fixed positioning, we need viewport position, so use current scroll position
+                // If header is above viewport, position at top with some margin
+                topPosition = 10;
+            } else {
+                // Header is below viewport - position at top
+                topPosition = 10;
+            }
+            // Ensure minimum top position
+            topPosition = Math.max(10, topPosition);
+        }
+        
+        const windowWidth = calculateWindowWidth();
+        const viewportHeight = window.innerHeight;
+        // Ensure availableHeight doesn't exceed viewport and is positive
+        // Leave 20px margin at bottom, but ensure minimum height of 200px
+        const availableHeight = Math.max(200, Math.min(viewportHeight - topPosition - 20, viewportHeight - 30));
+        
+        wrapper = document.createElement('div');
+        wrapper.id = 'morphology-combined-panel';
+        wrapper.style.cssText = `
+            position: fixed;
+            top: ${topPosition}px;
+            left: 10px;
+            width: ${windowWidth}px;
+            height: ${availableHeight}px;
+            max-height: ${availableHeight}px;
+            background: transparent;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        `;
+        
+        document.body.appendChild(wrapper);
+        return wrapper;
+    }
+    
     // Create minimap showing all words as small rectangles
     function createMinimap() {
         // Remove existing minimap if it exists
         const existingMinimap = document.getElementById('morphology-minimap');
         const existingRootPanel = document.getElementById('highlighted-roots-panel');
+        const existingWrapper = document.getElementById('morphology-combined-panel');
         let wasMinimapVisible = false;
         let wasRootPanelVisible = false;
         if (existingMinimap) {
@@ -2427,6 +2918,10 @@ const morphologyData = {};
         }
         if (existingRootPanel) {
             wasRootPanelVisible = existingRootPanel.style.display !== 'none' && existingRootPanel.style.display !== '';
+        }
+        // Remove wrapper if it exists (will be recreated)
+        if (existingWrapper && !isMobileMode) {
+            existingWrapper.remove();
         }
 
         let wordRects = calculateWordRects();
@@ -2463,14 +2958,17 @@ const morphologyData = {};
         const availableHeight = viewportHeight - topPosition - 20; // Leave 20px margin at bottom
         const maxHeight = Math.min(300, Math.floor(availableHeight / 2) - 15); // Half for each, minus spacing
 
+        // Create or get wrapper for desktop mode
+        const wrapper = createCombinedPanelWrapper();
 
         minimap.style.cssText = `
-            position: fixed;
-            top: ${topPosition}px;
-            left: 10px;
+            ${wrapper ? 'position: relative;' : 'position: fixed;'}
+            ${wrapper ? '' : `top: ${topPosition}px;`}
+            ${wrapper ? '' : 'left: 10px;'}
             width: ${windowWidth}px;
-            max-height: ${maxHeight}px;
-            height: auto;
+            ${wrapper ? 'flex: 0 0 50%;' : `max-height: ${maxHeight}px; height: auto;`}
+            ${wrapper ? 'height: 50%;' : ''}
+            ${wrapper ? 'min-height: 0;' : ''}
             background: #e3e3e3;
             border: 1px solid #aaa;
             border-radius: 4px;
@@ -2655,7 +3153,13 @@ const morphologyData = {};
         minimap._extraSpace = extraSpace;
 
         minimap.appendChild(minimapContent);
-        document.body.appendChild(minimap);
+        
+        // Append to wrapper if in desktop mode, otherwise to body
+        if (wrapper) {
+            wrapper.appendChild(minimap);
+        } else {
+            document.body.appendChild(minimap);
+        }
         
         // Update minimap positions (will be called on resize)
         updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
@@ -2750,12 +3254,14 @@ const morphologyData = {};
         //     }
         // };
         
-        // Update root list panel position to be below minimap
-        // Use requestAnimationFrame to ensure minimap is rendered first
-        requestAnimationFrame(() => {
-            setTimeout(() => {
-                const rootPanel = document.getElementById('highlighted-roots-panel');
-                if (rootPanel) {
+        // Update root list panel position to be below minimap (only if NOT in wrapper)
+        // If in wrapper, flexbox handles positioning automatically
+        const rootPanelWrapper = document.getElementById('morphology-combined-panel');
+        const rootPanel = document.getElementById('highlighted-roots-panel');
+        if (rootPanel && !rootPanelWrapper) {
+            // Only position separately if not in wrapper (old behavior for backward compatibility)
+            requestAnimationFrame(() => {
+                setTimeout(() => {
                     const windowWidth = calculateWindowWidth();
                     const minimapRect = minimap.getBoundingClientRect();
                     const minimapHeight = minimapRect.height || minimap.offsetHeight || 300;
@@ -2779,9 +3285,14 @@ const morphologyData = {};
                     const availableHeight = viewportHeight - finalTop - 20; // Leave 20px margin at bottom
                     const rootListMaxHeight = Math.min(400, Math.max(100, availableHeight));
                     rootPanel.style.maxHeight = rootListMaxHeight + 'px';
-                }
-            }, 50);
-        });
+                }, 50);
+            });
+        } else if (rootPanel && rootPanelWrapper) {
+            // If in wrapper, ensure styles are correct (flexbox handles layout)
+            rootPanel.style.removeProperty('top');
+            rootPanel.style.removeProperty('max-height');
+            rootPanel.style.width = calculateWindowWidth() + 'px';
+        }
 
         // Update on scroll
         let scrollTimeout;
@@ -2903,6 +3414,9 @@ const morphologyData = {};
     function init(sureNumber) {
         addStyles();
         
+        // Make sura header clickable
+        makeSuraHeaderClickable();
+        
         // Create toggle button
         createToggleButton();
         
@@ -2910,9 +3424,9 @@ const morphologyData = {};
         wrapWordsInSpans();
         
         // Create minimap after words are wrapped
-        setTimeout(() => {
+        // setTimeout(() => {
             createMinimap();
-        }, 100);
+        // }, 100);
         
         // Then load morphology data and add it to words
         loadMorphologyData(sureNumber).then(() => {
@@ -2965,49 +3479,66 @@ const morphologyData = {};
                             return;
                         }
                         
-                        // Only update if minimap is visible
+                        // In desktop mode, update wrapper container (which contains both panels)
+                        const wrapper = document.getElementById('morphology-combined-panel');
                         const minimap = document.getElementById('morphology-minimap');
                         const rootPanel = document.getElementById('highlighted-roots-panel');
-                        const wasMinimapVisible = minimap && minimap.style.display !== 'none' && minimap.style.display !== '';
-                        const wasRootPanelVisible = rootPanel && rootPanel.style.display !== 'none' && rootPanel.style.display !== '';
+                        const wasWrapperVisible = wrapper && wrapper.style.display !== 'none' && wrapper.style.display !== '';
                         
-                        if (wasMinimapVisible && minimap) {
+                        if (wasWrapperVisible && wrapper) {
+                            // Update wrapper position and size
+                            const surahHeader = getSurahHeader();
+                            let topPosition = 10;
+                            if (surahHeader) {
+                                const rect = surahHeader.getBoundingClientRect();
+                                // Use viewport-relative position (getBoundingClientRect is already viewport-relative)
+                                // If header is visible in viewport (even partially), position below it
+                                if (rect.bottom > 0 && rect.bottom < window.innerHeight) {
+                                    topPosition = rect.bottom + 10;
+                                } else {
+                                    // Header is scrolled off-screen - use minimum position
+                                    topPosition = 10;
+                                }
+                                // Ensure minimum top position
+                                topPosition = Math.max(10, topPosition);
+                            }
+                            
+                            const windowWidth = calculateWindowWidth();
+                            const viewportHeight = window.innerHeight;
+                            // Ensure availableHeight doesn't exceed viewport and is positive
+                            const availableHeight = Math.max(200, Math.min(viewportHeight - topPosition - 20, viewportHeight - 30));
+                            
+                            // Update wrapper dimensions - flexbox will handle the 50/50 split automatically
+                            wrapper.style.top = topPosition + 'px';
+                            wrapper.style.width = windowWidth + 'px';
+                            wrapper.style.height = availableHeight + 'px';
+                            wrapper.style.maxHeight = availableHeight + 'px';
+                            
+                            // Update minimap width to match wrapper (height is handled by flex: 0 0 50%)
+                            if (minimap) {
+                                minimap.style.width = windowWidth + 'px';
+                                
+                                // Update minimap content
+                                const minimapContent = document.getElementById('minimap-content');
+                                const visibleHighlight = document.getElementById('minimap-visible-highlight');
+                                const wordRects = minimap._wordRects;
+                                if (minimapContent && visibleHighlight && wordRects) {
+                                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                                }
+                            }
+                            
+                            // Update root panel width to match wrapper (height is handled by flex: 0 0 50%)
+                            if (rootPanel) {
+                                rootPanel.style.width = windowWidth + 'px';
+                            }
+                        } else if (minimap && !wrapper) {
+                            // Fallback: old behavior if wrapper doesn't exist (shouldn't happen in desktop mode)
                             const minimapContent = document.getElementById('minimap-content');
                             const visibleHighlight = document.getElementById('minimap-visible-highlight');
                             const wordRects = minimap._wordRects;
                             if (minimapContent && visibleHighlight && wordRects) {
                                 updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
                             }
-                            
-                            // Update root panel position after minimap is updated
-                            setTimeout(function() {
-                                const newMinimap = document.getElementById('morphology-minimap');
-                                const newRootPanel = document.getElementById('highlighted-roots-panel');
-                                if (newMinimap) {
-                                    const surahHeader = getSurahHeader();
-                                    const scrollY = window.scrollY || window.pageYOffset || 0;
-                                    let minimapBottom = newMinimap.offsetHeight + newMinimap.offsetTop;
-                                    // if (surahHeader) {
-                                    //     const rect = surahHeader.getBoundingClientRect();
-                                    //     topPosition = rect.bottom + 10;
-                                    //     console.log('topPosition: ', topPosition, 'rect.bottom: ', rect.bottom, surahHeader.getBoundingClientRect(), surahHeader);
-                                    // }
-                                    const windowWidth = calculateWindowWidth();
-
-                                    console.log('minimapBottom: ', minimapBottom);
-                                    
-                                    if (newRootPanel && wasRootPanelVisible) {
-                                        const rootListTop = minimapBottom + 10;
-                                        newRootPanel.style.top = rootListTop + 'px';
-                                        newRootPanel.style.width = windowWidth + 'px';
-                                        
-                                        const viewportHeight = window.innerHeight;
-                                        const availableHeight = viewportHeight - rootListTop - 20;
-                                        const rootListMaxHeight = Math.min(400, availableHeight);
-                                        newRootPanel.style.maxHeight = rootListMaxHeight + 'px';
-                                    }
-                                }
-                            }, 100);
                         }
                     }, 100); // Debounce resize events
                 });
