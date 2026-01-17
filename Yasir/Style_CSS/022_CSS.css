@@ -148,12 +148,40 @@ speech[gray]::before {
   border-top: 0;
 }
 
+.boxed.underline-gradientsym {
+  width: 100%;
+  border-bottom: 1px dotted;
+  border-image: linear-gradient(to right, rgb(230, 230, 230) 0%,
+  rgb(190, 190, 190) 45%,
+  rgb(190, 190, 190) 55%,
+  rgb(230, 230, 230) 100%);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-gradientsym1 {
+  width: 100%;
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, rgb(100, 100, 100) 0%,
+  rgb(230, 230, 230) 15%,
+  rgb(230, 230, 230) 85%,
+  rgb(100, 100, 100) 100%);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-black-1 {
   border-bottom: 1px solid rgb(100, 100, 100);
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-black-far {
@@ -161,7 +189,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 3px 0mm; ;
+  padding: 3px 0mm;
 }
 
 .boxed.underline-black-2 {
@@ -169,7 +197,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-black-3 {
@@ -177,7 +205,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdashed {
@@ -185,7 +213,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdashed2 {
@@ -193,7 +221,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdashedbold {
@@ -201,7 +229,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdashed-far {
@@ -209,7 +237,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 3px 0mm; ;
+  padding: 3px 0mm;
 }
 
 .boxed.underline-blackdotted {
@@ -217,7 +245,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdotted-far {
@@ -225,7 +253,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 3px 0mm; ;
+  padding: 3px 0mm;
 }
 
 .boxed.underline-blackdotted2 {
@@ -233,7 +261,31 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdotted3 {
+  border-bottom: 3px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen-far {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidred-far {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
 }
 
 .boxed.underline-notsure {
@@ -278,6 +330,24 @@ speech[gray]::before {
   margin-left: 10mm;
   text-align: justify;
   text-indent: -5mm;
+}
+
+.small-bullet-near-2 {
+  margin-top: 0mm;
+  margin-right: 14.5mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -4.5mm;
+}
+
+.small-bullet-far-2 {
+  margin-top: 0mm;
+  margin-right: 14.5mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -4.5mm;
 }
 
 .big-bullet-near {
