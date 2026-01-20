@@ -127,6 +127,31 @@
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(100, 180, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-solidgreen-far {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidgreen-far2 {
+  border-bottom: 1px solid rgb(140, 220, 140);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 6px 0px;
 }
 
 .boxed.underline-red {
@@ -134,6 +159,31 @@
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(220, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-solidred-far {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidred-far2 {
+  border-bottom: 1px solid rgb(255, 190, 190);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 6px 0px;
 }
 
 .boxed.underline-black {
@@ -141,6 +191,17 @@
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
 }
 
 .highlight1 {
@@ -173,8 +234,8 @@
 body {
   direction: rtl;
   text-align: right;
-  width: 210mm;
+  width: 190mm;
   font-size: 4.5mm;
-  line-height: 200%;
+  line-height: 240%;
   font-family: 'KFGQPC Uthman Taha Naskh';
 }
