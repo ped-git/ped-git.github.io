@@ -107,6 +107,14 @@
   width: 180mm;
 }
 
+.highlight2 {
+  color:  rgb(205, 100, 100);
+}
+
+.highlight10 {
+  color:  rgb(180, 26, 26);
+}
+
 .ordinary-near {
   margin-top: 0mm;
   margin-right: 10mm;

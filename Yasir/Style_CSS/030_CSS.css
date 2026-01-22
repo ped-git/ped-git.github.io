@@ -294,6 +294,14 @@ speech[gray]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-blackdashed3 {
+  border-bottom: 2px dashed rgb(220, 220, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-gradient {
   border-bottom: 1px solid;
   border-image: linear-gradient(to left, black, white);
