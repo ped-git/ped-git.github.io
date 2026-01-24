@@ -453,6 +453,9 @@ speech[gray]::before {
   padding: 0px 0.264583mm;
 }
 
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
 
 .highlight3 {
   color:  rgb(0, 150, 255);

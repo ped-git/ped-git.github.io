@@ -452,6 +452,10 @@ speech[gray]::before {
   color:  rgb(0, 150, 255);
 }
 
+.highlight7 {
+  color:  violet;
+}
+
 @media print {
   .header {
     position: fixed;
