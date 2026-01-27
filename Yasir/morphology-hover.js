@@ -378,9 +378,15 @@ const morphologyData = {};
                 return;
             }
 
+
             // Skip if word is just punctuation or very short (but keep Arabic words)
             const hasArabic = /[أ-ي]/.test(word);
-            if (!hasArabic && word.length < 2) {
+            // Count Arabic letters in the word
+            let arabicLetterCount = 0;
+            for (let j = 0; j < word.length; j++) {
+                if (word[j].match(/[أ-ي]/)) arabicLetterCount++;
+            }
+            if (!hasArabic && word.length < 2 || arabicLetterCount == 0) {
                 fragment.appendChild(document.createTextNode(word + (idx < words.length - 1 ? ' ' : '')));
                 // console.log('Skipping word: ', "'" + word + "'", word.length);
                 return;
@@ -958,7 +964,7 @@ const morphologyData = {};
             ${wrapper ? 'position: relative;' : 'position: fixed;'}
             ${wrapper ? '' : `top: ${topPosition}px;`}
             ${wrapper ? '' : 'left: 10px;'}
-            width: ${windowWidth}px;
+            ${wrapper ? 'width: 100%;' : `width: ${windowWidth}px;`}
             ${wrapper ? 'flex: 0 0 50%;' : `max-height: ${rootListMaxHeight}px;`}
             ${wrapper ? 'height: 50%;' : ''}
             ${wrapper ? 'max-height: none; top: auto;' : ''}
@@ -1099,10 +1105,17 @@ const morphologyData = {};
                 const relativeTop = rect.top - wrapperRect.top + mobileContentWrapper.scrollTop;
                 mobileContentWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
             } else {
-                // Normal mode, scroll window
-                const scrollY = window.scrollY || window.pageYOffset;
-                const targetY = scrollY + rect.top;
-                window.scrollTo({ top: targetY, behavior: 'smooth' });
+                const desktopWrapper = document.getElementById('desktop-content-wrapper');
+                if (desktopWrapper) {
+                    const wrapperRect = desktopWrapper.getBoundingClientRect();
+                    const relativeTop = rect.top - wrapperRect.top + desktopWrapper.scrollTop;
+                    desktopWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
+                } else {
+                    // Normal mode, scroll window
+                    const scrollY = window.scrollY || window.pageYOffset;
+                    const targetY = scrollY + rect.top;
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
             }
         });
         
@@ -1504,6 +1517,7 @@ const morphologyData = {};
     
     // Create a root list section (for top roots, selective roots, etc.)
     function createRootListSection(sectionId, title, roots, sectionType = null) {
+        const limitedRoots = applyRootLimit(roots, sectionType);
         const section = document.createElement('div');
         section.id = sectionId;
         section.style.cssText = 'margin-bottom: 8px;';
@@ -1528,10 +1542,10 @@ const morphologyData = {};
         section.appendChild(contentDiv);
         
         // Populate with roots
-        if (!roots || roots.length === 0) {
+        if (!limitedRoots || limitedRoots.length === 0) {
             contentDiv.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای یافت نشد</div>';
         } else {
-            roots.forEach((rootData) => {
+            limitedRoots.forEach((rootData) => {
                 const root = typeof rootData === 'string' ? rootData : rootData.root;
                 const count = rootData.count || 0;
                 // Convert root to Arabic for lookup (rootToWordsMap stores roots in Arabic)
@@ -1619,6 +1633,26 @@ const morphologyData = {};
         }
         
         return section;
+    }
+
+    function applyRootLimit(roots, sectionType) {
+        if (!roots || !sectionType) return roots;
+        const limit = getRootLimitFromStorage(sectionType);
+        if (!Number.isInteger(limit)) return roots;
+        if (limit <= 0) return [];
+        return roots.slice(0, limit);
+    }
+
+    function getRootLimitFromStorage(sectionType) {
+        try {
+            const raw = localStorage.getItem('desktopRootLimits');
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            const value = parsed ? parsed[sectionType] : null;
+            return Number.isInteger(value) ? value : null;
+        } catch (error) {
+            return null;
+        }
     }
     
     // Expose remove function globally for onclick handlers
@@ -1976,9 +2010,12 @@ const morphologyData = {};
         });
     }
     
-    // Mobile mode state
+    // Mobile/desktop layout state
     let isMobileMode = false;
     let mobileContentWrapper = null;
+    let desktopLayout = null;
+    let desktopContentWrapper = null;
+    let desktopLeftColumn = null;
     let visibleHighlight = null, minimap = null;
 
     // Create toggle button and add it to the first div

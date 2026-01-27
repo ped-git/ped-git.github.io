@@ -9,12 +9,13 @@ from pathlib import Path
 IN_PATH = Path("data/quranic-corpus-morphology-0.4.txt")
 OUT_PATH = Path("data/roots-freq.json")
 
-TOP_N = 10
+TOP_N = 1000
 
 # Distinctiveness filter (tune as you like)
-MIN_COUNT_IN_SURA = 3          # avoid 1-off noise
-MIN_RATIO = 3.0                # at least 3x more frequent in this sura than elsewhere
+MIN_COUNT_IN_SURA = 2          # avoid 1-off noise
+MIN_RATIO = 1.0                # at least 3x more frequent in this sura than elsewhere
 ALPHA = 0.5                    # smoothing (Jeffreys-ish). Use 1.0 for Laplace.
+n2_N_MIN_M = 1.0
 
 # ------------ Parsing helpers ------------
 LOC_RE = re.compile(r"^\((\d+):(\d+):(\d+):(\d+)\)$")
@@ -178,7 +179,7 @@ def main():
         kl_roots.sort(key=lambda x: x["kl"], reverse=True)
 
         # keep top 10 if desired
-        kl_roots = kl_roots[:100]
+        kl_roots = kl_roots[:TOP_N]
 
         n2_N = []
         for root, cnt in c_s.items():
@@ -187,7 +188,7 @@ def main():
             p = (cnt + ALPHA) / (N_s + ALPHA * V)
             q = (cnt_all + ALPHA) / (total_global + ALPHA * V)
             m = cnt * p / q
-            if m < 10.0: continue
+            if m < n2_N_MIN_M: continue
             n2_N.append({
                 "root": root,
                 "count": cnt,
@@ -197,7 +198,7 @@ def main():
                 "m": m
             })
         n2_N.sort(key=lambda x: x["m"], reverse=True)
-        n2_N = n2_N[:100]
+        n2_N = n2_N[:TOP_N]
 
 
 

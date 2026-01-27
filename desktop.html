@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ذکر یسیر - دسکتاپ</title>
+    <link rel="stylesheet" href="Yasir/fonts.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "KFGQPC Uthman Taha Naskh", Arial, sans-serif;
+            background: #ffffff;
+        }
+
+        #desktop-layout {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #ffffff;
+            direction: ltr;
+        }
+
+        #panels-column {
+            flex: 0 0 clamp(180px, 20vw, 260px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            border-left: 1px solid #e1e1e1;
+            padding-left: 6px;
+            direction: rtl;
+        }
+
+        .content-column {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: auto;
+            direction: rtl;
+        }
+
+        #content {
+            min-height: 100%;
+        }
+
+        #panels-placeholder,
+        #panel-placeholder-bottom {
+            flex: 1 1 50%;
+            border: 1px dashed #cfcfcf;
+            border-radius: 6px;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #888;
+            padding: 6px;
+            text-align: center;
+        }
+
+        #panels-column #morphology-minimap,
+        #panels-column #highlighted-roots-panel {
+            flex: 1 1 50%;
+            min-height: 0;
+            width: 100%;
+            max-width: 100%;
+            align-self: stretch;
+        }
+
+        #panels-column #morphology-combined-panel {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        #settings-button {
+            position: relative;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #888;
+            background: #f2f2f2;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        #settings-menu {
+            position: absolute;
+            top: 100%;
+            inset-inline-start: 0;
+            z-index: 10;
+            width: 150px;
+            background: #ffffff;
+            border: 1px solid #bfbfbf;
+            border-radius: 6px;
+            padding: 4px;
+            font-size: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            line-height: 1;
+        }
+
+        #settings-menu label {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        #settings-menu input {
+            width: 100%;
+            padding: 2px 3px;
+            font-size: 10px;
+        }
+
+        #settings-menu a {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 10px;
+            text-decoration: none;
+        }
+
+        #settings-menu .row {
+            margin-bottom: 4px;
+        }
+
+        #settings-menu .button-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        #settings-menu button {
+            flex: 1 1 auto;
+            padding: 2px 3px;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            border: 1px solid #999;
+            background: #f6f6f6;
+        }
+
+        .chart-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+        }
+
+        .root-chart-canvas {
+            display: block;
+            width: 100%;
+            height: 90px;
+        }
+
+        #toggle-minimap-btn,
+        #toggle-mobile-mode-btn {
+            display: none !important;
+        }
+
+        .settings-wrapper {
+            position: absolute;
+            inset-inline-start: 6px;
+            top: 6px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        #sura-selection-menu {
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="desktop-layout">
+        <aside id="panels-column">
+            <div id="panels-placeholder">پنل اول</div>
+            <div id="panel-placeholder-bottom">پنل دوم</div>
+        </aside>
+        <main id="desktop-content-wrapper" class="content-column">
+            <div id="content"></div>
+        </main>
+    </div>
+
+    <button id="settings-button">تنظیمات</button>
+    <div id="settings-menu" hidden>
+        <div class="row">
+            <label for="sure-number-input">شماره سوره</label>
+            <input id="sure-number-input" type="number" min="1" max="114">
+        </div>
+        <div class="row chart-toggle">
+            <input id="root-chart-toggle" type="checkbox">
+            <label for="root-chart-toggle">نمایش نمودار ریشه‌ها</label>
+        </div>
+        <div class="row">
+            <label for="top-roots-limit">حد ریشه‌های پرتکرار</label>
+            <input id="top-roots-limit" type="number" min="0">
+        </div>
+        <div class="row">
+            <label for="distinctive-roots-limit">حد ریشه‌های متمایز</label>
+            <input id="distinctive-roots-limit" type="number" min="0">
+        </div>
+        <div class="row">
+            <label for="high-kl-roots-limit">حد ریشه‌های KL بالا</label>
+            <input id="high-kl-roots-limit" type="number" min="0">
+        </div>
+        <div class="row">
+            <label for="n2n-roots-limit">حد ریشه‌های N2N</label>
+            <input id="n2n-roots-limit" type="number" min="0">
+        </div>
+        <div class="button-row">
+            <button id="apply-settings">اعمال</button>
+            <button id="close-settings">بستن</button>
+        </div>
+        <a href="mobile.html">نسخه موبایل</a>
+    </div>
+
+    <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="desktop.js"></script>
+</body>
+</html>
