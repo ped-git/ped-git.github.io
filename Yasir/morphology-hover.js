@@ -273,7 +273,7 @@ const morphologyData = {};
     // Load morphology data from file
     async function loadMorphologyData(sureNumber) {
         try {
-            const response = await fetch('../data/quranic-corpus-morphology-0.4.txt');
+            const response = await fetch('data/quranic-corpus-morphology-0.4.txt');
             if (!response.ok) {
                 console.error('Failed to load morphology data');
                 return;
@@ -921,7 +921,7 @@ const morphologyData = {};
         if (rootsFreqData) return rootsFreqData; // Already loaded
         
         try {
-            const response = await fetch('../data/roots-freq.json');
+            const response = await fetch('data/roots-freq.json');
             if (!response.ok) {
                 console.warn('Could not load roots-freq.json');
                 return null;
