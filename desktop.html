@@ -5,6 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ذکر یسیر - دسکتاپ</title>
     <link rel="stylesheet" href="Yasir/fonts.css">
+    <script type="application/json" class="js-hypothesis-config">
+        window.hypothesisConfig = function () {
+            return {
+              // Best compromise:
+              showHighlights: "whenSidebarOpen",
+              commentsMode: true,
+              // or hard-disable by default:
+              // showHighlights: false,
+            };
+          };
+    </script>        
+    <script src="https://hypothes.is/embed.js" async></script>
+    <style>
+        hypothesis-highlight {
+            pointer-events: none;
+        }
+        /* Reading mode OFF = Hypothesis should not react on the document */
+        body.hyp-doc-locked .hypothesis-adder,
+        body.hyp-doc-locked .hypothesis-adder-container {
+          display: none !important;
+        }
+      
+        /* Keep highlights visible, but disable hover/click on them */
+        body.hyp-doc-locked .hypothesis-highlight {
+          pointer-events: none !important;
+        }
+    </style>
+    <script>
+        let hypDocLocked = false;
+    
+        const hypBlockers = {
+        mouseup: (e) => {
+            if (!hypDocLocked) return;
+            // If user is selecting text, Hypothesis uses mouseup to show the adder.
+            // Stop Hypothesis reaction, but still allow selection to happen.
+            if (window.getSelection && String(window.getSelection()).length > 0) {
+            e.stopImmediatePropagation();
+            }
+        },
+        selectionchange: (e) => {
+            if (!hypDocLocked) return;
+            // Hypothesis may react to selectionchange too.
+            e.stopImmediatePropagation();
+        },
+        mouseover: (e) => {
+            if (!hypDocLocked) return;
+            // Prevent hover-driven behaviors (tooltips/focus) if any.
+            e.stopImmediatePropagation();
+        },
+        click: (e) => {
+            if (!hypDocLocked) return;
+            // Block click-to-focus on highlights (sidebar still works).
+            // Only block if clicking a highlight.
+            if (e.target && e.target.closest && e.target.closest('.hypothesis-highlight')) {
+            e.stopImmediatePropagation();
+            }
+        }
+        };
+    
+        // Install capture listeners (critical: capture=true)
+        window.addEventListener('mouseup', hypBlockers.mouseup, true);
+        document.addEventListener('selectionchange', hypBlockers.selectionchange, true);
+        document.addEventListener('mouseover', hypBlockers.mouseover, true);
+        document.addEventListener('click', hypBlockers.click, true);
+    
+        function setHypothesisDocumentInteractivity(enabled) {
+            hypDocLocked = !enabled;
+            if (document.body) {
+                document.body.classList.toggle('hyp-doc-locked', hypDocLocked);
+            }
+        }
+    
+        // Start with document interactivity disabled (after body loads)
+        document.addEventListener('DOMContentLoaded', () => {
+            setHypothesisDocumentInteractivity(false);
+        });
+    
+    </script>
+        
     <style>
         * {
             box-sizing: border-box;
@@ -165,7 +244,8 @@
         .settings-wrapper {
             position: absolute;
             inset-inline-start: 6px;
-            top: 6px;
+            top: 50%;
+            transform: translateY(-50%);
             display: inline-flex;
             flex-direction: column;
             gap: 4px;
@@ -173,7 +253,497 @@
         }
 
         #sura-selection-menu {
-            line-height: 1;
+            display: none !important;
+        }
+
+        /* Custom Avant-Garde Sura Selection */
+        #custom-sura-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            backdrop-filter: blur(8px);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #custom-sura-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #custom-sura-modal {
+            width: 90vw;
+            max-width: 900px;
+            max-height: 85vh;
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #custom-sura-overlay.visible #custom-sura-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .sura-modal-header {
+            padding: 24px 28px 16px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .sura-modal-title {
+            font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
+            font-size: 28px;
+            color: #f8fafc;
+            margin: 0;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sura-search-container {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .sura-search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #e2e8f0;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+            direction: rtl;
+        }
+
+        .sura-search-input::placeholder {
+            color: #64748b;
+        }
+
+        .sura-search-input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+        }
+
+        .sura-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 16px;
+        }
+
+        .sura-close-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sura-close-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.05);
+        }
+
+        .sura-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 28px 28px;
+            scrollbar-width: thin;
+            scrollbar-color: #475569 transparent;
+        }
+
+        .sura-modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sura-modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sura-modal-body::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        .sura-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .sura-card {
+            position: relative;
+            padding: 16px 14px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .sura-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .sura-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 
+                0 12px 24px -8px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(96, 165, 250, 0.1);
+        }
+
+        .sura-card:hover::before {
+            opacity: 1;
+        }
+
+        .sura-card.current {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
+            border-color: #60a5fa;
+        }
+
+        .sura-card.current .sura-number {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+        }
+
+        .sura-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(71, 85, 105, 0.6);
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .sura-card:hover .sura-number {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            color: white;
+        }
+
+        .sura-name {
+            font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
+            font-size: 16px;
+            color: #e2e8f0;
+            margin: 0;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sura-info {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sura-card.hidden {
+            display: none;
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: #475569;
+        }
+
+        .key-badge {
+            padding: 4px 8px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 6px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* View toggle button */
+        .view-toggle-btn {
+            padding: 8px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            background: rgba(51, 65, 85, 0.4);
+            color: #94a3b8;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-toggle-btn:hover {
+            background: rgba(96, 165, 250, 0.15);
+            border-color: rgba(96, 165, 250, 0.3);
+            color: #e2e8f0;
+        }
+
+        .view-toggle-btn.active {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa;
+            color: #60a5fa;
+        }
+
+        /* ========== TIMELINE VIEW ========== */
+        #custom-sura-modal.timeline-view {
+            max-width: 98vw;
+            width: 98vw;
+            max-height: none;
+            height: auto;
+        }
+
+        #custom-sura-modal.timeline-view .sura-modal-body {
+            padding: 16px 20px 24px;
+            overflow: visible;
+        }
+
+        #custom-sura-modal.timeline-view .sura-grid {
+            display: none;
+        }
+
+        .sura-timeline {
+            display: none;
+            position: relative;
+            overflow: visible;
+            padding-top: 100px;
+        }
+
+        #custom-sura-modal.timeline-view .sura-timeline {
+            display: block;
+        }
+
+        .timeline-track {
+            position: relative;
+            padding: 20px 0 20px;
+            overflow: visible;
+        }
+
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                #60a5fa 0%, 
+                #a78bfa 25%, 
+                #f472b6 50%, 
+                #fb923c 75%, 
+                #60a5fa 100%);
+            border-radius: 2px;
+            transform: translateY(-50%);
+        }
+
+        .timeline-scroll {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 20px 10px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #475569 transparent;
+        }
+
+        .timeline-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline-scroll::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 4px;
+        }
+
+        .timeline-scroll::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            border-radius: 4px;
+        }
+
+        .timeline-item {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 6px;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            min-width: 52px;
+        }
+
+        .timeline-item:hover {
+            background: rgba(96, 165, 250, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .timeline-item.current {
+            background: rgba(96, 165, 250, 0.15);
+        }
+
+        .timeline-item.current .timeline-dot {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            transform: scale(1.3);
+        }
+
+        .timeline-item.current .timeline-number {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #475569;
+            border: 2px solid #1e293b;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            transform: scale(1.2);
+        }
+
+        .timeline-number {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-name {
+            font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
+            font-size: 12px;
+            color: #e2e8f0;
+            text-align: center;
+            white-space: nowrap;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .timeline-item:hover .timeline-name {
+            color: #fff;
+        }
+
+        .timeline-item.hidden {
+            display: none;
+        }
+
+        /* Timeline markers for juz/hizb */
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            font-size: 9px;
+            color: #64748b;
+            background: rgba(30, 41, 59, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* Global tooltip for timeline (positioned via JS) */
+        #timeline-global-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            padding: 12px 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+            pointer-events: none;
+            z-index: 200000;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            direction: rtl;
+        }
+
+        #timeline-global-tooltip.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #timeline-global-tooltip .tooltip-name {
+            font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
+            font-size: 18px;
+            color: #f8fafc;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #timeline-global-tooltip .tooltip-info {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Hide inline tooltips (now using global) */
+        .timeline-tooltip {
+            display: none;
+        }
+
+        /* Header controls for views */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 </head>
@@ -197,6 +767,10 @@
         <div class="row chart-toggle">
             <input id="root-chart-toggle" type="checkbox">
             <label for="root-chart-toggle">نمایش نمودار ریشه‌ها</label>
+        </div>
+        <div class="row chart-toggle">
+            <input id="hypothesis-toggle" type="checkbox">
+            <label for="hypothesis-toggle">توضیحات</label>
         </div>
         <div class="row">
             <label for="top-roots-limit">حد ریشه‌های پرتکرار</label>

@@ -19,6 +19,7 @@
         contentColumn: document.getElementById('desktop-content-wrapper'),
         settingsButton: document.getElementById('settings-button'),
         settingsMenu: document.getElementById('settings-menu'),
+        hypothesisToggle: document.getElementById('hypothesis-toggle'),
         sureInput: document.getElementById('sure-number-input'),
         chartToggle: document.getElementById('root-chart-toggle'),
         topLimit: document.getElementById('top-roots-limit'),
@@ -100,7 +101,7 @@
     }
 
     async function getSuraHref(number) {
-        const response = await fetch('index.html', { cache: 'no-cache' });
+        const response = await fetch('list.html', { cache: 'no-cache' });
         const html = await response.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
@@ -880,8 +881,16 @@
             } else {
                 chartDataCache.delete(sectionId);
                 savedChartWrappers.delete(sectionId);
-                items.forEach(item => {
-                    item.style.display = 'inline-flex';
+                // Respect limits when showing items (not charts)
+                const limitMap = {
+                    'top-roots-section-content': limits.top_roots,
+                    'selective-roots-section-content': limits.distinctive_roots,
+                    'high-kl-roots-section-content': limits.high_kl_roots,
+                    'n2n-roots-section-content': limits.n2_N_roots
+                };
+                const limit = limitMap[sectionId] ?? items.length;
+                items.forEach((item, index) => {
+                    item.style.display = (limit <= 0 || index >= limit) ? 'none' : 'inline-flex';
                 });
             }
         });
@@ -1020,6 +1029,17 @@
         return true;
     }
 
+    function setupHypothesisToggle() {
+        if (!elements.hypothesisToggle) return;
+        elements.hypothesisToggle.addEventListener('change', () => {
+            const enabled = elements.hypothesisToggle.checked;
+            console.log('[hypothesis] toggle', { enabled });
+            if (typeof setHypothesisDocumentInteractivity === 'function') {
+                setHypothesisDocumentInteractivity(enabled);
+            }
+        });
+    }
+
     function setupDesktopMinimapSync() {
         const minimap = document.getElementById('morphology-minimap');
         const visibleHighlight = document.getElementById('minimap-visible-highlight');
@@ -1137,7 +1157,447 @@
         loadMorphologyScript();
         setupScrollProxy();
         attachSettingsToHeader();
+        setupHypothesisToggle();
+        overrideSuraNavigation();
         preparePanelsAndMinimap();
+    }   
+
+    // Sura names in Arabic
+    const SURA_NAMES = {
+        1: 'فاتحه', 2: 'بقره', 3: 'آل عمران', 4: 'نساء', 5: 'مائده',
+        6: 'انعام', 7: 'اعراف', 8: 'انفال', 9: 'توبه', 10: 'یونس',
+        11: 'هود', 12: 'یوسف', 13: 'رعد', 14: 'ابراهیم', 15: 'حجر',
+        16: 'نحل', 17: 'اسراء', 18: 'کهف', 19: 'مریم', 20: 'طه',
+        21: 'انبیاء', 22: 'حج', 23: 'مؤمنون', 24: 'نور', 25: 'فرقان',
+        26: 'شعراء', 27: 'نمل', 28: 'قصص', 29: 'عنکبوت', 30: 'روم',
+        31: 'لقمان', 32: 'سجده', 33: 'احزاب', 34: 'سبأ', 35: 'فاطر',
+        36: 'یس', 37: 'صافات', 38: 'ص', 39: 'زمر', 40: 'غافر',
+        41: 'فصلت', 42: 'شوری', 43: 'زخرف', 44: 'دخان', 45: 'جاثیه',
+        46: 'احقاف', 47: 'محمد', 48: 'فتح', 49: 'حجرات', 50: 'ق',
+        51: 'ذاریات', 52: 'طور', 53: 'نجم', 54: 'قمر', 55: 'رحمن',
+        56: 'واقعه', 57: 'حدید', 58: 'مجادله', 59: 'حشر', 60: 'ممتحنه',
+        61: 'صف', 62: 'جمعه', 63: 'منافقون', 64: 'تغابن', 65: 'طلاق',
+        66: 'تحریم', 67: 'ملک', 68: 'قلم', 69: 'حاقه', 70: 'معارج',
+        71: 'نوح', 72: 'جن', 73: 'مزمل', 74: 'مدثر', 75: 'قیامه',
+        76: 'انسان', 77: 'مرسلات', 78: 'نبأ', 79: 'نازعات', 80: 'عبس',
+        81: 'تکویر', 82: 'انفطار', 83: 'مطففین', 84: 'انشقاق', 85: 'بروج',
+        86: 'طارق', 87: 'اعلی', 88: 'غاشیه', 89: 'فجر', 90: 'بلد',
+        91: 'شمس', 92: 'لیل', 93: 'ضحی', 94: 'شرح', 95: 'تین',
+        96: 'علق', 97: 'قدر', 98: 'بینه', 99: 'زلزله', 100: 'عادیات',
+        101: 'قارعه', 102: 'تکاثر', 103: 'عصر', 104: 'همزه', 105: 'فیل',
+        106: 'قریش', 107: 'ماعون', 108: 'کوثر', 109: 'کافرون', 110: 'نصر',
+        111: 'مسد', 112: 'اخلاص', 113: 'فلق', 114: 'ناس'
+    };
+
+    // Sura verse counts
+    const SURA_AYAT = {
+        1: 7, 2: 286, 3: 200, 4: 176, 5: 120, 6: 165, 7: 206, 8: 75, 9: 129, 10: 109,
+        11: 123, 12: 111, 13: 43, 14: 52, 15: 99, 16: 128, 17: 111, 18: 110, 19: 98, 20: 135,
+        21: 112, 22: 78, 23: 118, 24: 64, 25: 77, 26: 227, 27: 93, 28: 88, 29: 69, 30: 60,
+        31: 34, 32: 30, 33: 73, 34: 54, 35: 45, 36: 83, 37: 182, 38: 88, 39: 75, 40: 85,
+        41: 54, 42: 53, 43: 89, 44: 59, 45: 37, 46: 35, 47: 38, 48: 29, 49: 18, 50: 45,
+        51: 60, 52: 49, 53: 62, 54: 55, 55: 78, 56: 96, 57: 29, 58: 22, 59: 24, 60: 13,
+        61: 14, 62: 11, 63: 11, 64: 18, 65: 12, 66: 12, 67: 30, 68: 52, 69: 52, 70: 44,
+        71: 28, 72: 28, 73: 20, 74: 56, 75: 40, 76: 31, 77: 50, 78: 40, 79: 46, 80: 42,
+        81: 29, 82: 19, 83: 36, 84: 25, 85: 22, 86: 17, 87: 19, 88: 26, 89: 30, 90: 20,
+        91: 15, 92: 21, 93: 11, 94: 8, 95: 8, 96: 19, 97: 5, 98: 8, 99: 8, 100: 11,
+        101: 11, 102: 8, 103: 3, 104: 9, 105: 5, 106: 4, 107: 7, 108: 3, 109: 6, 110: 3,
+        111: 5, 112: 4, 113: 5, 114: 6
+    };
+
+    let customSuraOverlay = null;
+    let currentSuraView = 'grid'; // 'grid' or 'timeline'
+    let timelineTooltip = null;
+
+    function getTimelineTooltip() {
+        if (!timelineTooltip) {
+            timelineTooltip = document.createElement('div');
+            timelineTooltip.id = 'timeline-global-tooltip';
+            
+            const nameEl = document.createElement('div');
+            nameEl.className = 'tooltip-name';
+            
+            const infoEl = document.createElement('div');
+            infoEl.className = 'tooltip-info';
+            
+            timelineTooltip.appendChild(nameEl);
+            timelineTooltip.appendChild(infoEl);
+            document.body.appendChild(timelineTooltip);
+        }
+        return timelineTooltip;
+    }
+
+    function showTimelineTooltip(item) {
+        const tooltip = getTimelineTooltip();
+        const suraNum = item.getAttribute('data-sura');
+        const suraName = item.getAttribute('data-name') || `سوره ${suraNum}`;
+        const ayat = item.getAttribute('data-ayat') || '?';
+
+        tooltip.querySelector('.tooltip-name').textContent = suraName;
+        tooltip.querySelector('.tooltip-info').textContent = `سوره ${suraNum} • ${ayat} آیه`;
+
+        const rect = item.getBoundingClientRect();
+        const tooltipWidth = 160;
+        
+        let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+        left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+        
+        const top = rect.top - 10;
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.bottom = `${window.innerHeight - top}px`;
+        tooltip.style.top = 'auto';
+        tooltip.classList.add('visible');
+    }
+
+    function hideTimelineTooltip() {
+        const tooltip = getTimelineTooltip();
+        tooltip.classList.remove('visible');
+    }
+
+    function createCustomSuraMenu() {
+        if (customSuraOverlay) return customSuraOverlay;
+
+        const currentSura = getSureNumberFromUrl();
+
+        // Create overlay
+        customSuraOverlay = document.createElement('div');
+        customSuraOverlay.id = 'custom-sura-overlay';
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'custom-sura-modal';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'sura-modal-header';
+
+        const title = document.createElement('h2');
+        title.className = 'sura-modal-title';
+        title.textContent = 'انتخاب سوره';
+
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'sura-search-container';
+
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'sura-search-input';
+        searchInput.placeholder = 'جستجو...';
+        searchInput.addEventListener('input', () => filterSuras(searchInput.value));
+
+        const searchIcon = document.createElement('span');
+        searchIcon.className = 'sura-search-icon';
+        searchIcon.textContent = '🔍';
+
+        searchContainer.appendChild(searchInput);
+        searchContainer.appendChild(searchIcon);
+
+        // Header controls (view toggles + close)
+        const headerControls = document.createElement('div');
+        headerControls.className = 'header-controls';
+
+        // Grid view button
+        const gridBtn = document.createElement('button');
+        gridBtn.className = 'view-toggle-btn active';
+        gridBtn.id = 'grid-view-btn';
+        gridBtn.innerHTML = '▦ شبکه';
+        gridBtn.addEventListener('click', () => setSuraView('grid'));
+
+        // Timeline view button
+        const timelineBtn = document.createElement('button');
+        timelineBtn.className = 'view-toggle-btn';
+        timelineBtn.id = 'timeline-view-btn';
+        timelineBtn.innerHTML = '━ خطی';
+        timelineBtn.addEventListener('click', () => setSuraView('timeline'));
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'sura-close-btn';
+        closeBtn.textContent = '✕';
+        closeBtn.addEventListener('click', hideCustomSuraMenu);
+
+        headerControls.appendChild(gridBtn);
+        headerControls.appendChild(timelineBtn);
+        headerControls.appendChild(closeBtn);
+
+        header.appendChild(title);
+        header.appendChild(searchContainer);
+        header.appendChild(headerControls);
+
+        // Body
+        const body = document.createElement('div');
+        body.className = 'sura-modal-body';
+
+        // Grid view
+        const grid = document.createElement('div');
+        grid.className = 'sura-grid';
+        grid.id = 'sura-grid';
+
+        // Timeline view
+        const timeline = document.createElement('div');
+        timeline.className = 'sura-timeline';
+        timeline.id = 'sura-timeline';
+
+        const timelineTrack = document.createElement('div');
+        timelineTrack.className = 'timeline-track';
+
+        const timelineLine = document.createElement('div');
+        timelineLine.className = 'timeline-line';
+
+        const timelineScroll = document.createElement('div');
+        timelineScroll.className = 'timeline-scroll';
+        timelineScroll.id = 'timeline-scroll';
+
+        timelineTrack.appendChild(timelineLine);
+        timelineTrack.appendChild(timelineScroll);
+        timeline.appendChild(timelineTrack);
+
+        // Create sura items for both views
+        for (let i = 1; i <= 114; i++) {
+            // Grid card
+            const card = document.createElement('div');
+            card.className = 'sura-card' + (i === currentSura ? ' current' : '');
+            card.setAttribute('data-sura', i);
+            card.setAttribute('data-name', SURA_NAMES[i] || '');
+
+            const number = document.createElement('div');
+            number.className = 'sura-number';
+            number.textContent = i;
+
+            const name = document.createElement('div');
+            name.className = 'sura-name';
+            name.textContent = SURA_NAMES[i] || `سوره ${i}`;
+
+            const info = document.createElement('div');
+            info.className = 'sura-info';
+            info.textContent = `${SURA_AYAT[i] || '?'} آیه`;
+
+            card.appendChild(number);
+            card.appendChild(name);
+            card.appendChild(info);
+
+            card.addEventListener('click', () => {
+                const nextUrl = updateSureParam(i);
+                window.location.href = nextUrl;
+            });
+
+            grid.appendChild(card);
+
+            // Timeline item
+            const timelineItem = document.createElement('div');
+            timelineItem.className = 'timeline-item' + (i === currentSura ? ' current' : '');
+            timelineItem.setAttribute('data-sura', i);
+            timelineItem.setAttribute('data-name', SURA_NAMES[i] || '');
+            timelineItem.setAttribute('data-ayat', SURA_AYAT[i] || '?');
+
+            const dot = document.createElement('div');
+            dot.className = 'timeline-dot';
+
+            const tNumber = document.createElement('div');
+            tNumber.className = 'timeline-number';
+            tNumber.textContent = i;
+
+            const tName = document.createElement('div');
+            tName.className = 'timeline-name';
+            tName.textContent = SURA_NAMES[i] || `سوره ${i}`;
+
+            timelineItem.appendChild(dot);
+            timelineItem.appendChild(tNumber);
+            timelineItem.appendChild(tName);
+
+            // Hover events for global tooltip
+            timelineItem.addEventListener('mouseenter', (e) => {
+                showTimelineTooltip(timelineItem);
+            });
+            timelineItem.addEventListener('mouseleave', () => {
+                hideTimelineTooltip();
+            });
+
+            timelineItem.addEventListener('click', () => {
+                const nextUrl = updateSureParam(i);
+                window.location.href = nextUrl;
+            });
+
+            timelineScroll.appendChild(timelineItem);
+        }
+
+        body.appendChild(grid);
+        body.appendChild(timeline);
+        modal.appendChild(header);
+        modal.appendChild(body);
+        customSuraOverlay.appendChild(modal);
+
+        // Close on overlay click
+        customSuraOverlay.addEventListener('click', (e) => {
+            if (e.target === customSuraOverlay) {
+                hideCustomSuraMenu();
+            }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && customSuraOverlay.classList.contains('visible')) {
+                hideCustomSuraMenu();
+            }
+        });
+
+        document.body.appendChild(customSuraOverlay);
+        return customSuraOverlay;
+    }
+
+    function filterSuras(query) {
+        const normalizedQuery = query.trim().toLowerCase();
+        
+        // Filter grid cards
+        const grid = document.getElementById('sura-grid');
+        if (grid) {
+            const cards = grid.querySelectorAll('.sura-card');
+            cards.forEach(card => {
+                const suraNum = card.getAttribute('data-sura');
+                const suraName = card.getAttribute('data-name') || '';
+                const matches = 
+                    suraNum.includes(normalizedQuery) ||
+                    suraName.includes(normalizedQuery) ||
+                    normalizedQuery === '';
+                card.classList.toggle('hidden', !matches);
+            });
+        }
+
+        // Filter timeline items
+        const timelineScroll = document.getElementById('timeline-scroll');
+        if (timelineScroll) {
+            const items = timelineScroll.querySelectorAll('.timeline-item');
+            items.forEach(item => {
+                const suraNum = item.getAttribute('data-sura');
+                const suraName = item.getAttribute('data-name') || '';
+                const matches = 
+                    suraNum.includes(normalizedQuery) ||
+                    suraName.includes(normalizedQuery) ||
+                    normalizedQuery === '';
+                item.classList.toggle('hidden', !matches);
+            });
+        }
+    }
+
+    function setSuraView(view) {
+        currentSuraView = view;
+        const modal = document.getElementById('custom-sura-modal');
+        const gridBtn = document.getElementById('grid-view-btn');
+        const timelineBtn = document.getElementById('timeline-view-btn');
+
+        if (!modal) return;
+
+        if (view === 'timeline') {
+            modal.classList.add('timeline-view');
+            gridBtn?.classList.remove('active');
+            timelineBtn?.classList.add('active');
+            
+            // Scroll to current sura in timeline
+            setTimeout(() => {
+                const currentItem = document.querySelector('#timeline-scroll .timeline-item.current');
+                if (currentItem) {
+                    currentItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }, 100);
+        } else {
+            modal.classList.remove('timeline-view');
+            gridBtn?.classList.add('active');
+            timelineBtn?.classList.remove('active');
+            
+            // Scroll to current sura in grid
+            setTimeout(() => {
+                const currentCard = document.querySelector('#sura-grid .sura-card.current');
+                if (currentCard) {
+                    currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+        }
+    }
+
+    function showCustomSuraMenu() {
+        const overlay = createCustomSuraMenu();
+        
+        // Update current sura highlight for both views
+        const currentSura = getSureNumberFromUrl();
+        
+        // Update grid cards
+        const cards = overlay.querySelectorAll('.sura-card');
+        cards.forEach(card => {
+            const num = parseInt(card.getAttribute('data-sura'), 10);
+            card.classList.toggle('current', num === currentSura);
+        });
+
+        // Update timeline items
+        const timelineItems = overlay.querySelectorAll('.timeline-item');
+        timelineItems.forEach(item => {
+            const num = parseInt(item.getAttribute('data-sura'), 10);
+            item.classList.toggle('current', num === currentSura);
+        });
+
+        // Apply saved view preference
+        setSuraView(currentSuraView);
+
+        overlay.classList.add('visible');
+
+        // Focus search and scroll to current based on view
+        setTimeout(() => {
+            const searchInput = overlay.querySelector('.sura-search-input');
+            if (searchInput) searchInput.focus();
+
+            if (currentSuraView === 'timeline') {
+                const currentItem = overlay.querySelector('.timeline-item.current');
+                if (currentItem) {
+                    currentItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            } else {
+                const currentCard = overlay.querySelector('.sura-card.current');
+                if (currentCard) {
+                    currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }, 150);
+    }
+
+    function hideCustomSuraMenu() {
+        if (customSuraOverlay) {
+            customSuraOverlay.classList.remove('visible');
+        }
+    }
+
+    // Override sura navigation to use desktop URL format (?s=X)
+    function overrideSuraNavigation() {
+        // Override the global navigateToSura function
+        window.navigateToSura = function(suraNumber) {
+            const nextUrl = updateSureParam(suraNumber);
+            window.location.href = nextUrl;
+        };
+
+        // Override createSuraSelectionMenu to show our custom menu
+        window.createSuraSelectionMenu = function() {
+            showCustomSuraMenu();
+            return null; // Don't return the old menu
+        };
+
+        // Intercept clicks on sura header to show custom menu
+        document.addEventListener('click', (e) => {
+            const header = e.target.closest('#header');
+            if (header && !e.target.closest('.settings-wrapper')) {
+                e.preventDefault();
+                e.stopPropagation();
+                showCustomSuraMenu();
+            }
+
+            // Also intercept old menu items just in case
+            const suraItem = e.target.closest('.sura-menu-item');
+            if (suraItem) {
+                const suraNumber = parseInt(suraItem.getAttribute('data-sura-number'), 10);
+                if (suraNumber >= 1 && suraNumber <= 114) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const nextUrl = updateSureParam(suraNumber);
+                    window.location.href = nextUrl;
+                }
+            }
+        }, true);
     }
 
     function toggleSettings(forceState) {
