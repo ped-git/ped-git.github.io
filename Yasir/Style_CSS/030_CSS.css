@@ -408,6 +408,10 @@ speech[gray]::before {
   color:  rgb(0, 150, 255);
 }
 
+.highlight9 {
+  color:  rgb(5, 145, 5);
+}
+
 .highlight13 {
   color: rgb(0, 0, 255); ;
 }
