@@ -137,6 +137,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0px;
 }
 
 .boxed.underline-gradientrev {
@@ -159,7 +160,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-gradientsym1 {

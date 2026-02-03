@@ -132,6 +132,72 @@ speech[black]::before {
   padding: 0px 0px;
 }
 
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed2 {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdotted {
+  border-bottom: 1px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-gradientgreen {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(100, 180, 100), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientred {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(220, 150, 150), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.highlight14 {
+  color: rgb(150, 150, 150); ;
+}
+
 .inner-paragraph-1 {
   display: inline-block;
   vertical-align: top;
