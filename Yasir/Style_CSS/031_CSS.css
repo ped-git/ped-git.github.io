@@ -261,20 +261,20 @@ speech[black]::before {
 
 .big-bullet-near {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 0mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
 .big-bullet-far {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 4.5mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
 .zero-margin {
