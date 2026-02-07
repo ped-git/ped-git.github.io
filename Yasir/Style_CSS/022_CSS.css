@@ -137,6 +137,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0px;
 }
 
 .boxed.underline-gradientrev {
@@ -159,7 +160,7 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-gradientsym1 {
@@ -270,6 +271,14 @@ speech[gray]::before {
   border-right: 0;
   border-top: 0;
   padding: 0px 0px;
+}
+
+.boxed.underline-blackdotted3-far {
+  border-bottom: 3px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0px;
 }
 
 .boxed.underline-solidgreen-far {

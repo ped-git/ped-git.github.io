@@ -177,9 +177,17 @@ speech[gray]::before {
   text-indent: -5mm;
 }
 
-.boxed {
-  border: 1px dashed rgb(150, 150, 150);
-  padding: 2px 0.529166mm; ;
+.boxed3 {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 1px dashed rgb(100, 100, 100);
+  border-top: 1px dashed rgb(100, 100, 100);
+  padding: 1px 0.529166mm;
+}
+
+.boxed-solid {
+  border: 1px solid rgb(150, 150, 150);
+  padding: 1px 0.529166mm;
 }
 
 .boxed.underline-green {
@@ -246,12 +254,20 @@ speech[gray]::before {
   padding: 6px 0px;
 }
 
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
 .boxed.underline-black-3 {
   border-bottom: 1px solid rgb(220, 220, 220);
   border-left: 0;
   border-right: 0;
   border-top: 0;
-  padding: 0px 0px; ;
+  padding: 0px 0px;
 }
 
 .boxed.underline-blackdotted {
@@ -302,6 +318,14 @@ speech[gray]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-blackdashedbold {
+  border-bottom: 2px dashed rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-gradient {
   border-bottom: 1px solid;
   border-image: linear-gradient(to left, black, white);
@@ -312,8 +336,88 @@ speech[gray]::before {
   padding: 0px 0px;
 }
 
-.highlight1 {
+.boxed.underline-gradientfar {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0px;
+}
+
+.boxed.underline-gradientrev {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradient2 {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientrev2 {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to right, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientgreen {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(100, 180, 100), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientred {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(220, 150, 150), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-notsure {
+  border-bottom: 0;
+  border-left: 1px dotted rgb(100, 100, 100);
+  border-right: 1px dotted rgb(100, 100, 100);
+  border-top: 0;
+  padding: 0px 0.264583mm;
+}
+
+.highlight3 {
+  color:  rgb(0, 150, 255);
+}
+
+.highlight9 {
+  color:  rgb(5, 145, 5);
+}
+
+.highlight13 {
   color: rgb(0, 0, 255); ;
+}
+
+.backhighlight1 {
+  text-shadow: 0.7mm 0.7mm 1.1mm rgba(0, 0, 0, 0.6);
 }
 
 @media print {

@@ -1,3 +1,49 @@
+speech {
+  font-size: 10mm;
+  display: inline;
+  color: inherit;
+  text-decoration: none;
+}
+
+speech[open]::before {
+  content: "«";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[close]::before {
+  content: "»";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[underline]::before {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0mm;
+}
+
+speech[green]::before {
+  color: rgb(70,175,70);
+}
+
+speech[red]::before {
+  color: rgb(205,100,100);
+}
+
+speech[blue]::before {
+  color: rgb(70, 70, 220);
+}
+
+speech[gray]::before {
+  color: rgb(150, 150, 150);
+}
+
+speech[black]::before {
+  color: rgb(100, 100, 100);
+}
+
+
 .vertical-line-1 {
   border-left: 0.3mm solid black;
   height: 100%;
@@ -62,12 +108,102 @@
   position: relative; ;
 }
 
+.boxed.underline-black-1 {
+  border-bottom: 1px solid rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-3 {
+  border-bottom: 1px solid rgb(220, 220, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed2 {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdotted {
+  border-bottom: 1px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-gradientgreen {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(100, 180, 100), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientred {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(220, 150, 150), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.highlight14 {
+  color: rgb(150, 150, 150); ;
+}
+
 .inner-paragraph-1 {
   display: inline-block;
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 112.6mm;
+  width: 90mm;
   text-indent: 0mm;
 }
 
@@ -84,7 +220,7 @@
   vertical-align: top;
   text-align: justify;
   margin-top: -1mm;
-  width: 176mm;
+  width: 156mm;
 }
 
 .ordinary-near {
@@ -125,20 +261,20 @@
 
 .big-bullet-near {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 0mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
 .big-bullet-far {
   margin-top: 0mm;
-  margin-right: 16.5mm;
+  margin-right: 19.5mm;
   margin-bottom: 4.5mm;
   margin-left: 10mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -9.5mm;
 }
 
 .zero-margin {
@@ -202,8 +338,8 @@
 body {
   direction: rtl;
   text-align: right;
-  width: 210mm;
+  width: 190mm;
   font-size: 4.5mm;
-  line-height: 200%;
+  line-height: 240%;
   font-family: 'KFGQPC Uthman Taha Naskh';
 }
