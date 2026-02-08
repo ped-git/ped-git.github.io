@@ -125,7 +125,8 @@
         #settings-menu {
             position: absolute;
             top: 100%;
-            inset-inline-start: 0;
+            inset-inline-start: auto;
+            inset-inline-end: 0;
             z-index: 10;
             width: 240px;
             max-width: calc(100vw - 16px);
@@ -285,13 +286,18 @@
 
         .settings-wrapper {
             position: absolute;
-            inset-inline-start: 6px;
+            inset-inline-end: 6px; /* visual left in RTL */
             top: 50%;
             transform: translateY(-50%);
             display: inline-flex;
             flex-direction: column;
             gap: 4px;
             z-index: 5;
+        }
+
+        .sura-title-text {
+            display: inline-block;
+            white-space: nowrap;
         }
 
         #sura-selection-menu {

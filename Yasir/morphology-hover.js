@@ -5,6 +5,44 @@ const morphologyData = {};
 (function() {
     'use strict';
 
+    const IS_DESKTOP_HOST = !!window.__DESKTOP_HOST__;
+    
+    function recomputeMinimapGeometry() {
+        if (!minimap) return;
+        let wordRects = calculateWordRects();
+        const minTop = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.top)) : 0;
+        const maxBottom = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.bottom)) : documentHeight;
+        const minLeft = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.left)) : 0;
+        const maxRight = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.right)) : documentWidth;
+        const contentHeight = maxBottom - minTop;
+        const contentWidth = (maxRight - minLeft);
+
+        minimap._wordRects = wordRects;
+        minimap._minTop = minTop;
+        minimap._minLeft = minLeft;
+        minimap._contentWidth = contentWidth;
+        minimap._contentHeight = contentHeight;
+
+        // In desktop host mode, the minimap width is controlled by the container (CSS/flex),
+        // so don't override it with JS. Just read the current size.
+        if (IS_DESKTOP_HOST) {
+            minimap._availableWidth = minimap.getBoundingClientRect().width || minimap.clientWidth || window.innerWidth;
+        } else {
+            const windowWidth = isMobileMode ? calculateWindowWidthForMobile() : calculateWindowWidth();
+            minimap.style.width = windowWidth + 'px';
+            minimap.style.flex = `0 0 ${windowWidth}px`;
+            minimap.style.maxWidth = `${windowWidth}px`;
+            minimap._availableWidth = windowWidth;
+        }
+
+        const minimapContent = document.getElementById('minimap-content');
+        const visibleHighlight = document.getElementById('minimap-visible-highlight');
+        if (minimapContent && visibleHighlight && wordRects) {
+            updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+        }
+        updateVisibleHighlight();
+    }
+
     // Morphology data structure: {ayah: {wordIndex: {root, lemma}}}
     let dataLoaded = false;
     
@@ -2101,31 +2139,7 @@ const morphologyData = {};
                 // mobileToggleBtn.style.background = '#2196F3';
             }
         }
-        setTimeout(() => {
-            let wordRects = calculateWordRects();
-            const minTop = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.top)) : 0;
-            const maxBottom = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.bottom)) : documentHeight;
-            const minLeft = wordRects.length > 0 ? Math.min(...wordRects.map(w => w.left)) : 0;
-            const maxRight = wordRects.length > 0 ? Math.max(...wordRects.map(w => w.right)) : documentWidth;
-            const contentHeight = maxBottom - minTop;
-            const contentWidth = (maxRight - minLeft);
-    
-            minimap._wordRects = wordRects;
-            minimap._minTop = minTop;
-            minimap._minLeft = minLeft;
-            minimap._contentWidth = contentWidth;
-            minimap._contentHeight = contentHeight;
-
-            const windowWidth = isMobileMode ? calculateWindowWidthForMobile() : calculateWindowWidth();
-            minimap.style.width = windowWidth + 'px';
-            minimap.style.flex = `0 0 ${windowWidth}px`;
-            minimap.style.maxWidth = `${windowWidth}px`;
-            minimap._availableWidth = windowWidth;
-
-
-            updateMinimap(minimap, document.getElementById('minimap-content'), wordRects, document.getElementById('minimap-visible-highlight'));
-            updateVisibleHighlight();
-        }, 100);
+        recomputeMinimapGeometry();
     }
     
     // Enable mobile mode: wrap content in top row, position minimap/roots in bottom row
@@ -2271,18 +2285,20 @@ const morphologyData = {};
             const visibleHighlight = document.getElementById('minimap-visible-highlight');
             const wordRects = minimap._wordRects;
             if (minimapContent && visibleHighlight && wordRects) {
-                setTimeout(() => {
-                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
-                }, 50);
+                updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
             }
         }
         
         // Add scroll listener to mobile content wrapper
         if (mobileContentWrapper) {
-            let scrollTimeout;
+            let rafPending = false;
             function handleMobileScroll() {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(updateVisibleHighlight, 10);
+                if (rafPending) return;
+                rafPending = true;
+                requestAnimationFrame(() => {
+                    rafPending = false;
+                    updateVisibleHighlight();
+                });
             }
             mobileContentWrapper.addEventListener('scroll', handleMobileScroll, { passive: true });
         }
@@ -2395,19 +2411,17 @@ const morphologyData = {};
             const wordRects = minimap._wordRects;
             
             if (minimapContent && visibleHighlight && wordRects) {
-                setTimeout(() => {
-                    updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
-                    // Ensure flex and other properties are still correct after updateMinimap
-                    // Use double requestAnimationFrame to ensure DOM is fully updated
+                updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+                // Ensure flex and other properties are still correct after updateMinimap
+                // Use double requestAnimationFrame to ensure DOM is fully updated
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            minimap.style.flex = '0 0 50%';
-                            minimap.style.height = '50%';
-                            minimap.style.removeProperty('max-width');
-                            minimap.style.removeProperty('min-width');
-                        });
+                        minimap.style.flex = '0 0 50%';
+                        minimap.style.height = '50%';
+                        minimap.style.removeProperty('max-width');
+                        minimap.style.removeProperty('min-width');
                     });
-                }, 50);
+                });
             } else {
                 // Even if minimap content isn't ready, ensure flex is set correctly
                 requestAnimationFrame(() => {
@@ -2685,21 +2699,26 @@ const morphologyData = {};
         const contentHeight = minimap._contentHeight;
         const extraSpace = minimap._extraSpace || 5;
         
-        // Calculate new scaling factors based on current window width
-        // In mobile mode, use the actual minimap width (50% of bottom row)
+        // Calculate new scaling factors based on available width.
+        // In desktop host mode, the minimap width is controlled by CSS, so read it.
         let minimapWindowWidth;
-        if (isMobileMode && minimap.parentElement && minimap.parentElement.id === 'mobile-bottom-row') {
-            // Get actual width of minimap in mobile mode (50% of bottom row minus gap)
-            const bottomRow = minimap.parentElement;
-            const bottomRowWidth = bottomRow.offsetWidth || window.innerWidth;
-            const gap = 5;
-            // minimapWindowWidth = Math.floor((bottomRowWidth - gap) / 2); // Half width minus half gap
+        let containerPadding;
+        if (IS_DESKTOP_HOST) {
+            const rect = minimap.getBoundingClientRect();
+            minimapWindowWidth = rect.width || minimap.clientWidth || window.innerWidth;
+            const cs = window.getComputedStyle(minimap);
+            const pl = parseFloat(cs.paddingLeft) || 0;
+            const pr = parseFloat(cs.paddingRight) || 0;
+            containerPadding = pl + pr;
+        } else if (isMobileMode && minimap.parentElement && minimap.parentElement.id === 'mobile-bottom-row') {
             minimapWindowWidth = calculateWindowWidthForMobile();
+            containerPadding = 12; // 6px padding on each side
         } else {
             minimapWindowWidth = calculateWindowWidth();
+            containerPadding = 12; // 6px padding on each side
         }
-        const containerPadding = 12; // 6px padding on each side
-        const availableWidth = minimapWindowWidth - containerPadding - extraSpace; // Content area width
+
+        const availableWidth = Math.max(0, minimapWindowWidth - containerPadding - extraSpace); // Content area width
         
         // In mobile mode, also consider the available height for scaling
         let availableHeightForScaling = 400; // Default
@@ -2795,7 +2814,9 @@ const morphologyData = {};
         const scaledHeight = contentHeight * scaleFactor;
         minimapContent.style.height = scaledHeight + 'px';
         minimapContent.style.width = (availableWidth + extraSpace) + 'px';
-        minimap.style.width = (minimapWindowWidth) + 'px';
+        if (!IS_DESKTOP_HOST) {
+            minimap.style.width = (minimapWindowWidth) + 'px';
+        }
         
         // Update stored values
         minimap._scaleFactor = scaleFactor;
@@ -3298,7 +3319,7 @@ const morphologyData = {};
         if (rootPanel && !rootPanelWrapper) {
             // Only position separately if not in wrapper (old behavior for backward compatibility)
             requestAnimationFrame(() => {
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     const windowWidth = calculateWindowWidth();
                     const minimapRect = minimap.getBoundingClientRect();
                     const minimapHeight = minimapRect.height || minimap.offsetHeight || 300;
@@ -3322,24 +3343,29 @@ const morphologyData = {};
                     const availableHeight = viewportHeight - finalTop - 20; // Leave 20px margin at bottom
                     const rootListMaxHeight = Math.min(400, Math.max(100, availableHeight));
                     rootPanel.style.maxHeight = rootListMaxHeight + 'px';
-                }, 50);
+                });
             });
         } else if (rootPanel && rootPanelWrapper) {
             // If in wrapper, ensure styles are correct (flexbox handles layout)
             rootPanel.style.removeProperty('top');
             rootPanel.style.removeProperty('max-height');
-            rootPanel.style.width = calculateWindowWidth() + 'px';
+            rootPanel.style.removeProperty('width');
         }
 
-        // Update on scroll
-        let scrollTimeout;
-        function handleScroll() {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(updateVisibleHighlight, 10);
+        // Update on scroll/resize (skip in desktop host; desktop.js handles minimap highlight)
+        if (!IS_DESKTOP_HOST) {
+            let rafPending = false;
+            function handleScroll() {
+                if (rafPending) return;
+                rafPending = true;
+                requestAnimationFrame(() => {
+                    rafPending = false;
+                    updateVisibleHighlight();
+                });
+            }
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            window.addEventListener('resize', handleScroll, { passive: true });
         }
-        
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        window.addEventListener('resize', handleScroll, { passive: true });
 
         // Click handler to scroll to clicked position
         minimapContent.addEventListener('click', function(e) {
@@ -3406,11 +3432,13 @@ const morphologyData = {};
         });
 
         // Initial update
-        setTimeout(updateVisibleHighlight, 200);
+        updateVisibleHighlight();
 
         // Store references for cleanup if needed
         minimap.wordRects = wordRects;
         minimap.updateHighlight = updateVisibleHighlight;
+        // Expose a relayout hook so desktop.js can force recomputation after its own layout settles
+        minimap.forceRelayout = recomputeMinimapGeometry;
     }
 
     // Add CSS for word hover effect and minimap
@@ -3492,11 +3520,14 @@ const morphologyData = {};
                     }
                 });
                 
-                // Add resize event listener to update minimap
-                let resizeTimeout;
-                window.addEventListener('resize', function() {
-                    clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(function() {
+                // Add resize event listener to update minimap (skip in desktop host; desktop.js manages sizing)
+                if (!IS_DESKTOP_HOST) {
+                    let rafPending = false;
+                    window.addEventListener('resize', function() {
+                        if (rafPending) return;
+                        rafPending = true;
+                        requestAnimationFrame(function() {
+                            rafPending = false;
                         // In mobile mode, update minimap content but keep positioning
                         if (isMobileMode) {
                             const minimap = document.getElementById('morphology-minimap');
@@ -3577,8 +3608,9 @@ const morphologyData = {};
                                 updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
                             }
                         }
-                    }, 100); // Debounce resize events
-                });
+                        });
+                    });
+                }
             }
         });
     }

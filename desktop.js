@@ -12,6 +12,41 @@
     let cachedRootLimits = null;
     const rootCharts = new Map();
     let rootClickTraceActive = false;
+
+    const LAST_SURA_COOKIE = 'desktopLastSura';
+    function setCookie(name, value, days = 365) {
+        try {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(String(value))}; expires=${expires}; path=/; SameSite=Lax`;
+        } catch {
+            // ignore
+        }
+    }
+    function getCookie(name) {
+        try {
+            const key = `${encodeURIComponent(name)}=`;
+            const parts = (document.cookie || '').split(';');
+            for (const part of parts) {
+                const trimmed = part.trim();
+                if (trimmed.startsWith(key)) return decodeURIComponent(trimmed.slice(key.length));
+            }
+        } catch {
+            // ignore
+        }
+        return null;
+    }
+    function saveLastVisitedSura(suraNumber) {
+        const n = parseInt(String(suraNumber || ''), 10);
+        if (!Number.isNaN(n) && n >= 1 && n <= MAX_SURE) {
+            setCookie(LAST_SURA_COOKIE, n);
+        }
+    }
+    function getLastVisitedSura() {
+        const raw = getCookie(LAST_SURA_COOKIE);
+        const n = parseInt(raw || '', 10);
+        if (!Number.isNaN(n) && n >= 1 && n <= MAX_SURE) return n;
+        return null;
+    }
     
     // Tooltip element for selected roots
     let selectedRootTooltip = null;
@@ -53,6 +88,10 @@
         if (!scope) return;
         const els = scope.querySelectorAll('span, div, a, button, label');
         els.forEach(el => {
+            // Never touch minimap DOM: it is dynamically managed by morphology-hover.js
+            // and rewriting textContent can accidentally break its internal structure.
+            if (el.closest && el.closest('#morphology-minimap')) return;
+
             // Only replace if the entire text is a number (avoid touching words)
             const raw = (el.textContent || '').trim();
             if (/^-?\d+(?:\.\d+)?$/.test(raw)) {
@@ -129,7 +168,7 @@
         return null;
     }
 
-    function scrollToAyahInDesktop(ayah) {
+    function scrollToAyahInDesktop(ayah, { behavior = 'smooth' } = {}) {
         if (!ayah) return false;
         const container = elements.contentColumn;
         if (!container) return false;
@@ -142,17 +181,17 @@
         const targetRect = target.getBoundingClientRect();
         const delta = targetRect.top - containerRect.top;
         const nextTop = Math.max(0, container.scrollTop + delta - 24);
-        container.scrollTo({ top: nextTop, behavior: 'smooth' });
+        container.scrollTo({ top: nextTop, behavior });
         return true;
     }
 
-    function waitForAyahAndScroll(ayah) {
+    function waitForAyahAndScroll(ayah, { behavior = 'smooth' } = {}) {
         if (!ayah) return Promise.resolve(false);
-        if (scrollToAyahInDesktop(ayah)) return Promise.resolve(true);
+        if (scrollToAyahInDesktop(ayah, { behavior })) return Promise.resolve(true);
 
         return new Promise(resolve => {
             const observer = new MutationObserver(() => {
-                if (scrollToAyahInDesktop(ayah)) {
+                if (scrollToAyahInDesktop(ayah, { behavior })) {
                     observer.disconnect();
                     resolve(true);
                 }
@@ -161,7 +200,7 @@
 
             // Also attempt once on next frame (no timeouts)
             requestAnimationFrame(() => {
-                if (scrollToAyahInDesktop(ayah)) {
+                if (scrollToAyahInDesktop(ayah, { behavior })) {
                     observer.disconnect();
                     resolve(true);
                 }
@@ -176,7 +215,10 @@
     function updateSureParam(number) {
         const url = new URL(window.location.href);
         url.searchParams.set('s', String(number));
+        // When selecting a sura, always start from top (no ayah deep-link)
+        url.searchParams.delete('a');
         window.history.replaceState({}, '', url.toString());
+        saveLastVisitedSura(number);
         return url.toString();
     }
 
@@ -222,6 +264,9 @@
 
     function loadMorphologyScript() {
         return new Promise((resolve) => {
+            // Let morphology-hover.js know it's hosted inside desktop.html so it won't
+            // run its own window-based layout/resize positioning logic.
+            window.__DESKTOP_HOST__ = true;
             const existing = document.getElementById('morphology-hover-script');
             if (existing) existing.remove();
             const script = document.createElement('script');
@@ -233,39 +278,32 @@
         });
     }
 
-    function waitForMinimapReady() {
-        return new Promise((resolve) => {
-            let interval = null;
-            let observer = null;
-            
-            const cleanup = () => {
-                if (interval) clearInterval(interval);
-                if (observer) observer.disconnect();
-            };
-            
-            const check = () => {
-                const minimap = document.getElementById('morphology-minimap');
-                // Wait for all required properties used in setupDesktopMinimapSync
-                if (minimap && 
-                    minimap._scaleFactor != null && 
-                    minimap._minTop != null &&
-                    minimap._contentHeight != null &&
-                    minimap._contentWidth != null) {
-                    cleanup();
-                    resolve(minimap);
-                    return true;
-                }
-                return false;
-            };
-            
-            if (check()) return;
-            
-            observer = new MutationObserver(() => check());
-            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-            
-            // Check periodically since JS properties don't trigger MutationObserver
-            interval = setInterval(check, 50);
-        });
+    function setupMinimapRelayoutObserver() {
+        if (window._desktopMinimapRelayoutObserver) return;
+        window._desktopMinimapRelayoutObserver = true;
+        
+        const wrapper = document.getElementById('morphology-combined-panel');
+        const minimap = document.getElementById('morphology-minimap');
+        if (!wrapper || !minimap) return;
+        
+        let rafPending = false;
+        const relayout = () => {
+            if (rafPending) return;
+            rafPending = true;
+            requestAnimationFrame(() => {
+                rafPending = false;
+                updateMinimapContentWidth();
+                minimap.forceRelayout?.();
+                updateMinimap();
+            });
+        };
+        
+        const ro = new ResizeObserver(() => relayout());
+        ro.observe(wrapper);
+        ro.observe(elements.panelsColumn);
+        
+        // Also relayout once immediately
+        relayout();
     }
 
     function waitForElement(selector, root = document.body) {
@@ -381,15 +419,24 @@
         const paddingRight = parseFloat(style.paddingRight) || 0;
         const availableWidth = Math.max(0, reference.clientWidth - paddingLeft - paddingRight);
         minimapContent.style.width = `${availableWidth}px`;
-        minimap.style.width = `${reference.clientWidth}px`;
     }
 
     function updateMinimap() {
         updateMinimapContentWidth();
         const minimap = document.getElementById('morphology-minimap');
+        if (minimap && typeof minimap._desktopUpdateHighlight === 'function') {
+            minimap._desktopUpdateHighlight();
+            return;
+        }
         if (minimap && typeof minimap.updateHighlight === 'function') {
             minimap.updateHighlight();
+            return;
         }
+        // Useful debug for cases where minimap flashes then disappears
+        const hasMinimap = !!minimap;
+        const hasContent = !!(minimap && minimap.querySelector && minimap.querySelector('#minimap-content'));
+        const hasHighlight = !!document.getElementById('minimap-visible-highlight');
+        console.warn('[desktop minimap] updateMinimap skipped', { hasMinimap, hasContent, hasHighlight });
     }
 
     // Measure descriptions from root-freq.py
@@ -1285,6 +1332,24 @@
         const header = elements.content.querySelector('#header') || elements.content.querySelector('div');
         if (!header) return false;
         header.style.position = 'relative';
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'center';
+        header.style.gap = '8px';
+
+        // Wrap the header text in a span so we can place the settings button next to it.
+        let titleSpan = header.querySelector('.sura-title-text');
+        if (!titleSpan) {
+            const textNodes = Array.from(header.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+            const titleText = textNodes.map(n => n.textContent || '').join(' ').replace(/\s+/g, ' ').trim()
+                || (header.textContent || '').replace(/\s+/g, ' ').trim();
+            textNodes.forEach(n => n.parentNode && n.parentNode.removeChild(n));
+            titleSpan = document.createElement('span');
+            titleSpan.className = 'sura-title-text';
+            titleSpan.textContent = titleText;
+            header.insertBefore(titleSpan, header.firstChild);
+        }
+
         let wrapper = header.querySelector('.settings-wrapper');
         if (!wrapper) {
             wrapper = document.createElement('div');
@@ -1293,6 +1358,11 @@
         }
         wrapper.appendChild(elements.settingsButton);
         wrapper.appendChild(elements.settingsMenu);
+
+        // Ensure order: title first, then wrapper. In RTL this places wrapper to the left of the title.
+        if (wrapper.parentElement === header && wrapper.previousElementSibling !== titleSpan) {
+            header.appendChild(wrapper);
+        }
         return true;
     }
 
@@ -1382,7 +1452,40 @@
         }, { passive: true });
         window.addEventListener('resize', update, { passive: true });
         update();
+        // Expose for one-off sync calls (e.g., deep-link ?a=)
+        minimap._desktopUpdateHighlight = update;
         return true;
+    }
+
+    function scrollMinimapToVisibleHighlightOnce() {
+        const minimap = document.getElementById('morphology-minimap');
+        const visibleHighlight = document.getElementById('minimap-visible-highlight');
+        if (!minimap || !visibleHighlight) return false;
+
+        // Ensure highlight position is up-to-date before scrolling minimap
+        minimap._desktopUpdateHighlight?.();
+
+        const top = parseFloat(visibleHighlight.style.top || '0') || 0;
+        const height = parseFloat(visibleHighlight.style.height || '0') || 0;
+        const bottom = top + height;
+
+        const viewportTop = minimap.scrollTop || 0;
+        const viewportHeight = minimap.clientHeight || 0;
+        const viewportBottom = viewportTop + viewportHeight;
+        const margin = 12;
+        if (viewportHeight <= 0) return false;
+
+        if (top < viewportTop + margin) {
+            minimap.scrollTop = Math.max(0, top - margin);
+            return true;
+        }
+        if (bottom > viewportBottom - margin) {
+            const next = bottom - viewportHeight + margin;
+            const maxScroll = Math.max(0, (minimap.scrollHeight || 0) - viewportHeight);
+            minimap.scrollTop = Math.min(maxScroll, Math.max(0, next));
+            return true;
+        }
+        return false;
     }
 
     async function preparePanelsAndMinimap() {
@@ -1392,10 +1495,13 @@
             waitForElement('#highlighted-roots-panel')
         ]);
         movePanelsIntoLeftColumn();
-        
-        // Wait for minimap to have its internal properties set by morphology-hover.js
-        await waitForMinimapReady();
+        // Run sequentially: size panels, then force minimap to recompute with current width
+        applyPanelWidthStyles();
+        updateMinimapContentWidth();
+        const minimap = document.getElementById('morphology-minimap');
+        minimap?.forceRelayout?.();
         setupDesktopMinimapSync();
+        setupMinimapRelayoutObserver();
         
         const limits = restoreRootLimits();
         updateRootPanelFromLimits(limits);
@@ -1413,6 +1519,7 @@
     }
 
     async function loadSuraContent(number) {
+        saveLastVisitedSura(number);
         const href = await getSuraHref(number);
         if (!href) {
             elements.content.innerHTML = '<p>سوره یافت نشد.</p>';
@@ -1968,14 +2075,21 @@
         bindSettings();
         const params = new URLSearchParams(window.location.search);
         if (!params.has('s')) {
-            clearStoredSureNumber();
-            updateSureParam(DEFAULT_SURE);
+            // Prefer last visited sura from cookie; fall back to default
+            const last = getLastVisitedSura() || DEFAULT_SURE;
+            const nextUrl = updateSureParam(last);
+            window.location.replace(nextUrl);
+            return;
         }
         const sureNumber = getSureNumberFromUrl();
         await loadSuraContent(sureNumber);
         const ayah = getAyahNumberFromUrl();
         if (ayah) {
-            await waitForAyahAndScroll(ayah);
+            // For deep-links, jump immediately (no smooth) then scroll minimap once to match.
+            await waitForAyahAndScroll(ayah, { behavior: 'auto' });
+            requestAnimationFrame(() => {
+                scrollMinimapToVisibleHighlightOnce();
+            });
         }
     }
 
