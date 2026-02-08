@@ -5,85 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ذکر یسیر - دسکتاپ</title>
     <link rel="stylesheet" href="Yasir/fonts.css">
-    <script type="application/json" class="js-hypothesis-config">
-        window.hypothesisConfig = function () {
-            return {
-              // Best compromise:
-              showHighlights: "whenSidebarOpen",
-              commentsMode: true,
-              // or hard-disable by default:
-              // showHighlights: false,
-            };
-          };
-    </script>        
-    <script src="https://hypothes.is/embed.js" async></script>
-    <style>
-        hypothesis-highlight {
-            pointer-events: none;
-        }
-        /* Reading mode OFF = Hypothesis should not react on the document */
-        body.hyp-doc-locked .hypothesis-adder,
-        body.hyp-doc-locked .hypothesis-adder-container {
-          display: none !important;
-        }
-      
-        /* Keep highlights visible, but disable hover/click on them */
-        body.hyp-doc-locked .hypothesis-highlight {
-          pointer-events: none !important;
-        }
-    </style>
     <script>
-        let hypDocLocked = false;
-    
-        const hypBlockers = {
-        mouseup: (e) => {
-            if (!hypDocLocked) return;
-            // If user is selecting text, Hypothesis uses mouseup to show the adder.
-            // Stop Hypothesis reaction, but still allow selection to happen.
-            if (window.getSelection && String(window.getSelection()).length > 0) {
-            e.stopImmediatePropagation();
-            }
-        },
-        selectionchange: (e) => {
-            if (!hypDocLocked) return;
-            // Hypothesis may react to selectionchange too.
-            e.stopImmediatePropagation();
-        },
-        mouseover: (e) => {
-            if (!hypDocLocked) return;
-            // Prevent hover-driven behaviors (tooltips/focus) if any.
-            e.stopImmediatePropagation();
-        },
-        click: (e) => {
-            if (!hypDocLocked) return;
-            // Block click-to-focus on highlights (sidebar still works).
-            // Only block if clicking a highlight.
-            if (e.target && e.target.closest && e.target.closest('.hypothesis-highlight')) {
-            e.stopImmediatePropagation();
-            }
+        // Only load Hypothesis if enabled in localStorage
+        const _hypEnabled = localStorage.getItem('hypothesisEnabled');
+        console.log('[hypothesis] localStorage value:', _hypEnabled);
+        if (_hypEnabled === 'true') {
+            // Write config and embed script directly (synchronous)
+            document.write('<script type="application/json" class="js-hypothesis-config">{"showHighlights":"whenSidebarOpen"}<\/script>');
+            document.write('<script src="https://hypothes.is/embed.js" async><\/script>');
         }
-        };
-    
-        // Install capture listeners (critical: capture=true)
-        window.addEventListener('mouseup', hypBlockers.mouseup, true);
-        document.addEventListener('selectionchange', hypBlockers.selectionchange, true);
-        document.addEventListener('mouseover', hypBlockers.mouseover, true);
-        document.addEventListener('click', hypBlockers.click, true);
-    
-        function setHypothesisDocumentInteractivity(enabled) {
-            hypDocLocked = !enabled;
-            if (document.body) {
-                document.body.classList.toggle('hyp-doc-locked', hypDocLocked);
-            }
-        }
-    
-        // Start with document interactivity disabled (after body loads)
-        document.addEventListener('DOMContentLoaded', () => {
-            setHypothesisDocumentInteractivity(false);
-        });
-    
     </script>
         
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap">
     <style>
         * {
             box-sizing: border-box;
@@ -93,6 +26,10 @@
             margin: 0;
             font-family: "KFGQPC Uthman Taha Naskh", Arial, sans-serif;
             background: #ffffff;
+        }
+
+        :root {
+            --ui-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
         }
 
         #desktop-layout {
@@ -114,6 +51,15 @@
             border-left: 1px solid #e1e1e1;
             padding-left: 6px;
             direction: rtl;
+            font-family: var(--ui-font);
+        }
+
+        /* Tooltips/hover popups should use UI font (not Quran font) */
+        #settings-menu,
+        #measure-info-tooltip,
+        #selected-root-tooltip,
+        #root-chart-tooltip {
+            font-family: var(--ui-font) !important;
         }
 
         .content-column {
@@ -163,12 +109,17 @@
 
         #settings-button {
             position: relative;
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid #888;
-            background: #f2f2f2;
-            font-size: 11px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.18);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+            font-size: 12px;
             cursor: pointer;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+        }
+
+        #settings-button:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
         }
 
         #settings-menu {
@@ -176,36 +127,107 @@
             top: 100%;
             inset-inline-start: 0;
             z-index: 10;
-            width: 150px;
-            background: #ffffff;
-            border: 1px solid #bfbfbf;
-            border-radius: 6px;
-            padding: 4px;
-            font-size: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-            line-height: 1;
+            width: 240px;
+            max-width: calc(100vw - 16px);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 14px;
+            padding: 10px;
+            font-size: 12px;
+            box-shadow:
+                0 14px 30px rgba(15, 23, 42, 0.16),
+                0 2px 8px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(10px);
+            line-height: 1.25;
+            direction: rtl;
+            text-align: right;
         }
 
         #settings-menu label {
             display: block;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            color: rgba(15, 23, 42, 0.78);
+            font-weight: 600;
         }
 
         #settings-menu input {
             width: 100%;
-            padding: 2px 3px;
-            font-size: 10px;
+            padding: 6px 8px;
+            font-size: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: rgba(255,255,255,0.95);
+            outline: none;
+        }
+
+        /* Make label + number inputs single-line (compact) */
+        #settings-menu .row:not(.chart-toggle):not(.button-row) {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #settings-menu .row:not(.chart-toggle):not(.button-row) label {
+            margin-bottom: 0;
+            flex: 1 1 auto;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        #settings-menu .row:not(.chart-toggle):not(.button-row) input {
+            width: 74px;
+            flex: 0 0 auto;
+            padding: 5px 8px;
+            font-size: 11px;
+        }
+
+        #settings-menu input:focus {
+            border-color: rgba(59, 130, 246, 0.55);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        }
+
+        /* Don't reserve full row width for checkboxes */
+        #settings-menu input[type="checkbox"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            flex: 0 0 auto;
+            accent-color: #3b82f6;
+        }
+
+        #settings-menu .chart-toggle label {
+            margin: 0;
+            font-weight: 600;
+            color: rgba(15, 23, 42, 0.78);
+            flex: 1 1 auto;
         }
 
         #settings-menu a {
             display: inline-block;
             margin-top: 4px;
-            font-size: 10px;
+            font-size: 12px;
             text-decoration: none;
         }
 
+        #settings-menu .menu-link {
+            display: block;
+            margin-top: 6px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            text-align: center;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        #settings-menu .menu-link:hover {
+            background: rgba(59, 130, 246, 0.12);
+        }
+
         #settings-menu .row {
-            margin-bottom: 4px;
+            margin-bottom: 10px;
         }
 
         #settings-menu .button-row {
@@ -215,19 +237,39 @@
 
         #settings-menu button {
             flex: 1 1 auto;
-            padding: 2px 3px;
-            font-size: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
             cursor: pointer;
-            border-radius: 4px;
-            border: 1px solid #999;
-            background: #f6f6f6;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: #f8fafc;
+            color: rgba(15, 23, 42, 0.9);
+        }
+
+        #apply-settings {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            border-color: rgba(37, 99, 235, 0.55);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        #apply-settings:hover {
+            filter: brightness(1.03);
+        }
+
+        #close-settings:hover {
+            background: #eef2f7;
         }
 
         .chart-toggle {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 10px;
+            gap: 8px;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.03);
+            border: 1px solid rgba(15, 23, 42, 0.06);
         }
 
         .root-chart-canvas {
@@ -792,10 +834,12 @@
             <button id="apply-settings">اعمال</button>
             <button id="close-settings">بستن</button>
         </div>
+        <a id="go-search-link" class="menu-link" href="search.html">ابزار جستجو</a>
         <a href="mobile.html">نسخه موبایل</a>
     </div>
 
     <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="js/sura-data.js"></script>
     <script src="desktop.js"></script>
 </body>
 </html>

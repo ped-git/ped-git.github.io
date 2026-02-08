@@ -12,6 +12,9 @@
     let cachedRootLimits = null;
     const rootCharts = new Map();
     let rootClickTraceActive = false;
+    
+    // Tooltip element for selected roots
+    let selectedRootTooltip = null;
 
     const elements = {
         content: document.getElementById('content'),
@@ -29,6 +32,35 @@
         applyButton: document.getElementById('apply-settings'),
         closeButton: document.getElementById('close-settings')
     };
+
+    // Persian number formatting (non-ad-hoc; uses Intl)
+    const faNumber = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 3 });
+    function fmtFa(n) {
+        const x = Number(n);
+        if (!Number.isFinite(x)) return '';
+        return faNumber.format(x);
+    }
+    function fmtFaInText(text) {
+        if (!text) return '';
+        return String(text).replace(/-?\d+(?:\.\d+)?/g, (m) => {
+            const x = Number(m);
+            return Number.isFinite(x) ? fmtFa(x) : m;
+        });
+    }
+
+    function formatPanelNumbersToFa() {
+        const scope = elements.panelsColumn;
+        if (!scope) return;
+        const els = scope.querySelectorAll('span, div, a, button, label');
+        els.forEach(el => {
+            // Only replace if the entire text is a number (avoid touching words)
+            const raw = (el.textContent || '').trim();
+            if (/^-?\d+(?:\.\d+)?$/.test(raw)) {
+                const x = Number(raw);
+                if (Number.isFinite(x)) el.textContent = fmtFa(x);
+            }
+        });
+    }
 
     function loadRootLimits() {
         let limits = {};
@@ -89,6 +121,54 @@
         return DEFAULT_SURE;
     }
 
+    function getAyahNumberFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('a');
+        const parsed = parseInt(raw || '', 10);
+        if (!Number.isNaN(parsed) && parsed >= 1) return parsed;
+        return null;
+    }
+
+    function scrollToAyahInDesktop(ayah) {
+        if (!ayah) return false;
+        const container = elements.contentColumn;
+        if (!container) return false;
+
+        const selector = `.morph-word[data-ayah="${ayah}"]`;
+        const target = elements.content.querySelector(selector) || document.querySelector(selector);
+        if (!target) return false;
+
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+        const delta = targetRect.top - containerRect.top;
+        const nextTop = Math.max(0, container.scrollTop + delta - 24);
+        container.scrollTo({ top: nextTop, behavior: 'smooth' });
+        return true;
+    }
+
+    function waitForAyahAndScroll(ayah) {
+        if (!ayah) return Promise.resolve(false);
+        if (scrollToAyahInDesktop(ayah)) return Promise.resolve(true);
+
+        return new Promise(resolve => {
+            const observer = new MutationObserver(() => {
+                if (scrollToAyahInDesktop(ayah)) {
+                    observer.disconnect();
+                    resolve(true);
+                }
+            });
+            observer.observe(elements.content, { subtree: true, childList: true, attributes: true });
+
+            // Also attempt once on next frame (no timeouts)
+            requestAnimationFrame(() => {
+                if (scrollToAyahInDesktop(ayah)) {
+                    observer.disconnect();
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     function clearStoredSureNumber() {
         localStorage.removeItem(STORAGE_KEYS.sureNumber);
     }
@@ -141,12 +221,51 @@
     }
 
     function loadMorphologyScript() {
-        const existing = document.getElementById('morphology-hover-script');
-        if (existing) existing.remove();
-        const script = document.createElement('script');
-        script.id = 'morphology-hover-script';
-        script.src = 'Yasir/morphology-hover.js';
-        document.body.appendChild(script);
+        return new Promise((resolve) => {
+            const existing = document.getElementById('morphology-hover-script');
+            if (existing) existing.remove();
+            const script = document.createElement('script');
+            script.id = 'morphology-hover-script';
+            script.src = 'Yasir/morphology-hover.js';
+            script.onload = () => resolve();
+            script.onerror = () => resolve(); // resolve anyway to not block
+            document.body.appendChild(script);
+        });
+    }
+
+    function waitForMinimapReady() {
+        return new Promise((resolve) => {
+            let interval = null;
+            let observer = null;
+            
+            const cleanup = () => {
+                if (interval) clearInterval(interval);
+                if (observer) observer.disconnect();
+            };
+            
+            const check = () => {
+                const minimap = document.getElementById('morphology-minimap');
+                // Wait for all required properties used in setupDesktopMinimapSync
+                if (minimap && 
+                    minimap._scaleFactor != null && 
+                    minimap._minTop != null &&
+                    minimap._contentHeight != null &&
+                    minimap._contentWidth != null) {
+                    cleanup();
+                    resolve(minimap);
+                    return true;
+                }
+                return false;
+            };
+            
+            if (check()) return;
+            
+            observer = new MutationObserver(() => check());
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+            
+            // Check periodically since JS properties don't trigger MutationObserver
+            interval = setInterval(check, 50);
+        });
     }
 
     function waitForElement(selector, root = document.body) {
@@ -361,8 +480,8 @@
                 const tooltip = getMeasureInfoTooltip();
                 tooltip.innerHTML = `
                     <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; font-size: 12px;">${info.title}</div>
-                    <div style="margin-bottom: 8px;">${info.description}</div>
-                    <div style="font-family: monospace; font-size: 9px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 4px; white-space: pre-line; line-height: 1.4;">${info.formula}</div>
+                    <div style="margin-bottom: 8px;">${fmtFaInText(info.description)}</div>
+                    <div style="font-family: monospace; font-size: 9px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 4px; white-space: pre-line; line-height: 1.4;">${fmtFaInText(info.formula)}</div>
                 `;
                 
                 const rect = infoIcon.getBoundingClientRect();
@@ -396,6 +515,151 @@
             
             // Insert at beginning of title div
             titleDiv.insertBefore(infoIcon, titleDiv.firstChild);
+        });
+    }
+
+    // Find all measure data for a root from DOM (each category only once)
+    function getAllMeasuresForRootFromDOM(root) {
+        const sections = [
+            { id: 'top-roots-section-content', title: 'پرتکرار', color: '#4ecdc4' },
+            { id: 'selective-roots-section-content', title: 'متمایز', color: '#f39c12' },
+            { id: 'high-kl-roots-section-content', title: 'KL', color: '#e74c3c' },
+            { id: 'n2n-roots-section-content', title: 'N²/N', color: '#9b59b6' }
+        ];
+        
+        const measures = [];
+        for (const section of sections) {
+            const container = document.getElementById(section.id);
+            if (!container) continue;
+            
+            const rootEl = container.querySelector(`[data-root="${root}"]`);
+            if (!rootEl) continue;
+            
+            const title = rootEl.getAttribute('title') || '';
+            const countSpan = rootEl.querySelector('span:last-child');
+            const count = countSpan?.textContent || '';
+            
+            measures.push({ title: section.title, color: section.color, info: title, count });
+        }
+        return measures.length > 0 ? measures : null;
+    }
+
+    // Format all measures for compact tooltip
+    function formatMeasuresTooltip(root, measures) {
+        let html = `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #555;">${root}</div>`;
+        measures.forEach((m, i) => {
+            const info = m.info || m.count;
+            const sep = i < measures.length - 1 ? 'border-bottom:1px solid #444;margin-bottom:3px;padding-bottom:3px;' : '';
+            const infoText = fmtFaInText(info).replace(/\n/g, ' | ');
+            html += `<div style="${sep}"><span style="color:${m.color};font-weight:bold;">${m.title}:</span> <span style="font-size:9px;">${infoText}</span></div>`;
+        });
+        return html;
+    }
+
+    // Get or create tooltip for selected roots
+    function getSelectedRootTooltip() {
+        if (!selectedRootTooltip) {
+            selectedRootTooltip = document.createElement('div');
+            selectedRootTooltip.id = 'selected-root-tooltip';
+            selectedRootTooltip.style.cssText = `
+                position: fixed;
+                background: rgba(0,0,0,0.85);
+                color: #ecf0f1;
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 10px;
+                line-height: 1.3;
+                z-index: 100000;
+                max-width: 220px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.15s ease;
+                pointer-events: none;
+                direction: rtl;
+                text-align: right;
+            `;
+            document.body.appendChild(selectedRootTooltip);
+        }
+        return selectedRootTooltip;
+    }
+
+    // Show tooltip for selected root
+    function showSelectedRootTooltip(rootElement, root) {
+        const measures = getAllMeasuresForRootFromDOM(root);
+        
+        if (!measures) return;
+        
+        const tooltip = getSelectedRootTooltip();
+        tooltip.innerHTML = formatMeasuresTooltip(root, measures);
+        
+        const rect = rootElement.getBoundingClientRect();
+        const tooltipWidth = 240;
+        
+        // Position to the right of element, or left if not enough space
+        let left = rect.right + 8;
+        if (left + tooltipWidth > window.innerWidth - 10) {
+            left = rect.left - tooltipWidth - 8;
+        }
+        left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+        
+        let top = rect.top;
+        // Keep within viewport vertically
+        const tooltipHeight = 150; // estimate
+        if (top + tooltipHeight > window.innerHeight - 10) {
+            top = window.innerHeight - tooltipHeight - 10;
+        }
+        top = Math.max(10, top);
+        
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+        tooltip.style.opacity = '1';
+        tooltip.style.visibility = 'visible';
+    }
+
+    // Hide tooltip for selected root
+    function hideSelectedRootTooltip() {
+        const tooltip = getSelectedRootTooltip();
+        tooltip.style.opacity = '0';
+        tooltip.style.visibility = 'hidden';
+    }
+
+    // Setup hover events for selected roots section
+    function setupSelectedRootsHover() {
+        const rootPanel = document.getElementById('highlighted-roots-panel');
+        if (!rootPanel) return;
+        
+        // Use event delegation
+        rootPanel.addEventListener('mouseover', (e) => {
+            const target = e.target.closest('[data-root]');
+            if (!target) return;
+            
+            // Check if this is in the selected roots section (first section in the panel)
+            const section = target.closest('div[style*="margin-bottom"]');
+            if (!section) return;
+            
+            // The selected roots section doesn't have an ID, but it's the first one
+            // Check if it's NOT in one of the measure sections
+            const measureSections = ['top-roots-section', 'selective-roots-section', 'high-kl-roots-section', 'n2n-roots-section'];
+            const inMeasureSection = measureSections.some(id => target.closest(`#${id}`));
+            
+            if (!inMeasureSection) {
+                const root = target.getAttribute('data-root');
+                if (root) {
+                    showSelectedRootTooltip(target, root);
+                }
+            }
+        });
+        
+        rootPanel.addEventListener('mouseout', (e) => {
+            const target = e.target.closest('[data-root]');
+            if (target) {
+                // Check if we're leaving the root element (not just moving within it)
+                const related = e.relatedTarget;
+                if (!related || !target.contains(related)) {
+                    hideSelectedRootTooltip();
+                }
+            }
         });
     }
 
@@ -937,7 +1201,9 @@
         const container = document.getElementById(sectionId);
         const currentItem = rootKey && container ? container.querySelector(`[data-root="${rootKey}"]`) : null;
         const detail = currentItem?.getAttribute('title') || '';
-        tooltipEl.innerHTML = `<div>${title}</div><div style="margin-top:2px;">${detail}</div>`;
+        const detailFa = fmtFaInText(detail);
+        const detailFormatted = detailFa.replace(/\n/g, ' <span style="color:#888;">|</span> ');
+        tooltipEl.innerHTML = `<div style="font-weight:bold;border-bottom:1px solid #555;padding-bottom:3px;margin-bottom:3px;">${title}</div><div>${detailFormatted}</div>`;
 
         const canvasRect = chart.canvas.getBoundingClientRect();
         const pageX = canvasRect.left + window.scrollX;
@@ -968,6 +1234,7 @@
                 item.style.display = (limit <= 0 || index >= limit) ? 'none' : 'inline-flex';
             });
         });
+        formatPanelNumbersToFa();
         if (chartEnabled) {
             updateRootChartMode(true, limits);
         }
@@ -1029,15 +1296,20 @@
         return true;
     }
 
+    function loadHypothesisPreference() {
+        return localStorage.getItem('hypothesisEnabled') === 'true';
+    }
+
+    function saveHypothesisPreference(enabled) {
+        localStorage.setItem('hypothesisEnabled', enabled ? 'true' : 'false');
+    }
+
     function setupHypothesisToggle() {
         if (!elements.hypothesisToggle) return;
-        elements.hypothesisToggle.addEventListener('change', () => {
-            const enabled = elements.hypothesisToggle.checked;
-            console.log('[hypothesis] toggle', { enabled });
-            if (typeof setHypothesisDocumentInteractivity === 'function') {
-                setHypothesisDocumentInteractivity(enabled);
-            }
-        });
+        
+        // Initialize checkbox from saved preference
+        elements.hypothesisToggle.checked = loadHypothesisPreference();
+        // No auto-reload on change - handled by Apply button
     }
 
     function setupDesktopMinimapSync() {
@@ -1120,7 +1392,11 @@
             waitForElement('#highlighted-roots-panel')
         ]);
         movePanelsIntoLeftColumn();
+        
+        // Wait for minimap to have its internal properties set by morphology-hover.js
+        await waitForMinimapReady();
         setupDesktopMinimapSync();
+        
         const limits = restoreRootLimits();
         updateRootPanelFromLimits(limits);
         addMeasureInfoIcons();
@@ -1130,6 +1406,10 @@
         // Set initial fingerprint to avoid unnecessary refreshes
         lastRootFingerprint = getRootPanelFingerprint();
         updateMinimap();
+        
+        // Setup hover for selected roots (uses DOM data already loaded)
+        setupSelectedRootsHover();
+        formatPanelNumbersToFa();
     }
 
     async function loadSuraContent(number) {
@@ -1154,56 +1434,15 @@
         setSureNumberGlobal(number);
         const limits = loadRootLimits();
         setExpandedRootLimits(limits);
-        loadMorphologyScript();
+        await loadMorphologyScript();
         setupScrollProxy();
         attachSettingsToHeader();
         setupHypothesisToggle();
         overrideSuraNavigation();
-        preparePanelsAndMinimap();
+        await preparePanelsAndMinimap();
     }   
 
-    // Sura names in Arabic
-    const SURA_NAMES = {
-        1: 'فاتحه', 2: 'بقره', 3: 'آل عمران', 4: 'نساء', 5: 'مائده',
-        6: 'انعام', 7: 'اعراف', 8: 'انفال', 9: 'توبه', 10: 'یونس',
-        11: 'هود', 12: 'یوسف', 13: 'رعد', 14: 'ابراهیم', 15: 'حجر',
-        16: 'نحل', 17: 'اسراء', 18: 'کهف', 19: 'مریم', 20: 'طه',
-        21: 'انبیاء', 22: 'حج', 23: 'مؤمنون', 24: 'نور', 25: 'فرقان',
-        26: 'شعراء', 27: 'نمل', 28: 'قصص', 29: 'عنکبوت', 30: 'روم',
-        31: 'لقمان', 32: 'سجده', 33: 'احزاب', 34: 'سبأ', 35: 'فاطر',
-        36: 'یس', 37: 'صافات', 38: 'ص', 39: 'زمر', 40: 'غافر',
-        41: 'فصلت', 42: 'شوری', 43: 'زخرف', 44: 'دخان', 45: 'جاثیه',
-        46: 'احقاف', 47: 'محمد', 48: 'فتح', 49: 'حجرات', 50: 'ق',
-        51: 'ذاریات', 52: 'طور', 53: 'نجم', 54: 'قمر', 55: 'رحمن',
-        56: 'واقعه', 57: 'حدید', 58: 'مجادله', 59: 'حشر', 60: 'ممتحنه',
-        61: 'صف', 62: 'جمعه', 63: 'منافقون', 64: 'تغابن', 65: 'طلاق',
-        66: 'تحریم', 67: 'ملک', 68: 'قلم', 69: 'حاقه', 70: 'معارج',
-        71: 'نوح', 72: 'جن', 73: 'مزمل', 74: 'مدثر', 75: 'قیامه',
-        76: 'انسان', 77: 'مرسلات', 78: 'نبأ', 79: 'نازعات', 80: 'عبس',
-        81: 'تکویر', 82: 'انفطار', 83: 'مطففین', 84: 'انشقاق', 85: 'بروج',
-        86: 'طارق', 87: 'اعلی', 88: 'غاشیه', 89: 'فجر', 90: 'بلد',
-        91: 'شمس', 92: 'لیل', 93: 'ضحی', 94: 'شرح', 95: 'تین',
-        96: 'علق', 97: 'قدر', 98: 'بینه', 99: 'زلزله', 100: 'عادیات',
-        101: 'قارعه', 102: 'تکاثر', 103: 'عصر', 104: 'همزه', 105: 'فیل',
-        106: 'قریش', 107: 'ماعون', 108: 'کوثر', 109: 'کافرون', 110: 'نصر',
-        111: 'مسد', 112: 'اخلاص', 113: 'فلق', 114: 'ناس'
-    };
-
-    // Sura verse counts
-    const SURA_AYAT = {
-        1: 7, 2: 286, 3: 200, 4: 176, 5: 120, 6: 165, 7: 206, 8: 75, 9: 129, 10: 109,
-        11: 123, 12: 111, 13: 43, 14: 52, 15: 99, 16: 128, 17: 111, 18: 110, 19: 98, 20: 135,
-        21: 112, 22: 78, 23: 118, 24: 64, 25: 77, 26: 227, 27: 93, 28: 88, 29: 69, 30: 60,
-        31: 34, 32: 30, 33: 73, 34: 54, 35: 45, 36: 83, 37: 182, 38: 88, 39: 75, 40: 85,
-        41: 54, 42: 53, 43: 89, 44: 59, 45: 37, 46: 35, 47: 38, 48: 29, 49: 18, 50: 45,
-        51: 60, 52: 49, 53: 62, 54: 55, 55: 78, 56: 96, 57: 29, 58: 22, 59: 24, 60: 13,
-        61: 14, 62: 11, 63: 11, 64: 18, 65: 12, 66: 12, 67: 30, 68: 52, 69: 52, 70: 44,
-        71: 28, 72: 28, 73: 20, 74: 56, 75: 40, 76: 31, 77: 50, 78: 40, 79: 46, 80: 42,
-        81: 29, 82: 19, 83: 36, 84: 25, 85: 22, 86: 17, 87: 19, 88: 26, 89: 30, 90: 20,
-        91: 15, 92: 21, 93: 11, 94: 8, 95: 8, 96: 19, 97: 5, 98: 8, 99: 8, 100: 11,
-        101: 11, 102: 8, 103: 3, 104: 9, 105: 5, 106: 4, 107: 7, 108: 3, 109: 6, 110: 3,
-        111: 5, 112: 4, 113: 5, 114: 6
-    };
+    // SURA_NAMES and SURA_AYAT loaded from js/sura-data.js
 
     let customSuraOverlay = null;
     let currentSuraView = 'grid'; // 'grid' or 'timeline'
@@ -1491,25 +1730,25 @@
             gridBtn?.classList.remove('active');
             timelineBtn?.classList.add('active');
             
-            // Scroll to current sura in timeline
-            setTimeout(() => {
+            // Scroll to current sura in timeline after layout update
+            requestAnimationFrame(() => {
                 const currentItem = document.querySelector('#timeline-scroll .timeline-item.current');
                 if (currentItem) {
                     currentItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                 }
-            }, 100);
+            });
         } else {
             modal.classList.remove('timeline-view');
             gridBtn?.classList.add('active');
             timelineBtn?.classList.remove('active');
             
-            // Scroll to current sura in grid
-            setTimeout(() => {
+            // Scroll to current sura in grid after layout update
+            requestAnimationFrame(() => {
                 const currentCard = document.querySelector('#sura-grid .sura-card.current');
                 if (currentCard) {
                     currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-            }, 100);
+            });
         }
     }
 
@@ -1538,8 +1777,8 @@
 
         overlay.classList.add('visible');
 
-        // Focus search and scroll to current based on view
-        setTimeout(() => {
+        // Focus search and scroll to current based on view after layout update
+        requestAnimationFrame(() => {
             const searchInput = overlay.querySelector('.sura-search-input');
             if (searchInput) searchInput.focus();
 
@@ -1554,7 +1793,7 @@
                     currentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
-        }, 150);
+        });
     }
 
     function hideCustomSuraMenu() {
@@ -1684,13 +1923,36 @@
             saveRootLimits(newLimits);
             const chartOn = elements.chartToggle?.checked || false;
             saveChartPreference(chartOn);
+            
+            // Check if hypothesis setting changed - requires page reload
+            const hypothesisOn = elements.hypothesisToggle?.checked || false;
+            const hypothesisChanged = hypothesisOn !== loadHypothesisPreference();
+            
             toggleSettings(false);
             const currentSure = getSureNumberFromUrl();
+            
+            // Reload page if sura changed or hypothesis changed
             if (newSure !== currentSure) {
+                if (hypothesisChanged) {
+                    saveHypothesisPreference(hypothesisOn);
+                }
                 const nextUrl = updateSureParam(newSure);
                 window.location.href = nextUrl;
                 return;
             }
+            if (hypothesisChanged) {
+                if (confirm('برای اعمال تغییرات توضیحات، صفحه باید بارگذاری مجدد شود. ادامه می‌دهید؟')) {
+                    saveHypothesisPreference(hypothesisOn);
+                    window.location.reload();
+                } else {
+                    // Revert checkbox to previous state
+                    if (elements.hypothesisToggle) {
+                        elements.hypothesisToggle.checked = !hypothesisOn;
+                    }
+                }
+                return;
+            }
+            
             cachedRootLimits = newLimits;
             updateRootPanelFromLimits(newLimits);
             if (chartOn) {
@@ -1711,6 +1973,10 @@
         }
         const sureNumber = getSureNumberFromUrl();
         await loadSuraContent(sureNumber);
+        const ayah = getAyahNumberFromUrl();
+        if (ayah) {
+            await waitForAyahAndScroll(ayah);
+        }
     }
 
     init();

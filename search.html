@@ -1,0 +1,3201 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جستجو در قرآن</title>
+    <style>
+        @font-face {
+            font-family: 'KFGQPC Uthman Taha Naskh';
+            src: url('fonts/KFGQPC Uthman Taha Naskh Regular.ttf') format('truetype');
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 8px;
+            font-family: 'KFGQPC Uthman Taha Naskh', Arial, sans-serif;
+            background: #f5f5f5;
+            direction: rtl;
+        }
+        
+        .container {
+            width: 100%;
+        }
+        
+        .search-box {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+        }
+        
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            direction: rtl;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .suggestions.visible {
+            display: block;
+        }
+        
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-item:hover {
+            background: #f0f7ff;
+        }
+        
+        .suggestion-item.text {
+            background: #fff8e1;
+        }
+        
+        .suggestion-item.word {
+            background: #e3f2fd;
+        }
+        
+        .suggestion-item.root {
+            background: #e8f5e9;
+        }
+        
+        .suggestion-type {
+            font-size: 11px;
+            color: #888;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        
+        .distance-control {
+            display: inline-flex;
+            align-items: center;
+            height: 30px;
+            border: 1px solid #ddd;
+            border-radius: 999px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* Digits are produced via Intl.NumberFormat('fa-IR'); keep the normal UI font */
+        .num-hindi {
+            font-family: inherit;
+        }
+
+        .distance-input {
+            width: 38px;
+            height: 30px;
+            border: none;
+            padding: 0 4px;
+            font-size: 13px;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+            appearance: textfield;
+            -moz-appearance: textfield;
+            background: transparent;
+            line-height: 1;
+        }
+
+        /* Distance: show formatted (fa-IR) digits, keep actual numeric input hidden for parsing */
+        .distance-control.has-display {
+            position: relative;
+        }
+
+        .distance-control.has-display .distance-input {
+            color: transparent;
+            text-shadow: none;
+            caret-color: #333;
+        }
+
+        .distance-display {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            font-size: 13px;
+            line-height: 1;
+            color: #333;
+        }
+
+        /* Hide number input spinners (arrows) */
+        .distance-input::-webkit-outer-spin-button,
+        .distance-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .cross-sura-toggle {
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+            color: #333;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: background 0.2s, border-color 0.2s;
+            height: 34px;
+        }
+
+        .cross-sura-toggle:hover {
+            background: #f0f0f0;
+        }
+
+        .cross-sura-toggle[aria-pressed="true"] {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .cross-sura-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #bbb;
+        }
+
+        .cross-sura-toggle[aria-pressed="true"] .cross-sura-dot {
+            background: #3498db;
+        }
+        
+        .distance-label {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .search-btn {
+            padding: 8px 20px;
+            font-size: 14px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+        }
+        
+        .search-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .selected-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex: 1;
+            min-height: 28px;
+            padding: 4px 8px;
+            background: #fafafa;
+            border-radius: 6px;
+            border: 1px dashed #ddd;
+            align-items: center;
+        }
+        
+        .selected-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        /* Match highlight colors */
+        .selected-item.color-0 { background: #a5d6a7; }
+        .selected-item.color-1 { background: #90caf9; }
+        .selected-item.color-2 { background: #ffcc80; }
+        .selected-item.color-3 { background: #ce93d8; }
+        .selected-item.color-4 { background: #fff59d; }
+        .selected-item.color-5 { background: #f48fb1; }
+        .selected-item.color-6 { background: #80deea; }
+        .selected-item.color-7 { background: #bcaaa4; }
+        
+        .selected-item .remove-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.15);
+            color: #333;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .selected-item .remove-btn:hover {
+            background: rgba(0,0,0,0.25);
+        }
+        
+        .results-count {
+            color: #666;
+            font-size: 12px;
+            white-space: nowrap;
+            cursor: help;
+        }
+        
+        .empty-hint {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .results-box {
+            display: flex;
+            flex-direction: row-reverse; /* RTL fix: items panel on right */
+            gap: 10px;
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        .results-content-column {
+            flex: 1;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        
+        .items-panel {
+            width: 240px;
+            flex-shrink: 0;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+            position: sticky;
+            top: 10px;
+        }
+        
+        .items-panel-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .search-item-row {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .search-item-row:hover {
+            background: #f5f5f5;
+        }
+        
+        .search-item-row.highlighted {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+        }
+        
+        .search-item-row.unchecked {
+            opacity: 0.5;
+        }
+        
+        .search-item-row.unchecked .item-label {
+            text-decoration: line-through;
+        }
+        
+        .search-item-row .item-checkbox {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .search-item-row .item-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        
+        .search-item-row .item-label {
+            flex: 1;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .search-item-row .item-type {
+            font-size: 10px;
+            color: #888;
+            background: #f0f0f0;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        
+        .lems-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .lems-container.collapsed {
+            max-height: 0 !important;
+        }
+        
+        .expand-toggle {
+            cursor: pointer;
+            font-size: 10px;
+            color: #666;
+            transition: transform 0.2s;
+            user-select: none;
+            width: 12px;
+            text-align: center;
+        }
+        
+        .expand-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .expand-spacer {
+            width: 12px;
+            flex-shrink: 0;
+        }
+        
+        .lem-subrow {
+            padding: 4px 24px 4px 8px; /* RTL: indent on right */
+            margin-bottom: 2px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .lem-subrow:hover {
+            background: #f8f8f8;
+        }
+        
+        .lem-subrow.highlighted {
+            background: #e8f5e9;
+            border: 1px solid #a5d6a7;
+        }
+        
+        .lem-subrow.unchecked {
+            opacity: 0.5;
+        }
+        
+        .lem-subrow.unchecked .lem-label {
+            text-decoration: line-through;
+        }
+        
+        .lem-subrow input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .lem-subrow .lem-label {
+            flex: 1;
+        }
+        
+        .lem-subrow .lem-count {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        .result-group {
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            background: #fafafa;
+            border-radius: 6px;
+            border-right: 3px solid #3498db;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .region-controls {
+            position: absolute;
+            top: -2px; /* inside the region, overlay on top */
+            left: 6px;
+            transform: none;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 3px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            backdrop-filter: none;
+            z-index: 2;
+        }
+
+        .result-group:hover .region-controls {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .region-btn {
+            border: none;
+            background: transparent;
+            width: 14px;
+            height: 14px;
+            padding: 0;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: inherit;
+            color: #111;
+            line-height: 1;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            opacity: 0.95;
+        }
+
+        .region-btn:hover {
+            opacity: 1;
+        }
+
+        .region-btn svg {
+            width: 14px;
+            height: 14px;
+            display: block;
+        }
+
+        .region-btn.before {
+            color: #111; /* black like screenshot */
+        }
+
+        .region-btn.after {
+            color: #1565c0; /* blue like screenshot */
+        }
+
+        .region-btn.reset {
+            color: #555;
+        }
+
+        .region-btn.danger {
+            color: #c62828; /* red X */
+        }
+
+        .region-btn.danger:hover {
+            opacity: 1;
+        }
+
+        /* Ensure left-outside controls are not clipped by containers */
+        .multi-sura-container {
+            overflow: visible;
+        }
+
+        .result-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Connected groups from same cross-sura interval */
+        .multi-sura-container {
+            border-right: 3px solid #3498db;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .multi-sura-container .result-group {
+            border-right: none;
+            border-radius: 0;
+            margin-bottom: 0;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .multi-sura-container .result-group:first-child {
+            border-radius: 6px 6px 0 0;
+        }
+        
+        .multi-sura-container .result-group:last-child {
+            border-radius: 0 0 6px 6px;
+            border-bottom: none;
+        }
+        
+        .result-ayah {
+            display: inline;
+            line-height: 2;
+            font-size: 17px;
+        }
+        
+        .result-ref {
+            display: inline-block;
+            font-size: 10px;
+            color: #888;
+            background: #e8e8e8;
+            padding: 1px 6px;
+            border-radius: 3px;
+            margin-right: 8px;
+            vertical-align: middle;
+            text-decoration: none;
+        }
+        
+        .sura-row {
+            line-height: 2;
+        }
+        
+        .highlight {
+            padding: 1px 3px;
+            border-radius: 2px;
+        }
+        
+        :root {
+            --color-0: #a5d6a7; /* Light green */
+            --color-1: #90caf9; /* Light blue */
+            --color-2: #ffcc80; /* Light orange */
+            --color-3: #ce93d8; /* Light purple */
+            --color-4: #fff59d; /* Light yellow */
+            --color-5: #f48fb1; /* Light pink */
+            --color-6: #80deea; /* Light cyan */
+            --color-7: #bcaaa4; /* Light brown */
+
+            /* Darker text colors for "text highlight" mode */
+            --tcolor-0: #2e7d32;
+            --tcolor-1: #1565c0;
+            --tcolor-2: #ef6c00;
+            --tcolor-3: #6a1b9a;
+            --tcolor-4: #8d6e00;
+            --tcolor-5: #ad1457;
+            --tcolor-6: #00838f;
+            --tcolor-7: #5d4037;
+        }
+        
+        .highlight-0 { background: var(--color-0); }
+        .highlight-1 { background: var(--color-1); }
+        .highlight-2 { background: var(--color-2); }
+        .highlight-3 { background: var(--color-3); }
+        .highlight-4 { background: var(--color-4); }
+        .highlight-5 { background: var(--color-5); }
+        .highlight-6 { background: var(--color-6); }
+        .highlight-7 { background: var(--color-7); }
+
+        /* Results view options */
+        .results-box.view-rows .sura-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ayah-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .ayah-ref-leading {
+            display: inline-block;
+            font-size: 11px;
+            color: #666;
+            background: #e8e8e8;
+            padding: 1px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            text-decoration: none;
+        }
+
+        /* Highlight mode: text color instead of background (only affects results) */
+        .results-box.highlight-text .highlight {
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+            font-weight: 700;
+        }
+
+        .results-box.highlight-text .highlight-0 { color: var(--tcolor-0) !important; }
+        .results-box.highlight-text .highlight-1 { color: var(--tcolor-1) !important; }
+        .results-box.highlight-text .highlight-2 { color: var(--tcolor-2) !important; }
+        .results-box.highlight-text .highlight-3 { color: var(--tcolor-3) !important; }
+        .results-box.highlight-text .highlight-4 { color: var(--tcolor-4) !important; }
+        .results-box.highlight-text .highlight-5 { color: var(--tcolor-5) !important; }
+        .results-box.highlight-text .highlight-6 { color: var(--tcolor-6) !important; }
+        .results-box.highlight-text .highlight-7 { color: var(--tcolor-7) !important; }
+        
+        .no-results {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .sura-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .settings-btn {
+            padding: 8px 12px;
+            font-size: 16px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .settings-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* Split search button (Gmail-like): main search + dropdown arrow */
+        .search-split {
+            position: relative;
+            display: inline-flex;
+            align-items: stretch;
+            direction: ltr; /* keep arrow segment visually on the right, like Gmail */
+        }
+
+        .search-split .search-btn {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .search-drop-btn {
+            background: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            padding: 0;
+            border-radius: 0 8px 8px 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            border-left: 1px solid rgba(255,255,255,0.35);
+        }
+
+        .search-drop-btn:hover {
+            background: #2980b9;
+        }
+
+        .search-drop-btn:disabled,
+        .search-split .search-btn:disabled + .search-drop-btn {
+            background: #bdc3c7; /* match .search-btn:disabled */
+            color: white;
+            cursor: not-allowed;
+        }
+
+        .copy-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 5px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1002;
+            min-width: 160px;
+        }
+
+        .copy-menu.visible {
+            display: block;
+        }
+
+        .copy-menu-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .copy-menu-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .settings-wrapper {
+            position: relative;
+        }
+        
+        .settings-menu {
+            display: none;
+            /* Positioned via Floating UI (prevents off-screen in RTL + narrow widths) */
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            min-width: 220px;
+            max-width: calc(100vw - 16px);
+        }
+        
+        .settings-menu.visible {
+            display: block;
+        }
+        
+        .settings-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .settings-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .settings-item label {
+            font-size: 13px;
+            color: #555;
+            white-space: nowrap;
+        }
+        
+        .settings-item select {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        
+        .apply-btn {
+            width: 100%;
+            padding: 8px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        
+        .apply-btn:hover {
+            background: #2980b9;
+        }
+
+        .desktop-link {
+            display: block;
+            margin-top: 8px;
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #d6e7fb;
+            background: #f3f9ff;
+            color: #1e6fbf;
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .desktop-link:hover {
+            background: #e8f3ff;
+            border-color: #c6defa;
+        }
+        
+        /* Sura filter */
+        .sura-filter-wrapper {
+            position: relative;
+        }
+        
+        .sura-filter-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        
+        .sura-filter-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .sura-filter-btn .filter-count {
+            background: #3498db;
+            color: white;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+        
+        .sura-filter-popup {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 5px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1002;
+            width: 320px;
+            max-height: 400px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .sura-filter-popup.visible {
+            display: flex;
+        }
+        
+        .sura-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sura-filter-header span {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .sura-filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .sura-filter-actions button {
+            padding: 4px 8px;
+            font-size: 11px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f8f8;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .sura-filter-actions button:hover {
+            background: #e8e8e8;
+        }
+        
+        .sura-filter-search {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-family: inherit;
+        }
+        
+        .sura-filter-list {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            max-height: 280px;
+        }
+        
+        .sura-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .sura-filter-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .sura-filter-item.hidden {
+            display: none;
+        }
+        
+        .sura-filter-item input {
+            margin: 0;
+            cursor: pointer;
+        }
+        
+        .sura-filter-item .sura-num {
+            color: #888;
+            font-size: 10px;
+            min-width: 18px;
+        }
+        
+        .sura-filter-item .sura-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Quran.com QCF font style */
+        body.font-qurancom .result-ayah {
+            font-size: 28px;
+            line-height: 2.2;
+        }
+        
+        body.font-qurancom .qcf-word {
+            display: inline-block;
+            direction: rtl;
+        }
+        
+        /* Loading indicator for quran.com font */
+        .qcf-loading {
+            color: #999;
+            font-style: italic;
+            font-size: 14px;
+        }
+    </style>
+    
+    <!-- QCF page fonts will be loaded dynamically -->
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <div class="search-row">
+                <div class="search-input-wrapper">
+                    <input type="text" class="search-input" id="search-input" placeholder="واژه یا ریشه را وارد کنید..." autocomplete="off">
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+                <div class="sura-filter-wrapper">
+                    <button class="sura-filter-btn" id="sura-filter-btn" type="button">
+                        📖 <span id="sura-filter-label">همه سوره‌ها</span>
+                    </button>
+                    <div class="sura-filter-popup" id="sura-filter-popup">
+                        <div class="sura-filter-header">
+                            <span>انتخاب سوره‌ها</span>
+                            <div class="sura-filter-actions">
+                                <button type="button" id="sura-select-all">همه</button>
+                                <button type="button" id="sura-select-none">هیچ</button>
+                            </div>
+                        </div>
+                        <input type="text" class="sura-filter-search" id="sura-filter-search" placeholder="جستجوی سوره...">
+                        <div class="sura-filter-list" id="sura-filter-list"></div>
+                    </div>
+                </div>
+                <div class="distance-control has-display" id="distance-control" title="فاصله (تعداد آیه) — تغییر با پیمایش موش‌واره یا کلیدهای ↑↓" aria-label="فاصله (تعداد آیه)">
+                    <input type="number" class="distance-input" id="distance-input" value="5" min="0" max="100" inputmode="numeric" aria-label="فاصله">
+                    <div class="distance-display num-hindi" id="distance-display" aria-hidden="true"></div>
+                </div>
+                <button type="button" class="cross-sura-toggle" id="cross-sura-toggle" aria-pressed="false" title="عبور از سوره‌ها">
+                    <span class="cross-sura-dot" aria-hidden="true"></span>
+                    بین سوره
+                </button>
+                <div class="search-split">
+                    <button class="search-btn" id="search-btn" disabled>جستجو</button>
+                    <button class="search-drop-btn" id="copy-btn" type="button" title="گزینه‌ها" disabled>▾</button>
+                    <div class="copy-menu" id="copy-menu">
+                        <div class="copy-menu-item" id="copy-results">
+                            <span>انتقال به حافظه</span>
+                            <span style="margin-right:auto; font-size:11px; color:#888;">نتایج + توضیحات</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-wrapper">
+                    <button class="settings-btn" id="settings-btn" title="تنظیمات">⚙️</button>
+                    <div class="settings-menu" id="settings-menu">
+                        <div class="settings-title">تنظیمات</div>
+                        <div class="settings-item">
+                            <label>فونت قرآن:</label>
+                            <select id="font-select">
+                                <option value="local">فونت محلی (KFGQPC)</option>
+                                <option value="qurancom">فونت اصلی عثمان طه</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label>نمایش نتایج:</label>
+                            <select id="view-mode-select">
+                                <option value="paragraph">پاراگرافی</option>
+                                <option value="rows">هر آیه یک سطر (شماره ابتدا)</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label>هایلایت:</label>
+                            <select id="highlight-mode-select">
+                                <option value="background">پس‌زمینه</option>
+                                <option value="text">رنگ متن</option>
+                            </select>
+                        </div>
+                        <button class="apply-btn" id="apply-settings">اعمال</button>
+                        <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="selected-row">
+                <div class="selected-items" id="selected-items">
+                    <span class="empty-hint">موردی انتخاب نشده. واژه یا ریشه‌ای را جستجو و انتخاب کنید.</span>
+                </div>
+                <span class="results-count" id="results-count"></span>
+            </div>
+        </div>
+        
+        <div class="results-box" id="results-box" style="display: none;">
+            <div class="results-content-column">
+                <div id="results-content"></div>
+            </div>
+            <div class="items-panel" id="items-panel">
+                <div id="items-panel-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/buckwalter.js"></script>
+    <script src="js/sura-data.js"></script>
+    <script type="module">
+    import { computePosition, offset, flip, shift, autoUpdate } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.10/+esm';
+    (function() {
+        'use strict';
+        
+        // Icons (centralized)
+        const ITEM_ICONS = {
+            // More meaningful than old 🌱📝🔍
+            root: '🌳', // ریشه
+            word: '🔠', // واژه
+            text: '📝'  // عبارت
+        };
+
+        // Data structures
+        const morphologyData = {}; // {sura: {ayah: {wordIndex: {root, lemma, text}}}}
+        const faNumber = new Intl.NumberFormat('fa-IR');
+        function fmtFa(n) {
+            const x = Number(n);
+            if (!Number.isFinite(x)) return '';
+            return faNumber.format(x);
+        }
+
+        const rootToWordsMap = {}; // {root: [{sura, ayah, wordIndex}, ...]}
+        const wordTextsMap = {}; // {text: [{sura, ayah, wordIndex}, ...]}
+        const ayahTexts = {}; // {sura: {ayah: "full text"}}
+        let dataLoaded = false;
+        
+        // Selected search items
+        const selectedItems = []; // [{type: 'text'|'root', value: string, checked: boolean}]
+        
+        // Item checked state (separate to preserve across re-renders)
+        const itemCheckedState = []; // [boolean, ...] - tracks checked state for each selectedItem
+        
+        // LEM tracking for roots
+        const rootLemData = {}; // {root: {lems: [{lem, count, selected}], allSelected: boolean}}
+        const rootExpandedState = {}; // {root: boolean} - tracks if root LEMs are expanded
+        let highlightedItem = null; // {type: 'item'|'lem', itemIndex, lem?} - for focus mode
+        
+        // Sura filter
+        const selectedSuras = new Set(); // empty = all suras selected
+        let allSurasSelected = true;
+        
+        // Get all LEMs for a root from morphology data (filtered by selected suras)
+        function getLemsForRoot(root, filterBySura = true) {
+            const lemCounts = {};
+            const locations = rootToWordsMap[root] || [];
+            
+            for (const loc of locations) {
+                // Filter by selected suras if requested
+                if (filterBySura && !isSuraSelected(loc.sura)) continue;
+                
+                const wordData = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex];
+                if (wordData?.lemma) {
+                    lemCounts[wordData.lemma] = (lemCounts[wordData.lemma] || 0) + 1;
+                }
+            }
+            
+            return Object.entries(lemCounts)
+                .map(([lem, count]) => ({ lem, count, selected: true }))
+                .sort((a, b) => b.count - a.count);
+        }
+        
+        // Initialize LEM data for a root (preserves selection state on refresh)
+        function initRootLemData(root, forceRefresh = false) {
+            const newLems = getLemsForRoot(root);
+            
+            if (!rootLemData[root]) {
+                rootLemData[root] = {
+                    lems: newLems,
+                    allSelected: true
+                };
+            } else if (forceRefresh) {
+                // Preserve selection state
+                const oldSelections = {};
+                rootLemData[root].lems.forEach(l => { oldSelections[l.lem] = l.selected; });
+                
+                // Update with new counts, preserve selections
+                rootLemData[root].lems = newLems.map(l => ({
+                    ...l,
+                    selected: oldSelections[l.lem] !== undefined ? oldSelections[l.lem] : true
+                }));
+            }
+            return rootLemData[root];
+        }
+        
+        // Build items panel HTML
+        function buildItemsPanel() {
+            const container = document.getElementById('items-panel-content');
+            if (!container) return;
+            
+            // Ensure itemCheckedState has entries for all items (default to true)
+            while (itemCheckedState.length < selectedItems.length) {
+                itemCheckedState.push(true);
+            }
+            
+            const icons = ITEM_ICONS;
+            const typeLabels = { text: 'عبارت', word: 'واژه', root: 'ریشه' };
+            let html = '';
+            
+            selectedItems.forEach((item, index) => {
+                const colorIndex = index % 8;
+                const isHighlighted = highlightedItem?.type === 'item' && highlightedItem?.itemIndex === index;
+                const isChecked = itemCheckedState[index] !== false;
+                const isRoot = item.type === 'root';
+                const isExpanded = isRoot ? (rootExpandedState[item.value] !== false) : false;
+                
+                html += `<div class="search-item-row ${isHighlighted ? 'highlighted' : ''} ${!isChecked ? 'unchecked' : ''}" 
+                              data-item-index="${index}" data-item-type="${item.type}" data-root="${item.value || ''}">
+                    <input type="checkbox" class="item-checkbox" ${isChecked ? 'checked' : ''} 
+                           onclick="event.stopPropagation()">`;
+                
+                // Add expand/collapse toggle for roots, or spacer for non-roots
+                if (isRoot) {
+                    html += `<span class="expand-toggle ${!isExpanded ? 'collapsed' : ''}" 
+                                   onclick="event.stopPropagation()">▼</span>`;
+                } else {
+                    html += `<span class="expand-spacer"></span>`;
+                }
+                
+                html += `<span class="item-color" style="background: var(--color-${colorIndex})"></span>
+                    <span class="item-label">${icons[item.type]} ${item.display || item.value}</span>
+                    <span class="item-type">${typeLabels[item.type]}</span>
+                </div>`;
+                
+                // If root, show LEMs in collapsible container
+                if (isRoot) {
+                    const lemData = initRootLemData(item.value, true); // true = refresh counts for current sura filter
+                    html += `<div class="lems-container ${!isExpanded ? 'collapsed' : ''}" data-root="${item.value}">`;
+                    lemData.lems.forEach((lemInfo, lemIndex) => {
+                        const isLemHighlighted = highlightedItem?.type === 'lem' && 
+                                                  highlightedItem?.itemIndex === index && 
+                                                  highlightedItem?.lem === lemInfo.lem;
+                        html += `<div class="lem-subrow ${isLemHighlighted ? 'highlighted' : ''} ${!lemInfo.selected ? 'unchecked' : ''}"
+                                      data-item-index="${index}" data-lem="${lemInfo.lem}" data-lem-index="${lemIndex}">
+                            <input type="checkbox" ${lemInfo.selected ? 'checked' : ''} 
+                                   onclick="event.stopPropagation()">
+                            <span class="lem-label">${lemInfo.lem}</span>
+                            <span class="lem-count num-hindi">${fmtFa(lemInfo.count)}</span>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+            });
+            
+            container.innerHTML = html;
+            
+            // Bind click events for highlighting
+            container.querySelectorAll('.search-item-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox' && !e.target.classList.contains('expand-toggle')) {
+                        handleItemClick(row);
+                    }
+                });
+                row.querySelector('.item-checkbox').addEventListener('change', (e) => {
+                    handleItemCheckbox(row, e.target.checked);
+                });
+                
+                // Expand/collapse toggle for roots
+                const toggle = row.querySelector('.expand-toggle');
+                if (toggle) {
+                    toggle.addEventListener('click', () => {
+                        const root = row.dataset.root;
+                        // Current state: undefined or true = expanded, false = collapsed
+                        const currentlyExpanded = rootExpandedState[root] !== false;
+                        rootExpandedState[root] = !currentlyExpanded;
+                        buildItemsPanel();
+                    });
+                }
+            });
+            
+            container.querySelectorAll('.lem-subrow').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        handleLemClick(row);
+                    }
+                });
+                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    handleLemCheckbox(row, e.target.checked);
+                });
+            });
+        }
+        
+        // Handle clicking on a search item row
+        function handleItemClick(row) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            
+            // Toggle highlight
+            if (highlightedItem?.type === 'item' && highlightedItem?.itemIndex === itemIndex) {
+                highlightedItem = null;
+            } else {
+                highlightedItem = { type: 'item', itemIndex };
+            }
+            
+            buildItemsPanel();
+            triggerSearch();
+        }
+        
+        // Handle clicking on a LEM row
+        function handleLemClick(row) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            const lem = row.dataset.lem;
+            
+            // Toggle highlight
+            if (highlightedItem?.type === 'lem' && highlightedItem?.itemIndex === itemIndex && highlightedItem?.lem === lem) {
+                highlightedItem = null;
+            } else {
+                highlightedItem = { type: 'lem', itemIndex, lem };
+            }
+            
+            buildItemsPanel();
+            triggerSearch();
+        }
+        
+        // Handle LEM checkbox change
+        function handleLemCheckbox(row, checked) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            const lemIndex = parseInt(row.dataset.lemIndex);
+            const root = selectedItems[itemIndex].value;
+            
+            if (rootLemData[root]) {
+                rootLemData[root].lems[lemIndex].selected = checked;
+            }
+            
+            buildItemsPanel();
+            triggerSearch();
+        }
+        
+        // Handle item checkbox change
+        function handleItemCheckbox(row, checked) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            itemCheckedState[itemIndex] = checked;
+            
+            buildItemsPanel();
+            triggerSearch();
+        }
+        
+        // Trigger search with current settings
+        async function triggerSearch() {
+            const results = performSearch();
+            await renderResults(results);
+        }
+        
+        // QCF (Quran Complex Font) data from quran.com
+        const qcfWordData = {}; // {sura: {ayah: {wordIndex: {page, code_v1}}}}
+        const loadedQCFPages = new Set();
+        let qcfDataLoaded = {};
+        
+        // SURA_NAMES loaded from js/sura-data.js
+        // Buckwalter conversion loaded from js/buckwalter.js
+        
+        // Load QCF word data from quran.com API for a sura
+        async function loadQCFDataForSura(sura) {
+            if (qcfDataLoaded[sura]) return;
+            
+            try {
+                const response = await fetch(`https://api.quran.com/api/v4/verses/by_chapter/${sura}?words=true&word_fields=v1_page,code_v1&per_page=300`);
+                const data = await response.json();
+                
+                if (!qcfWordData[sura]) qcfWordData[sura] = {};
+                
+                for (const verse of data.verses) {
+                    const ayah = verse.verse_number;
+                    if (!qcfWordData[sura][ayah]) qcfWordData[sura][ayah] = {};
+                    
+                    let wordIndex = 1;
+                    for (const word of verse.words) {
+                        // Skip end markers (like verse numbers)
+                        if (word.char_type_name === 'end') continue;
+                        
+                        qcfWordData[sura][ayah][wordIndex] = {
+                            page: word.v1_page,
+                            code: word.code_v1
+                        };
+                        wordIndex++;
+                    }
+                }
+                
+                qcfDataLoaded[sura] = true;
+            } catch (error) {
+                console.error(`Error loading QCF data for sura ${sura}:`, error);
+            }
+        }
+        
+        // Load QCF page font
+        function loadQCFPageFont(page) {
+            if (loadedQCFPages.has(page)) return;
+            loadedQCFPages.add(page);
+            
+            const paddedPage = String(page).padStart(3, '0');
+            const style = document.createElement('style');
+            style.textContent = `
+                @font-face {
+                    font-family: 'QCF_P${paddedPage}';
+                    src: url('https://static.qurancdn.com/fonts/quran/hafs/v1/woff2/p${page}.woff2') format('woff2'),
+                         url('https://static.qurancdn.com/fonts/quran/hafs/v1/woff/p${page}.woff') format('woff');
+                    font-display: swap;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Get QCF word HTML
+        function getQCFWordHTML(sura, ayah, wordIndex, highlightClass = '') {
+            const wordData = qcfWordData[sura]?.[ayah]?.[wordIndex];
+            if (!wordData) {
+                // Fallback to normal text
+                const text = morphologyData[sura]?.[ayah]?.[wordIndex]?.text || '';
+                return highlightClass ? `<span class="${highlightClass}">${text}</span>` : text;
+            }
+            
+            // Load the page font if not loaded
+            loadQCFPageFont(wordData.page);
+            
+            const paddedPage = String(wordData.page).padStart(3, '0');
+            const classes = `qcf-word${highlightClass ? ' ' + highlightClass : ''}`;
+            return `<span class="${classes}" style="font-family: 'QCF_P${paddedPage}', serif;">${wordData.code}</span>`;
+        }
+        
+        // Load morphology data
+        async function loadMorphologyData() {
+            try {
+                const response = await fetch('data/quranic-corpus-morphology-0.4.txt');
+                const text = await response.text();
+                parseMorphologyData(text);
+                dataLoaded = true;
+                document.getElementById('search-input').placeholder = 'واژه یا ریشه را وارد کنید...';
+            } catch (error) {
+                console.error('Error loading morphology data:', error);
+                document.getElementById('search-input').placeholder = 'خطا در بارگذاری داده‌ها';
+            }
+        }
+        
+        function parseMorphologyData(text) {
+            const lines = text.split('\n');
+            
+            // First pass: collect all segments for each word
+            const wordSegments = {}; // key: "sura:ayah:word" -> [{segment, text, features}, ...]
+            
+            for (const line of lines) {
+                if (!line || line.startsWith('#') || line.startsWith('LOCATION')) continue;
+                
+                const parts = line.split('\t');
+                if (parts.length < 3) continue;
+                
+                const location = parts[0];
+                const wordText = parts[1];
+                const features = parts[3] || '';
+                
+                // Parse location (sura:ayah:word:segment)
+                const locMatch = location.match(/\((\d+):(\d+):(\d+):(\d+)\)/);
+                if (!locMatch) continue;
+                
+                const sura = parseInt(locMatch[1]);
+                const ayah = parseInt(locMatch[2]);
+                const wordIndex = parseInt(locMatch[3]);
+                const segment = parseInt(locMatch[4]);
+                
+                const key = `${sura}:${ayah}:${wordIndex}`;
+                if (!wordSegments[key]) {
+                    wordSegments[key] = { sura, ayah, wordIndex, segments: [] };
+                }
+                wordSegments[key].segments.push({ segment, text: wordText, features });
+            }
+            
+            // Second pass: combine segments and build data structures
+            for (const key in wordSegments) {
+                const { sura, ayah, wordIndex, segments } = wordSegments[key];
+                
+                // Sort segments by segment number
+                segments.sort((a, b) => a.segment - b.segment);
+                
+                // Combine all segment texts to form the full word
+                const fullWordBuckwalter = segments.map(s => s.text).join('');
+                const arabicWord = convertBuckwalterToArabic(fullWordBuckwalter);
+                
+                // Find root from any segment (usually in STEM segment)
+                let root = null;
+                let lemma = null;
+                for (const seg of segments) {
+                    if (!root) {
+                        const rootMatch = seg.features.match(/ROOT:([A-Za-z'><&}{\-]+)/);
+                        if (rootMatch) root = convertBuckwalterToArabic(rootMatch[1]);
+                    }
+                    if (!lemma) {
+                        const lemmaMatch = seg.features.match(/LEM:([^\|]+)/);
+                        if (lemmaMatch) lemma = convertBuckwalterToArabic(lemmaMatch[1]);
+                    }
+                }
+                
+                // Store in morphologyData
+                if (!morphologyData[sura]) morphologyData[sura] = {};
+                if (!morphologyData[sura][ayah]) morphologyData[sura][ayah] = {};
+                morphologyData[sura][ayah][wordIndex] = { root, lemma, text: arabicWord };
+                
+                // Build root-to-words map
+                if (root) {
+                    if (!rootToWordsMap[root]) rootToWordsMap[root] = [];
+                    // Avoid duplicates
+                    const exists = rootToWordsMap[root].some(
+                        w => w.sura === sura && w.ayah === ayah && w.wordIndex === wordIndex
+                    );
+                    if (!exists) {
+                        rootToWordsMap[root].push({ sura, ayah, wordIndex });
+                    }
+                }
+                
+                // Build word texts map (normalized - remove diacritics for search)
+                const normalizedWord = normalizeArabic(arabicWord);
+                if (normalizedWord.length > 1) {
+                    if (!wordTextsMap[normalizedWord]) wordTextsMap[normalizedWord] = [];
+                    wordTextsMap[normalizedWord].push({ sura, ayah, wordIndex, original: arabicWord });
+                }
+            }
+        }
+        
+        function normalizeArabic(text) {
+            if (!text) return '';
+            // Remove diacritics and normalize
+            return text
+                .replace(/[\u064B-\u065F]/g, '') // Remove tashkeel (but not dagger alef)
+                .replace(/[أإآاٱٰ]/g, 'ا')  // Normalize all alef variants (including dagger alef ٰ) to regular alef
+                .replace(/[ىيی]/g, 'ی')  // Normalize to Persian yeh
+                .replace(/[كک]/g, 'ک')   // Normalize to Persian kaf
+                .replace(/ة/g, 'ه');
+        }
+        
+        // Search suggestions
+        function getSuggestions(query) {
+            if (!query || query.length < 2 || !dataLoaded) return [];
+            
+            const normalizedQuery = normalizeArabic(query);
+            const rootSuggestions = [];
+            const wordSuggestions = [];
+            const textSuggestions = [];
+            
+            // Helper to get sample words for a root
+            function getSampleWordsForRoot(root, limit = 5) {
+                const words = new Set();
+                const locations = rootToWordsMap[root] || [];
+                for (const loc of locations) {
+                    const wordData = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex];
+                    if (wordData?.text) {
+                        words.add(wordData.text);
+                        if (words.size >= limit) break;
+                    }
+                }
+                return [...words];
+            }
+            
+            // Helper to count unique words for a root
+            function countUniqueWordsForRoot(root) {
+                const words = new Set();
+                const locations = rootToWordsMap[root] || [];
+                for (const loc of locations) {
+                    const wordData = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex];
+                    if (wordData?.text) {
+                        words.add(wordData.text);
+                    }
+                }
+                return words.size;
+            }
+            
+            // 1. Search matching words and collect their roots
+            const matchingWords = Object.entries(wordTextsMap)
+                .filter(([word]) => word.includes(normalizedQuery))
+                .sort((a, b) => b[1].length - a[1].length) // Sort by frequency
+                .slice(0, 8);
+            
+            // Collect roots from matched words with their sample words
+            const rootsFromWords = new Map(); // root -> Set of sample words
+            
+            matchingWords.forEach(([word, locations]) => {
+                // Get original (with diacritics) from first occurrence
+                const originalWord = locations[0]?.original || word;
+                
+                // Find the root for this word
+                const loc = locations[0];
+                const wordRoot = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex]?.root;
+                if (wordRoot) {
+                    if (!rootsFromWords.has(wordRoot)) {
+                        rootsFromWords.set(wordRoot, new Set());
+                    }
+                    rootsFromWords.get(wordRoot).add(originalWord);
+                }
+                
+                wordSuggestions.push({
+                    type: 'word',
+                    value: word,
+                    display: originalWord,
+                    count: locations.length,
+                    icon: ITEM_ICONS.word
+                });
+            });
+            
+            // 2. Build root suggestions (roots from matched words first, then directly matching)
+            const addedRoots = new Set();
+            
+            // Roots from matched words
+            rootsFromWords.forEach((sampleWords, root) => {
+                if (rootToWordsMap[root]) {
+                    // Get more sample words from root if needed
+                    const allSamples = new Set(sampleWords);
+                    if (allSamples.size < 5) {
+                        const moreSamples = getSampleWordsForRoot(root, 5);
+                        moreSamples.forEach(w => allSamples.add(w));
+                    }
+                    const samplesArray = [...allSamples].slice(0, 5);
+                    const totalUniqueWords = countUniqueWordsForRoot(root);
+                    const ellipsis = totalUniqueWords > 5 ? '، ...' : '';
+                    const displayWithSamples = `${root} (${samplesArray.join('، ')}${ellipsis})`;
+                    
+                    rootSuggestions.push({
+                        type: 'root',
+                        value: root,
+                        display: displayWithSamples,
+                        count: rootToWordsMap[root].length,
+                        icon: ITEM_ICONS.root
+                    });
+                    addedRoots.add(root);
+                }
+            });
+            
+            // Directly matching roots
+            const matchingRoots = Object.keys(rootToWordsMap)
+                .filter(root => !addedRoots.has(root) && (root.includes(query) || normalizeArabic(root).includes(normalizedQuery)))
+                .sort((a, b) => rootToWordsMap[b].length - rootToWordsMap[a].length)
+                .slice(0, 8);
+            
+            matchingRoots.forEach(root => {
+                const samples = getSampleWordsForRoot(root, 5);
+                const totalUniqueWords = countUniqueWordsForRoot(root);
+                const ellipsis = totalUniqueWords > 5 ? '، ...' : '';
+                const displayWithSamples = samples.length > 0 ? `${root} (${samples.join('، ')}${ellipsis})` : root;
+                
+                rootSuggestions.push({
+                    type: 'root',
+                    value: root,
+                    display: displayWithSamples,
+                    count: rootToWordsMap[root].length,
+                    icon: ITEM_ICONS.root
+                });
+            });
+            
+            // 3. Add text search option (partial match in any word)
+            const textCount = countTextMatches(normalizedQuery);
+            if (textCount > 0) {
+                textSuggestions.push({
+                    type: 'text',
+                    value: query,
+                    display: `"${query}"`,
+                    count: textCount,
+                    icon: ITEM_ICONS.text
+                });
+            }
+            
+            // Return in order: roots, words, text
+            return [...rootSuggestions, ...wordSuggestions, ...textSuggestions];
+        }
+        
+        function countTextMatches(normalizedText) {
+            // Check if multi-word phrase
+            const words = normalizedText.trim().split(/\s+/);
+            if (words.length > 1) {
+                return countPhraseMatches(words);
+            }
+            
+            // Single word - partial match
+            let count = 0;
+            for (const [word, locations] of Object.entries(wordTextsMap)) {
+                if (word.includes(normalizedText)) {
+                    count += locations.length;
+                }
+            }
+            return count;
+        }
+        
+        // Count multi-word phrase matches
+        function countPhraseMatches(normalizedWords) {
+            let count = 0;
+            
+            // Search through all ayahs
+            for (const sura in morphologyData) {
+                for (const ayah in morphologyData[sura]) {
+                    const ayahData = morphologyData[sura][ayah];
+                    const wordIndices = Object.keys(ayahData).map(Number).sort((a, b) => a - b);
+                    
+                    // Check each starting position
+                    for (let i = 0; i <= wordIndices.length - normalizedWords.length; i++) {
+                        let matches = true;
+                        for (let j = 0; j < normalizedWords.length; j++) {
+                            const wordIndex = wordIndices[i + j];
+                            const wordData = ayahData[wordIndex];
+                            const normalizedWord = normalizeArabic(wordData?.text || '');
+                            if (!normalizedWord.includes(normalizedWords[j])) {
+                                matches = false;
+                                break;
+                            }
+                        }
+                        if (matches) count++;
+                    }
+                }
+            }
+            return count;
+        }
+        
+        // Check if sura is in the selected filter
+        function isSuraSelected(sura) {
+            if (allSurasSelected) return true;
+            if (selectedSuras.size === 0) return false; // None selected
+            return selectedSuras.has(sura);
+        }
+        
+        // Find phrase matches (returns starting positions)
+        function findPhraseMatches(normalizedWords) {
+            const matches = [];
+            
+            for (const sura in morphologyData) {
+                // Filter by selected suras
+                if (!isSuraSelected(parseInt(sura))) continue;
+                
+                for (const ayah in morphologyData[sura]) {
+                    const ayahData = morphologyData[sura][ayah];
+                    const wordIndices = Object.keys(ayahData).map(Number).sort((a, b) => a - b);
+                    
+                    for (let i = 0; i <= wordIndices.length - normalizedWords.length; i++) {
+                        let phraseMatches = true;
+                        const matchedIndices = [];
+                        
+                        for (let j = 0; j < normalizedWords.length; j++) {
+                            const wordIndex = wordIndices[i + j];
+                            const wordData = ayahData[wordIndex];
+                            const normalizedWord = normalizeArabic(wordData?.text || '');
+                            if (!normalizedWord.includes(normalizedWords[j])) {
+                                phraseMatches = false;
+                                break;
+                            }
+                            matchedIndices.push(wordIndex);
+                        }
+                        
+                        if (phraseMatches) {
+                            // Add all words in the phrase as matches
+                            matchedIndices.forEach(wordIndex => {
+                                matches.push({
+                                    sura: parseInt(sura),
+                                    ayah: parseInt(ayah),
+                                    wordIndex,
+                                    matchType: 'text'
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+            return matches;
+        }
+        
+        // Find words matching an item
+        // Find all matches for a search item, respecting LEM selection
+        // focusedLem: specific LEM to search (ignore others)
+        // ignoreFilters: if true, ignore LEM checkboxes (used when root item is highlighted)
+        function findMatchingWords(item, itemIndex = -1, focusedLem = null, ignoreFilters = false) {
+            const matches = [];
+            
+            if (item.type === 'root') {
+                const words = rootToWordsMap[item.value] || [];
+                const lemData = rootLemData[item.value];
+                
+                // Get selected LEMs (or just the focused one)
+                let allowedLems = null;
+                if (focusedLem) {
+                    // Specific LEM is focused - only that one
+                    allowedLems = new Set([focusedLem]);
+                } else if (!ignoreFilters && lemData) {
+                    // Normal mode - filter by checked LEMs
+                    allowedLems = new Set(lemData.lems.filter(l => l.selected).map(l => l.lem));
+                }
+                // If ignoreFilters is true, allowedLems stays null (all LEMs allowed)
+                
+                words.forEach(w => {
+                    // Filter by sura
+                    if (!isSuraSelected(w.sura)) return;
+                    
+                    const wordData = morphologyData[w.sura]?.[w.ayah]?.[w.wordIndex];
+                    const wordLem = wordData?.lemma;
+                    
+                    // Filter by allowed LEMs if specified
+                    if (allowedLems && wordLem && !allowedLems.has(wordLem)) {
+                        return;
+                    }
+                    
+                    matches.push({ ...w, matchType: 'root' });
+                });
+            } else if (item.type === 'word') {
+                // Exact word match
+                const locations = wordTextsMap[item.value] || [];
+                locations.forEach(loc => {
+                    if (isSuraSelected(loc.sura)) {
+                        matches.push({ ...loc, matchType: 'word' });
+                    }
+                });
+            } else {
+                // Text search (partial match or phrase)
+                const normalizedQuery = normalizeArabic(item.value);
+                const words = normalizedQuery.trim().split(/\s+/);
+                
+                if (words.length > 1) {
+                    // Multi-word phrase search
+                    return findPhraseMatches(words);
+                }
+                
+                // Single word partial match
+                for (const [word, locations] of Object.entries(wordTextsMap)) {
+                    if (word.includes(normalizedQuery)) {
+                        locations.forEach(loc => {
+                            if (isSuraSelected(loc.sura)) {
+                                matches.push({ ...loc, matchType: 'text' });
+                            }
+                        });
+                    }
+                }
+            }
+            
+            return matches;
+        }
+        
+        // Calculate global ayah position for a match (for cross-sura distance)
+        // Position is cumulative ayah count from start of Quran
+        let globalAyahCache = null;
+        function buildGlobalAyahCache() {
+            if (globalAyahCache) return globalAyahCache;
+            globalAyahCache = {};
+            let cumulative = 0;
+            
+            for (let sura = 1; sura <= 114; sura++) {
+                globalAyahCache[sura] = {};
+                const suraData = morphologyData[sura];
+                if (!suraData) continue;
+                
+                const ayahs = Object.keys(suraData).map(Number).sort((a, b) => a - b);
+                for (const ayah of ayahs) {
+                    globalAyahCache[sura][ayah] = cumulative;
+                    cumulative++;
+                }
+            }
+            return globalAyahCache;
+        }
+        
+        // Get global ayah position for a match
+        function getGlobalAyahPosition(match) {
+            const cache = buildGlobalAyahCache();
+            return cache[match.sura]?.[match.ayah] ?? 0;
+        }
+        
+        // Calculate distance between two matches (in ayahs)
+        function calculateDistance(a, b, crossSura) {
+            if (a.sura === b.sura) {
+                // Same sura: distance is ayah difference
+                return Math.abs(a.ayah - b.ayah);
+            } else {
+                // Different suras
+                if (!crossSura) return Infinity;
+                // Cross-sura: calculate cumulative ayah distance
+                const posA = getGlobalAyahPosition(a);
+                const posB = getGlobalAyahPosition(b);
+                return Math.abs(posB - posA);
+            }
+        }
+        
+        // Get global position for sorting/intervals (still use ayah-based)
+        function getGlobalPosition(match) {
+            return getGlobalAyahPosition(match);
+        }
+        
+        // Compare two positions (for sorting)
+        function comparePositions(a, b) {
+            if (a.sura !== b.sura) return a.sura - b.sura;
+            if (a.ayah !== b.ayah) return a.ayah - b.ayah;
+            return a.wordIndex - b.wordIndex;
+        }
+        
+        // Search algorithm as specified by user
+        function performSearch() {
+            if (selectedItems.length === 0) return [];
+            
+            const distance = parseInt(document.getElementById('distance-input').value) || 5;
+            const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true';
+            
+            // Check if we're in focus mode (single item/lem highlighted)
+            if (highlightedItem) {
+                const itemIndex = highlightedItem.itemIndex;
+                const item = selectedItems[itemIndex];
+                
+                let focusedLem = null;
+                let ignoreFilters = false;
+                
+                if (highlightedItem.type === 'lem') {
+                    // Specific LEM highlighted - search only that LEM
+                    focusedLem = highlightedItem.lem;
+                } else if (highlightedItem.type === 'item') {
+                    // Entire item highlighted - ignore LEM filters, search all
+                    ignoreFilters = true;
+                }
+                
+                const matches = findMatchingWords(item, itemIndex, focusedLem, ignoreFilters);
+                matches.forEach(m => m.itemIndex = itemIndex);
+                return groupMatchesByRegion(matches.sort(comparePositions), crossSura);
+            }
+            
+            // Filter to only checked items
+            const checkedIndices = selectedItems
+                .map((_, idx) => idx)
+                .filter(idx => itemCheckedState[idx] !== false);
+            
+            if (checkedIndices.length === 0) {
+                return [];
+            }
+            
+            const n = checkedIndices.length;
+            
+            // Step 1: Get all matches M[i] for each checked item, with itemIndex
+            // Now respects LEM selection for roots
+            const M = checkedIndices.map(itemIndex => {
+                const item = selectedItems[itemIndex];
+                const matches = findMatchingWords(item, itemIndex);
+                // Add itemIndex to each match for coloring
+                matches.forEach(m => m.itemIndex = itemIndex);
+                // Sort by position
+                return matches.sort(comparePositions);
+            });
+            
+            // If only one checked item, group matches by region
+            if (n === 1) {
+                return groupMatchesByRegion(M[0], crossSura);
+            }
+            
+            // Step 2: For each match M[i][j], compute matchingSets[i][j][i2]
+            // matchingSets[i][j][i2] = farthest matching item of set i2 that is after M[i][j] within distance
+            
+            const intervals = [];
+            
+            // Use first item as anchor
+            for (let j = 0; j < M[0].length; j++) {
+                const anchor = M[0][j];
+                const matchingSets = {}; // matchingSets[i2] = ALL matches from M[i2] within distance of anchor
+                let allFound = true;
+                
+                // For each other item i2, find ALL matches within distance
+                for (let i2 = 1; i2 < n; i2++) {
+                    const matchesInRange = [];
+                    
+                    for (const match of M[i2]) {
+                        // Check if match is within distance from anchor
+                        const dist = calculateDistance(anchor, match, crossSura);
+                        if (dist <= distance) {
+                            matchesInRange.push(match);
+                        }
+                    }
+                    
+                    if (matchesInRange.length > 0) {
+                        matchingSets[i2] = matchesInRange;
+                    } else {
+                        allFound = false;
+                        break;
+                    }
+                }
+                
+                // Step 3: If matchingSets[i2] is filled for all i2, create interval
+                if (allFound) {
+                    // Collect ALL matches from all sets
+                    const allMatches = [anchor];
+                    for (const i2 in matchingSets) {
+                        allMatches.push(...matchingSets[i2]);
+                    }
+                    
+                    // Also include other matches from M[0] that are within the interval
+                    const positions = allMatches.map(m => getGlobalPosition(m));
+                    let startPos = Math.min(...positions);
+                    let endPos = Math.max(...positions);
+                    
+                    // Add other M[0] matches that fall within interval range
+                    for (const match of M[0]) {
+                        const pos = getGlobalPosition(match);
+                        if (pos >= startPos && pos <= endPos) {
+                            const exists = allMatches.some(
+                                m => m.sura === match.sura && m.ayah === match.ayah && m.wordIndex === match.wordIndex
+                            );
+                            if (!exists) {
+                                allMatches.push(match);
+                            }
+                        }
+                    }
+                    
+                    // Recalculate bounds
+                    const finalPositions = allMatches.map(m => getGlobalPosition(m));
+                    startPos = Math.min(...finalPositions);
+                    endPos = Math.max(...finalPositions);
+                    
+                    intervals.push({
+                        startPos,
+                        endPos,
+                        matches: allMatches
+                    });
+                }
+            }
+            
+            // Step 4: Sort intervals by starting point
+            intervals.sort((a, b) => a.startPos - b.startPos);
+            
+            // Step 5: Merge overlapping intervals
+            const mergedIntervals = [];
+            for (const interval of intervals) {
+                if (mergedIntervals.length === 0) {
+                    mergedIntervals.push(interval);
+                } else {
+                    const last = mergedIntervals[mergedIntervals.length - 1];
+                    // Check if intervals overlap or are adjacent
+                    if (interval.startPos <= last.endPos + 1) {
+                        // Merge
+                        last.endPos = Math.max(last.endPos, interval.endPos);
+                        // Add matches avoiding duplicates
+                        for (const m of interval.matches) {
+                            const exists = last.matches.some(
+                                lm => lm.sura === m.sura && lm.ayah === m.ayah && lm.wordIndex === m.wordIndex
+                            );
+                            if (!exists) {
+                                last.matches.push(m);
+                            }
+                        }
+                    } else {
+                        mergedIntervals.push(interval);
+                    }
+                }
+            }
+            
+            // Step 6: Convert intervals to result format (groups with sura, startAyah, endAyah)
+            return convertIntervalsToGroups(mergedIntervals, crossSura);
+        }
+        
+        // Convert intervals to displayable groups
+        // Each group gets an intervalId to track which groups came from the same match
+        function convertIntervalsToGroups(intervals, crossSura) {
+            const groups = [];
+            let intervalId = 0;
+            
+            for (const interval of intervals) {
+                // Group matches by sura
+                const bySura = {};
+                for (const match of interval.matches) {
+                    if (!bySura[match.sura]) bySura[match.sura] = [];
+                    bySura[match.sura].push(match);
+                }
+                
+                // Check if this interval spans multiple suras
+                const suraCount = Object.keys(bySura).length;
+                const currentIntervalId = intervalId++;
+                
+                // Create a group for each sura
+                const suras = Object.keys(bySura).map(Number).sort((a, b) => a - b);
+                for (let i = 0; i < suras.length; i++) {
+                    const sura = suras[i];
+                    const matches = bySura[sura];
+                    const ayahs = matches.map(m => m.ayah);
+                    const startAyah = Math.min(...ayahs);
+                    const endAyah = Math.max(...ayahs);
+                    
+                    // Check if we can merge with existing group from same interval
+                    let merged = false;
+                    for (const group of groups) {
+                        if (group.sura === sura && group.intervalId === currentIntervalId &&
+                            ((startAyah >= group.startAyah - 1 && startAyah <= group.endAyah + 1) ||
+                             (endAyah >= group.startAyah - 1 && endAyah <= group.endAyah + 1))) {
+                            group.startAyah = Math.min(group.startAyah, startAyah);
+                            group.endAyah = Math.max(group.endAyah, endAyah);
+                            for (const m of matches) {
+                                const exists = group.matches.some(
+                                    gm => gm.sura === m.sura && gm.ayah === m.ayah && gm.wordIndex === m.wordIndex
+                                );
+                                if (!exists) {
+                                    group.matches.push(m);
+                                }
+                            }
+                            merged = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!merged) {
+                        groups.push({ 
+                            sura, 
+                            startAyah, 
+                            endAyah, 
+                            matches: [...matches],
+                            intervalId: currentIntervalId,
+                            groupKey: `int-${currentIntervalId}-${sura}`,
+                            isMultiSura: suraCount > 1,
+                            isFirstInInterval: i === 0,
+                            isLastInInterval: i === suras.length - 1
+                        });
+                    }
+                }
+            }
+            
+            return groups.sort((a, b) => {
+                if (a.intervalId !== b.intervalId) return a.intervalId - b.intervalId;
+                if (a.sura !== b.sura) return a.sura - b.sura;
+                return a.startAyah - b.startAyah;
+            });
+        }
+
+        // Recompute multi-sura first/last flags after edits (remove)
+        function recomputeIntervalFlags(groups) {
+            const byInterval = {};
+            for (const g of groups) {
+                // IMPORTANT: if intervalId is missing (e.g., focus-mode groups),
+                // we must NOT group them together, otherwise regions "merge".
+                const key = (g.intervalId === undefined || g.intervalId === null)
+                    ? `single:${g.groupKey || `${g.sura}-${g.startAyah}-${g.endAyah}`}`
+                    : `interval:${g.intervalId}`;
+                if (!byInterval[key]) byInterval[key] = [];
+                byInterval[key].push(g);
+            }
+            
+            for (const key of Object.keys(byInterval)) {
+                const list = byInterval[key].sort((a, b) => (a.sura - b.sura) || (a.startAyah - b.startAyah));
+                const multi = list.length > 1;
+                list.forEach((g, idx) => {
+                    g.isMultiSura = multi;
+                    g.isFirstInInterval = idx === 0;
+                    g.isLastInInterval = idx === list.length - 1;
+                });
+            }
+            
+            return groups.sort((a, b) => {
+                const aHas = !(a.intervalId === undefined || a.intervalId === null);
+                const bHas = !(b.intervalId === undefined || b.intervalId === null);
+                if (aHas && bHas && a.intervalId !== b.intervalId) return a.intervalId - b.intervalId;
+                if (a.sura !== b.sura) return a.sura - b.sura;
+                return a.startAyah - b.startAyah;
+            });
+        }
+
+        // Region controls state
+        let lastRenderedGroups = [];
+
+        function clampGroupRange(group) {
+            const maxAyah = (typeof SURA_AYAT !== 'undefined' && SURA_AYAT[group.sura]) ? SURA_AYAT[group.sura] : 9999;
+            group.startAyah = Math.max(1, group.startAyah);
+            group.endAyah = Math.min(maxAyah, group.endAyah);
+            if (group.endAyah < group.startAyah) group.endAyah = group.startAyah;
+        }
+
+        function applyRegionAction(groupKey, action) {
+            const group = lastRenderedGroups.find(g => g.groupKey === groupKey);
+            if (!group) return;
+
+            // Ensure base range exists (original search-produced bounds)
+            if (group.baseStartAyah === undefined) group.baseStartAyah = group.startAyah;
+            if (group.baseEndAyah === undefined) group.baseEndAyah = group.endAyah;
+            
+            if (action === 'remove') {
+                lastRenderedGroups = lastRenderedGroups.filter(g => g.groupKey !== groupKey);
+                lastRenderedGroups = recomputeIntervalFlags(lastRenderedGroups);
+                renderResults(lastRenderedGroups);
+                return;
+            }
+
+            if (action === 'reset') {
+                group.startAyah = group.baseStartAyah;
+                group.endAyah = group.baseEndAyah;
+                clampGroupRange(group);
+                renderResults(lastRenderedGroups);
+                return;
+            }
+            
+            const step = action.endsWith('5') ? 5 : 1;
+            if (action.startsWith('before')) {
+                group.startAyah -= step;
+            } else if (action.startsWith('after')) {
+                group.endAyah += step;
+            }
+            clampGroupRange(group);
+            renderResults(lastRenderedGroups);
+        }
+
+        function getActiveHighlightSpecs() {
+            // Returns array of { item, itemIndex, focusedLem, ignoreFilters }
+            if (selectedItems.length === 0) return [];
+            
+            // Focus mode
+            if (highlightedItem) {
+                const itemIndex = highlightedItem.itemIndex;
+                const item = selectedItems[itemIndex];
+                if (!item) return [];
+                
+                if (highlightedItem.type === 'lem') {
+                    return [{ item, itemIndex, focusedLem: highlightedItem.lem, ignoreFilters: false }];
+                }
+                // highlightedItem.type === 'item'
+                return [{ item, itemIndex, focusedLem: null, ignoreFilters: true }];
+            }
+            
+            // Normal mode: only checked items, respect LEM filtering for roots
+            const specs = [];
+            for (let itemIndex = 0; itemIndex < selectedItems.length; itemIndex++) {
+                if (itemCheckedState[itemIndex] === false) continue;
+                specs.push({ item: selectedItems[itemIndex], itemIndex, focusedLem: null, ignoreFilters: false });
+            }
+            return specs;
+        }
+
+        function computeHighlightMatchesForGroup(group) {
+            const specs = getActiveHighlightSpecs();
+            if (specs.length === 0) return [];
+            
+            const matches = [];
+            for (const spec of specs) {
+                const m = findMatchingWords(spec.item, spec.itemIndex, spec.focusedLem, spec.ignoreFilters) || [];
+                for (const x of m) {
+                    if (x.sura !== group.sura) continue;
+                    if (x.ayah < group.startAyah || x.ayah > group.endAyah) continue;
+                    // Ensure itemIndex present (needed for highlight color)
+                    x.itemIndex = spec.itemIndex;
+                    matches.push(x);
+                }
+            }
+            return matches;
+        }
+        
+        // Build a summary of the current search for tooltip
+        function buildSearchSummary() {
+            const lines = [];
+            const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت' };
+            
+            // Search items
+            lines.push('جستجو:');
+            selectedItems.forEach((item, idx) => {
+                const isChecked = itemCheckedState[idx] !== false;
+                const checkMark = isChecked ? '✓' : '✗';
+                let itemLine = `  ${checkMark} ${typeLabels[item.type]}: ${item.value}`;
+                
+                // For roots, show selected LEMs
+                if (item.type === 'root' && rootLemData[item.value]) {
+                    const lemData = rootLemData[item.value];
+                    const selectedLems = lemData.lems.filter(l => l.selected);
+                    const totalLems = lemData.lems.length;
+                    
+                    if (selectedLems.length < totalLems) {
+                        const lemNames = selectedLems.map(l => l.lem).join('، ');
+                        itemLine += ` [${fmtFa(selectedLems.length)}/${fmtFa(totalLems)}: ${lemNames}]`;
+                    } else {
+                        itemLine += ` [همه ${fmtFa(totalLems)} صیغه]`;
+                    }
+                }
+                
+                lines.push(itemLine);
+            });
+            
+            // Highlighted item (focus mode)
+            if (highlightedItem) {
+                const item = selectedItems[highlightedItem.itemIndex];
+                if (highlightedItem.type === 'lem') {
+                    lines.push(`\nحالت تمرکز: صیغه "${highlightedItem.lem}" از ریشه "${item.value}"`);
+                } else {
+                    lines.push(`\nحالت تمرکز: ${typeLabels[item.type]} "${item.value}"`);
+                }
+            }
+            
+            // Distance
+            const distance = parseInt(document.getElementById('distance-input').value, 10);
+            lines.push(`\nفاصله: ${fmtFa(Number.isFinite(distance) ? distance : 5)} آیه`);
+            
+            // Cross-sura
+            const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true';
+            lines.push(`عبور از سوره‌ها: ${crossSura ? 'بله' : 'خیر'}`);
+            
+            // Sura filter
+            if (allSurasSelected) {
+                lines.push(`سوره‌ها: همه`);
+            } else if (selectedSuras.size === 0) {
+                lines.push(`سوره‌ها: هیچ‌کدام`);
+            } else {
+                const suraNames = [...selectedSuras]
+                    .sort((a, b) => a - b)
+                    .map(s => SURA_NAMES[s] || s)
+                    .join('، ');
+                lines.push(`سوره‌ها (${fmtFa(selectedSuras.size)}): ${suraNames}`);
+            }
+            
+            return lines.join('\n');
+        }
+
+        function buildCopyPayloadText() {
+            const groups = Array.isArray(lastRenderedGroups) ? lastRenderedGroups : [];
+            if (groups.length === 0) {
+                const t = new Date().toLocaleString('fa-IR');
+                return `نتیجه‌ای برای کپی وجود ندارد.\n\nزمان: ${t}\n\n${buildSearchSummary()}`;
+            }
+            
+            // One paragraph per region (group)
+            const paragraphs = [];
+            for (const group of groups) {
+                const parts = [];
+                for (let ayah = group.startAyah; ayah <= group.endAyah; ayah++) {
+                    const ayahText = getAyahText(group.sura, ayah);
+                    if (!ayahText) continue;
+                    // Put reference at end (consistent with UI paragraph mode)
+                    parts.push(`${ayahText} (${SURA_NAMES[group.sura]} ${fmtFa(ayah)})`);
+                }
+                if (parts.length) paragraphs.push(parts.join(' '));
+            }
+            
+            const t = new Date().toLocaleString('fa-IR');
+            const desc = buildSearchSummary();
+            return `${paragraphs.join('\n\n')}\n\n—\nزمان جستجو: ${t}\n\n${desc}`;
+        }
+
+        const HIGHLIGHT_BG_COLORS = ['#a5d6a7','#90caf9','#ffcc80','#ce93d8','#fff59d','#f48fb1','#80deea','#bcaaa4'];
+        const HIGHLIGHT_TEXT_COLORS = ['#2e7d32','#1565c0','#ef6c00','#6a1b9a','#8d6e00','#ad1457','#00838f','#5d4037'];
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function buildHighlightedAyahHTML(sura, ayah, highlightMatchesForGroup) {
+            const ayahData = morphologyData[sura]?.[ayah];
+            if (!ayahData) return escapeHtml(getAyahText(sura, ayah));
+            
+            const mode = localStorage.getItem('searchHighlightMode') || 'background';
+            const wordIndices = Object.keys(ayahData).map(Number).sort((a, b) => a - b);
+            const matchMap = new Map(); // wordIndex -> itemIndex
+            for (const m of (highlightMatchesForGroup || [])) {
+                if (m.sura === sura && m.ayah === ayah) {
+                    matchMap.set(m.wordIndex, m.itemIndex ?? 0);
+                }
+            }
+            
+            const parts = [];
+            for (const idx of wordIndices) {
+                const word = ayahData[idx]?.text || '';
+                const itemIndex = matchMap.get(idx);
+                if (itemIndex !== undefined) {
+                    const c = (itemIndex % 8 + 8) % 8;
+                    const style = (mode === 'text')
+                        ? `color:${HIGHLIGHT_TEXT_COLORS[c]};font-weight:700;display:inline-block;`
+                        // No padding here: LibreOffice tends to highlight NBSP separators as visible dark blocks
+                        : `background-color:${HIGHLIGHT_BG_COLORS[c]};border-radius:2px;display:inline-block;`;
+                    parts.push(`<span style="${style}">${escapeHtml(word)}</span>`);
+                } else {
+                    parts.push(escapeHtml(word));
+                }
+            }
+            // Use explicit spacer element so LibreOffice doesn't merge the separator space into a highlighted span
+            const spacer = `<span style="background-color:transparent;color:inherit;display:inline;"> </span>`;
+            return parts.join(spacer);
+        }
+
+        function buildCopyPayloadHTML() {
+            const groups = Array.isArray(lastRenderedGroups) ? lastRenderedGroups : [];
+            const t = new Date().toLocaleString('fa-IR');
+            const desc = escapeHtml(buildSearchSummary());
+            
+            if (groups.length === 0) {
+                return `<div dir="rtl" lang="fa" style="direction:rtl;unicode-bidi:plaintext;text-align:right;font-family:inherit;">
+                    <p style="margin:0 0 10px 0;">نتیجه‌ای برای کپی وجود ندارد.</p>
+                    <div style="white-space:pre-wrap;color:#444;font-size:12px;">زمان: ${escapeHtml(t)}\n\n${desc}</div>
+                </div>`;
+            }
+            
+            const paras = [];
+            for (const group of groups) {
+                const highlightMatchesForGroup = computeHighlightMatchesForGroup(group);
+                const ayahParts = [];
+                for (let ay = group.startAyah; ay <= group.endAyah; ay++) {
+                    const ayahHtml = buildHighlightedAyahHTML(group.sura, ay, highlightMatchesForGroup);
+                    const ref = `${SURA_NAMES[group.sura]} ${fmtFa(ay)}`;
+                    ayahParts.push(`${ayahHtml} <span style="color:#777;font-size:11px;">(${escapeHtml(ref)})</span>`);
+                }
+                paras.push(`<p dir="rtl" style="margin:0 0 12px 0;line-height:2;direction:rtl;unicode-bidi:plaintext;text-align:right;">${ayahParts.join(' ')}</p>`);
+            }
+            
+            return `<div dir="rtl" lang="fa" style="direction:rtl;unicode-bidi:plaintext;text-align:right;font-family:inherit;">
+                ${paras.join('')}
+                <div style="margin:8px 0;border-top:1px solid #ddd;"></div>
+                <div style="white-space:pre-wrap;color:#444;font-size:12px;">زمان جستجو: ${escapeHtml(t)}\n\n${desc}</div>
+            </div>`;
+        }
+
+        function copyWithCopyEvent({ html, text }) {
+            // Robust fallback: force-set clipboard types during the copy event.
+            // This is often more reliable than relying on the browser to infer HTML from selection.
+            const container = document.createElement('div');
+            container.contentEditable = 'true';
+            container.style.position = 'fixed';
+            container.style.left = '-9999px';
+            container.style.top = '0';
+            container.style.width = '1px';
+            container.style.height = '1px';
+            container.style.overflow = 'hidden';
+            container.style.opacity = '1';
+            container.innerHTML = html;
+            document.body.appendChild(container);
+            
+            const range = document.createRange();
+            range.selectNodeContents(container);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            const handler = (e) => {
+                try {
+                    e.clipboardData.setData('text/html', html);
+                    e.clipboardData.setData('text/plain', text);
+                    e.preventDefault();
+                } catch (_) {
+                    // ignore
+                }
+            };
+            
+            document.addEventListener('copy', handler, { once: true });
+            const ok = document.execCommand('copy');
+            
+            sel.removeAllRanges();
+            container.remove();
+            return ok;
+        }
+
+        async function copyToClipboard({ text, html }) {
+            // Prefer rich clipboard (keeps highlights in Word/Google Docs)
+            try {
+                if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+                    const item = new ClipboardItem({
+                        'text/plain': new Blob([text], { type: 'text/plain' }),
+                        'text/html': new Blob([html], { type: 'text/html' })
+                    });
+                    await navigator.clipboard.write([item]);
+                    console.log('[copy] rich clipboard (ClipboardItem) used');
+                    return;
+                }
+            } catch (e) {
+                console.warn('[copy] rich clipboard failed, falling back', e);
+            }
+            
+            // Fallback to plain text
+            try {
+                // Prefer copy-event forced HTML fallback before plain text (better for Word/Docs)
+                const ok = copyWithCopyEvent({ html, text });
+                if (ok) {
+                    console.log('[copy] execCommand copy-event html used');
+                    return;
+                }
+            } catch (e) {
+                console.warn('[copy] execCommand copy-event failed, falling back to text', e);
+            }
+            
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(text);
+                console.log('[copy] plain text clipboard used');
+                return;
+            }
+            
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+        }
+        
+        // Group matches by region for single item search
+        // Always creates separate groups for each sura
+        function groupMatchesByRegion(matches, crossSura) {
+            const groups = [];
+            const sorted = [...matches].sort(comparePositions);
+            
+            let currentGroup = null;
+            
+            for (const match of sorted) {
+                if (!currentGroup) {
+                    currentGroup = { sura: match.sura, startAyah: match.ayah, endAyah: match.ayah, matches: [match] };
+                } else if (match.sura === currentGroup.sura && match.ayah <= currentGroup.endAyah + 1) {
+                    // Same sura and adjacent ayah - merge
+                    currentGroup.matches.push(match);
+                    currentGroup.endAyah = Math.max(currentGroup.endAyah, match.ayah);
+                } else {
+                    // Different sura or non-adjacent - create new group
+                    groups.push(currentGroup);
+                    currentGroup = { sura: match.sura, startAyah: match.ayah, endAyah: match.ayah, matches: [match] };
+                }
+            }
+            
+            if (currentGroup) {
+                groups.push(currentGroup);
+            }
+            
+            return groups;
+        }
+        
+        // Get ayah text
+        function getAyahText(sura, ayah) {
+            const ayahData = morphologyData[sura]?.[ayah];
+            if (!ayahData) return '';
+            
+            const words = [];
+            const wordIndices = Object.keys(ayahData).map(Number).sort((a, b) => a - b);
+            for (const idx of wordIndices) {
+                if (ayahData[idx]?.text) {
+                    words.push(ayahData[idx].text);
+                }
+            }
+            return words.join(' ');
+        }
+        
+        // Render results
+        async function renderResults(groups) {
+            const resultsBox = document.getElementById('results-box');
+            const resultsContent = document.getElementById('results-content');
+            const resultsCount = document.getElementById('results-count');
+            
+            resultsBox.style.display = 'flex';
+
+            // Apply saved view / highlight settings
+            const savedViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
+            const savedHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+            resultsBox.classList.toggle('view-rows', savedViewMode === 'rows');
+            resultsBox.classList.toggle('highlight-text', savedHighlightMode === 'text');
+            
+            // Always build items panel
+            buildItemsPanel();
+            
+            if (groups.length === 0) {
+                resultsContent.innerHTML = '<div class="no-results">نتیجه‌ای یافت نشد</div>';
+                resultsCount.textContent = '';
+                return;
+            }
+            
+            // Count unique intervals for result count
+            const uniqueIntervals = new Set(groups.map(g => g.intervalId ?? g));
+            resultsCount.textContent = `${fmtFa(uniqueIntervals.size)} مورد یافت شد`;
+            
+            // Build search summary tooltip
+            resultsCount.title = buildSearchSummary();
+            
+            // If using QCF font, load data for all suras in results
+            const useQCF = document.body.classList.contains('font-qurancom');
+            if (useQCF) {
+                const surasInResults = [...new Set(groups.map(g => g.sura))];
+                resultsContent.innerHTML = '<div class="qcf-loading">در حال بارگذاری فونت quran.com...</div>';
+                
+                await Promise.all(surasInResults.map(sura => loadQCFDataForSura(sura)));
+            }
+            
+            let html = '';
+            let inMultiSuraContainer = false;
+            
+            // Keep a mutable reference for region controls actions
+            lastRenderedGroups = groups;
+            // Ensure group keys exist
+            for (let i = 0; i < lastRenderedGroups.length; i++) {
+                if (!lastRenderedGroups[i].groupKey) {
+                    const id = lastRenderedGroups[i].intervalId ?? 0;
+                    lastRenderedGroups[i].groupKey = `g-${id}-${lastRenderedGroups[i].sura}-${i}`;
+                }
+                // Preserve original bounds for reset
+                if (lastRenderedGroups[i].baseStartAyah === undefined) lastRenderedGroups[i].baseStartAyah = lastRenderedGroups[i].startAyah;
+                if (lastRenderedGroups[i].baseEndAyah === undefined) lastRenderedGroups[i].baseEndAyah = lastRenderedGroups[i].endAyah;
+            }
+
+            for (const group of groups) {
+                // Handle multi-sura container
+                if (group.isMultiSura) {
+                    if (group.isFirstInInterval) {
+                        html += `<div class="multi-sura-container">`;
+                        inMultiSuraContainer = true;
+                    }
+                } else if (inMultiSuraContainer) {
+                    html += `</div>`;
+                    inMultiSuraContainer = false;
+                }
+                
+                html += `<div class="result-group" data-group-key="${group.groupKey}">`;
+                html += `<div class="region-controls" aria-hidden="true">`;
+                // Order and styling matches screenshot: blue down/down2, black up/up2, red X
+                html += `<button type="button" class="region-btn after" data-action="after-1" title="افزودن ۱ آیه بعد" aria-label="افزودن ۱ آیه بعد">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 4.5 6 8.3 9.8 4.5"/></svg>` +
+                        `</button>`;
+                html += `<button type="button" class="region-btn after" data-action="after-5" title="افزودن ۵ آیه بعد" aria-label="افزودن ۵ آیه بعد">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">` +
+                        `<path d="M2.2 3.7 6 7.5 9.8 3.7"/><path d="M2.2 6.0 6 9.8 9.8 6.0"/></svg>` +
+                        `</button>`;
+                html += `<button type="button" class="region-btn before" data-action="before-1" title="افزودن ۱ آیه قبل" aria-label="افزودن ۱ آیه قبل">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 7.5 6 3.7 9.8 7.5"/></svg>` +
+                        `</button>`;
+                html += `<button type="button" class="region-btn before" data-action="before-5" title="افزودن ۵ آیه قبل" aria-label="افزودن ۵ آیه قبل">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">` +
+                        `<path d="M2.2 8.3 6 4.5 9.8 8.3"/><path d="M2.2 6.0 6 2.2 9.8 6.0"/></svg>` +
+                        `</button>`;
+                html += `<button type="button" class="region-btn reset" data-action="reset" title="بازنشانی این ناحیه" aria-label="بازنشانی این ناحیه">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">` +
+                        `<path d="M4.2 3.0H2.2v2.0"/><path d="M2.2 5.0a4.2 4.2 0 1 1 1.1 2.9"/></svg>` +
+                        `</button>`;
+                html += `<button type="button" class="region-btn danger" data-action="remove" title="حذف این ناحیه" aria-label="حذف این ناحیه">` +
+                        `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 3 9 9"/><path d="M9 3 3 9"/></svg>` +
+                        `</button>`;
+                html += `</div>`;
+                html += `<div class="sura-row">`;
+
+                // When a region is manually expanded, still highlight all searched items inside the expanded range
+                const highlightMatchesForGroup = computeHighlightMatchesForGroup(group);
+                
+                for (let ayah = group.startAyah; ayah <= group.endAyah; ayah++) {
+                    const ayahText = getAyahText(group.sura, ayah);
+                    const highlightedText = highlightMatches(ayahText, group.sura, ayah, highlightMatchesForGroup);
+
+                    const viewMode = localStorage.getItem('searchViewMode') || 'paragraph';
+                    if (viewMode === 'rows') {
+                        html += `<div class="ayah-row">`;
+                        html += `<a class="ayah-ref-leading num-hindi" href="desktop.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += `<span class="result-ayah">${highlightedText}</span>`;
+                        html += `</div>`;
+                    } else {
+                        html += `<span class="result-ayah">`;
+                        html += highlightedText;
+                        html += `<a class="result-ref num-hindi" href="desktop.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += `</span> `;
+                    }
+                }
+                
+                html += `</div>`;
+                html += `</div>`;
+                
+                // Close multi-sura container after last group in interval
+                if (group.isMultiSura && group.isLastInInterval) {
+                    html += `</div>`;
+                    inMultiSuraContainer = false;
+                }
+            }
+            
+            // Close any unclosed container
+            if (inMultiSuraContainer) {
+                html += `</div>`;
+            }
+            
+            resultsContent.innerHTML = html;
+
+            // Bind region controls (delegated)
+            if (!resultsContent.dataset.regionControlsBound) {
+                resultsContent.dataset.regionControlsBound = '1';
+                resultsContent.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.region-btn');
+                    if (!btn) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const groupEl = btn.closest('.result-group');
+                    const groupKey = groupEl?.dataset.groupKey;
+                    const action = btn.dataset.action;
+                    if (groupKey && action) {
+                        applyRegionAction(groupKey, action);
+                    }
+                });
+            }
+        }
+        
+        function highlightMatches(text, sura, ayah, matches) {
+            const ayahData = morphologyData[sura]?.[ayah];
+            if (!ayahData) return text;
+            
+            const useQCF = document.body.classList.contains('font-qurancom');
+            const wordIndices = Object.keys(ayahData).map(Number).sort((a, b) => a - b);
+            const highlightedWords = [];
+            
+            for (const idx of wordIndices) {
+                const word = ayahData[idx]?.text || '';
+                const match = matches.find(m => m.sura === sura && m.ayah === ayah && m.wordIndex === idx);
+                
+                if (match) {
+                    // Use itemIndex for color, default to 0
+                    const colorIndex = (match.itemIndex ?? 0) % 8;
+                    const highlightClass = `highlight highlight-${colorIndex}`;
+                    
+                    if (useQCF) {
+                        highlightedWords.push(getQCFWordHTML(sura, ayah, idx, highlightClass));
+                    } else {
+                        highlightedWords.push(`<span class="${highlightClass}">${word}</span>`);
+                    }
+                } else {
+                    if (useQCF) {
+                        highlightedWords.push(getQCFWordHTML(sura, ayah, idx));
+                    } else {
+                        highlightedWords.push(word);
+                    }
+                }
+            }
+            
+            return highlightedWords.join(' ');
+        }
+        
+        // UI handlers
+        function updateSelectedItemsUI() {
+            const container = document.getElementById('selected-items');
+            const searchBtn = document.getElementById('search-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            
+            if (selectedItems.length === 0) {
+                container.innerHTML = '<span class="empty-hint">موردی انتخاب نشده. واژه یا ریشه‌ای را جستجو و انتخاب کنید.</span>';
+                searchBtn.disabled = true;
+                if (copyBtn) copyBtn.disabled = true;
+            } else {
+                const icons = ITEM_ICONS;
+                container.innerHTML = selectedItems.map((item, index) => `
+                    <div class="selected-item color-${index % 8}">
+                        <span>${icons[item.type] || ''} ${item.display || item.value}</span>
+                        <button class="remove-btn" data-index="${index}">×</button>
+                    </div>
+                `).join('');
+                searchBtn.disabled = false;
+                if (copyBtn) copyBtn.disabled = false;
+            }
+        }
+        
+        function addSelectedItem(type, value, display) {
+            // Check for duplicates
+            if (selectedItems.some(item => item.type === type && item.value === value)) {
+                return;
+            }
+            selectedItems.push({ type, value, display: display || value });
+            updateSelectedItemsUI();
+        }
+        
+        function removeSelectedItem(index) {
+            selectedItems.splice(index, 1);
+            itemCheckedState.splice(index, 1);
+            // Reset highlighted item if it's affected
+            if (highlightedItem) {
+                if (highlightedItem.itemIndex === index) {
+                    highlightedItem = null;
+                } else if (highlightedItem.itemIndex > index) {
+                    highlightedItem.itemIndex--;
+                }
+            }
+            updateSelectedItemsUI();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            const suggestions = document.getElementById('suggestions');
+            const selectedItemsContainer = document.getElementById('selected-items');
+            const searchBtn = document.getElementById('search-btn');
+            const distanceInput = document.getElementById('distance-input');
+            const distanceDisplay = document.getElementById('distance-display');
+            
+            // Load data
+            loadMorphologyData();
+
+            // Distance control
+            function updateDistanceDisplay() {
+                if (!distanceDisplay || !distanceInput) return;
+                const raw = parseInt(distanceInput.value, 10);
+                const v = Number.isFinite(raw) ? raw : 5;
+                distanceDisplay.textContent = fmtFa(v);
+            }
+            function clampDistance() {
+                const raw = parseInt(distanceInput?.value, 10);
+                const v = Number.isFinite(raw) ? raw : 5;
+                const clamped = Math.max(0, Math.min(100, v));
+                if (distanceInput) distanceInput.value = String(clamped);
+                updateDistanceDisplay();
+                return clamped;
+            }
+            if (distanceInput) {
+                updateDistanceDisplay();
+                distanceInput.addEventListener('input', updateDistanceDisplay);
+                distanceInput.addEventListener('change', clampDistance);
+                distanceInput.addEventListener('blur', clampDistance);
+                distanceInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const v = clampDistance();
+                        const next = e.key === 'ArrowUp' ? Math.min(100, v + 1) : Math.max(0, v - 1);
+                        distanceInput.value = String(next);
+                        updateDistanceDisplay();
+                    }
+                });
+                distanceInput.addEventListener('wheel', (e) => {
+                    // Use wheel to increment/decrement without scrolling page
+                    e.preventDefault();
+                    const v = clampDistance();
+                    const dir = e.deltaY < 0 ? 1 : -1;
+                    distanceInput.value = String(Math.max(0, Math.min(100, v + dir)));
+                    updateDistanceDisplay();
+                }, { passive: false });
+            }
+            
+            // Search input handler
+            let debounceTimer;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const query = searchInput.value.trim();
+                    const results = getSuggestions(query);
+                    
+                    if (results.length > 0) {
+                        const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت' };
+                        suggestions.innerHTML = results.map(r => `
+                            <div class="suggestion-item ${r.type}" data-type="${r.type}" data-value="${r.value}" data-display="${r.display.replace(/"/g, '&quot;')}">
+                                <span>${r.icon} ${r.display}</span>
+                                <span class="suggestion-type num-hindi">${typeLabels[r.type]} (${fmtFa(r.count)})</span>
+                            </div>
+                        `).join('');
+                        suggestions.classList.add('visible');
+                    } else {
+                        suggestions.classList.remove('visible');
+                    }
+                }, 200);
+            });
+            
+            // Suggestion click handler
+            suggestions.addEventListener('click', (e) => {
+                const item = e.target.closest('.suggestion-item');
+                if (item) {
+                    // For roots, use value as display (without sample words in parenthesis)
+                    const display = item.dataset.type === 'root' ? item.dataset.value : item.dataset.display;
+                    addSelectedItem(item.dataset.type, item.dataset.value, display);
+                    searchInput.value = '';
+                    suggestions.classList.remove('visible');
+                    searchInput.focus(); // Focus back to search input
+                }
+            });
+            
+            // Remove item handler
+            selectedItemsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn')) {
+                    removeSelectedItem(parseInt(e.target.dataset.index));
+                }
+            });
+            
+            // Search button handler
+            searchBtn.addEventListener('click', async () => {
+                const results = performSearch();
+                await renderResults(results);
+            });
+
+            // Copy/send menu handling
+            const copyBtn = document.getElementById('copy-btn');
+            const copyMenu = document.getElementById('copy-menu');
+            const copyResults = document.getElementById('copy-results');
+
+            copyBtn.addEventListener('click', (e) => {
+                if (copyBtn.disabled) return;
+                e.stopPropagation();
+                copyMenu.classList.toggle('visible');
+            });
+
+            copyResults.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const payloadText = buildCopyPayloadText();
+                const payloadHtml = buildCopyPayloadHTML();
+                await copyToClipboard({ text: payloadText, html: payloadHtml });
+                copyMenu.classList.remove('visible');
+            });
+            
+            // Close suggestions on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-input-wrapper')) {
+                    suggestions.classList.remove('visible');
+                }
+            });
+            
+            // Enter key to search
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && selectedItems.length > 0) {
+                    searchBtn.click();
+                }
+            });
+
+            // Cross-sura toggle button (no checkbox)
+            const crossSuraToggle = document.getElementById('cross-sura-toggle');
+            const savedCrossSura = localStorage.getItem('searchCrossSura') === 'true';
+            if (crossSuraToggle) {
+                crossSuraToggle.setAttribute('aria-pressed', savedCrossSura ? 'true' : 'false');
+                crossSuraToggle.addEventListener('click', () => {
+                    const next = crossSuraToggle.getAttribute('aria-pressed') !== 'true';
+                    crossSuraToggle.setAttribute('aria-pressed', next ? 'true' : 'false');
+                    localStorage.setItem('searchCrossSura', next ? 'true' : 'false');
+                });
+            }
+            
+            // Settings handling
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsMenu = document.getElementById('settings-menu');
+            const fontSelect = document.getElementById('font-select');
+            const viewModeSelect = document.getElementById('view-mode-select');
+            const highlightModeSelect = document.getElementById('highlight-mode-select');
+            const applySettings = document.getElementById('apply-settings');
+            const goDesktopLink = document.getElementById('go-desktop-link');
+
+            // Use a lightweight positioning library (Floating UI) instead of ad-hoc RTL/viewport logic
+            let cleanupSettingsAutoUpdate = null;
+            async function positionSettingsMenu() {
+                const isRTL = getComputedStyle(document.documentElement).direction === 'rtl';
+                const placement = isRTL ? 'bottom-end' : 'bottom-start';
+                const { x, y } = await computePosition(settingsBtn, settingsMenu, {
+                    strategy: 'fixed',
+                    placement,
+                    middleware: [
+                        offset(6),
+                        flip(),
+                        shift({ padding: 8 })
+                    ]
+                });
+                Object.assign(settingsMenu.style, {
+                    left: `${x}px`,
+                    top: `${y}px`
+                });
+            }
+
+            function openSettingsMenu() {
+                settingsMenu.classList.add('visible');
+                // Update desktop link (prefer first result sura/ayah, then selected sura, else default 1)
+                if (goDesktopLink) {
+                    let sura = 1;
+                    let ayah = null;
+                    if (Array.isArray(lastRenderedGroups) && lastRenderedGroups.length > 0) {
+                        sura = lastRenderedGroups[0].sura;
+                        ayah = lastRenderedGroups[0].startAyah;
+                    } else if (!allSurasSelected && selectedSuras.size === 1) {
+                        sura = [...selectedSuras][0];
+                    }
+                    const url = new URL('desktop.html', window.location.href);
+                    url.searchParams.set('s', String(sura));
+                    if (ayah) url.searchParams.set('a', String(ayah));
+                    goDesktopLink.href = url.toString();
+                }
+                // Start auto updates (resize/scroll/layout shifts)
+                if (cleanupSettingsAutoUpdate) cleanupSettingsAutoUpdate();
+                cleanupSettingsAutoUpdate = autoUpdate(settingsBtn, settingsMenu, positionSettingsMenu);
+                positionSettingsMenu();
+            }
+
+            function closeSettingsMenu() {
+                settingsMenu.classList.remove('visible');
+                if (cleanupSettingsAutoUpdate) {
+                    cleanupSettingsAutoUpdate();
+                    cleanupSettingsAutoUpdate = null;
+                }
+            }
+            
+            // Load saved font preference
+            const savedFont = localStorage.getItem('quranFont') || 'local';
+            fontSelect.value = savedFont;
+            applyFontSetting(savedFont);
+
+            // Load saved view/highlight preferences
+            const savedViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
+            const savedHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+            viewModeSelect.value = savedViewMode;
+            highlightModeSelect.value = savedHighlightMode;
+            
+            function applyFontSetting(font) {
+                if (font === 'qurancom') {
+                    document.body.classList.add('font-qurancom');
+                } else {
+                    document.body.classList.remove('font-qurancom');
+                }
+            }
+            
+            // Toggle settings menu
+            settingsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (settingsMenu.classList.contains('visible')) {
+                    closeSettingsMenu();
+                } else {
+                    openSettingsMenu();
+                }
+            });
+            
+            // Close settings on click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.copy-menu') && !e.target.closest('.search-drop-btn')) {
+                    copyMenu.classList.remove('visible');
+                }
+                if (!e.target.closest('.settings-menu') && !e.target.closest('.settings-btn')) {
+                    closeSettingsMenu();
+                }
+            });
+            
+            // Apply settings
+            applySettings.addEventListener('click', () => {
+                const newFont = fontSelect.value;
+                const currentFont = localStorage.getItem('quranFont') || 'local';
+                const newViewMode = viewModeSelect.value;
+                const newHighlightMode = highlightModeSelect.value;
+                const currentViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
+                const currentHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+
+                // Persist view/highlight settings
+                if (newViewMode !== currentViewMode) localStorage.setItem('searchViewMode', newViewMode);
+                if (newHighlightMode !== currentHighlightMode) localStorage.setItem('searchHighlightMode', newHighlightMode);
+                
+                if (newFont !== currentFont) {
+                    localStorage.setItem('quranFont', newFont);
+                    // Reload page to apply font properly
+                    location.reload();
+                } else {
+                    closeSettingsMenu();
+                    // Re-render results to apply view/highlight immediately (no reload)
+                    if (lastRenderedGroups && lastRenderedGroups.length) {
+                        renderResults(lastRenderedGroups);
+                    }
+                }
+            });
+            
+            // Sura filter
+            const suraFilterBtn = document.getElementById('sura-filter-btn');
+            const suraFilterPopup = document.getElementById('sura-filter-popup');
+            const suraFilterList = document.getElementById('sura-filter-list');
+            const suraFilterSearch = document.getElementById('sura-filter-search');
+            const suraFilterLabel = document.getElementById('sura-filter-label');
+            const suraSelectAll = document.getElementById('sura-select-all');
+            const suraSelectNone = document.getElementById('sura-select-none');
+            
+            // Build sura list
+            function buildSuraFilterList() {
+                let html = '';
+                for (let i = 1; i <= 114; i++) {
+                    const name = SURA_NAMES[i] || `سوره ${i}`;
+                    const isChecked = allSurasSelected || selectedSuras.has(i);
+                    html += `<label class="sura-filter-item" data-sura="${i}" data-name="${name}">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} data-sura="${i}">
+                        <span class="sura-num">${i}</span>
+                        <span class="sura-name">${name}</span>
+                    </label>`;
+                }
+                suraFilterList.innerHTML = html;
+                
+                // Bind checkbox events
+                suraFilterList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        const sura = parseInt(cb.dataset.sura);
+                        
+                        if (allSurasSelected) {
+                            // Switching from "all" mode: first uncheck means we go to individual mode
+                            // Initialize selectedSuras with all EXCEPT this one
+                            allSurasSelected = false;
+                            selectedSuras.clear();
+                            for (let s = 1; s <= 114; s++) {
+                                if (s !== sura) selectedSuras.add(s);
+                            }
+                        } else {
+                            // Individual mode
+                            if (cb.checked) {
+                                selectedSuras.add(sura);
+                            } else {
+                                selectedSuras.delete(sura);
+                            }
+                        }
+                        updateSuraFilterLabel();
+                    });
+                });
+            }
+            
+            // Update label
+            function updateSuraFilterLabel() {
+                if (allSurasSelected) {
+                    suraFilterLabel.textContent = 'همه سوره‌ها';
+                } else if (selectedSuras.size === 0) {
+                    suraFilterLabel.textContent = 'هیچ سوره‌ای';
+                } else if (selectedSuras.size === 114) {
+                    suraFilterLabel.textContent = 'همه سوره‌ها';
+                    allSurasSelected = true;
+                    selectedSuras.clear();
+                } else {
+                    suraFilterLabel.innerHTML = `<span class="filter-count num-hindi">${fmtFa(selectedSuras.size)}</span> سوره`;
+                }
+            }
+            
+            // Toggle popup
+            suraFilterBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                suraFilterPopup.classList.toggle('visible');
+                if (suraFilterPopup.classList.contains('visible')) {
+                    buildSuraFilterList();
+                }
+            });
+            
+            // Close popup on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.sura-filter-popup') && !e.target.closest('.sura-filter-btn')) {
+                    const wasVisible = suraFilterPopup.classList.contains('visible');
+                    suraFilterPopup.classList.remove('visible');
+                    // Refresh items panel when popup closes to update counts
+                    if (wasVisible && selectedItems.length > 0) {
+                        buildItemsPanel();
+                    }
+                }
+            });
+            
+            // Select all
+            suraSelectAll.addEventListener('click', () => {
+                allSurasSelected = true;
+                selectedSuras.clear();
+                buildSuraFilterList();
+                updateSuraFilterLabel();
+            });
+            
+            // Select none
+            suraSelectNone.addEventListener('click', () => {
+                allSurasSelected = false;
+                selectedSuras.clear();
+                suraFilterList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                });
+                updateSuraFilterLabel();
+            });
+            
+            // Search suras
+            suraFilterSearch.addEventListener('input', () => {
+                const query = suraFilterSearch.value.trim().toLowerCase();
+                suraFilterList.querySelectorAll('.sura-filter-item').forEach(item => {
+                    const name = item.dataset.name.toLowerCase();
+                    const num = item.dataset.sura;
+                    if (query === '' || name.includes(query) || num.includes(query)) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
+
