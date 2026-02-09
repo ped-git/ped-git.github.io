@@ -291,6 +291,11 @@ speech[black]::before {
   padding: 2px 0.529166mm; ;
 }
 
+.boxed-solid {
+  border: 1px solid rgb(150, 150, 150);
+  padding: 2px 0.529166mm; ;
+}
+
 .boxed.underline-green {
   border-bottom: 1px dashed rgb(70, 175, 70);
   border-left: 0;
