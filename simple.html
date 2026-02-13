@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="fa-IR" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قرآن - نمایش</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232c3e50'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23fff' font-family='serif'%3E٭%3C/text%3E%3C/svg%3E">
+    <style>
+        :root {
+            --font-size-jumbo: 2rem;
+        }
+        @font-face {
+            font-family: 'BLotus';
+            src: url('/fonts/B%20LOTUS%20S1%20REGULAR%20R1.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: surahnames;
+            src: url('fonts/sura_names.woff2') format('woff2'), url('fonts/sura_names.woff') format('woff');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'BLotus', 'Traditional Arabic', 'Scheherazade New', system-ui, sans-serif;
+            background: #f5f3ef;
+            min-height: 100vh;
+            padding-bottom: 0;
+        }
+        .main {
+            max-width: 960px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 56px);
+        }
+        #bottom-ribbon {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            direction: ltr;
+            padding: 0 10px;
+            background: rgba(245,243,239,0.95);
+            border-top: 1px solid rgba(44,62,80,0.12);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+            z-index: 50;
+            backdrop-filter: blur(2px);
+        }
+        #settings-wrap {
+            position: relative;
+            z-index: 60;
+        }
+        #settings-btn {
+            background: #2c3e50;
+            color: #fff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        #settings-menu {
+            display: none;
+            position: absolute;
+            bottom: 44px;
+            left: 0;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 12px 16px;
+            min-width: 220px;
+            font-family: inherit;
+            direction: rtl;
+            text-align: right;
+        }
+        #settings-menu.open { display: block; }
+        #settings-menu h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: #555; }
+        #settings-menu label { display: block; margin-bottom: 6px; cursor: pointer; font-size: 0.95rem; }
+        #bottom-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            direction: ltr;
+            flex-direction: row-reverse;
+        }
+        .bottom-nav-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #2c3e50;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0 8px;
+        }
+        .bottom-nav-btn:hover { background: #f4f7fb; }
+        .page-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+        .page-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+            width: 310px;
+            max-width: 100%;
+            flex: 0 1 310px;
+            min-width: 290px;
+        }
+        .page-card.single { flex: 0 1 420px; min-width: 0; }
+        .page-container.two-pages {
+            flex-wrap: nowrap;
+            align-items: flex-start;
+        }
+        .page-container.two-pages .page-card {
+            flex: 1 1 0;
+            min-width: 290px;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-container.two-pages .page-card .page-content {
+            flex: 1;
+            min-height: 0;
+        }
+        .page-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e8e6e2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .sura-name { font-weight: bold; font-size: 1rem; }
+        .page-meta {
+            font-size: 0.85rem;
+            color: #555;
+        }
+        .page-meta .page-num-input {
+            width: 4em;
+            min-width: 3.5em;
+            padding: 3px 8px;
+            font-size: 1rem;
+            font-size: inherit;
+            /* font-weight: 600; */
+            font-weight: normal;
+            color: #2c3e50;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            text-align: center;
+            direction: ltr;
+        }
+        .page-meta .page-num-input:hover { border-color: #ccc; }
+        .page-meta .page-num-input:focus {
+            outline: none;
+            border-color: #2c3e50;
+        }
+        .page-meta .page-num-input.page-num-readonly,
+        .page-meta .page-num-input[readonly] {
+            cursor: default;
+            border-color: transparent;
+            background: transparent;
+        }
+        .page-meta .page-num-input[readonly]:hover { border-color: transparent; }
+        .page-content {
+            padding: 16px 18px;
+            min-height: 0;
+            line-height: 1.9;
+            font-size: clamp(1rem, 2.2vw, 1.35rem);
+            direction: rtl;
+            text-align: center;
+        }
+        .page-content.font-qcf { font-size: clamp(1.1rem, 2.4vw, 1.5rem); }
+        .page-content .ayah { display: block; margin-bottom: 0.35em; }
+        .page-content .ayah-inline { margin-left: 0.25em; }
+        .page-content.layout-flow .ayah { display: inline; margin-bottom: 0; }
+        .page-content.layout-flow .ayah::after { content: '\00a0'; }
+        .page-content .mushaf-line {
+            display: block;
+            direction: rtl;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+        .page-content .mushaf-line.bismillah { text-align: center; }
+        .page-card.page-1 .page-content .mushaf-line,
+        .page-card.page-2 .page-content .mushaf-line { text-align: center; }
+        .page-content .mushaf-line .qcf-word { display: inline; }
+        .page-content .qword {
+            transition: color 0.12s ease;
+        }
+        .page-content .qword.word-hovered {
+            color: #2ca4ab;
+        }
+        .page-content .qword.ayah-hovered {
+            color: #2ca4ab;
+        }
+        .page-content .sura-name-in-page {
+            display: block;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            line-height: normal;
+            font-size: 1.4rem;
+            color: #333;
+        }
+        .page-content .sura-name-in-page.sura-name-qcf {
+            font-family: surahnames, serif;
+            font-size: 1.5em;
+            color: #000;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page-content .sura-name-in-page.sura-name-qcf .sura-name-icon {
+            font-family: surahnames, serif;
+        }
+        .page-content .sura-name-in-page:not(.sura-name-qcf) {
+            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+        }
+        .sura-container {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        .sura-title {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            margin-top: 0;
+            color: #2c3e50;
+            font-family: system-ui, sans-serif;
+        }
+        .sura-scroll {
+            background: #faf8f5;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            padding: 12px 0;
+        }
+        .sura-page-block { padding: 12px 18px; }
+        .sura-page-block + .sura-page-block { border-top: 1px solid #c4bfb4; }
+        .sura-page-block .page-content { min-height: 0; }
+        .loading, .error {
+            padding: 24px;
+            text-align: center;
+            color: #666;
+            font-family: system-ui, sans-serif;
+        }
+        .error { color: #c0392b; }
+        .qcf-word { display: inline; }
+
+        #progress-inline-wrap {
+            width: 80%;
+            max-width: 100%;
+            margin: 16px auto 0;
+            min-height: 30px;
+            padding: 0;
+            border-radius: 0;
+            background: #f6f3ee;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.9), 0 5px 18px rgba(34,26,18,0.05);
+        }
+        #progress-bar-stack {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            direction: rtl;
+            border-radius: 0;
+            overflow: visible;
+        }
+        #juz-bar {
+            height: 10px;
+            border-radius: 0;
+            overflow: visible;
+            display: flex;
+            position: relative;
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.35), inset 0 1px 0 rgba(0,0,0,0.08);
+        }
+        #juz-bar span {
+            flex: 1;
+            cursor: pointer;
+            position: relative;
+            transform-origin: center bottom;
+            transition: flex-grow 0.12s ease-out, transform 0.12s ease-out;
+        }
+        #pages-bar {
+            height: 20px;
+            border-radius: 0;
+            overflow: visible;
+            display: flex;
+            cursor: pointer;
+            position: relative;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(0,0,0,0.08);
+        }
+        #pages-bar span {
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            transform-origin: center bottom;
+            transition: flex-grow 0.12s ease-out, transform 0.12s ease-out;
+        }
+        #progress-hover-segment {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 30px;
+            width: 0;
+            pointer-events: none;
+            display: none;
+            box-sizing: border-box;
+            border-radius: 0;
+            border: none;
+            background: rgba(255,255,255,0.12);
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
+        }
+        #juz-hover-segment {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 10px;
+            width: 0;
+            pointer-events: none;
+            display: none;
+            box-sizing: border-box;
+            border-radius: 0;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
+        }
+        #progress-hover-segment.hover-active,
+        #juz-hover-segment.hover-active {
+            display: block;
+            transform: scale(1.03);
+        }
+        #progress-inline-wrap #progress-hover-segment.hover-active,
+        #progress-inline-wrap #juz-hover-segment.hover-active { display: block; }
+        #pages-bar span.sura-highlight {
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.3);
+            filter: saturate(1.15) brightness(1.06);
+        }
+        #progress-bar-stack { padding-bottom: 2px; }
+        #progress-tooltip {
+            position: fixed;
+            background: linear-gradient(180deg, rgba(25,25,28,0.96), rgba(18,18,21,0.95));
+            color: #f7f4ed;
+            padding: 9px 13px;
+            border-radius: 12px;
+            font-size: 0.83rem;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+            transform: translate(-50%, -100%);
+            margin-bottom: 8px;
+            max-width: 300px;
+            line-height: 1.5;
+            text-align: right;
+            direction: rtl;
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: 0 14px 34px rgba(0,0,0,0.34);
+        }
+        #progress-tooltip .tooltip-highlight {
+            font-weight: 700;
+            color: #f6e8cf;
+            letter-spacing: 0.01em;
+        }
+        #progress-tooltip .tooltip-suras {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.22);
+            font-size: 0.86em;
+            color: rgba(255,255,255,0.96);
+        }
+        #progress-tooltip .tooltip-sura-line {
+            display: block;
+            padding: 4px 7px;
+            margin: 2px 0;
+            border-radius: 7px;
+            background: rgba(255,255,255,0.14);
+        }
+        #progress-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border: 6px solid transparent;
+            border-top-color: rgba(19,19,22,0.95);
+        }
+        #progress-tooltip.visible { display: block; }
+        #word-hover-tooltip {
+            position: fixed;
+            z-index: 120;
+            display: none;
+            pointer-events: none;
+            max-width: 280px;
+            --arrow-left: 50%;
+            background: #ffffff;
+            color: #1f2c3d;
+            border: 1px solid #cfd9e6;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            line-height: 1.35;
+            box-shadow: 0 8px 24px rgba(22,34,49,0.16);
+            direction: rtl;
+            text-align: right;
+            white-space: normal;
+        }
+        #word-hover-tooltip::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: var(--arrow-left);
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #cfd9e6;
+        }
+        #word-hover-tooltip::after {
+            content: '';
+            position: absolute;
+            top: calc(100% - 1px);
+            left: var(--arrow-left);
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: #ffffff;
+        }
+
+        #sura-picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        #sura-picker-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #sura-picker-modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 90vw;
+            width: 520px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sura-picker-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e6e2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .sura-picker-title { margin: 0; font-size: 1.25rem; color: #2c3e50; }
+        .sura-picker-search {
+            flex: 1;
+            max-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            direction: rtl;
+        }
+        .sura-picker-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: #f0e6e0;
+            color: #8b6914;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sura-picker-body {
+            overflow-y: auto;
+            padding: 16px 20px 20px;
+        }
+        .sura-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .sura-picker-card {
+            padding: 12px 10px;
+            border-radius: 12px;
+            background: #faf8f5;
+            border: 1px solid #e8e6e2;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .sura-picker-card:hover {
+            background: #f0ebe4;
+            border-color: #c4bfb4;
+        }
+        .sura-picker-card.current {
+            background: #e8e6e2;
+            border-color: #2c3e50;
+        }
+        .sura-picker-card .sura-picker-num {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .sura-picker-card .sura-picker-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+        .sura-picker-card.hidden { display: none; }
+        .sura-name-click { cursor: pointer; }
+        .sura-name-click:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <main class="main" id="main">
+        <div id="loading" class="loading" style="display:none;">در حال بارگذاری...</div>
+    </main>
+    <div id="bottom-ribbon">
+        <div id="settings-wrap">
+            <button type="button" id="settings-btn" aria-label="تنظیمات">⚙</button>
+            <div id="settings-menu" class="settings-menu">
+                <h3>فونت</h3>
+                <label><input type="radio" name="font" value="text">متن (فونت متنی)</label>
+                <label><input type="radio" name="font" value="qurancom" checked>فونت عثمان طه</label>
+                <h3>چیدمان آیه</h3>
+                <label><input type="radio" name="layout" value="ayah-line" checked>یک آیه در هر خط</label>
+                <label><input type="radio" name="layout" value="flow">متن پیوسته</label>
+                <h3>حالت صفحه</h3>
+                <label><input type="checkbox" id="two-page"> دو صفحه کنار هم (فقط حالت صفحه)</label>
+                <label><input type="checkbox" id="sura-view"> حالت سوره (باز کردن سوره به‌صورت نمای سوره)</label>
+            </div>
+        </div>
+        <div id="bottom-nav">
+            <button type="button" id="nav-prev-sura" class="bottom-nav-btn" title="سوره قبل">»</button>
+            <button type="button" id="nav-prev-page" class="bottom-nav-btn" title="صفحه قبل">→</button>
+            <button type="button" id="nav-next-page" class="bottom-nav-btn" title="صفحه بعد">←</button>
+            <button type="button" id="nav-next-sura" class="bottom-nav-btn" title="سوره بعد">«</button>
+        </div>
+    </div>
+    <div id="progress-tooltip"></div>
+    <div id="word-hover-tooltip"></div>
+
+    <script src="js/sura-data.js"></script>
+    <script>
+(function() {
+    const TOTAL_PAGES = 604;
+    const loadedQCFPages = new Set();
+    const QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
+    const SURAH_NAMES_FONT_FAMILY = 'surahnames';
+    let surahNamesFontLoaded = false;
+    const main = document.getElementById('main');
+    const loadingEl = document.getElementById('loading');
+    const progressTooltip = document.getElementById('progress-tooltip');
+    const wordHoverTooltip = document.getElementById('word-hover-tooltip');
+    var progressInlineWrap = null;
+    var suraPickerOverlay = null;
+    function createSuraPicker() {
+        if (suraPickerOverlay) return suraPickerOverlay;
+        suraPickerOverlay = document.createElement('div');
+        suraPickerOverlay.id = 'sura-picker-overlay';
+        var modal = document.createElement('div');
+        modal.id = 'sura-picker-modal';
+        var header = document.createElement('div');
+        header.className = 'sura-picker-header';
+        var title = document.createElement('h2');
+        title.className = 'sura-picker-title';
+        title.textContent = 'انتخاب سوره';
+        var search = document.createElement('input');
+        search.type = 'text';
+        search.className = 'sura-picker-search';
+        search.placeholder = 'جستجو...';
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'sura-picker-close';
+        closeBtn.textContent = '×';
+        closeBtn.addEventListener('click', hideSuraPicker);
+        header.appendChild(title);
+        header.appendChild(search);
+        header.appendChild(closeBtn);
+        var body = document.createElement('div');
+        body.className = 'sura-picker-body';
+        var grid = document.createElement('div');
+        grid.className = 'sura-picker-grid';
+        grid.id = 'sura-picker-grid';
+        for (var i = 1; i <= 114; i++) {
+            var card = document.createElement('div');
+            card.className = 'sura-picker-card';
+            card.setAttribute('data-sura', i);
+            card.setAttribute('data-name', (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[i]) ? SURA_NAMES[i] : '');
+            card.innerHTML = '<div class="sura-picker-num">' + fmtFa(i) + '</div><div class="sura-picker-name">' + escapeHtml(getSuraName(i)) + '</div>';
+            card.addEventListener('click', async function() {
+                var num = parseInt(this.getAttribute('data-sura'), 10);
+                if (suraViewMode()) {
+                    setUrl('sura', 1, num);
+                } else {
+                    if (!chaptersCache || !chaptersCache.length) {
+                        try { await fetchChapters(); } catch (err) {}
+                    }
+                    var ch = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === num; }) : null;
+                    var firstPage = (ch && ch.pages && ch.pages[0] != null) ? ch.pages[0] : 1;
+                    setUrl('page', pageToOdd(firstPage), 1);
+                }
+                render();
+                hideSuraPicker();
+            });
+            grid.appendChild(card);
+        }
+        search.addEventListener('input', function() {
+            var q = this.value.trim().toLowerCase();
+            var cards = grid.querySelectorAll('.sura-picker-card');
+            for (var j = 0; j < cards.length; j++) {
+                var c = cards[j];
+                var name = (c.getAttribute('data-name') || '').toLowerCase();
+                var num = c.getAttribute('data-sura');
+                c.classList.toggle('hidden', q && name.indexOf(q) === -1 && num.indexOf(q) === -1);
+            }
+        });
+        body.appendChild(grid);
+        modal.appendChild(header);
+        modal.appendChild(body);
+        suraPickerOverlay.appendChild(modal);
+        suraPickerOverlay.addEventListener('click', function(e) {
+            if (e.target === suraPickerOverlay) hideSuraPicker();
+        });
+        document.addEventListener('keydown', function onEsc(e) {
+            if (e.key === 'Escape' && suraPickerOverlay && suraPickerOverlay.classList.contains('visible')) hideSuraPicker();
+        });
+        document.body.appendChild(suraPickerOverlay);
+        return suraPickerOverlay;
+    }
+    function openSuraPicker(currentSura) {
+        createSuraPicker();
+        var grid = document.getElementById('sura-picker-grid');
+        if (grid) {
+            grid.querySelectorAll('.sura-picker-card').forEach(function(card) {
+                card.classList.toggle('current', parseInt(card.getAttribute('data-sura'), 10) === currentSura);
+            });
+        }
+        var search = suraPickerOverlay.querySelector('.sura-picker-search');
+        if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+        suraPickerOverlay.classList.add('visible');
+    }
+    function hideSuraPicker() {
+        if (suraPickerOverlay) suraPickerOverlay.classList.remove('visible');
+    }
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsMenu = document.getElementById('settings-menu');
+    const navPrevSuraBtn = document.getElementById('nav-prev-sura');
+    const navPrevPageBtn = document.getElementById('nav-prev-page');
+    const navNextPageBtn = document.getElementById('nav-next-page');
+    const navNextSuraBtn = document.getElementById('nav-next-sura');
+    let bismillahVerseCache = null;
+
+    var pageToSura = [];
+    var pageToJuz = [];
+    var JUZ_PAGE_ENDS = [22, 42, 62, 82, 102, 122, 142, 162, 182, 202, 222, 242, 262, 282, 302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582, 604];
+    function buildPageMaps() {
+        for (var p = 1; p <= 604; p++) {
+            var ch = getChapterForPage(p);
+            pageToSura[p] = ch ? ch.id : 1;
+            var j = 1;
+            while (j <= 30 && JUZ_PAGE_ENDS[j - 1] < p) j++;
+            pageToJuz[p] = j <= 30 ? j : 30;
+        }
+    }
+    var JUZ_COLORS = [];
+    (function() {
+        for (var j = 0; j < 30; j++) {
+            var hue = (j / 30) * 360;
+            JUZ_COLORS.push('hsl(' + hue + ', 42%, 68%)');
+        }
+    })();
+    function juzColor(juzNum) {
+        if (!juzNum || juzNum < 1 || juzNum > 30) return '#d4d8dc';
+        return JUZ_COLORS[juzNum - 1];
+    }
+    var SURA_COLORS = [];
+    (function() {
+        for (var s = 0; s < 114; s++) {
+            var hue = (s / 114) * 360;
+            var sat = 40 + (s % 4) * 4;
+            var light = 64 + (s % 3) * 3;
+            SURA_COLORS.push('hsl(' + hue + ', ' + sat + '%, ' + light + '%)');
+        }
+    })();
+    function suraColor(suraNum) {
+        if (!suraNum || suraNum < 1) return '#d8dce0';
+        return SURA_COLORS[(suraNum - 1) % SURA_COLORS.length];
+    }
+
+    const faNum = new Intl.NumberFormat('fa-IR', { maximumFractionDigits: 0 });
+    function fmtFa(n) {
+        var x = Number(n);
+        if (!Number.isFinite(x)) return '';
+        return faNum.format(x);
+    }
+    function normalizeDigits(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/[۰-۹]/g, function(d) { return String(d.charCodeAt(0) - 1776); })
+            .replace(/[٠-٩]/g, function(d) { return String(d.charCodeAt(0) - 1632); });
+    }
+    function parseLocalizedInt(str) {
+        var s = normalizeDigits(str).replace(/[^\d]/g, '');
+        if (!s) return NaN;
+        return parseInt(s, 10);
+    }
+
+    function getMode() {
+        const params = new URLSearchParams(window.location.search);
+        const p = parseInt(params.get('p'), 10);
+        const sura = parseInt(params.get('sura'), 10);
+        if (sura >= 1 && sura <= 114) return { mode: 'sura', sura, page: 1 };
+        const page = (p >= 1 && p <= TOTAL_PAGES) ? p : 1;
+        return { mode: 'page', page, sura: 1 };
+    }
+
+    function setUrl(mode, page, sura) {
+        const u = new URL(window.location.href);
+        if (mode === 'sura') {
+            u.searchParams.set('sura', String(sura));
+            u.searchParams.delete('p');
+        } else {
+            u.searchParams.set('p', String(page));
+            u.searchParams.delete('sura');
+        }
+        window.history.replaceState({}, '', u.toString());
+    }
+
+    function getSetting(key, def) {
+        try {
+            const v = localStorage.getItem('simple_' + key);
+            return v !== null ? v : def;
+        } catch (e) { return def; }
+    }
+    function setSetting(key, value) {
+        try { localStorage.setItem('simple_' + key, value); } catch (e) {}
+    }
+
+    function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
+    function twoPageMode() { return getSetting('two-page', '0') === '1'; }
+    function suraViewMode() { return getSetting('sura-view', '0') === '1'; }
+
+    function loadQCFPageFont(page) {
+        if (loadedQCFPages.has(page)) return;
+        loadedQCFPages.add(page);
+        const padded = String(page).padStart(3, '0');
+        const fontFamily = 'QCF_P' + padded;
+        const woff2Url = QCF_CDN + '/woff2/p' + page + '.woff2';
+        const woffUrl = QCF_CDN + '/woff/p' + page + '.woff';
+        const style = document.createElement('style');
+        style.textContent = `
+            @font-face {
+                font-family: '${fontFamily}';
+                src: url('${woff2Url}') format('woff2'),
+                     url('${woffUrl}') format('woff');
+                font-display: swap;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function collectPageNumbersFromPages(pages) {
+        const set = new Set();
+        for (const data of pages) {
+            for (const v of data.verses || []) {
+                for (const w of v.words || []) {
+                    if (w.char_type_name === 'end') continue;
+                    set.add(w.v1_page || v.page_number || 1);
+                }
+            }
+        }
+        return set;
+    }
+    function collectPageNumbersFromBlocks(pageBlocks) {
+        const set = new Set();
+        for (const block of pageBlocks) {
+            for (const v of block.verses || []) {
+                for (const w of v.words || []) {
+                    if (w.char_type_name === 'end') continue;
+                    set.add(w.v1_page || v.page_number || 1);
+                }
+            }
+        }
+        return set;
+    }
+
+    function ensureQCFFontsLoaded(pageNumbers) {
+        const arr = [...pageNumbers];
+        for (const p of pageNumbers) loadQCFPageFont(p);
+        return Promise.all(arr.map(function(p) {
+            const padded = String(p).padStart(3, '0');
+            const fontFamily = 'QCF_P' + padded;
+            const woff2Url = QCF_CDN + '/woff2/p' + p + '.woff2';
+            return new Promise(function(resolve, reject) {
+                const fontFace = new FontFace(fontFamily, "url('" + woff2Url + "')");
+                fontFace.load().then(function(loaded) {
+                    document.fonts.add(loaded);
+                    resolve();
+                }).catch(reject);
+            });
+        }));
+    }
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        const div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+    function escapeAttr(s) {
+        return escapeHtml(String(s == null ? '' : s)).replace(/"/g, '&quot;');
+    }
+    function getWordTranslation(w) {
+        if (!w) return '';
+        if (typeof w.translation === 'string') return w.translation;
+        if (w.translation && typeof w.translation.text === 'string') return w.translation.text;
+        if (w.word_translation && typeof w.word_translation.text === 'string') return w.word_translation.text;
+        return '';
+    }
+
+    function getSuraName(suraNumber) {
+        return (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[suraNumber])
+            ? SURA_NAMES[suraNumber] : ('سوره ' + fmtFa(suraNumber));
+    }
+    function getSuraNameIconNumber(suraNumber) {
+        if (suraNumber < 1 || suraNumber > 114) return '001';
+        return suraNumber >= 100 ? String(suraNumber) : String(suraNumber).padStart(3, '0');
+    }
+    function firstVerseOfPageBody(verses) {
+        for (var i = 0; i < verses.length; i++) {
+            if (verses[i].verse_key !== '1:1') return verses[i];
+        }
+        return verses[0] || null;
+    }
+
+    function layoutAyahPerLine() {
+        return getSetting('layout', 'ayah-line') === 'ayah-line';
+    }
+
+    function buildWordHtml(w, pageNum, useQCFFont, verseKey) {
+        var vKey = verseKey || '';
+        var isEnd = w && w.char_type_name === 'end';
+        var tr = getWordTranslation(w);
+        var baseClass = 'qword' + (isEnd ? ' ayah-end' : '');
+        if (useQCFFont) {
+            var page = w.v1_page || pageNum;
+            loadQCFPageFont(page);
+            var padded = String(page).padStart(3, '0');
+            var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
+            return '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>';
+        }
+        return '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '">' + escapeHtml(w.text || '') + '</span>';
+    }
+    function buildVerseText(verse, useQCFFont) {
+        if (!verse.words || verse.words.length === 0) return '';
+        var pageNum = verse.page_number || (verse.words[0] && verse.words[0].v1_page);
+        var html = '';
+        for (var i = 0; i < verse.words.length; i++) {
+            html += buildWordHtml(verse.words[i], pageNum, useQCFFont, verse.verse_key);
+        }
+        return html;
+    }
+    function getLinesFromVerses(verses) {
+        var lines = [];
+        var currentKey = null;
+        var currentWords = null;
+        var lastLineNum = null;
+        for (var vi = 0; vi < verses.length; vi++) {
+            var v = verses[vi];
+            var pageNum = v.page_number || (v.words && v.words[0] && v.words[0].v1_page) || 1;
+            if (!v.words) continue;
+            for (var wi = 0; wi < v.words.length; wi++) {
+                var w = v.words[wi];
+                var ln = w.line_number != null ? w.line_number : (lastLineNum != null ? lastLineNum : 1);
+                if (w.line_number != null) lastLineNum = w.line_number;
+                var key = pageNum + ':' + ln;
+                if (key !== currentKey) {
+                    currentKey = key;
+                    currentWords = [];
+                    lines.push({ pageNumber: pageNum, lineNumber: ln, words: currentWords });
+                }
+                currentWords.push({ word: w, pageNum: pageNum, verseKey: v.verse_key });
+            }
+        }
+        return lines;
+    }
+
+    function renderPageContent(verses, container, useQCFFont) {
+        container.classList.toggle('font-qcf', useQCFFont);
+        container.classList.toggle('layout-ayah-line', layoutAyahPerLine());
+        container.classList.toggle('layout-flow', !layoutAyahPerLine());
+        var html = '';
+        if (layoutAyahPerLine()) {
+            for (var i = 0; i < verses.length; i++) {
+                var v = verses[i];
+                var verseText = buildVerseText(v, useQCFFont);
+                html += '<span class="ayah"><span class="ayah-inline">' + verseText + '</span></span>';
+            }
+        } else {
+            var lineList = getLinesFromVerses(verses);
+            var surasNameShown = {};
+            for (var li = 0; li < lineList.length; li++) {
+                var line = lineList[li];
+                var nextLine = lineList[li + 1];
+                var isBismillahOnly = line.words.length > 0 && line.words.every(function(item) { return item.verseKey === '1:1'; });
+                var nextSuraStart = null;
+                if (nextLine && nextLine.words.length > 0) {
+                    for (var nwi = 0; nwi < nextLine.words.length; nwi++) {
+                        var nk = nextLine.words[nwi].verseKey;
+                        if (nk && nk !== '1:1') {
+                            var nm = nk.match(/^(\d+):1$/);
+                            if (nm) { nextSuraStart = parseInt(nm[1], 10); break; }
+                        }
+                    }
+                }
+                if (isBismillahOnly && nextSuraStart !== null && !surasNameShown[nextSuraStart]) {
+                    html += (useQCFFont
+                        ? '<div class="sura-name-in-page sura-name-qcf" style="direction:rtl;box-sizing:border-box;display:block;text-align:center;margin:0;padding:0;line-height:normal;" aria-label="' + escapeHtml(getSuraName(nextSuraStart)) + '"><span class="sura-name-icon" translate="no">' + getSuraNameIconNumber(nextSuraStart) + '</span></div>'
+                        : '<div class="sura-name-in-page">' + escapeHtml(getSuraName(nextSuraStart)) + '</div>');
+                    surasNameShown[nextSuraStart] = true;
+                } else {
+                    var surasStartingOnThisLine = [];
+                    for (var wi = 0; wi < line.words.length; wi++) {
+                        var item = line.words[wi];
+                        if (item.verseKey) {
+                            var suraStartMatch = item.verseKey.match(/^(\d+):1$/);
+                            if (suraStartMatch) {
+                                var sn = parseInt(suraStartMatch[1], 10);
+                                if (sn !== 1 && surasStartingOnThisLine.indexOf(sn) === -1) surasStartingOnThisLine.push(sn);
+                            }
+                        }
+                    }
+                    for (var si = 0; si < surasStartingOnThisLine.length; si++) {
+                        var suraNumStart = surasStartingOnThisLine[si];
+                        if (surasNameShown[suraNumStart]) continue;
+                        if (useQCFFont) {
+                            html += '<div class="sura-name-in-page sura-name-qcf" style="direction:rtl;box-sizing:border-box;display:block;text-align:center;margin:0;padding:0;line-height:normal;" aria-label="' + escapeHtml(getSuraName(suraNumStart)) + '"><span class="sura-name-icon" translate="no">' + getSuraNameIconNumber(suraNumStart) + '</span></div>';
+                        } else {
+                            html += '<div class="sura-name-in-page">' + escapeHtml(getSuraName(suraNumStart)) + '</div>';
+                        }
+                        surasNameShown[suraNumStart] = true;
+                    }
+                }
+                html += '<div class="mushaf-line' + (isBismillahOnly ? ' bismillah' : '') + '">';
+                for (var wi = 0; wi < line.words.length; wi++) {
+                    var item = line.words[wi];
+                    html += buildWordHtml(item.word, item.pageNum, useQCFFont, item.verseKey);
+                }
+                html += '</div>';
+            }
+        }
+        container.innerHTML = html;
+        attachWordHoverInteractions(container);
+    }
+    function hideWordHoverTooltip() {
+        if (!wordHoverTooltip) return;
+        wordHoverTooltip.style.display = 'none';
+        wordHoverTooltip.textContent = '';
+    }
+    function showWordHoverTooltip(text, anchorEl) {
+        if (!wordHoverTooltip || !text) return;
+        wordHoverTooltip.textContent = text;
+        wordHoverTooltip.style.display = 'block';
+        var a = anchorEl ? anchorEl.getBoundingClientRect() : null;
+        var anchorCenter = (a ? (a.left + a.width / 2) : 0);
+        var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+        var rect = wordHoverTooltip.getBoundingClientRect();
+        var arrowH = 4;
+        var gap = 1;
+        var left = Math.max(8 + rect.width / 2, Math.min(vw - 8 - rect.width / 2, anchorCenter));
+        var tooltipLeft = left - rect.width / 2;
+        var top = a ? (a.top - rect.height - arrowH - gap) : 8;
+        top = Math.max(8, top);
+        var arrowLeft = Math.max(10, Math.min(rect.width - 10, anchorCenter - tooltipLeft));
+        wordHoverTooltip.style.setProperty('--arrow-left', arrowLeft + 'px');
+        wordHoverTooltip.style.left = tooltipLeft + 'px';
+        wordHoverTooltip.style.top = top + 'px';
+    }
+    function attachWordHoverInteractions(container) {
+        if (!container) return;
+        var activeWord = null;
+        function clearHighlights() {
+            if (activeWord) activeWord.classList.remove('word-hovered');
+            container.querySelectorAll('.qword.ayah-hovered').forEach(function(el) { el.classList.remove('ayah-hovered'); });
+            activeWord = null;
+        }
+        function highlightAyah(verseKey) {
+            var words = container.querySelectorAll('.qword');
+            for (var i = 0; i < words.length; i++) {
+                if (words[i].getAttribute('data-verse-key') === verseKey) words[i].classList.add('ayah-hovered');
+            }
+        }
+        container.addEventListener('mouseover', function(e) {
+            var wordEl = e.target && e.target.closest ? e.target.closest('.qword') : null;
+            if (!wordEl || !container.contains(wordEl)) return;
+            clearHighlights();
+            var verseKey = wordEl.getAttribute('data-verse-key') || '';
+            if (wordEl.classList.contains('ayah-end') && verseKey) {
+                highlightAyah(verseKey);
+                hideWordHoverTooltip();
+                return;
+            }
+            activeWord = wordEl;
+            activeWord.classList.add('word-hovered');
+            var tr = wordEl.getAttribute('data-word-translation') || '';
+            if (tr) showWordHoverTooltip(tr, activeWord);
+            else hideWordHoverTooltip();
+        });
+        container.addEventListener('mouseout', function(e) {
+            var from = e.target && e.target.closest ? e.target.closest('.qword') : null;
+            if (!from || !container.contains(from)) return;
+            var to = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.qword') : null;
+            if (to && container.contains(to)) return;
+            clearHighlights();
+            hideWordHoverTooltip();
+        });
+        container.addEventListener('mouseleave', function() {
+            clearHighlights();
+            hideWordHoverTooltip();
+        });
+    }
+
+    var chaptersCache = null;
+    async function fetchChapters() {
+        if (chaptersCache) return chaptersCache;
+        const res = await fetch('https://api.quran.com/api/v4/chapters?language=fa');
+        if (!res.ok) throw new Error('خطا در دریافت فهرست سوره\u200cها');
+        const data = await res.json();
+        chaptersCache = data.chapters || [];
+        return chaptersCache;
+    }
+    function getChapterForPage(pageNum) {
+        if (!chaptersCache || !chaptersCache.length) return null;
+        const n = parseInt(pageNum, 10);
+        for (var i = 0; i < chaptersCache.length; i++) {
+            var c = chaptersCache[i];
+            var start = (c.pages && c.pages[0]) ? c.pages[0] : 0;
+            if (start === n) return c;
+        }
+        for (var j = 0; j < chaptersCache.length; j++) {
+            var ch = chaptersCache[j];
+            var s = (ch.pages && ch.pages[0]) ? ch.pages[0] : 0;
+            var e = (ch.pages && ch.pages[1]) ? ch.pages[1] : 0;
+            if (s <= n && n <= e) return ch;
+        }
+        return null;
+    }
+    var pageTooltipCache = {};
+    function getChaptersOnPage(pageNum) {
+        if (!chaptersCache || !chaptersCache.length) return [];
+        var n = parseInt(pageNum, 10);
+        var out = [];
+        for (var i = 0; i < chaptersCache.length; i++) {
+            var ch = chaptersCache[i];
+            var s = (ch.pages && ch.pages[0]) ? ch.pages[0] : 0;
+            var e = (ch.pages && ch.pages[1]) ? ch.pages[1] : 0;
+            if (s <= n && n <= e) out.push(ch);
+        }
+        return out;
+    }
+    function buildPageTooltipHtml(pStart, mergedBySura, pEnd) {
+        var pageLine = 'ص ' + fmtFa(pStart);
+        if (pEnd != null && pEnd > pStart) pageLine += ' – ' + fmtFa(pEnd);
+        var juz = (pStart >= 1 && pStart <= 604 && pageToJuz[pStart]) ? pageToJuz[pStart] : 0;
+        pageLine += ' (جزء ' + fmtFa(juz) + ')';
+        var html = '<span class="tooltip-highlight">' + escapeHtml(pageLine) + '</span>';
+        if (mergedBySura && Object.keys(mergedBySura).length) {
+            var suras = Object.keys(mergedBySura).map(Number).sort(function(a,b){ return a - b; });
+            html += '<div class="tooltip-suras">';
+            for (var i = 0; i < suras.length; i++) {
+                var sid = suras[i];
+                var name = getSuraName(sid);
+                var r = mergedBySura[sid];
+                var range = (r.min === r.max) ? fmtFa(r.min) : (fmtFa(r.min) + '–' + fmtFa(r.max));
+                var line = '(' + name + ' ' + range + ')';
+                html += '<span class="tooltip-sura-line">' + escapeHtml(line) + '</span>';
+            }
+            html += '</div>';
+        }
+        return html;
+    }
+    function updatePageTooltipCache(pageNum, verses) {
+        if (!verses || !verses.length) return;
+        var bySura = {};
+        for (var i = 0; i < verses.length; i++) {
+            var v = verses[i];
+            var key = v.verse_key || '';
+            var m = key.match(/^(\d+):(\d+)$/);
+            if (m) {
+                var sura = parseInt(m[1], 10);
+                var ayah = parseInt(m[2], 10);
+                if (!bySura[sura]) bySura[sura] = { min: ayah, max: ayah };
+                else { bySura[sura].min = Math.min(bySura[sura].min, ayah); bySura[sura].max = Math.max(bySura[sura].max, ayah); }
+            }
+        }
+        var lines = [];
+        var suras = Object.keys(bySura).map(Number).sort(function(a,b){ return a - b; });
+        for (var s = 0; s < suras.length; s++) {
+            var sid = suras[s];
+            var name = getSuraName(sid);
+            var r = bySura[sid];
+            if (r.min === r.max) lines.push('سوره ' + name + ' آیه ' + fmtFa(r.min));
+            else lines.push('سوره ' + name + ' آیات ' + fmtFa(r.min) + '–' + fmtFa(r.max));
+        }
+        pageTooltipCache[pageNum] = { bySura: bySura, lines: lines };
+    }
+    var boxTooltipHtml = {};
+    var PAGE_BOXES_COUNT = 302;
+    function getBoxTooltipHtml(box) {
+        if (box < 0 || box >= PAGE_BOXES_COUNT) return null;
+        var pStart = box * 2 + 1;
+        var pEnd = Math.min(box * 2 + 2, 604);
+        var merged = {};
+        for (var pg = pStart; pg <= pEnd && pg <= 604; pg++) {
+            var cached = pageTooltipCache[pg];
+            var bySura = cached && cached.bySura ? cached.bySura : null;
+            if (!bySura) return null;
+            for (var sid in bySura) {
+                sid = parseInt(sid, 10);
+                var r = bySura[sid];
+                if (!merged[sid]) merged[sid] = { min: r.min, max: r.max };
+                else { merged[sid].min = Math.min(merged[sid].min, r.min); merged[sid].max = Math.max(merged[sid].max, r.max); }
+            }
+        }
+        return buildPageTooltipHtml(pStart, merged, pEnd);
+    }
+    function preloadBoxTooltips() {
+        var BATCH = 12;
+        var next = 1;
+        function runBatch() {
+            if (next > 604) return;
+            var batch = [];
+            for (var i = 0; i < BATCH && next <= 604; i++) batch.push(next++);
+            Promise.all(batch.map(function(pid) {
+                return fetchPage(pid).then(function(data) {
+                    updatePageTooltipCache(pid, data.verses || []);
+                    return pid;
+                }).catch(function() { return null; });
+            })).then(function(ids) {
+                for (var b = 0; b < ids.length; b++) {
+                    var pid = ids[b];
+                    if (pid == null) continue;
+                    var box0 = Math.floor((pid - 1) / 2);
+                    for (var bi = Math.max(0, box0 - 1); bi <= Math.min(PAGE_BOXES_COUNT - 1, box0 + 1); bi++) {
+                        if (boxTooltipHtml[bi] != null) continue;
+                        var html = getBoxTooltipHtml(bi);
+                        if (html != null) boxTooltipHtml[bi] = html;
+                    }
+                }
+                runBatch();
+            });
+        }
+        runBatch();
+    }
+
+    function buildProgressBars(wrap) {
+        if (!wrap || !pageToSura.length) return;
+        var barJuz = wrap.querySelector('#juz-bar');
+        var barPages = wrap.querySelector('#pages-bar');
+        var hoverSegment = wrap.querySelector('#progress-hover-segment');
+        var juzHoverSegment = wrap.querySelector('#juz-hover-segment');
+        if (!barJuz || !barPages) return;
+        barJuz.innerHTML = '';
+        for (var j = 1; j <= 30; j++) {
+            var span = document.createElement('span');
+            span.setAttribute('data-juz', j);
+            span.style.backgroundColor = juzColor(j);
+            span.setAttribute('title', 'جزء ' + fmtFa(j));
+            barJuz.appendChild(span);
+        }
+        barPages.innerHTML = '';
+        var suraSegments = [];
+        for (var si = 0; si < chaptersCache.length; si++) {
+            var chSeg = chaptersCache[si];
+            if (!chSeg || !chSeg.pages || chSeg.pages[0] == null || chSeg.pages[1] == null) continue;
+            var seg = document.createElement('span');
+            var pStartSeg = parseInt(chSeg.pages[0], 10);
+            var pEndSeg = parseInt(chSeg.pages[1], 10);
+            var pagesCount = Math.max(1, pEndSeg - pStartSeg + 1);
+            seg.setAttribute('data-sura', chSeg.id);
+            seg.setAttribute('data-start-page', pStartSeg);
+            seg.setAttribute('data-end-page', pEndSeg);
+            seg.setAttribute('data-base-grow', String(pagesCount));
+            seg.style.backgroundColor = suraColor(chSeg.id);
+            seg.style.flexGrow = String(pagesCount);
+            barPages.appendChild(seg);
+            suraSegments.push(seg);
+        }
+        var twoPage = twoPageMode();
+        var PAGE_BOXES = 302;
+        var pageSpans = Array.prototype.slice.call(barPages.children);
+        var juzSpans = Array.prototype.slice.call(barJuz.children);
+        function suraFromEvent(e) {
+            var x = e.clientX;
+            for (var i = 0; i < pageSpans.length; i++) {
+                var span = pageSpans[i];
+                var r = span.getBoundingClientRect();
+                if (x >= r.left && x <= r.right) {
+                    var sid = parseInt(span.getAttribute('data-sura'), 10) || 1;
+                    var pStart = parseInt(span.getAttribute('data-start-page'), 10) || 1;
+                    var pEnd = parseInt(span.getAttribute('data-end-page'), 10) || pStart;
+                    return { sura: sid, pStart: pStart, pEnd: pEnd, index: i, span: span };
+                }
+            }
+            if (pageSpans.length === 0) return null;
+            var fallback = pageSpans[pageSpans.length - 1];
+            return {
+                sura: parseInt(fallback.getAttribute('data-sura'), 10) || 1,
+                pStart: parseInt(fallback.getAttribute('data-start-page'), 10) || 1,
+                pEnd: parseInt(fallback.getAttribute('data-end-page'), 10) || 1,
+                index: pageSpans.length - 1,
+                span: fallback
+            };
+        }
+        function juzFromEvent(e) {
+            var x = e.clientX;
+            for (var i = 0; i < juzSpans.length; i++) {
+                var span = juzSpans[i];
+                var r = span.getBoundingClientRect();
+                if (x >= r.left && x <= r.right) {
+                    return parseInt(span.getAttribute('data-juz'), 10) || (i + 1);
+                }
+            }
+            var rect = barJuz.getBoundingClientRect();
+            var tx = x - rect.left;
+            var t = Math.max(0, Math.min(1, tx / rect.width));
+            return Math.min(30, 1 + Math.floor((1 - t) * 30));
+        }
+        var lastHoveredBox = -1;
+        var lastHoveredJuz = 0;
+        function applyPageDockZoom(pageNum) {
+            var sigma = 8.5;
+            for (var i = 0; i < pageSpans.length; i++) {
+                var span = pageSpans[i];
+                var d = Math.abs((i + 1) - pageNum);
+                var influence = Math.exp(-(d * d) / (2 * sigma * sigma));
+                var baseGrow = parseFloat(span.getAttribute('data-base-grow') || '1');
+                var grow = baseGrow * (0.62 + 2.9 * influence);
+                var scaleY = 1 + 0.24 * influence;
+                span.style.flexGrow = grow.toFixed(3);
+                span.style.transform = 'scaleY(' + scaleY.toFixed(3) + ')';
+                span.style.zIndex = String(1 + Math.round(influence * 50));
+            }
+        }
+        function clearPageDockZoom() {
+            for (var i = 0; i < pageSpans.length; i++) {
+                var span = pageSpans[i];
+                span.style.flexGrow = span.getAttribute('data-base-grow') || '1';
+                span.style.transform = '';
+                span.style.zIndex = '';
+            }
+        }
+        function applyJuzDockZoom(juzNum) {
+            var sigma = 5;
+            for (var i = 0; i < juzSpans.length; i++) {
+                var span = juzSpans[i];
+                var d = Math.abs((i + 1) - juzNum);
+                var influence = Math.exp(-(d * d) / (2 * sigma * sigma));
+                var grow = 0.58 + 2.5 * influence;
+                var scaleY = 1 + 0.18 * influence;
+                span.style.flexGrow = grow.toFixed(3);
+                span.style.transform = 'scaleY(' + scaleY.toFixed(3) + ')';
+                span.style.zIndex = String(1 + Math.round(influence * 20));
+            }
+        }
+        function clearJuzDockZoom() {
+            for (var i = 0; i < juzSpans.length; i++) {
+                var span = juzSpans[i];
+                span.style.flexGrow = '';
+                span.style.transform = '';
+                span.style.zIndex = '';
+            }
+        }
+        function setPageTooltipContent(pStart, pEnd) {
+            var merged = {};
+            for (var pg = pStart; pg <= pEnd && pg <= 604; pg++) {
+                var cached = pageTooltipCache[pg];
+                var bySura = cached && cached.bySura ? cached.bySura : null;
+                if (bySura) {
+                    for (var sid in bySura) {
+                        sid = parseInt(sid, 10);
+                        var r = bySura[sid];
+                        if (!merged[sid]) merged[sid] = { min: r.min, max: r.max };
+                        else { merged[sid].min = Math.min(merged[sid].min, r.min); merged[sid].max = Math.max(merged[sid].max, r.max); }
+                    }
+                }
+            }
+            var html = buildPageTooltipHtml(pStart, merged, pEnd);
+            progressTooltip.innerHTML = html;
+        }
+        function setHoverState(e) {
+            var info = suraFromEvent(e);
+            if (!info) return;
+            var sid = info.sura;
+            var pStart = info.pStart;
+            var pEnd = info.pEnd;
+            applyPageDockZoom(info.index + 1);
+            clearJuzDockZoom();
+            if (juzHoverSegment) juzHoverSegment.classList.remove('hover-active');
+            var stack = barPages.parentElement;
+            var stackRect = stack.getBoundingClientRect();
+            var segRectInBar = info.span.getBoundingClientRect();
+            var segmentLeftPx = segRectInBar.left - stackRect.left;
+            var widthPx = segRectInBar.width;
+            if (hoverSegment) {
+                hoverSegment.style.left = segmentLeftPx + 'px';
+                hoverSegment.style.width = widthPx + 'px';
+                hoverSegment.classList.add('hover-active');
+            }
+            var segCenterX = stackRect.left + segmentLeftPx + widthPx / 2;
+            if (hoverSegment && hoverSegment.classList.contains('hover-active')) {
+                var segRect = hoverSegment.getBoundingClientRect();
+                segCenterX = segRect.left + segRect.width / 2;
+            }
+            barPages.querySelectorAll('span.sura-highlight').forEach(function(s){ s.classList.remove('sura-highlight'); });
+            info.span.classList.add('sura-highlight');
+            var startJ = pageToJuz[pStart] || 0;
+            var endJ = pageToJuz[pEnd] || startJ;
+            progressTooltip.innerHTML = '<span class="tooltip-highlight">(' + escapeHtml(getSuraName(sid)) + ')</span><div class="tooltip-suras"><span class="tooltip-sura-line">ص ' + fmtFa(pStart) + ' – ' + fmtFa(pEnd) + '</span><span class="tooltip-sura-line">جزء ' + fmtFa(startJ) + (endJ !== startJ ? (' – ' + fmtFa(endJ)) : '') + '</span></div>';
+            lastHoveredBox = sid;
+            progressTooltip.classList.add('visible');
+            progressTooltip.style.left = segCenterX + 'px';
+            progressTooltip.style.top = (stackRect.top - 6) + 'px';
+            progressTooltip.style.transform = 'translate(-50%, -100%)';
+        }
+        barPages.addEventListener('mouseenter', setHoverState);
+        barPages.addEventListener('mousemove', setHoverState);
+        barPages.addEventListener('mouseleave', function() {
+            clearPageDockZoom();
+            progressTooltip.classList.remove('visible');
+            if (hoverSegment) hoverSegment.classList.remove('hover-active');
+            barPages.querySelectorAll('span.sura-highlight').forEach(function(s){ s.classList.remove('sura-highlight'); });
+            lastHoveredBox = -1;
+        });
+        barPages.addEventListener('click', function(e) {
+            var info = suraFromEvent(e);
+            if (!info) return;
+            var targetPage = pageToOdd(info.pStart);
+            setUrl('page', targetPage, 1);
+            render();
+        });
+        function setJuzHoverState(e) {
+            var j = juzFromEvent(e);
+            applyJuzDockZoom(j);
+            clearPageDockZoom();
+            if (juzHoverSegment) juzHoverSegment.classList.remove('hover-active');
+            if (hoverSegment) hoverSegment.classList.remove('hover-active');
+            if (j === lastHoveredJuz) {
+                var startPage = j === 1 ? 1 : JUZ_PAGE_ENDS[j - 2] + 1;
+                progressTooltip.innerHTML = 'جزء ' + fmtFa(j) + '<br>ص ' + fmtFa(startPage) + ' – ' + fmtFa(JUZ_PAGE_ENDS[j - 1]);
+                var rect = barJuz.getBoundingClientRect();
+                var segW = rect.width / 30;
+                var segCenterX = rect.left + ((30 - j + 0.5) / 30) * rect.width;
+                progressTooltip.style.left = segCenterX + 'px';
+                progressTooltip.style.top = (rect.top - 28) + 'px';
+                progressTooltip.style.transform = 'translate(-50%, -100%)';
+                return;
+            }
+            lastHoveredJuz = j;
+            var juzStack = barJuz.parentElement;
+            var juzStackRect = juzStack.getBoundingClientRect();
+            var juzSpan = barJuz.children[j - 1];
+            var juzStartPx = 0;
+            var juzSegWidthPx = 0;
+            if (juzSpan) {
+                var jr = juzSpan.getBoundingClientRect();
+                juzStartPx = jr.left - juzStackRect.left;
+                juzSegWidthPx = jr.right - jr.left;
+            }
+            var juzLeftPx = Math.round(juzStartPx);
+            var juzWidthPx = Math.round(juzSegWidthPx);
+            if (juzHoverSegment && juzSpan) {
+                juzHoverSegment.style.left = juzLeftPx + 'px';
+                juzHoverSegment.style.width = juzWidthPx + 'px';
+                juzHoverSegment.classList.add('hover-active');
+            }
+            var startPage = j === 1 ? 1 : JUZ_PAGE_ENDS[j - 2] + 1;
+            var endPage = JUZ_PAGE_ENDS[j - 1];
+            console.log('[Ribbon] Juz highlight: juz=' + j + ', pages ' + startPage + '–' + endPage + ', left(px)=' + juzLeftPx + ', width(px)=' + juzWidthPx);
+            progressTooltip.innerHTML = 'جزء ' + fmtFa(j) + '<br>ص ' + fmtFa(startPage) + ' – ' + fmtFa(endPage);
+            progressTooltip.classList.add('visible');
+            progressTooltip.style.transform = 'translate(-50%, -100%)';
+            var rect = barJuz.getBoundingClientRect();
+            var segW = rect.width / 30;
+            var segCenterX = rect.left + ((30 - j + 0.5) / 30) * rect.width;
+            progressTooltip.style.left = segCenterX + 'px';
+            progressTooltip.style.top = (rect.top - 28) + 'px';
+            progressTooltip.style.transform = 'translate(-50%, -100%)';
+        }
+        barJuz.addEventListener('mouseenter', setJuzHoverState);
+        barJuz.addEventListener('mousemove', setJuzHoverState);
+        barJuz.addEventListener('mouseleave', function() {
+            clearJuzDockZoom();
+            progressTooltip.classList.remove('visible');
+            if (juzHoverSegment) juzHoverSegment.classList.remove('hover-active');
+            lastHoveredJuz = 0;
+        });
+        barJuz.querySelectorAll('span').forEach(function(span) {
+            var j = parseInt(span.getAttribute('data-juz'), 10);
+            var startPage = j === 1 ? 1 : JUZ_PAGE_ENDS[j - 2] + 1;
+            span.addEventListener('click', function(e) {
+                e.stopPropagation();
+                setUrl('page', startPage, 1);
+                render();
+            });
+        });
+    }
+    function updateProgressHighlight(wrap, page) {
+        var barPages = wrap && wrap.querySelector('#pages-bar');
+        if (!barPages || !barPages.children.length) return;
+        barPages.querySelectorAll('span').forEach(function(span) {
+            var pStart = parseInt(span.getAttribute('data-start-page'), 10) || 1;
+            var pEnd = parseInt(span.getAttribute('data-end-page'), 10) || pStart;
+            span.style.opacity = (page >= pStart && page <= pEnd) ? '1' : '0.82';
+        });
+    }
+    function renderPageMode(pages) {
+        const useQCFFont = useQCF();
+        const twoPage = twoPageMode();
+        const pageContainer = document.createElement('div');
+        pageContainer.className = 'page-container' + (twoPage && pages.length === 2 ? ' two-pages' : '');
+        const pageList = [];
+        for (let i = 0; i < pages.length; i++) pageList.push(pages[i]);
+        for (let cardIndex = 0; cardIndex < pageList.length; cardIndex++) {
+            const data = pageList[cardIndex];
+            if (!data) continue;
+            const card = document.createElement('div');
+            const pageNum = data.pageNumber || data.page_number;
+            card.className = 'page-card page-' + pageNum + (pageList.length === 1 ? ' single' : '');
+            const verses = data.verses || [];
+            const firstBodyVerse = firstVerseOfPageBody(verses);
+            const firstVerse = firstBodyVerse || verses[0];
+            const suraNum = firstVerse && firstVerse.verse_key
+                ? parseInt(String(firstVerse.verse_key).split(':')[0], 10) || 0
+                : (getChapterForPage(pageNum) ? getChapterForPage(pageNum).id : 0);
+            const juz = firstBodyVerse ? firstBodyVerse.juz_number : (verses[0] ? verses[0].juz_number : 0);
+            var isRightCard = (cardIndex === 0);
+            var inputMin = isRightCard ? 1 : 2;
+            var inputMax = isRightCard ? 603 : 604;
+            var inputStep = 2;
+            var inputReadonly = isRightCard ? '' : ' readonly';
+            card.innerHTML =
+                '<div class="page-header">' +
+                '<span class="sura-name sura-name-click" data-sura="' + suraNum + '" role="button" tabindex="0">' + escapeHtml(getSuraName(suraNum)) + '</span>' +
+                '<span class="page-meta">ص <input type="number" class="page-num-input' + (isRightCard ? '' : ' page-num-readonly') + '" value="' + pageNum + '" min="' + inputMin + '" max="' + inputMax + '" step="' + inputStep + '" aria-label="شماره صفحه"' + inputReadonly + '> · جزء ' + fmtFa(juz) + '</span>' +
+                '</div>' +
+                '<div class="page-content"></div>';
+            const content = card.querySelector('.page-content');
+            var suraNameEl = card.querySelector('.sura-name-click');
+            if (suraNameEl) {
+                suraNameEl.addEventListener('click', function() { openSuraPicker(suraNum); });
+                suraNameEl.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSuraPicker(suraNum); }
+                });
+            }
+            var pageInput = card.querySelector('.page-num-input');
+            if (pageInput && isRightCard) {
+                pageInput.addEventListener('change', function() {
+                    var n = parseInt(this.value, 10);
+                    if (isNaN(n) || n < 1 || n > TOTAL_PAGES) {
+                        this.value = pageNum;
+                        return;
+                    }
+                    var targetPage = pageToOdd(n);
+                    setUrl('page', targetPage, 1);
+                    render();
+                });
+                pageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+                });
+            }
+            renderPageContent(verses, content, useQCFFont);
+            pageContainer.appendChild(card);
+        }
+        if (twoPage && pageContainer.children.length === 2) {
+            var cards = Array.prototype.slice.call(pageContainer.querySelectorAll('.page-card'));
+            function equalizeTwoPageCardHeights() {
+                cards.forEach(function(c) { c.style.height = ''; c.style.minHeight = '0'; });
+                var maxH = 0;
+                for (var ci = 0; ci < cards.length; ci++) maxH = Math.max(maxH, cards[ci].offsetHeight);
+                cards.forEach(function(c) { c.style.height = maxH + 'px'; });
+            }
+            equalizeTwoPageCardHeights();
+            requestAnimationFrame(equalizeTwoPageCardHeights);
+            setTimeout(equalizeTwoPageCardHeights, 120);
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(equalizeTwoPageCardHeights).catch(function() {});
+            }
+        }
+        if (!progressInlineWrap) {
+            progressInlineWrap = document.createElement('div');
+            progressInlineWrap.id = 'progress-inline-wrap';
+            var stack = document.createElement('div');
+            stack.id = 'progress-bar-stack';
+            var jb = document.createElement('div');
+            jb.id = 'juz-bar';
+            var pb = document.createElement('div');
+            pb.id = 'pages-bar';
+            var seg = document.createElement('div');
+            seg.id = 'progress-hover-segment';
+            var juzSeg = document.createElement('div');
+            juzSeg.id = 'juz-hover-segment';
+            stack.appendChild(jb);
+            stack.appendChild(pb);
+            stack.appendChild(juzSeg);
+            stack.appendChild(seg);
+            progressInlineWrap.appendChild(stack);
+        }
+        main.innerHTML = '';
+        main.appendChild(pageContainer);
+        // Ribbon disabled (commented out per request)
+        // main.appendChild(progressInlineWrap);
+        // var barPages = progressInlineWrap.querySelector('#pages-bar');
+        // if (barPages && barPages.children.length === 0) buildProgressBars(progressInlineWrap);
+    }
+
+    function renderSuraMode(suraNumber, pageBlocks) {
+        const useQCFFont = useQCF();
+        const container = document.createElement('div');
+        container.className = 'sura-container';
+        const title = document.createElement('div');
+        title.className = 'sura-title';
+        title.textContent = 'سوره ' + getSuraName(suraNumber);
+        container.appendChild(title);
+        const scroll = document.createElement('div');
+        scroll.className = 'sura-scroll';
+        for (const block of pageBlocks) {
+            const div = document.createElement('div');
+            div.className = 'sura-page-block';
+            const content = document.createElement('div');
+            content.className = 'page-content';
+            renderPageContent(block.verses, content, useQCFFont);
+            div.appendChild(content);
+            scroll.appendChild(div);
+        }
+        container.appendChild(scroll);
+        main.innerHTML = '';
+        main.appendChild(container);
+    }
+
+    function setLoading(show) {
+        if (loadingEl) loadingEl.style.display = show ? 'block' : 'none';
+    }
+    function setError(msg) {
+        main.innerHTML = '<div class="error">' + escapeHtml(msg) + '</div>';
+    }
+
+    function suraHasBismillah(suraNum) {
+        return suraNum !== 1 && suraNum !== 9;
+    }
+    async function fetchBismillah() {
+        if (bismillahVerseCache) return bismillahVerseCache;
+        var res = await fetch('https://api.quran.com/api/v4/verses/by_key/1:1?words=true&word_fields=v1_page,code_v1,line_number&language=fa');
+        if (!res.ok) throw new Error('خطا در دریافت بسم الله');
+        var data = await res.json();
+        bismillahVerseCache = data.verse;
+        return bismillahVerseCache;
+    }
+    function bismillahWithoutNumber(verse) {
+        if (!verse || !verse.words) return verse;
+        return Object.assign({}, verse, { words: verse.words.filter(function(w) { return w.char_type_name !== 'end'; }) });
+    }
+
+    async function fetchPage(pageNum) {
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number&language=fa');
+        if (!res.ok) throw new Error('خطا در دریافت صفحه');
+        const data = await res.json();
+        return { pageNumber: pageNum, verses: data.verses || [] };
+    }
+
+    async function fetchSuraByPage(suraNumber) {
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number&language=fa&per_page=300');
+        if (!res.ok) throw new Error('خطا در دریافت سوره');
+        const data = await res.json();
+        const verses = data.verses || [];
+        const byPage = new Map();
+        for (const v of verses) {
+            const page = (v.words && v.words[0]) ? (v.words[0].v1_page || v.page_number) : v.page_number || 1;
+            if (!byPage.has(page)) byPage.set(page, []);
+            byPage.get(page).push(v);
+        }
+        const sortedPages = [...byPage.keys()].sort((a, b) => a - b);
+        return sortedPages.map(function(p) {
+            return { pageNumber: p, verses: byPage.get(p) };
+        });
+    }
+
+    function render() {
+        const { mode, page, sura } = getMode();
+        if (loadingEl) loadingEl.style.display = 'none';
+
+        if (mode === 'page') {
+            const twoPage = twoPageMode();
+            const startPage = (page % 2 === 1) ? page : Math.max(1, page - 1);
+            setLoading(true);
+            (async function() {
+                try {
+                    const pages = [];
+                    pages.push(await fetchPage(startPage));
+                    if (twoPage && startPage + 1 <= TOTAL_PAGES) {
+                        pages.push(await fetchPage(startPage + 1));
+                    }
+                    for (var pi = 0; pi < pages.length; pi++) {
+                        var pdata = pages[pi];
+                        var vs = pdata.verses || [];
+                        if (vs.length > 0) {
+                            var firstKey = vs[0].verse_key;
+                            var m = firstKey.match(/^(\d+):1$/);
+                            if (m && suraHasBismillah(parseInt(m[1], 10))) {
+                                var bismillah = await fetchBismillah();
+                                if (bismillah) pdata.verses = [bismillahWithoutNumber(bismillah)].concat(vs);
+                            }
+                            var bismillah = await fetchBismillah();
+                            if (bismillah) {
+                                var b = bismillahWithoutNumber(bismillah);
+                                for (var i = pdata.verses.length - 1; i >= 1; i--) {
+                                    var v = pdata.verses[i];
+                                    var match = v.verse_key && v.verse_key.match(/^(\d+):1$/);
+                                    if (match && suraHasBismillah(parseInt(match[1], 10))) {
+                                        if (pdata.verses[i - 1].verse_key !== '1:1') {
+                                            pdata.verses.splice(i, 0, b);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    await fetchChapters();
+                    buildPageMaps();
+                    if (useQCF()) {
+                        await ensureQCFFontsLoaded(collectPageNumbersFromPages(pages));
+                    }
+                    setLoading(false);
+                    renderPageMode(pages);
+                    updateProgressHighlight(progressInlineWrap, startPage);
+                } catch (e) {
+                    console.error('Page mode error:', e);
+                    setLoading(false);
+                    setError(e.message || 'خطا');
+                }
+            })();
+            return;
+        }
+
+        if (mode === 'sura') {
+            setLoading(true);
+            (async function() {
+                try {
+                    const pageBlocks = await fetchSuraByPage(sura);
+                    if (suraHasBismillah(sura) && pageBlocks.length > 0 && pageBlocks[0].verses.length > 0) {
+                        var bismillah = await fetchBismillah();
+                        if (bismillah) pageBlocks[0].verses = [bismillahWithoutNumber(bismillah)].concat(pageBlocks[0].verses);
+                    }
+                    if (useQCF()) {
+                        await ensureQCFFontsLoaded(collectPageNumbersFromBlocks(pageBlocks));
+                    }
+                    setLoading(false);
+                    renderSuraMode(sura, pageBlocks);
+                } catch (e) {
+                    console.error('Sura mode error:', e);
+                    setLoading(false);
+                    setError(e.message || 'خطا');
+                }
+            })();
+            return;
+        }
+
+        setError('حالت نامعتبر');
+    }
+
+    document.querySelectorAll('input[name="font"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            setSetting('font', this.value);
+            render();
+        });
+    });
+    document.querySelectorAll('input[name="layout"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            setSetting('layout', this.value);
+            render();
+        });
+    });
+    document.getElementById('two-page').addEventListener('change', function() {
+        setSetting('two-page', this.checked ? '1' : '0');
+        render();
+    });
+    document.getElementById('sura-view').addEventListener('change', function() {
+        setSetting('sura-view', this.checked ? '1' : '0');
+    });
+    navPrevPageBtn.addEventListener('click', function() { navigatePageSpread(-2); });
+    navNextPageBtn.addEventListener('click', function() { navigatePageSpread(2); });
+    navPrevSuraBtn.addEventListener('click', function() { navigateAdjacentSura(-1); });
+    navNextSuraBtn.addEventListener('click', function() { navigateAdjacentSura(1); });
+    settingsBtn.addEventListener('click', function() {
+        settingsMenu.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+        if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) {
+            settingsMenu.classList.remove('open');
+        }
+    });
+
+    function pageToOdd(pageNum) {
+        var p = parseInt(pageNum, 10);
+        if (p <= 1) return 1;
+        if (p >= TOTAL_PAGES) return (TOTAL_PAGES % 2 === 1) ? TOTAL_PAGES : TOTAL_PAGES - 1;
+        return (p % 2 === 1) ? p : p - 1;
+    }
+    function clampPage(p) {
+        return Math.max(1, Math.min(TOTAL_PAGES, parseInt(p, 10) || 1));
+    }
+    function navigatePageSpread(delta) {
+        var st = getMode();
+        if (st.mode !== 'page') return;
+        var target = pageToOdd(clampPage(st.page + delta));
+        setUrl('page', target, 1);
+        render();
+    }
+    async function navigateAdjacentSura(step) {
+        var st = getMode();
+        if (!chaptersCache || !chaptersCache.length) {
+            try { await fetchChapters(); } catch (err) {}
+        }
+        if (!chaptersCache || !chaptersCache.length) return;
+        var currentSuraId = 1;
+        if (st.mode === 'sura') {
+            currentSuraId = st.sura || 1;
+        } else {
+            var ch = getChapterForPage(st.page);
+            currentSuraId = ch ? ch.id : 1;
+        }
+        var idx = chaptersCache.findIndex(function(c) { return c.id === currentSuraId; });
+        if (idx < 0) idx = 0;
+        var nextIdx = Math.max(0, Math.min(chaptersCache.length - 1, idx + step));
+        var nextCh = chaptersCache[nextIdx];
+        if (!nextCh) return;
+        if (suraViewMode()) {
+            setUrl('sura', 1, nextCh.id);
+        } else {
+            var firstPage = (nextCh.pages && nextCh.pages[0] != null) ? nextCh.pages[0] : 1;
+            setUrl('page', pageToOdd(firstPage), 1);
+        }
+        render();
+    }
+    document.addEventListener('keydown', async function(e) {
+        var mode = getMode().mode;
+        if (mode !== 'page') return;
+        var tag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        var page = getMode().page;
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            var nextPage = Math.max(1, page - 2);
+            setUrl('page', pageToOdd(nextPage), 1);
+            render();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            var nextPage = Math.min(TOTAL_PAGES, page + 2);
+            setUrl('page', pageToOdd(nextPage), 1);
+            render();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
+            var ch = getChapterForPage(page);
+            if (!ch || !ch.pages || ch.pages[0] == null) { setUrl('page', 1, 1); render(); return; }
+            var firstPageOfSura = ch.pages[0];
+            var targetPage;
+            if (page === firstPageOfSura) {
+                var idx = chaptersCache.findIndex(function(c) { return c.id === ch.id; });
+                var prevFirst = (idx > 0 && chaptersCache[idx - 1].pages && chaptersCache[idx - 1].pages[0] != null)
+                    ? chaptersCache[idx - 1].pages[0] : 1;
+                targetPage = pageToOdd(prevFirst);
+            } else {
+                targetPage = pageToOdd(firstPageOfSura);
+            }
+            setUrl('page', Math.max(1, targetPage), 1);
+            render();
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
+            var startPage = (page % 2 === 1) ? page : Math.max(1, page - 1);
+            var twoPage = twoPageMode();
+            var lastPageVisible = (twoPage && startPage + 1 <= TOTAL_PAGES) ? startPage + 1 : startPage;
+            var lastPageData;
+            try { lastPageData = await fetchPage(lastPageVisible); } catch (err) { setUrl('page', pageToOdd(Math.min(TOTAL_PAGES, page + 2)), 1); render(); return; }
+            var verses = lastPageData.verses || [];
+            var lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
+            var suraOfLastAyah = lastVerse && lastVerse.verse_key ? parseInt(String(lastVerse.verse_key).split(':')[0], 10) : null;
+            if (!suraOfLastAyah || suraOfLastAyah < 1 || suraOfLastAyah > 114) {
+                var ch = getChapterForPage(lastPageVisible);
+                suraOfLastAyah = ch ? ch.id : 1;
+            }
+            var idx = chaptersCache.findIndex(function(c) { return c.id === suraOfLastAyah; });
+            if (idx < 0 || idx + 1 >= chaptersCache.length) {
+                setUrl('page', pageToOdd(Math.min(TOTAL_PAGES, page + 2)), 1);
+                render();
+                return;
+            }
+            var nextCh = chaptersCache[idx + 1];
+            var nextSuraFirstPage = (nextCh.pages && nextCh.pages[0] != null) ? nextCh.pages[0] : startPage + 2;
+            var targetPage = pageToOdd(nextSuraFirstPage);
+            setUrl('page', Math.min(603, Math.max(1, targetPage)), 1);
+            render();
+        }
+    });
+
+    var savedFont = getSetting('font', 'qurancom');
+    var savedLayout = getSetting('layout', 'ayah-line');
+    var savedTwo = getSetting('two-page', '0');
+    var savedSuraView = getSetting('sura-view', '0');
+    document.querySelector('input[name="font"][value="' + savedFont + '"]') && (document.querySelector('input[name="font"][value="' + savedFont + '"]').checked = true);
+    document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
+    document.getElementById('two-page').checked = savedTwo === '1';
+    document.getElementById('sura-view').checked = savedSuraView === '1';
+
+    render();
+})();
+    </script>
+</body>
+</html>

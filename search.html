@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جستجو در قرآن</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%232e7d32' rx='6'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='serif'>Q</text></svg>" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.1/dist/font-face.css">
     <style>
+        @font-face {
+            font-family: 'Sahel';
+            src: url('/fonts/Sahel.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
         @font-face {
             font-family: 'KFGQPC Uthman Taha Naskh';
             src: url('fonts/KFGQPC Uthman Taha Naskh Regular.ttf') format('truetype');
@@ -17,7 +26,7 @@
         body {
             margin: 0;
             padding: 8px;
-            font-family: 'KFGQPC Uthman Taha Naskh', Arial, sans-serif;
+            font-family: 'Sahel', 'KFGQPC Uthman Taha Naskh', Arial, sans-serif;
             background: #f5f5f5;
             direction: rtl;
         }
@@ -131,7 +140,8 @@
 
         /* Digits are produced via Intl.NumberFormat('fa-IR'); keep the normal UI font */
         .num-hindi {
-            font-family: inherit;
+            font-family: "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-size: calc(1em * var(--ui-font-scale));
         }
 
         .distance-input {
@@ -139,9 +149,10 @@
             height: 30px;
             border: none;
             padding: 0 4px;
-            font-size: 13px;
+            font-size: calc(13px * var(--ui-font-scale));
             text-align: center;
-            font-family: inherit;
+            /* Ensure the visible glyph uses Shabnam */
+            font-family: "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
             outline: none;
             appearance: textfield;
             -moz-appearance: textfield;
@@ -167,7 +178,7 @@
             align-items: center;
             justify-content: center;
             pointer-events: none;
-            font-size: 13px;
+            font-size: calc(13px * var(--ui-font-scale));
             line-height: 1;
             color: #333;
         }
@@ -213,6 +224,47 @@
         }
 
         .cross-sura-toggle[aria-pressed="true"] .cross-sura-dot {
+            background: #3498db;
+        }
+
+        .auto-update-toggle {
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+            color: #333;
+            border-radius: 999px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            user-select: none;
+            height: 34px;
+            transition: background 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .auto-update-toggle input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .auto-update-toggle .auto-update-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #bbb;
+        }
+
+        .auto-update-toggle.on {
+            background: #e3f2fd;
+            border-color: #90caf9;
+        }
+
+        .auto-update-toggle.on .auto-update-dot {
             background: #3498db;
         }
         
@@ -304,7 +356,7 @@
         
         .results-count {
             color: #666;
-            font-size: 12px;
+            font-size: calc(12px * var(--ui-font-scale));
             white-space: nowrap;
             cursor: help;
         }
@@ -605,7 +657,7 @@
         
         .result-ref {
             display: inline-block;
-            font-size: 10px;
+            font-size: calc(10px * var(--ui-font-scale));
             color: #888;
             background: #e8e8e8;
             padding: 1px 6px;
@@ -625,6 +677,9 @@
         }
         
         :root {
+            /* Shabnam (UI font) runs a bit larger; scale it down */
+            --ui-font-scale: 0.8;
+
             --color-0: #a5d6a7; /* Light green */
             --color-1: #90caf9; /* Light blue */
             --color-2: #ffcc80; /* Light orange */
@@ -669,7 +724,7 @@
 
         .ayah-ref-leading {
             display: inline-block;
-            font-size: 11px;
+            font-size: calc(11px * var(--ui-font-scale));
             color: #666;
             background: #e8e8e8;
             padding: 1px 6px;
@@ -1031,7 +1086,7 @@
         
         .sura-filter-item .sura-num {
             color: #888;
-            font-size: 10px;
+            font-size: calc(10px * var(--ui-font-scale));
             min-width: 18px;
         }
         
@@ -1088,13 +1143,17 @@
                     </div>
                 </div>
                 <div class="distance-control has-display" id="distance-control" title="فاصله (تعداد آیه) — تغییر با پیمایش موش‌واره یا کلیدهای ↑↓" aria-label="فاصله (تعداد آیه)">
-                    <input type="number" class="distance-input" id="distance-input" value="5" min="0" max="100" inputmode="numeric" aria-label="فاصله">
+                    <input type="text" class="distance-input" id="distance-input" value="5" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" autocomplete="off" spellcheck="false" aria-label="فاصله" lang="fa">
                     <div class="distance-display num-hindi" id="distance-display" aria-hidden="true"></div>
                 </div>
-                <button type="button" class="cross-sura-toggle" id="cross-sura-toggle" aria-pressed="false" title="عبور از سوره‌ها">
+                <button type="button" class="cross-sura-toggle" id="cross-sura-toggle" aria-pressed="false" title="وقتی روشن باشد، یک گروه آیه می‌تواند شامل چند آیه از یک سوره و چند آیه از سوره بعدی باشد.">
                     <span class="cross-sura-dot" aria-hidden="true"></span>
                     بین سوره
                 </button>
+                <label class="auto-update-toggle on" id="auto-update-toggle" title="به‌روزرسانی خودکار: با هر تغییر، جستجو دوباره اجرا می‌شود">
+                    <input type="checkbox" id="auto-update" checked aria-label="به‌روزرسانی خودکار: با هر تغییر، جستجو دوباره اجرا می‌شود">
+                    <span class="auto-update-dot" aria-hidden="true"></span>
+                </label>
                 <div class="search-split">
                     <button class="search-btn" id="search-btn" disabled>جستجو</button>
                     <button class="search-drop-btn" id="copy-btn" type="button" title="گزینه‌ها" disabled>▾</button>
@@ -1140,7 +1199,7 @@
                 <div class="selected-items" id="selected-items">
                     <span class="empty-hint">موردی انتخاب نشده. واژه یا ریشه‌ای را جستجو و انتخاب کنید.</span>
                 </div>
-                <span class="results-count" id="results-count"></span>
+                <span class="results-count num-hindi" id="results-count"></span>
             </div>
         </div>
         
@@ -1176,6 +1235,34 @@
             const x = Number(n);
             if (!Number.isFinite(x)) return '';
             return faNumber.format(x);
+        }
+
+        // Accept Persian/Arabic-Indic digits from keyboard, but keep numeric logic working with ASCII digits.
+        const FA_DIGITS = '۰۱۲۳۴۵۶۷۸۹';
+        const AR_DIGITS = '٠١٢٣٤٥٦٧٨٩';
+        function normalizeDigitsToAscii(s) {
+            return String(s ?? '')
+                .replace(/[۰-۹]/g, ch => String(FA_DIGITS.indexOf(ch)))
+                .replace(/[٠-٩]/g, ch => String(AR_DIGITS.indexOf(ch)));
+        }
+        function parseDistanceFromValue(raw) {
+            const ascii = normalizeDigitsToAscii(raw).replace(/[^\d]/g, '');
+            if (!ascii) return NaN;
+            return parseInt(ascii, 10);
+        }
+        function getDistanceValueClamped() {
+            const el = document.getElementById('distance-input');
+            const parsed = parseDistanceFromValue(el ? el.value : '');
+            const v = Number.isFinite(parsed) ? parsed : 5;
+            return Math.max(0, Math.min(100, v));
+        }
+        function setDistanceValueClamped(v) {
+            const el = document.getElementById('distance-input');
+            if (!el) return;
+            const n = Number(v);
+            const clamped = Number.isFinite(n) ? Math.max(0, Math.min(100, Math.trunc(n))) : 5;
+            // Store Persian digits too, so selecting the input shows Persian.
+            el.value = fmtFa(clamped);
         }
 
         const rootToWordsMap = {}; // {root: [{sura, ayah, wordIndex}, ...]}
@@ -1350,7 +1437,7 @@
             }
             
             buildItemsPanel();
-            triggerSearch();
+            requestAutoSearch(0);
         }
         
         // Handle clicking on a LEM row
@@ -1366,7 +1453,7 @@
             }
             
             buildItemsPanel();
-            triggerSearch();
+            requestAutoSearch(0);
         }
         
         // Handle LEM checkbox change
@@ -1380,7 +1467,7 @@
             }
             
             buildItemsPanel();
-            triggerSearch();
+            requestAutoSearch(0);
         }
         
         // Handle item checkbox change
@@ -1389,13 +1476,52 @@
             itemCheckedState[itemIndex] = checked;
             
             buildItemsPanel();
-            triggerSearch();
+            requestAutoSearch(0);
         }
         
-        // Trigger search with current settings
+        function isAutoUpdateEnabled() {
+            const cb = document.getElementById('auto-update');
+            // If the control isn't present, default to ON.
+            return !cb || cb.checked;
+        }
+
+        let __autoUpdateTimer = null;
+        function requestAutoSearch(delayMs = 120) {
+            if (!isAutoUpdateEnabled()) return;
+            if (selectedItems.length === 0) return;
+            if (__autoUpdateTimer) clearTimeout(__autoUpdateTimer);
+            // Run heavy work in rAF so the setTimeout handler returns quickly and avoids
+            // "[Violation] 'setTimeout' handler took Xms" (Chrome flags handlers > ~50ms).
+            __autoUpdateTimer = setTimeout(() => {
+                __autoUpdateTimer = null;
+                if (!isAutoUpdateEnabled()) return;
+                if (selectedItems.length === 0) return;
+                requestAnimationFrame(() => { triggerSearch(); });
+            }, Math.max(0, delayMs | 0));
+        }
+
+        // Trigger search with current settings (serialized to avoid overlapping renders)
+        let __searchInFlight = null;
+        let __searchQueued = false;
         async function triggerSearch() {
-            const results = performSearch();
-            await renderResults(results);
+            if (__searchInFlight) {
+                __searchQueued = true;
+                return __searchInFlight;
+            }
+            __searchInFlight = (async () => {
+                const results = performSearch();
+                await renderResults(results);
+            })();
+            try {
+                return await __searchInFlight;
+            } finally {
+                __searchInFlight = null;
+                if (__searchQueued) {
+                    __searchQueued = false;
+                    // Re-run with latest UI state
+                    triggerSearch();
+                }
+            }
         }
         
         // QCF (Quran Complex Font) data from quran.com
@@ -1940,7 +2066,7 @@
         function performSearch() {
             if (selectedItems.length === 0) return [];
             
-            const distance = parseInt(document.getElementById('distance-input').value) || 5;
+            const distance = getDistanceValueClamped();
             const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true';
             
             // Check if we're in focus mode (single item/lem highlighted)
@@ -2324,8 +2450,8 @@
             }
             
             // Distance
-            const distance = parseInt(document.getElementById('distance-input').value, 10);
-            lines.push(`\nفاصله: ${fmtFa(Number.isFinite(distance) ? distance : 5)} آیه`);
+            const distance = getDistanceValueClamped();
+            lines.push(`\nفاصله: ${fmtFa(distance)} آیه`);
             
             // Cross-sura
             const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true';
@@ -2645,7 +2771,7 @@
                 }
                 
                 html += `<div class="result-group" data-group-key="${group.groupKey}">`;
-                html += `<div class="region-controls" aria-hidden="true">`;
+                html += `<div class="region-controls">`;
                 // Order and styling matches screenshot: blue down/down2, black up/up2, red X
                 html += `<button type="button" class="region-btn after" data-action="after-1" title="افزودن ۱ آیه بعد" aria-label="افزودن ۱ آیه بعد">` +
                         `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 4.5 6 8.3 9.8 4.5"/></svg>` +
@@ -2791,6 +2917,7 @@
             }
             selectedItems.push({ type, value, display: display || value });
             updateSelectedItemsUI();
+            requestAutoSearch(0);
         }
         
         function removeSelectedItem(index) {
@@ -2805,6 +2932,7 @@
                 }
             }
             updateSelectedItemsUI();
+            requestAutoSearch(0);
         }
         
         // Initialize
@@ -2822,21 +2950,23 @@
             // Distance control
             function updateDistanceDisplay() {
                 if (!distanceDisplay || !distanceInput) return;
-                const raw = parseInt(distanceInput.value, 10);
+                const raw = parseDistanceFromValue(distanceInput.value);
                 const v = Number.isFinite(raw) ? raw : 5;
                 distanceDisplay.textContent = fmtFa(v);
             }
             function clampDistance() {
-                const raw = parseInt(distanceInput?.value, 10);
-                const v = Number.isFinite(raw) ? raw : 5;
-                const clamped = Math.max(0, Math.min(100, v));
-                if (distanceInput) distanceInput.value = String(clamped);
+                const clamped = getDistanceValueClamped();
+                setDistanceValueClamped(clamped);
                 updateDistanceDisplay();
+                requestAutoSearch(0);
                 return clamped;
             }
             if (distanceInput) {
                 updateDistanceDisplay();
-                distanceInput.addEventListener('input', updateDistanceDisplay);
+                distanceInput.addEventListener('input', () => {
+                    updateDistanceDisplay();
+                    requestAutoSearch(250);
+                });
                 distanceInput.addEventListener('change', clampDistance);
                 distanceInput.addEventListener('blur', clampDistance);
                 distanceInput.addEventListener('keydown', (e) => {
@@ -2844,7 +2974,7 @@
                         e.preventDefault();
                         const v = clampDistance();
                         const next = e.key === 'ArrowUp' ? Math.min(100, v + 1) : Math.max(0, v - 1);
-                        distanceInput.value = String(next);
+                        setDistanceValueClamped(next);
                         updateDistanceDisplay();
                     }
                 });
@@ -2853,7 +2983,7 @@
                     e.preventDefault();
                     const v = clampDistance();
                     const dir = e.deltaY < 0 ? 1 : -1;
-                    distanceInput.value = String(Math.max(0, Math.min(100, v + dir)));
+                    setDistanceValueClamped(Math.max(0, Math.min(100, v + dir)));
                     updateDistanceDisplay();
                 }, { passive: false });
             }
@@ -2902,9 +3032,8 @@
             });
             
             // Search button handler
-            searchBtn.addEventListener('click', async () => {
-                const results = performSearch();
-                await renderResults(results);
+            searchBtn.addEventListener('click', () => {
+                triggerSearch();
             });
 
             // Copy/send menu handling
@@ -2949,6 +3078,32 @@
                     const next = crossSuraToggle.getAttribute('aria-pressed') !== 'true';
                     crossSuraToggle.setAttribute('aria-pressed', next ? 'true' : 'false');
                     localStorage.setItem('searchCrossSura', next ? 'true' : 'false');
+                    requestAutoSearch(0);
+                });
+            }
+
+            // Auto-update toggle (persist)
+            const autoUpdateCb = document.getElementById('auto-update');
+            if (autoUpdateCb) {
+                const autoUpdatePill = document.getElementById('auto-update-toggle') || autoUpdateCb.closest('.auto-update-toggle');
+                const syncAutoUpdatePill = () => {
+                    if (!autoUpdatePill) return;
+                    autoUpdatePill.classList.toggle('on', !!autoUpdateCb.checked);
+                };
+                const saved = localStorage.getItem('searchAutoUpdate');
+                // Default: on. Only treat explicit 'false' as off.
+                autoUpdateCb.checked = saved !== 'false';
+                syncAutoUpdatePill();
+                autoUpdateCb.addEventListener('change', () => {
+                    localStorage.setItem('searchAutoUpdate', autoUpdateCb.checked ? 'true' : 'false');
+                    syncAutoUpdatePill();
+                    if (!autoUpdateCb.checked) {
+                        // Cancel any scheduled auto search
+                        if (__autoUpdateTimer) clearTimeout(__autoUpdateTimer);
+                        __autoUpdateTimer = null;
+                    } else {
+                        requestAutoSearch(0);
+                    }
                 });
             }
             
@@ -3090,11 +3245,11 @@
             function buildSuraFilterList() {
                 let html = '';
                 for (let i = 1; i <= 114; i++) {
-                    const name = SURA_NAMES[i] || `سوره ${i}`;
+                    const name = SURA_NAMES[i] || `سوره ${fmtFa(i)}`;
                     const isChecked = allSurasSelected || selectedSuras.has(i);
                     html += `<label class="sura-filter-item" data-sura="${i}" data-name="${name}">
                         <input type="checkbox" ${isChecked ? 'checked' : ''} data-sura="${i}">
-                        <span class="sura-num">${i}</span>
+                        <span class="sura-num num-hindi">${fmtFa(i)}</span>
                         <span class="sura-name">${name}</span>
                     </label>`;
                 }
@@ -3122,6 +3277,7 @@
                             }
                         }
                         updateSuraFilterLabel();
+                        requestAutoSearch(0);
                     });
                 });
             }
@@ -3168,6 +3324,7 @@
                 selectedSuras.clear();
                 buildSuraFilterList();
                 updateSuraFilterLabel();
+                requestAutoSearch(0);
             });
             
             // Select none
@@ -3178,6 +3335,7 @@
                     cb.checked = false;
                 });
                 updateSuraFilterLabel();
+                requestAutoSearch(0);
             });
             
             // Search suras

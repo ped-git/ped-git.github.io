@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ذکر یسیر - دسکتاپ</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232c3e50'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23fff' font-family='serif'%3E٭%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="Yasir/fonts.css">
     <script>
         // Only load Hypothesis if enabled in localStorage
@@ -17,19 +18,28 @@
     </script>
         
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.1/dist/font-face.css">
     <style>
+        @font-face {
+            font-family: 'Sahel';
+            src: url('fonts/Sahel.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
         * {
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            font-family: "KFGQPC Uthman Taha Naskh", Arial, sans-serif;
+            font-family: "Sahel", "KFGQPC Uthman Taha Naskh", Arial, sans-serif;
             background: #ffffff;
         }
 
         :root {
-            --ui-font: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            --ui-font: "Sahel", "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            --ui-font-scale: 0.8;
         }
 
         #desktop-layout {
@@ -52,6 +62,7 @@
             padding-left: 6px;
             direction: rtl;
             font-family: var(--ui-font);
+            font-size: calc(1rem * var(--ui-font-scale));
         }
 
         /* Tooltips/hover popups should use UI font (not Quran font) */
@@ -60,6 +71,7 @@
         #selected-root-tooltip,
         #root-chart-tooltip {
             font-family: var(--ui-font) !important;
+            font-size: calc(1rem * var(--ui-font-scale));
         }
 
         .content-column {
@@ -97,6 +109,12 @@
             align-self: stretch;
         }
 
+        /* Roots panel + measure subpanels should use the same UI font as settings */
+        #panels-column #highlighted-roots-panel,
+        #panels-column #highlighted-roots-panel button {
+            font-family: var(--ui-font);
+        }
+
         #panels-column #morphology-combined-panel {
             width: 100%;
             height: 100%;
@@ -113,7 +131,8 @@
             border-radius: 10px;
             border: 1px solid rgba(15, 23, 42, 0.18);
             background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
-            font-size: 12px;
+            font-family: var(--ui-font);
+            font-size: calc(12px * var(--ui-font-scale));
             cursor: pointer;
             box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
         }
@@ -176,12 +195,31 @@
             font-weight: 600;
         }
 
-        #settings-menu .row:not(.chart-toggle):not(.button-row) input {
+        #settings-menu .settings-num-wrap {
+            position: relative;
             width: 74px;
             flex: 0 0 auto;
+        }
+
+        #settings-menu .settings-num-wrap input {
+            width: 100%;
             padding: 5px 8px;
             font-size: 11px;
+            color: transparent;
+            caret-color: rgba(15, 23, 42, 0.85);
         }
+
+        #settings-menu .settings-num-wrap .settings-num-display {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            padding-inline: 8px;
+            pointer-events: none;
+            font-size: 11px;
+            font-family: var(--ui-font);
+        }
+
 
         #settings-menu input:focus {
             border-color: rgba(59, 130, 246, 0.55);
@@ -304,11 +342,11 @@
             display: none !important;
         }
 
-        /* Custom Avant-Garde Sura Selection */
+        /* Custom Avant-Garde Sura Selection (light theme) */
         #custom-sura-overlay {
             position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+            background: rgba(248, 250, 252, 0.92);
             backdrop-filter: blur(8px);
             z-index: 100000;
             display: flex;
@@ -328,13 +366,12 @@
             width: 90vw;
             max-width: 900px;
             max-height: 85vh;
-            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            background: #ffffff;
             border-radius: 24px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(255, 255, 255, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.04);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -348,7 +385,7 @@
 
         .sura-modal-header {
             padding: 24px 28px 16px;
-            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -358,9 +395,9 @@
         .sura-modal-title {
             font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
             font-size: 28px;
-            color: #f8fafc;
+            color: #0f172a;
             margin: 0;
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -375,10 +412,10 @@
         .sura-search-input {
             width: 100%;
             padding: 12px 16px 12px 40px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 12px;
-            background: rgba(15, 23, 42, 0.6);
-            color: #e2e8f0;
+            background: #f8fafc;
+            color: #0f172a;
             font-size: 14px;
             font-family: inherit;
             outline: none;
@@ -387,12 +424,12 @@
         }
 
         .sura-search-input::placeholder {
-            color: #64748b;
+            color: #94a3b8;
         }
 
         .sura-search-input:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .sura-search-icon {
@@ -400,7 +437,7 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: #64748b;
+            color: #94a3b8;
             font-size: 16px;
         }
 
@@ -410,7 +447,7 @@
             border: none;
             border-radius: 12px;
             background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
+            color: #dc2626;
             font-size: 20px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -420,7 +457,7 @@
         }
 
         .sura-close-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.18);
             transform: scale(1.05);
         }
 
@@ -429,7 +466,7 @@
             overflow-y: auto;
             padding: 20px 28px 28px;
             scrollbar-width: thin;
-            scrollbar-color: #475569 transparent;
+            scrollbar-color: #cbd5e1 transparent;
         }
 
         .sura-modal-body::-webkit-scrollbar {
@@ -441,7 +478,7 @@
         }
 
         .sura-modal-body::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #cbd5e1;
             border-radius: 3px;
         }
 
@@ -455,8 +492,8 @@
             position: relative;
             padding: 16px 14px;
             border-radius: 16px;
-            background: linear-gradient(145deg, rgba(51, 65, 85, 0.5) 0%, rgba(30, 41, 59, 0.5) 100%);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            background: #f8fafc;
+            border: 1px solid rgba(0, 0, 0, 0.06);
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
@@ -467,17 +504,17 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(124, 58, 237, 0.06) 100%);
             opacity: 0;
             transition: opacity 0.25s ease;
         }
 
         .sura-card:hover {
             transform: translateY(-4px);
-            border-color: rgba(96, 165, 250, 0.3);
-            box-shadow: 
-                0 12px 24px -8px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(96, 165, 250, 0.1);
+            border-color: rgba(37, 99, 235, 0.25);
+            box-shadow:
+                0 12px 24px -8px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(37, 99, 235, 0.08);
         }
 
         .sura-card:hover::before {
@@ -485,12 +522,13 @@
         }
 
         .sura-card.current {
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2) 0%, rgba(167, 139, 250, 0.2) 100%);
-            border-color: #60a5fa;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border-color: #2563eb;
         }
 
         .sura-card.current .sura-number {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            color: white;
         }
 
         .sura-number {
@@ -500,8 +538,8 @@
             width: 32px;
             height: 32px;
             border-radius: 10px;
-            background: rgba(71, 85, 105, 0.6);
-            color: #94a3b8;
+            background: #e2e8f0;
+            color: #64748b;
             font-size: 13px;
             font-weight: 600;
             margin-bottom: 10px;
@@ -509,14 +547,14 @@
         }
 
         .sura-card:hover .sura-number {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             color: white;
         }
 
         .sura-name {
             font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
             font-size: 16px;
-            color: #e2e8f0;
+            color: #0f172a;
             margin: 0;
             line-height: 1.4;
             position: relative;
@@ -544,23 +582,24 @@
             display: flex;
             gap: 8px;
             font-size: 11px;
-            color: #475569;
+            color: #64748b;
         }
 
         .key-badge {
             padding: 4px 8px;
-            background: rgba(51, 65, 85, 0.5);
+            background: #e2e8f0;
             border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: #475569;
         }
 
         /* View toggle button */
         .view-toggle-btn {
             padding: 8px 14px;
-            border: 1px solid rgba(148, 163, 184, 0.2);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            background: rgba(51, 65, 85, 0.4);
-            color: #94a3b8;
+            background: #f1f5f9;
+            color: #475569;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -570,15 +609,15 @@
         }
 
         .view-toggle-btn:hover {
-            background: rgba(96, 165, 250, 0.15);
-            border-color: rgba(96, 165, 250, 0.3);
-            color: #e2e8f0;
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.2);
+            color: #0f172a;
         }
 
         .view-toggle-btn.active {
-            background: rgba(96, 165, 250, 0.2);
-            border-color: #60a5fa;
-            color: #60a5fa;
+            background: rgba(37, 99, 235, 0.12);
+            border-color: #2563eb;
+            color: #2563eb;
         }
 
         /* ========== TIMELINE VIEW ========== */
@@ -639,7 +678,7 @@
             padding: 20px 10px;
             scroll-behavior: smooth;
             scrollbar-width: thin;
-            scrollbar-color: #475569 transparent;
+            scrollbar-color: #cbd5e1 transparent;
         }
 
         .timeline-scroll::-webkit-scrollbar {
@@ -647,12 +686,12 @@
         }
 
         .timeline-scroll::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.5);
+            background: #f1f5f9;
             border-radius: 4px;
         }
 
         .timeline-scroll::-webkit-scrollbar-thumb {
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
             border-radius: 4px;
         }
 
@@ -670,22 +709,22 @@
         }
 
         .timeline-item:hover {
-            background: rgba(96, 165, 250, 0.1);
+            background: rgba(37, 99, 235, 0.08);
             transform: translateY(-4px);
         }
 
         .timeline-item.current {
-            background: rgba(96, 165, 250, 0.15);
+            background: rgba(37, 99, 235, 0.12);
         }
 
         .timeline-item.current .timeline-dot {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-            box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.35);
             transform: scale(1.3);
         }
 
         .timeline-item.current .timeline-number {
-            color: #60a5fa;
+            color: #2563eb;
             font-weight: 700;
         }
 
@@ -693,20 +732,20 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: #475569;
-            border: 2px solid #1e293b;
+            background: #94a3b8;
+            border: 2px solid #e2e8f0;
             transition: all 0.2s ease;
             margin-bottom: 8px;
         }
 
         .timeline-item:hover .timeline-dot {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             transform: scale(1.2);
         }
 
         .timeline-number {
             font-size: 11px;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 600;
             margin-bottom: 4px;
             transition: all 0.2s ease;
@@ -715,7 +754,7 @@
         .timeline-name {
             font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
             font-size: 12px;
-            color: #e2e8f0;
+            color: #0f172a;
             text-align: center;
             white-space: nowrap;
             max-width: 70px;
@@ -724,7 +763,7 @@
         }
 
         .timeline-item:hover .timeline-name {
-            color: #fff;
+            color: #0f172a;
         }
 
         .timeline-item.hidden {
@@ -746,8 +785,8 @@
         /* Global tooltip for timeline (positioned via JS) */
         #timeline-global-tooltip {
             position: fixed;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 12px;
             padding: 12px 16px;
             opacity: 0;
@@ -757,7 +796,7 @@
             z-index: 200000;
             min-width: 140px;
             text-align: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04);
             direction: rtl;
         }
 
@@ -769,9 +808,9 @@
         #timeline-global-tooltip .tooltip-name {
             font-family: 'Amiri', 'KFGQPC Uthman Taha Naskh', serif;
             font-size: 18px;
-            color: #f8fafc;
+            color: #0f172a;
             margin-bottom: 6px;
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -779,7 +818,7 @@
 
         #timeline-global-tooltip .tooltip-info {
             font-size: 12px;
-            color: #94a3b8;
+            color: #64748b;
         }
 
         /* Hide inline tooltips (now using global) */
@@ -810,7 +849,10 @@
     <div id="settings-menu" hidden>
         <div class="row">
             <label for="sure-number-input">شماره سوره</label>
-            <input id="sure-number-input" type="number" min="1" max="114">
+            <div class="settings-num-wrap">
+                <input id="sure-number-input" type="number" min="1" max="114" aria-label="شماره سوره">
+                <span class="settings-num-display num-hindi" id="sure-number-display" aria-hidden="true"></span>
+            </div>
         </div>
         <div class="row chart-toggle">
             <input id="root-chart-toggle" type="checkbox">
@@ -822,19 +864,31 @@
         </div>
         <div class="row">
             <label for="top-roots-limit">حد ریشه‌های پرتکرار</label>
-            <input id="top-roots-limit" type="number" min="0">
+            <div class="settings-num-wrap">
+                <input id="top-roots-limit" type="number" min="0" aria-label="حد ریشه‌های پرتکرار">
+                <span class="settings-num-display num-hindi" id="top-roots-limit-display" aria-hidden="true"></span>
+            </div>
         </div>
         <div class="row">
             <label for="distinctive-roots-limit">حد ریشه‌های متمایز</label>
-            <input id="distinctive-roots-limit" type="number" min="0">
+            <div class="settings-num-wrap">
+                <input id="distinctive-roots-limit" type="number" min="0" aria-label="حد ریشه‌های متمایز">
+                <span class="settings-num-display num-hindi" id="distinctive-roots-limit-display" aria-hidden="true"></span>
+            </div>
         </div>
         <div class="row">
             <label for="high-kl-roots-limit">حد ریشه‌های KL بالا</label>
-            <input id="high-kl-roots-limit" type="number" min="0">
+            <div class="settings-num-wrap">
+                <input id="high-kl-roots-limit" type="number" min="0" aria-label="حد ریشه‌های KL بالا">
+                <span class="settings-num-display num-hindi" id="high-kl-roots-limit-display" aria-hidden="true"></span>
+            </div>
         </div>
         <div class="row">
             <label for="n2n-roots-limit">حد ریشه‌های N2N</label>
-            <input id="n2n-roots-limit" type="number" min="0">
+            <div class="settings-num-wrap">
+                <input id="n2n-roots-limit" type="number" min="0" aria-label="حد ریشه‌های N2N">
+                <span class="settings-num-display num-hindi" id="n2n-roots-limit-display" aria-hidden="true"></span>
+            </div>
         </div>
         <div class="button-row">
             <button id="apply-settings">اعمال</button>
@@ -845,6 +899,7 @@
     </div>
 
     <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="js/buckwalter.js"></script>
     <script src="js/sura-data.js"></script>
     <script src="desktop.js"></script>
 </body>

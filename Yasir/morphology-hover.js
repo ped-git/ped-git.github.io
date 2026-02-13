@@ -6,6 +6,11 @@ const morphologyData = {};
     'use strict';
 
     const IS_DESKTOP_HOST = !!window.__DESKTOP_HOST__;
+    function faNum(n) {
+        return (typeof Intl !== 'undefined' && Intl.NumberFormat)
+            ? new Intl.NumberFormat('fa-IR').format(Number(n))
+            : String(n);
+    }
     
     function recomputeMinimapGeometry() {
         if (!minimap) return;
@@ -1016,7 +1021,7 @@ const morphologyData = {};
             overflow-x: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             direction: rtl;
-            font-family: Arial, sans-serif;
+            ${IS_DESKTOP_HOST ? '' : 'font-family: Arial, sans-serif;'}
             font-size: 9px;
             box-sizing: border-box;
             display: block;
@@ -1395,7 +1400,7 @@ const morphologyData = {};
                 color: white;
                 border: none;
                 border-radius: 2px;
-                font-family: Arial, sans-serif;
+                ${IS_DESKTOP_HOST ? '' : 'font-family: Arial, sans-serif;'}
             `;
             unhighlightBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1944,7 +1949,7 @@ const morphologyData = {};
             `;
             
             suraItem.innerHTML = `
-                <span>${i}. ${suraName}</span>
+                <span>${faNum(i)}. ${suraName}</span>
             `;
             
             suraItem.addEventListener('mouseenter', function() {
@@ -3116,8 +3121,8 @@ const morphologyData = {};
             // Check if we need to add ayah number
             let bg_color = '#ccc';
             if (index == wordRects.length - 1 || (wordRect.ayah !== wordRects[index + 1].ayah)) {
-                // Calculate ayah number width based on text measurement
-                const ayahText = String(wordRect.ayah);
+                // Calculate ayah number width based on text measurement (Persian digits)
+                const ayahText = faNum(wordRect.ayah);
                 const fontSize = 8;
                 const measuredWidth = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
 

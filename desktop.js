@@ -73,6 +73,7 @@
     function fmtFa(n) {
         const x = Number(n);
         if (!Number.isFinite(x)) return '';
+        // Keep Persian digits + Persian separators (e.g. ۰٫۵ and ۱٬۲۳۴)
         return faNumber.format(x);
     }
     function fmtFaInText(text) {
@@ -80,6 +81,44 @@
         return String(text).replace(/-?\d+(?:\.\d+)?/g, (m) => {
             const x = Number(m);
             return Number.isFinite(x) ? fmtFa(x) : m;
+        });
+    }
+
+    function formatMeasurePanelRootTooltipsToFa() {
+        const sectionIds = [
+            'top-roots-section-content',
+            'selective-roots-section-content',
+            'high-kl-roots-section-content',
+            'n2n-roots-section-content'
+        ];
+        sectionIds.forEach((id) => {
+            const container = document.getElementById(id);
+            if (!container) return;
+            const items = container.querySelectorAll('[data-root]');
+            items.forEach((item) => {
+                const title = item.getAttribute('title');
+                if (title) item.setAttribute('title', fmtFaInText(title));
+                // format the visible count "(123)" too
+                const countSpan = item.querySelector('span:last-child');
+                if (countSpan) countSpan.textContent = fmtFaInText(countSpan.textContent || '');
+            });
+        });
+    }
+
+    function formatSelectedRootsSectionToFa() {
+        const selectedSection = document.querySelector('#highlighted-roots-content > div:first-child');
+        if (!selectedSection) return;
+
+        // Format counts like "(123)" and any digits in tooltips for selected roots
+        const items = selectedSection.querySelectorAll('[data-root]');
+        items.forEach((item) => {
+            const title = item.getAttribute('title');
+            if (title) item.setAttribute('title', fmtFaInText(title));
+            const spans = item.querySelectorAll('span');
+            spans.forEach((sp) => {
+                const t = (sp.textContent || '').trim();
+                if (/\d/.test(t)) sp.textContent = fmtFaInText(t);
+            });
         });
     }
 
@@ -528,7 +567,7 @@
                 tooltip.innerHTML = `
                     <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; font-size: 12px;">${info.title}</div>
                     <div style="margin-bottom: 8px;">${fmtFaInText(info.description)}</div>
-                    <div style="font-family: monospace; font-size: 9px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 4px; white-space: pre-line; line-height: 1.4;">${fmtFaInText(info.formula)}</div>
+                    <div style="font-family: var(--ui-font), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", monospace; font-size: 9px; background: rgba(0,0,0,0.3); padding: 4px 6px; border-radius: 4px; white-space: pre-line; line-height: 1.4;">${fmtFaInText(info.formula)}</div>
                 `;
                 
                 const rect = infoIcon.getBoundingClientRect();
@@ -780,9 +819,69 @@
             const bgColor = item.style.backgroundColor || window.getComputedStyle(item).backgroundColor;
             if (root && bgColor && bgColor !== 'rgb(232, 232, 232)') { // Exclude default gray
                 result.set(root, bgColor);
+                // Also store Arabic form if root is Buckwalter (desktop uses shared converter)
+                if (typeof window.convertBuckwalterToArabic === 'function') {
+                    const ar = window.convertBuckwalterToArabic(root);
+                    if (ar && ar !== root) result.set(ar, bgColor);
+                }
             }
         });
         return result;
+    }
+
+    function applySelectedRootHighlightsToMeasureLists() {
+        function toTintedRgba(color, alpha = 0.22) {
+            const c = String(color || '').trim();
+            let m = c.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+            if (m) return `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${alpha})`;
+            m = c.match(/^#([0-9a-f]{6})$/i);
+            if (m) {
+                const hex = m[1];
+                const r = parseInt(hex.slice(0, 2), 16);
+                const g = parseInt(hex.slice(2, 4), 16);
+                const b = parseInt(hex.slice(4, 6), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+            // Fallback: if parsing fails, just return original color
+            return c;
+        }
+
+        const selectedRootsColors = getSelectedRootsWithColors();
+        const sectionIds = [
+            'top-roots-section-content',
+            'selective-roots-section-content',
+            'high-kl-roots-section-content',
+            'n2n-roots-section-content'
+        ];
+
+        sectionIds.forEach((id) => {
+            const container = document.getElementById(id);
+            if (!container) return;
+            const items = container.querySelectorAll('[data-root]');
+            items.forEach((item) => {
+                const root = item.getAttribute('data-root');
+                const color = root ? selectedRootsColors.get(root) : null;
+                if (color) {
+                    item.dataset.selected = '1';
+                    item.style.setProperty('--sel-color', color);
+                    if (item.dataset.origBg == null) {
+                        item.dataset.origBg = item.style.backgroundColor || '';
+                    }
+                    const vivid = saturateColor(color);
+                    // Option B: subtle tinted background (keep overall pill look)
+                    item.style.backgroundColor = toTintedRgba(vivid, 0.22);
+                } else {
+                    delete item.dataset.selected;
+                    item.style.removeProperty('--sel-color');
+                    if (item.dataset.origBg != null) {
+                        item.style.backgroundColor = item.dataset.origBg;
+                        delete item.dataset.origBg;
+                    } else {
+                        item.style.removeProperty('background-color');
+                    }
+                }
+            });
+        });
     }
     
     // Saturate and darken pastel colors to make them more vibrant
@@ -1059,6 +1158,11 @@
             
             // Always add info icons when panel is rebuilt
             addMeasureInfoIcons();
+
+            // Always sync selection styling in the measure lists (works in both chart and non-chart modes)
+            applySelectedRootHighlightsToMeasureLists();
+            formatMeasurePanelRootTooltipsToFa();
+            formatSelectedRootsSectionToFa();
             
             const chartPref = loadChartPreference();
             if (!chartPref) {
@@ -1075,6 +1179,11 @@
                 if (savedChartWrappers.size > 0) {
                     restoreChartsFromCache();
                 }
+                // Selection may have changed even if fingerprint didn't
+                updateChartHighlighting();
+                applySelectedRootHighlightsToMeasureLists();
+                formatMeasurePanelRootTooltipsToFa();
+                formatSelectedRootsSectionToFa();
                 return;
             }
             
@@ -1281,6 +1390,9 @@
                 item.style.display = (limit <= 0 || index >= limit) ? 'none' : 'inline-flex';
             });
         });
+        applySelectedRootHighlightsToMeasureLists();
+        formatMeasurePanelRootTooltipsToFa();
+        formatSelectedRootsSectionToFa();
         formatPanelNumbersToFa();
         if (chartEnabled) {
             updateRootChartMode(true, limits);
@@ -1515,6 +1627,8 @@
         
         // Setup hover for selected roots (uses DOM data already loaded)
         setupSelectedRootsHover();
+        formatMeasurePanelRootTooltipsToFa();
+        formatSelectedRootsSectionToFa();
         formatPanelNumbersToFa();
     }
 
@@ -1580,7 +1694,7 @@
         const ayat = item.getAttribute('data-ayat') || '?';
 
         tooltip.querySelector('.tooltip-name').textContent = suraName;
-        tooltip.querySelector('.tooltip-info').textContent = `سوره ${suraNum} • ${ayat} آیه`;
+        tooltip.querySelector('.tooltip-info').textContent = `سوره ${fmtFa(suraNum)} • ${fmtFa(ayat)} آیه`;
 
         const rect = item.getBoundingClientRect();
         const tooltipWidth = 160;
@@ -1707,15 +1821,15 @@
 
             const number = document.createElement('div');
             number.className = 'sura-number';
-            number.textContent = i;
+            number.textContent = fmtFa(i);
 
             const name = document.createElement('div');
             name.className = 'sura-name';
-            name.textContent = SURA_NAMES[i] || `سوره ${i}`;
+            name.textContent = SURA_NAMES[i] || `سوره ${fmtFa(i)}`;
 
             const info = document.createElement('div');
             info.className = 'sura-info';
-            info.textContent = `${SURA_AYAT[i] || '?'} آیه`;
+            info.textContent = `${fmtFa(SURA_AYAT[i] || '?')} آیه`;
 
             card.appendChild(number);
             card.appendChild(name);
@@ -1740,11 +1854,11 @@
 
             const tNumber = document.createElement('div');
             tNumber.className = 'timeline-number';
-            tNumber.textContent = i;
+            tNumber.textContent = fmtFa(i);
 
             const tName = document.createElement('div');
             tName.className = 'timeline-name';
-            tName.textContent = SURA_NAMES[i] || `سوره ${i}`;
+            tName.textContent = SURA_NAMES[i] || `سوره ${fmtFa(i)}`;
 
             timelineItem.appendChild(dot);
             timelineItem.appendChild(tNumber);
@@ -1954,6 +2068,25 @@
         elements.settingsMenu.hidden = !elements.settingsMenu.hidden;
     }
 
+    function updateSettingsNumberDisplays() {
+        const pairs = [
+            [elements.sureInput, 'sure-number-display'],
+            [elements.topLimit, 'top-roots-limit-display'],
+            [elements.distinctiveLimit, 'distinctive-roots-limit-display'],
+            [elements.highKlLimit, 'high-kl-roots-limit-display'],
+            [elements.n2nLimit, 'n2n-roots-limit-display']
+        ];
+        pairs.forEach(([input, displayId]) => {
+            if (!input) return;
+            const display = document.getElementById(displayId);
+            if (display) {
+                const v = input.value.trim();
+                const n = v === '' ? '' : (parseInt(v, 10));
+                display.textContent = (n === '' || !Number.isFinite(n)) ? v : fmtFa(n);
+            }
+        });
+    }
+
     function bindSettings() {
         const limits = loadRootLimits();
         const chartEnabled = loadChartPreference();
@@ -1962,9 +2095,16 @@
         elements.distinctiveLimit.value = limits.distinctive_roots ?? DEFAULT_ROOT_LIMIT;
         elements.highKlLimit.value = limits.high_kl_roots ?? DEFAULT_ROOT_LIMIT;
         elements.n2nLimit.value = limits.n2_N_roots ?? DEFAULT_ROOT_LIMIT;
+        updateSettingsNumberDisplays();
         if (elements.chartToggle) {
             elements.chartToggle.checked = chartEnabled;
         }
+        [elements.sureInput, elements.topLimit, elements.distinctiveLimit, elements.highKlLimit, elements.n2nLimit].forEach(input => {
+            if (input) {
+                input.addEventListener('input', updateSettingsNumberDisplays);
+                input.addEventListener('change', updateSettingsNumberDisplays);
+            }
+        });
 
         elements.settingsButton.addEventListener('click', (event) => {
             event.stopPropagation();
