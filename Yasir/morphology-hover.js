@@ -581,8 +581,14 @@ const morphologyData = {};
         // }
         
         // Process the entire body recursively in document order
-        // This ensures we process all words sequentially, regardless of container boundaries
-        processNodeRecursive(document.querySelector('sure'), state);
+        // On desktop, content is injected into #content; ensure we have a root (sure or #content)
+        var root = document.querySelector('sure');
+        if (!root && IS_DESKTOP_HOST) root = document.getElementById('content');
+        processNodeRecursive(root, state);
+        if (typeof console !== 'undefined' && console.log) {
+            var n = document.querySelectorAll ? document.querySelectorAll('.morph-word').length : 0;
+            console.log('[morph-hover] wrapWordsInSpans done, root=' + (root ? root.tagName || root.id || 'el' : 'null') + ', morph-word count: ' + n);
+        }
     }
 
     
@@ -632,8 +638,28 @@ const morphologyData = {};
         });
     }
 
+    var morphTooltipHideTimer = null;
+    function cancelMorphTooltipHide() {
+        if (morphTooltipHideTimer) {
+            clearTimeout(morphTooltipHideTimer);
+            morphTooltipHideTimer = null;
+        }
+    }
+    function scheduleMorphTooltipHide(delayMs) {
+        cancelMorphTooltipHide();
+        morphTooltipHideTimer = setTimeout(function() {
+            morphTooltipHideTimer = null;
+            var tooltipEl = document.getElementById('morph-tooltip');
+            if (tooltipEl) {
+                removeHighlights();
+                hideTooltip();
+            }
+        }, delayMs || 250);
+    }
+
     // Create and show tooltip with morphology data
     function showTooltip(element, ayah, wordIndex) {
+        cancelMorphTooltipHide();
         // Remove existing tooltip
         const existing = document.getElementById('morph-tooltip');
         if (existing) {
@@ -651,14 +677,14 @@ const morphologyData = {};
         const tooltip = document.createElement('div');
         tooltip.id = 'morph-tooltip';
         tooltip.style.cssText = `
-            position: absolute;
+            position: fixed;
             background: #2c3e50;
             color: white;
             padding: 4px 8px;
             border-radius: 3px;
             font-size: 11px;
-            z-index: 10000;
-            pointer-events: none;
+            z-index: 100000;
+            pointer-events: auto;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
             font-family: Arial, sans-serif;
             direction: rtl;
@@ -667,45 +693,57 @@ const morphologyData = {};
             max-width: 200px;
         `;
 
-        let content = '';
+        var searchBase = (window.location.pathname || '').indexOf('/Yasir/') !== -1 ? '../search.html' : 'search.html';
+        function searchUrl(param, value) {
+            return searchBase + '?' + param + '=' + encodeURIComponent(value);
+        }
+
+        var content = '';
+        var arrowStyle = 'color: #4ecdc4; text-decoration: none; font-size: 12px; cursor: pointer; flex-shrink: 0; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #4ecdc4; border-radius: 3px; line-height: 1;';
         if (morphData.root) {
-            content += `<div style="margin-bottom: 3px;"><span style="color: #ecf0f1; font-size: 10px;">ریشه:</span> <span style="font-weight: bold;">${morphData.root}</span></div>`;
+            content += '<div style="margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; direction: rtl; text-align: right;">';
+            content += '<a href="' + searchUrl('root', morphData.root) + '" target="_top" style="' + arrowStyle + '" title="جستجو در کل قرآن">→</a>';
+            content += '<span style="flex: 1; text-align: right;"><span style="color: #ecf0f1; font-size: 10px;">ریشه:</span> <span style="font-weight: bold;">' + (morphData.root) + '</span></span>';
+            content += '</div>';
         }
         if (morphData.root && morphData.lemma) {
             content += '<div style="border-top: 1px solid rgba(255,255,255,0.2); margin: 3px 0; padding-top: 3px;"></div>';
         }
         if (morphData.lemma) {
-            content += `<div><span style="color: #ecf0f1; font-size: 10px;">مصدر:</span> <span style="font-weight: bold;">${morphData.lemma}</span></div>`;
+            content += '<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; direction: rtl; text-align: right;">';
+            content += '<a href="' + searchUrl('lem', morphData.lemma) + '" target="_top" style="' + arrowStyle + '" title="جستجو در کل قرآن">→</a>';
+            content += '<span style="flex: 1; text-align: right;"><span style="color: #ecf0f1; font-size: 10px;">مصدر:</span> <span style="font-weight: bold;">' + (morphData.lemma) + '</span></span>';
+            content += '</div>';
         }
         tooltip.innerHTML = content;
 
         document.body.appendChild(tooltip);
 
-        // Position tooltip near the element
-        // getBoundingClientRect() gives viewport coordinates, but we need to add scroll offset
+        tooltip.addEventListener('mouseenter', function() {
+            cancelMorphTooltipHide();
+        });
+        tooltip.addEventListener('mouseleave', function() {
+            removeHighlights();
+            hideTooltip();
+        });
+
+        // Position tooltip near the element (viewport coords: works with scrollable content column on desktop)
         const rect = element.getBoundingClientRect();
         const tooltipRect = tooltip.getBoundingClientRect();
-        const scrollX = window.scrollX || window.pageXOffset || 0;
-        const scrollY = window.scrollY || window.pageYOffset || 0;
-        
-        // Calculate position relative to document (add scroll offset)
-        let top = rect.top + scrollY - tooltipRect.height - 6;
-        let left = rect.left + scrollX + (rect.width / 2) - (tooltipRect.width / 2);
 
-        // Adjust if tooltip goes off screen (viewport check)
-        const viewportTop = rect.top - tooltipRect.height - 6;
-        if (viewportTop < 0) {
-            // Show below instead
-            top = rect.bottom + scrollY + 6;
+        let top = rect.top - tooltipRect.height - 2;
+        let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+        if (top < 8) {
+            top = rect.bottom + 2;
         }
-        
-        // Check horizontal boundaries
-        if (rect.left + (rect.width / 2) - (tooltipRect.width / 2) < 8) {
-            left = rect.left + scrollX + 8;
+        if (left < 8) {
+            left = 8;
         }
-        if (rect.left + scrollX + (rect.width / 2) + (tooltipRect.width / 2) > window.innerWidth - 8) {
-            left = rect.left + scrollX + rect.width - tooltipRect.width - 8;
+        if (left + tooltipRect.width > window.innerWidth - 8) {
+            left = window.innerWidth - tooltipRect.width - 8;
         }
+        top = Math.max(8, Math.min(top, window.innerHeight - tooltipRect.height - 8));
 
         tooltip.style.top = top + 'px';
         tooltip.style.left = left + 'px';
@@ -724,6 +762,10 @@ const morphologyData = {};
         // Use event delegation for better performance
         document.addEventListener('mouseover', function(e) {
             if (e.target.classList.contains('morph-word')) {
+                if (typeof console !== 'undefined' && console.log && !window._morphHoverFirst) {
+                    window._morphHoverFirst = true;
+                    console.log('[morph-hover] first word hover');
+                }
                 // Read ayah and word number from the span
                 const ayah = parseInt(e.target.getAttribute('data-ayah'));
                 const wordIndex = parseInt(e.target.getAttribute('data-word-index'));
@@ -740,10 +782,17 @@ const morphologyData = {};
 
         document.addEventListener('mouseout', function(e) {
             if (e.target.classList.contains('morph-word')) {
-                // Remove highlights
-                removeHighlights();
-                // Hide tooltip
-                hideTooltip();
+                var tooltipEl = document.getElementById('morph-tooltip');
+                if (e.relatedTarget && tooltipEl && tooltipEl.contains(e.relatedTarget)) {
+                    cancelMorphTooltipHide();
+                    return;
+                }
+                scheduleMorphTooltipHide(280);
+            }
+        });
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.closest && e.target.closest('#morph-tooltip')) {
+                cancelMorphTooltipHide();
             }
         });
         
@@ -3487,6 +3536,7 @@ const morphologyData = {};
 
     // Initialize when DOM is ready
     function init(sureNumber) {
+        if (typeof console !== 'undefined' && console.log) console.log('[morph-hover] init sura', sureNumber);
         addStyles();
         
         // Make sura header clickable
@@ -3626,8 +3676,8 @@ const morphologyData = {};
     }
 
     // Run when DOM is loaded
-    // sureNumber should be defined in the HTML before this script
-    const sureNum = sureNumber;
+    // sureNumber: from window (desktop) or inline script (standalone), else from path e.g. /Yasir/036_... -> 36
+    const sureNum = window.sureNumber != null ? window.sureNumber : (parseInt((window.location.pathname || '').match(/(\d+)_/)?.[1], 10) || 1);
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             init(sureNum);

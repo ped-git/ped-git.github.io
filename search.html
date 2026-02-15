@@ -3583,8 +3583,22 @@
             const distanceInput = document.getElementById('distance-input');
             const distanceDisplay = document.getElementById('distance-display');
             
-            // Load data
-            loadMorphologyData();
+            // Load data, then apply URL params (e.g. from desktop tooltip links)
+            loadMorphologyData().then(() => {
+                const params = new URLSearchParams(window.location.search);
+                const root = params.get('root');
+                const lem = params.get('lem');
+                if (root && root.trim()) addSelectedItem('root', root.trim(), root.trim());
+                if (lem && lem.trim()) addSelectedItem('text', lem.trim(), lem.trim());
+                if (root || lem) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('root');
+                    url.searchParams.delete('lem');
+                    if (url.searchParams.toString()) url.search = '?' + url.searchParams.toString();
+                    else url.search = '';
+                    window.history.replaceState({}, '', url.toString());
+                }
+            });
 
             // Distance control
             function updateDistanceDisplay() {

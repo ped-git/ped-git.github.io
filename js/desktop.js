@@ -310,7 +310,7 @@
             if (existing) existing.remove();
             const script = document.createElement('script');
             script.id = 'morphology-hover-script';
-            script.src = 'Yasir/morphology-hover.js';
+            script.src = 'Yasir/morphology-hover.js?v=2';
             script.onload = () => resolve();
             script.onerror = () => resolve(); // resolve anyway to not block
             document.body.appendChild(script);
@@ -1718,6 +1718,7 @@
         restorePanelsPlaceholder();
 
         setSureNumberGlobal(number);
+        window.sureNumber = number;
         const limits = loadRootLimits();
         setExpandedRootLimits(limits);
         await loadMorphologyScript();
