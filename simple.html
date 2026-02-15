@@ -17,6 +17,30 @@
             font-display: swap;
         }
         @font-face {
+            font-family: 'Sahel';
+            src: url('/fonts/Sahel.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'KFGQPC Uthman Taha Naskh';
+            src: url('fonts/KFGQPC Uthman Taha Naskh Regular.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'QPC Uthmani Hafs';
+            src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+                 url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+            size-adjust: 80%;
+        }
+
+        @font-face {
             font-family: surahnames;
             src: url('fonts/sura_names.woff2') format('woff2'), url('fonts/sura_names.woff') format('woff');
             font-weight: 400;
@@ -35,7 +59,7 @@
             max-width: 960px;
             width: 100%;
             margin: 0 auto;
-            padding: 12px 16px;
+            padding: 12px 16px 72px;
             display: flex;
             flex-direction: column;
             min-height: calc(100vh - 56px);
@@ -190,11 +214,31 @@
             direction: rtl;
             text-align: center;
         }
+        .page-content:not(.font-qcf) {
+            font-family: 'QPC Uthmani Hafs', 'B Badr', 'BBadr', 'BLotus', 'KFGQPC Uthman Taha Naskh', serif;
+            text-align: right;
+        }
         .page-content.font-qcf { font-size: clamp(1.1rem, 2.4vw, 1.5rem); }
         .page-content .ayah { display: block; margin-bottom: 0.35em; }
         .page-content .ayah-inline { margin-left: 0.25em; }
+        .page-content.layout-ayah-line { text-align: right; line-height: 1.5; }
+        .page-content.layout-ayah-line .ayah { margin-bottom: 0.32em; }
+        .page-content.layout-ayah-line .ayah,
+        .page-content.layout-ayah-line .ayah-inline { text-indent: 0; }
+        .page-content.layout-ayah-line .ayah-inline {
+            display: block;
+            margin: 0;
+            padding: 0;
+            line-height: 1.38;
+        }
         .page-content.layout-flow .ayah { display: inline; margin-bottom: 0; }
         .page-content.layout-flow .ayah::after { content: '\00a0'; }
+        .page-content.layout-flow { text-align: right; }
+        .page-content.font-qcf,
+        .page-content.font-qcf.layout-ayah-line,
+        .page-content.font-qcf.layout-flow {
+            text-align: center;
+        }
         .page-content .mushaf-line {
             display: block;
             direction: rtl;
@@ -203,9 +247,17 @@
             line-height: 1.5;
             white-space: nowrap;
         }
+        .page-content:not(.font-qcf) .mushaf-line {
+            text-align: right;
+            text-align-last: auto;
+        }
+        .page-content.font-qcf .mushaf-line {
+            text-align: center;
+            text-align-last: center;
+        }
         .page-content .mushaf-line.bismillah { text-align: center; }
-        .page-card.page-1 .page-content .mushaf-line,
-        .page-card.page-2 .page-content .mushaf-line { text-align: center; }
+        .page-card.page-1 .page-content.font-qcf .mushaf-line,
+        .page-card.page-2 .page-content.font-qcf .mushaf-line { text-align: center; }
         .page-content .mushaf-line .qcf-word { display: inline; }
         .page-content .qword {
             transition: color 0.12s ease;
@@ -235,7 +287,7 @@
             font-family: surahnames, serif;
         }
         .page-content .sura-name-in-page:not(.sura-name-qcf) {
-            font-family: 'Traditional Arabic', 'Scheherazade New', serif;
+            font-family: 'QPC Uthmani Hafs', 'B Badr', 'BBadr', 'BLotus', 'KFGQPC Uthman Taha Naskh', serif;
         }
         .sura-container {
             width: 100%;
@@ -624,7 +676,8 @@
             card.innerHTML = '<div class="sura-picker-num">' + fmtFa(i) + '</div><div class="sura-picker-name">' + escapeHtml(getSuraName(i)) + '</div>';
             card.addEventListener('click', async function() {
                 var num = parseInt(this.getAttribute('data-sura'), 10);
-                if (suraViewMode()) {
+                var currentMode = getMode().mode;
+                if (currentMode === 'sura') {
                     setUrl('sura', 1, num);
                 } else {
                     if (!chaptersCache || !chaptersCache.length) {
@@ -632,7 +685,7 @@
                     }
                     var ch = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === num; }) : null;
                     var firstPage = (ch && ch.pages && ch.pages[0] != null) ? ch.pages[0] : 1;
-                    setUrl('page', pageToOdd(firstPage), 1);
+                    setUrl('page', pageForCurrentMode(firstPage), 1);
                 }
                 render();
                 hideSuraPicker();
@@ -877,21 +930,32 @@
         var isEnd = w && w.char_type_name === 'end';
         var tr = getWordTranslation(w);
         var baseClass = 'qword' + (isEnd ? ' ayah-end' : '');
+        var pad = (isEnd && !useQCFFont) ? ' ' : '';
         if (useQCFFont) {
             var page = w.v1_page || pageNum;
             loadQCFPageFont(page);
             var padded = String(page).padStart(3, '0');
             var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
-            return '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>';
+            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
         }
-        return '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '">' + escapeHtml(w.text || '') + '</span>';
+        var plain = w.text_uthmani || w.text || '';
+        // if (plain === 'أُو۟لَـٰٓئِكَ') plain = 'أُو۟★لَـٰٓئِكَ';
+        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '">' + escapeHtml(plain) + '</span>' + pad;
     }
     function buildVerseText(verse, useQCFFont) {
         if (!verse.words || verse.words.length === 0) return '';
         var pageNum = verse.page_number || (verse.words[0] && verse.words[0].v1_page);
         var html = '';
         for (var i = 0; i < verse.words.length; i++) {
-            html += buildWordHtml(verse.words[i], pageNum, useQCFFont, verse.verse_key);
+            var w = verse.words[i];
+            html += buildWordHtml(w, pageNum, useQCFFont, verse.verse_key);
+            var next = verse.words[i + 1];
+            if (!next) continue;
+            // In text mode keep real spacing between words; in QCF mode keep glyph flow.
+            if (w.char_type_name !== 'end' && next.char_type_name !== 'end') {
+                if (!useQCFFont) html += ' ';
+                html += '<wbr>';
+            }
         }
         return html;
     }
@@ -919,6 +983,12 @@
         }
         return lines;
     }
+    function buildSuraHeadingHtml(suraNum, useQCFFont) {
+        if (!suraNum) return '';
+        return useQCFFont
+            ? '<div class="sura-name-in-page sura-name-qcf" style="direction:rtl;box-sizing:border-box;display:block;text-align:center;margin:0;padding:0;line-height:normal;" aria-label="' + escapeHtml(getSuraName(suraNum)) + '"><span class="sura-name-icon" translate="no"> ' + getSuraNameIconNumber(suraNum) + ' </span></div>'
+            : '<div class="sura-name-in-page">' + escapeHtml(getSuraName(suraNum)) + '</div>';
+    }
 
     function renderPageContent(verses, container, useQCFFont) {
         container.classList.toggle('font-qcf', useQCFFont);
@@ -926,8 +996,26 @@
         container.classList.toggle('layout-flow', !layoutAyahPerLine());
         var html = '';
         if (layoutAyahPerLine()) {
+            var surasNameShown = {};
             for (var i = 0; i < verses.length; i++) {
                 var v = verses[i];
+                var vKey = v.verse_key || '';
+                var showSuraNum = null;
+                var mStart = vKey.match(/^(\d+):1$/);
+                if (mStart && parseInt(mStart[1], 10) !== 1) {
+                    showSuraNum = parseInt(mStart[1], 10);
+                } else if (vKey === '1:1') {
+                    var nextV = verses[i + 1];
+                    var nextKey = nextV && nextV.verse_key ? nextV.verse_key : '';
+                    var nextStart = nextKey.match(/^(\d+):1$/);
+                    if (nextStart && parseInt(nextStart[1], 10) !== 1) {
+                        showSuraNum = parseInt(nextStart[1], 10);
+                    }
+                }
+                if (showSuraNum && !surasNameShown[showSuraNum]) {
+                    html += buildSuraHeadingHtml(showSuraNum, useQCFFont);
+                    surasNameShown[showSuraNum] = true;
+                }
                 var verseText = buildVerseText(v, useQCFFont);
                 html += '<span class="ayah"><span class="ayah-inline">' + verseText + '</span></span>';
             }
@@ -949,9 +1037,7 @@
                     }
                 }
                 if (isBismillahOnly && nextSuraStart !== null && !surasNameShown[nextSuraStart]) {
-                    html += (useQCFFont
-                        ? '<div class="sura-name-in-page sura-name-qcf" style="direction:rtl;box-sizing:border-box;display:block;text-align:center;margin:0;padding:0;line-height:normal;" aria-label="' + escapeHtml(getSuraName(nextSuraStart)) + '"><span class="sura-name-icon" translate="no">' + getSuraNameIconNumber(nextSuraStart) + '</span></div>'
-                        : '<div class="sura-name-in-page">' + escapeHtml(getSuraName(nextSuraStart)) + '</div>');
+                    html += buildSuraHeadingHtml(nextSuraStart, useQCFFont);
                     surasNameShown[nextSuraStart] = true;
                 } else {
                     var surasStartingOnThisLine = [];
@@ -968,11 +1054,7 @@
                     for (var si = 0; si < surasStartingOnThisLine.length; si++) {
                         var suraNumStart = surasStartingOnThisLine[si];
                         if (surasNameShown[suraNumStart]) continue;
-                        if (useQCFFont) {
-                            html += '<div class="sura-name-in-page sura-name-qcf" style="direction:rtl;box-sizing:border-box;display:block;text-align:center;margin:0;padding:0;line-height:normal;" aria-label="' + escapeHtml(getSuraName(suraNumStart)) + '"><span class="sura-name-icon" translate="no">' + getSuraNameIconNumber(suraNumStart) + '</span></div>';
-                        } else {
-                            html += '<div class="sura-name-in-page">' + escapeHtml(getSuraName(suraNumStart)) + '</div>';
-                        }
+                        html += buildSuraHeadingHtml(suraNumStart, useQCFFont);
                         surasNameShown[suraNumStart] = true;
                     }
                 }
@@ -980,6 +1062,12 @@
                 for (var wi = 0; wi < line.words.length; wi++) {
                     var item = line.words[wi];
                     html += buildWordHtml(item.word, item.pageNum, useQCFFont, item.verseKey);
+                    var nextItem = line.words[wi + 1];
+                    if (!nextItem) continue;
+                    if (item.word && nextItem.word && item.word.char_type_name !== 'end' && nextItem.word.char_type_name !== 'end') {
+                        if (!useQCFFont) html += ' ';
+                        html += '<wbr>';
+                    }
                 }
                 html += '</div>';
             }
@@ -1470,14 +1558,14 @@
                 : (getChapterForPage(pageNum) ? getChapterForPage(pageNum).id : 0);
             const juz = firstBodyVerse ? firstBodyVerse.juz_number : (verses[0] ? verses[0].juz_number : 0);
             var isRightCard = (cardIndex === 0);
-            var inputMin = isRightCard ? 1 : 2;
-            var inputMax = isRightCard ? 603 : 604;
-            var inputStep = 2;
-            var inputReadonly = isRightCard ? '' : ' readonly';
+            var inputMin = twoPage ? (isRightCard ? 1 : 2) : 1;
+            var inputMax = twoPage ? (isRightCard ? 603 : 604) : 604;
+            var inputStep = twoPage ? 2 : 1;
+            var inputReadonly = (twoPage && !isRightCard) ? ' readonly' : '';
             card.innerHTML =
                 '<div class="page-header">' +
                 '<span class="sura-name sura-name-click" data-sura="' + suraNum + '" role="button" tabindex="0">' + escapeHtml(getSuraName(suraNum)) + '</span>' +
-                '<span class="page-meta">ص <input type="number" class="page-num-input' + (isRightCard ? '' : ' page-num-readonly') + '" value="' + pageNum + '" min="' + inputMin + '" max="' + inputMax + '" step="' + inputStep + '" aria-label="شماره صفحه"' + inputReadonly + '> · جزء ' + fmtFa(juz) + '</span>' +
+                '<span class="page-meta">ص <input type="number" class="page-num-input' + ((twoPage && !isRightCard) ? ' page-num-readonly' : '') + '" value="' + pageNum + '" min="' + inputMin + '" max="' + inputMax + '" step="' + inputStep + '" aria-label="شماره صفحه"' + inputReadonly + '> · جزء ' + fmtFa(juz) + '</span>' +
                 '</div>' +
                 '<div class="page-content"></div>';
             const content = card.querySelector('.page-content');
@@ -1489,14 +1577,14 @@
                 });
             }
             var pageInput = card.querySelector('.page-num-input');
-            if (pageInput && isRightCard) {
+            if (pageInput && (isRightCard || !twoPage)) {
                 pageInput.addEventListener('change', function() {
                     var n = parseInt(this.value, 10);
                     if (isNaN(n) || n < 1 || n > TOTAL_PAGES) {
                         this.value = pageNum;
                         return;
                     }
-                    var targetPage = pageToOdd(n);
+                    var targetPage = twoPage ? pageToOdd(n) : n;
                     setUrl('page', targetPage, 1);
                     render();
                 });
@@ -1512,12 +1600,15 @@
             function equalizeTwoPageCardHeights() {
                 cards.forEach(function(c) { c.style.height = ''; c.style.minHeight = '0'; });
                 var maxH = 0;
-                for (var ci = 0; ci < cards.length; ci++) maxH = Math.max(maxH, cards[ci].offsetHeight);
+                for (var ci = 0; ci < cards.length; ci++) {
+                    maxH = Math.max(maxH, cards[ci].offsetHeight, cards[ci].scrollHeight);
+                }
                 cards.forEach(function(c) { c.style.height = maxH + 'px'; });
             }
             equalizeTwoPageCardHeights();
             requestAnimationFrame(equalizeTwoPageCardHeights);
             setTimeout(equalizeTwoPageCardHeights, 120);
+            setTimeout(equalizeTwoPageCardHeights, 360);
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(equalizeTwoPageCardHeights).catch(function() {});
             }
@@ -1585,7 +1676,7 @@
     }
     async function fetchBismillah() {
         if (bismillahVerseCache) return bismillahVerseCache;
-        var res = await fetch('https://api.quran.com/api/v4/verses/by_key/1:1?words=true&word_fields=v1_page,code_v1,line_number&language=fa');
+        var res = await fetch('https://api.quran.com/api/v4/verses/by_key/1:1?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa');
         if (!res.ok) throw new Error('خطا در دریافت بسم الله');
         var data = await res.json();
         bismillahVerseCache = data.verse;
@@ -1597,14 +1688,14 @@
     }
 
     async function fetchPage(pageNum) {
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number&language=fa');
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa');
         if (!res.ok) throw new Error('خطا در دریافت صفحه');
         const data = await res.json();
         return { pageNumber: pageNum, verses: data.verses || [] };
     }
 
     async function fetchSuraByPage(suraNumber) {
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number&language=fa&per_page=300');
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa&per_page=300');
         if (!res.ok) throw new Error('خطا در دریافت سوره');
         const data = await res.json();
         const verses = data.verses || [];
@@ -1626,7 +1717,7 @@
 
         if (mode === 'page') {
             const twoPage = twoPageMode();
-            const startPage = (page % 2 === 1) ? page : Math.max(1, page - 1);
+            const startPage = twoPage ? ((page % 2 === 1) ? page : Math.max(1, page - 1)) : page;
             setLoading(true);
             (async function() {
                 try {
@@ -1719,13 +1810,48 @@
         setSetting('two-page', this.checked ? '1' : '0');
         render();
     });
-    document.getElementById('sura-view').addEventListener('change', function() {
-        setSetting('sura-view', this.checked ? '1' : '0');
+    document.getElementById('sura-view').addEventListener('change', async function() {
+        var enableSuraMode = this.checked;
+        setSetting('sura-view', enableSuraMode ? '1' : '0');
+        var st = getMode();
+        if (enableSuraMode && st.mode === 'page') {
+            var range = getVisiblePageRange(st.page);
+            var inspectPage = range.startPage;
+            var targetSura = 1;
+            try {
+                var pdata = await fetchPage(inspectPage);
+                var verses = pdata.verses || [];
+                var firstV = firstVerseOfPageBody(verses) || verses[0] || null;
+                if (firstV && firstV.verse_key) {
+                    var sid = parseInt(String(firstV.verse_key).split(':')[0], 10);
+                    if (sid >= 1 && sid <= 114) targetSura = sid;
+                }
+            } catch (err) {}
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            if (targetSura < 1 || targetSura > 114) {
+                var ch = getChapterForPage(inspectPage);
+                targetSura = ch ? ch.id : 1;
+            }
+            setUrl('sura', 1, targetSura);
+            render();
+            return;
+        }
+        if (!enableSuraMode && st.mode === 'sura') {
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            var cur = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === st.sura; }) : null;
+            var firstPage = (cur && cur.pages && cur.pages[0] != null) ? cur.pages[0] : 1;
+            setUrl('page', pageForCurrentMode(firstPage), 1);
+            render();
+        }
     });
     navPrevPageBtn.addEventListener('click', function() { navigatePageSpread(-2); });
     navNextPageBtn.addEventListener('click', function() { navigatePageSpread(2); });
-    navPrevSuraBtn.addEventListener('click', function() { navigateAdjacentSura(-1); });
-    navNextSuraBtn.addEventListener('click', function() { navigateAdjacentSura(1); });
+    navPrevSuraBtn.addEventListener('click', function() { navigatePrevSuraLikeKey(); });
+    navNextSuraBtn.addEventListener('click', function() { navigateNextSuraLikeKey(); });
     settingsBtn.addEventListener('click', function() {
         settingsMenu.classList.toggle('open');
     });
@@ -1744,10 +1870,23 @@
     function clampPage(p) {
         return Math.max(1, Math.min(TOTAL_PAGES, parseInt(p, 10) || 1));
     }
+    function pageForCurrentMode(p) {
+        var n = clampPage(p);
+        return twoPageMode() ? pageToOdd(n) : n;
+    }
+    function getVisiblePageRange(pageNum) {
+        var p = clampPage(pageNum);
+        if (twoPageMode()) {
+            var start = (p % 2 === 1) ? p : Math.max(1, p - 1);
+            var end = (start + 1 <= TOTAL_PAGES) ? (start + 1) : start;
+            return { startPage: start, lastPageVisible: end };
+        }
+        return { startPage: p, lastPageVisible: p };
+    }
     function navigatePageSpread(delta) {
         var st = getMode();
         if (st.mode !== 'page') return;
-        var target = pageToOdd(clampPage(st.page + delta));
+        var target = pageForCurrentMode(st.page + delta);
         setUrl('page', target, 1);
         render();
     }
@@ -1777,71 +1916,114 @@
         }
         render();
     }
+    async function navigatePrevSuraLikeKey() {
+        var st = getMode();
+        if (st.mode === 'sura') {
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            if (!chaptersCache || !chaptersCache.length) return;
+            var curIdx = chaptersCache.findIndex(function(c) { return c.id === st.sura; });
+            if (curIdx < 0) curIdx = 0;
+            var prevIdx = Math.max(0, curIdx - 1);
+            var prevCh = chaptersCache[prevIdx];
+            if (!prevCh) return;
+            setUrl('sura', 1, prevCh.id);
+            render();
+            return;
+        }
+        if (st.mode !== 'page') return;
+        var page = st.page;
+        if (!chaptersCache || !chaptersCache.length) {
+            try { await fetchChapters(); } catch (err) {}
+        }
+        if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
+        var ch = getChapterForPage(page);
+        if (!ch || !ch.pages || ch.pages[0] == null) { setUrl('page', 1, 1); render(); return; }
+        var firstPageOfSura = ch.pages[0];
+        var targetPage;
+        if (page === firstPageOfSura) {
+            var idx = chaptersCache.findIndex(function(c) { return c.id === ch.id; });
+            var prevFirst = (idx > 0 && chaptersCache[idx - 1].pages && chaptersCache[idx - 1].pages[0] != null)
+                ? chaptersCache[idx - 1].pages[0] : 1;
+            targetPage = pageForCurrentMode(prevFirst);
+        } else {
+            targetPage = pageForCurrentMode(firstPageOfSura);
+        }
+        setUrl('page', Math.max(1, targetPage), 1);
+        render();
+    }
+    async function navigateNextSuraLikeKey() {
+        var st = getMode();
+        if (st.mode === 'sura') {
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            if (!chaptersCache || !chaptersCache.length) return;
+            var curIdx = chaptersCache.findIndex(function(c) { return c.id === st.sura; });
+            if (curIdx < 0) curIdx = 0;
+            var nextIdx = Math.min(chaptersCache.length - 1, curIdx + 1);
+            var nextCh = chaptersCache[nextIdx];
+            if (!nextCh) return;
+            setUrl('sura', 1, nextCh.id);
+            render();
+            return;
+        }
+        if (st.mode !== 'page') return;
+        var page = st.page;
+        if (!chaptersCache || !chaptersCache.length) {
+            try { await fetchChapters(); } catch (err) {}
+        }
+        if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
+        var range = getVisiblePageRange(page);
+        var startPage = range.startPage;
+        var lastPageVisible = range.lastPageVisible;
+        var lastPageData;
+        try { lastPageData = await fetchPage(lastPageVisible); } catch (err) { setUrl('page', pageForCurrentMode(Math.min(TOTAL_PAGES, page + (twoPageMode() ? 2 : 1))), 1); render(); return; }
+        var verses = lastPageData.verses || [];
+        var lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
+        var suraOfLastAyah = lastVerse && lastVerse.verse_key ? parseInt(String(lastVerse.verse_key).split(':')[0], 10) : null;
+        if (!suraOfLastAyah || suraOfLastAyah < 1 || suraOfLastAyah > 114) {
+            var ch = getChapterForPage(lastPageVisible);
+            suraOfLastAyah = ch ? ch.id : 1;
+        }
+        var idx = chaptersCache.findIndex(function(c) { return c.id === suraOfLastAyah; });
+        if (idx < 0 || idx + 1 >= chaptersCache.length) {
+            setUrl('page', pageForCurrentMode(Math.min(TOTAL_PAGES, page + (twoPageMode() ? 2 : 1))), 1);
+            render();
+            return;
+        }
+        var nextCh = chaptersCache[idx + 1];
+        var nextSuraFirstPage = (nextCh.pages && nextCh.pages[0] != null) ? nextCh.pages[0] : startPage + (twoPageMode() ? 2 : 1);
+        var targetPage = pageForCurrentMode(nextSuraFirstPage);
+        setUrl('page', clampPage(targetPage), 1);
+        render();
+    }
     document.addEventListener('keydown', async function(e) {
         var mode = getMode().mode;
-        if (mode !== 'page') return;
         var tag = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : '';
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
         var page = getMode().page;
         if (e.key === 'ArrowRight') {
+            if (mode !== 'page') return;
             e.preventDefault();
-            var nextPage = Math.max(1, page - 2);
-            setUrl('page', pageToOdd(nextPage), 1);
+            var step = twoPageMode() ? 2 : 1;
+            var nextPage = Math.max(1, page - step);
+            setUrl('page', pageForCurrentMode(nextPage), 1);
             render();
         } else if (e.key === 'ArrowLeft') {
+            if (mode !== 'page') return;
             e.preventDefault();
-            var nextPage = Math.min(TOTAL_PAGES, page + 2);
-            setUrl('page', pageToOdd(nextPage), 1);
+            var step = twoPageMode() ? 2 : 1;
+            var nextPage = Math.min(TOTAL_PAGES, page + step);
+            setUrl('page', pageForCurrentMode(nextPage), 1);
             render();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            if (!chaptersCache || !chaptersCache.length) {
-                try { await fetchChapters(); } catch (err) {}
-            }
-            if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
-            var ch = getChapterForPage(page);
-            if (!ch || !ch.pages || ch.pages[0] == null) { setUrl('page', 1, 1); render(); return; }
-            var firstPageOfSura = ch.pages[0];
-            var targetPage;
-            if (page === firstPageOfSura) {
-                var idx = chaptersCache.findIndex(function(c) { return c.id === ch.id; });
-                var prevFirst = (idx > 0 && chaptersCache[idx - 1].pages && chaptersCache[idx - 1].pages[0] != null)
-                    ? chaptersCache[idx - 1].pages[0] : 1;
-                targetPage = pageToOdd(prevFirst);
-            } else {
-                targetPage = pageToOdd(firstPageOfSura);
-            }
-            setUrl('page', Math.max(1, targetPage), 1);
-            render();
+            await navigatePrevSuraLikeKey();
         } else if (e.key === 'ArrowDown') {
             e.preventDefault();
-            if (!chaptersCache || !chaptersCache.length) {
-                try { await fetchChapters(); } catch (err) {}
-            }
-            if (!chaptersCache || !chaptersCache.length) { setUrl('page', 1, 1); render(); return; }
-            var startPage = (page % 2 === 1) ? page : Math.max(1, page - 1);
-            var twoPage = twoPageMode();
-            var lastPageVisible = (twoPage && startPage + 1 <= TOTAL_PAGES) ? startPage + 1 : startPage;
-            var lastPageData;
-            try { lastPageData = await fetchPage(lastPageVisible); } catch (err) { setUrl('page', pageToOdd(Math.min(TOTAL_PAGES, page + 2)), 1); render(); return; }
-            var verses = lastPageData.verses || [];
-            var lastVerse = verses.length > 0 ? verses[verses.length - 1] : null;
-            var suraOfLastAyah = lastVerse && lastVerse.verse_key ? parseInt(String(lastVerse.verse_key).split(':')[0], 10) : null;
-            if (!suraOfLastAyah || suraOfLastAyah < 1 || suraOfLastAyah > 114) {
-                var ch = getChapterForPage(lastPageVisible);
-                suraOfLastAyah = ch ? ch.id : 1;
-            }
-            var idx = chaptersCache.findIndex(function(c) { return c.id === suraOfLastAyah; });
-            if (idx < 0 || idx + 1 >= chaptersCache.length) {
-                setUrl('page', pageToOdd(Math.min(TOTAL_PAGES, page + 2)), 1);
-                render();
-                return;
-            }
-            var nextCh = chaptersCache[idx + 1];
-            var nextSuraFirstPage = (nextCh.pages && nextCh.pages[0] != null) ? nextCh.pages[0] : startPage + 2;
-            var targetPage = pageToOdd(nextSuraFirstPage);
-            setUrl('page', Math.min(603, Math.max(1, targetPage)), 1);
-            render();
+            await navigateNextSuraLikeKey();
         }
     });
 
