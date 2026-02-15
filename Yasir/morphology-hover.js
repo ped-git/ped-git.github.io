@@ -1369,7 +1369,6 @@ const morphologyData = {};
         selectedSection.style.cssText = 'margin-bottom: 8px;';
         
         const selectedTitle = document.createElement('div');
-        selectedTitle.textContent = 'ریشه‌های انتخاب شده';
         selectedTitle.style.cssText = `
             font-weight: bold;
             margin-bottom: 3px;
@@ -1377,8 +1376,14 @@ const morphologyData = {};
             border-bottom: 1px solid #ccc;
             font-size: 9px;
             line-height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         `;
+        const selectedTitleText = document.createElement('span');
+        selectedTitleText.textContent = 'ریشه‌های انتخاب شده';
         selectedSection.appendChild(selectedTitle);
+        selectedTitle.appendChild(selectedTitleText);
         
         const selectedContent = document.createElement('div');
         selectedContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';

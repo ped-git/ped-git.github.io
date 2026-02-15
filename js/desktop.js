@@ -551,7 +551,6 @@
                 justify-content: center;
                 width: 14px;
                 height: 14px;
-                margin-right: 5px;
                 font-size: 11px;
                 color: #6a9fd4;
                 cursor: help;
@@ -602,6 +601,72 @@
             // Insert at beginning of title div
             titleDiv.insertBefore(infoIcon, titleDiv.firstChild);
         });
+        addSelectedRootsHelpIcon();
+    }
+
+    const SELECTED_ROOTS_HELP_HTML = `
+        <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 4px; font-size: 12px;">ریشه‌های انتخاب شده</div>
+        <div style="line-height: 1.5;">
+            با کلیک روی یک واژه (در متن اصلی یا در بخش معیارها) ریشهٔ آن اینجا اضافه می‌شود.<br><br>
+            <strong>کلیک</strong> روی ریشه: جستجوی مورد بعدی.<br>
+            <strong>شیفت+کلیک</strong>: جستجوی مورد قبلی.<br>
+            <strong>کنتزل+کلیک</strong>: حذف ریشه از لیست.
+        </div>
+    `;
+
+    function addSelectedRootsHelpIcon() {
+        const content = document.getElementById('highlighted-roots-content');
+        if (!content) return;
+        const selectedSection = content.firstElementChild;
+        if (!selectedSection) return;
+        const titleDiv = selectedSection.querySelector('div');
+        if (!titleDiv || titleDiv.querySelector('.selected-roots-help-icon')) return;
+
+        const infoIcon = document.createElement('span');
+        infoIcon.className = 'selected-roots-help-icon measure-info-icon';
+        infoIcon.innerHTML = 'ⓘ';
+        infoIcon.style.cssText = `
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            font-size: 11px;
+            color: #6a9fd4;
+            cursor: help;
+            vertical-align: middle;
+            font-style: normal;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        `;
+
+        infoIcon.addEventListener('mouseenter', (e) => {
+            const tooltip = getMeasureInfoTooltip();
+            tooltip.innerHTML = SELECTED_ROOTS_HELP_HTML;
+            const rect = infoIcon.getBoundingClientRect();
+            const tooltipWidth = 240;
+            let left = rect.right + 8;
+            if (left + tooltipWidth > window.innerWidth - 10) {
+                left = rect.left - tooltipWidth - 8;
+            }
+            left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${rect.top - 10}px`;
+            tooltip.style.opacity = '1';
+            tooltip.style.visibility = 'visible';
+            infoIcon.style.color = '#4ecdc4';
+            infoIcon.style.transform = 'scale(1.15)';
+        });
+
+        infoIcon.addEventListener('mouseleave', () => {
+            const tooltip = getMeasureInfoTooltip();
+            tooltip.style.opacity = '0';
+            tooltip.style.visibility = 'hidden';
+            infoIcon.style.color = '#6a9fd4';
+            infoIcon.style.transform = 'scale(1)';
+        });
+
+        titleDiv.insertBefore(infoIcon, titleDiv.firstChild);
     }
 
     // Find all measure data for a root from DOM (each category only once)
