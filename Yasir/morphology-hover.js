@@ -58,6 +58,9 @@ const morphologyData = {};
     const highlightedRoots = {};
     let nextColorIndex = 1;
     
+    // Selected search items (from embed search modal): { display, items, distance, crossSura, stats? }
+    let selectedSearchItems = [];
+    
     // Currently searched root and selected word
     let currentSearchedRoot = null;
     let currentSelectedWord = null; // {ayah, wordIndex}
@@ -699,10 +702,14 @@ const morphologyData = {};
         }
 
         var content = '';
-        var arrowStyle = 'color: #4ecdc4; text-decoration: none; font-size: 12px; cursor: pointer; flex-shrink: 0; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #4ecdc4; border-radius: 3px; line-height: 1;';
+        var btnStyle = 'color: #4ecdc4; text-decoration: none; font-size: 10px; cursor: pointer; flex-shrink: 0; width: 12px; height: 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #4ecdc4; border-radius: 2px; line-height: normal; box-sizing: border-box; padding: 0px 0px 2px 0px;';
         if (morphData.root) {
-            content += '<div style="margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; direction: rtl; text-align: right;">';
-            content += '<a href="' + searchUrl('root', morphData.root) + '" target="_top" style="' + arrowStyle + '" title="جستجو در کل قرآن">→</a>';
+            var rootEsc = (morphData.root + '').replace(/"/g, '&quot;');
+            content += '<div style="margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 6px; direction: rtl; text-align: right;">';
+            content += '<span style="display: inline-flex; align-items: center; gap: 3px;">';
+            content += '<a href="' + searchUrl('root', morphData.root) + '" target="_top" style="' + btnStyle + '" title="جستجو در کل قرآن">&lt;</a>';
+            content += '<span class="morph-tooltip-add-root" data-root="' + rootEsc + '" style="' + btnStyle + ' user-select: none;" title="افزودن به ریشه‌های انتخاب‌شده">+</span>';
+            content += '</span>';
             content += '<span style="flex: 1; text-align: right;"><span style="color: #ecf0f1; font-size: 10px;">ریشه:</span> <span style="font-weight: bold;">' + (morphData.root) + '</span></span>';
             content += '</div>';
         }
@@ -710,8 +717,15 @@ const morphologyData = {};
             content += '<div style="border-top: 1px solid rgba(255,255,255,0.2); margin: 3px 0; padding-top: 3px;"></div>';
         }
         if (morphData.lemma) {
-            content += '<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; direction: rtl; text-align: right;">';
-            content += '<a href="' + searchUrl('lem', morphData.lemma) + '" target="_top" style="' + arrowStyle + '" title="جستجو در کل قرآن">→</a>';
+            var lemEsc = (morphData.lemma + '').replace(/"/g, '&quot;');
+            var rootEscLem = (morphData.root && morphData.root !== morphData.lemma) ? (morphData.root + '').replace(/"/g, '&quot;') : '';
+            content += '<div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; direction: rtl; text-align: right;">';
+            content += '<span style="display: inline-flex; align-items: center; gap: 3px;">';
+            content += '<a href="' + searchUrl('lem', morphData.lemma) + '" target="_top" style="' + btnStyle + '" title="جستجو در کل قرآن">&lt;</a>';
+            if (typeof IS_DESKTOP_HOST !== 'undefined' && IS_DESKTOP_HOST && morphData.root) {
+                content += '<span class="morph-tooltip-add-lem" data-root="' + rootEscLem + '" data-lem="' + lemEsc + '" style="' + btnStyle + ' user-select: none;" title="افزودن ریشه با انتخاب فقط این مصدر">+</span>';
+            }
+            content += '</span>';
             content += '<span style="flex: 1; text-align: right;"><span style="color: #ecf0f1; font-size: 10px;">مصدر:</span> <span style="font-weight: bold;">' + (morphData.lemma) + '</span></span>';
             content += '</div>';
         }
@@ -725,6 +739,36 @@ const morphologyData = {};
         tooltip.addEventListener('mouseleave', function() {
             removeHighlights();
             hideTooltip();
+        });
+        tooltip.addEventListener('click', function(e) {
+            if (e.target.classList.contains('morph-tooltip-add-root')) {
+                e.preventDefault();
+                e.stopPropagation();
+                var root = e.target.getAttribute('data-root');
+                if (root && !highlightedRoots[root]) {
+                    addRootHighlight(root);
+                    updateHighlightedRootsPanel();
+                }
+                return;
+            }
+            if (e.target.classList.contains('morph-tooltip-add-lem')) {
+                e.preventDefault();
+                e.stopPropagation();
+                var root = e.target.getAttribute('data-root');
+                var lem = e.target.getAttribute('data-lem');
+                if (!lem || !root) return;
+                var suraNum = window.sureNumber != null ? Number(window.sureNumber) : null;
+                var regions = buildRegionsForRootWithLemma(root, lem, suraNum);
+                var payload;
+                if (typeof window.SearchShared !== 'undefined' && window.SearchShared.buildAddSearchItemPayloadForRootWithLemma) {
+                    payload = window.SearchShared.buildAddSearchItemPayloadForRootWithLemma(root, lem, regions);
+                } else {
+                    payload = { display: root, items: [{ type: 'root', value: root }], itemCheckedState: [true], distance: 0, crossSura: false, statsRows: null, searchDetails: 'ریشه: ' + root + ' (' + lem + ' [1/1])', regions: regions, root: root, lemma: lem };
+                }
+                if (payload && suraNum != null && Number.isFinite(suraNum)) payload.statsScopeSuras = [suraNum];
+                if (payload) payload.preventDuplicate = true;
+                if (payload) addSearchItemToSelected(payload);
+            }
         });
 
         // Position tooltip near the element (viewport coords: works with scrollable content column on desktop)
@@ -760,25 +804,23 @@ const morphologyData = {};
     // Add event listeners to word spans
     function attachHoverListeners() {
         // Use event delegation for better performance
-        document.addEventListener('mouseover', function(e) {
-            if (e.target.classList.contains('morph-word')) {
-                if (typeof console !== 'undefined' && console.log && !window._morphHoverFirst) {
-                    window._morphHoverFirst = true;
-                    console.log('[morph-hover] first word hover');
+        // On desktop: tooltip shows on click only; on standalone: tooltip shows on hover
+        if (!IS_DESKTOP_HOST) {
+            document.addEventListener('mouseover', function(e) {
+                if (e.target.classList.contains('morph-word')) {
+                    if (typeof console !== 'undefined' && console.log && !window._morphHoverFirst) {
+                        window._morphHoverFirst = true;
+                        console.log('[morph-hover] first word hover');
+                    }
+                    const ayah = parseInt(e.target.getAttribute('data-ayah'));
+                    const wordIndex = parseInt(e.target.getAttribute('data-word-index'));
+                    if (ayah && wordIndex) {
+                        highlightMatchingWords(ayah, wordIndex);
+                        showTooltip(e.target, ayah, wordIndex);
+                    }
                 }
-                // Read ayah and word number from the span
-                const ayah = parseInt(e.target.getAttribute('data-ayah'));
-                const wordIndex = parseInt(e.target.getAttribute('data-word-index'));
-                
-                if (ayah && wordIndex) {
-                    // Highlight all spans with the same ayah and word index
-                    highlightMatchingWords(ayah, wordIndex);
-                    
-                    // Show tooltip with morphology data
-                    showTooltip(e.target, ayah, wordIndex);
-                }
-            }
-        });
+            });
+        }
 
         document.addEventListener('mouseout', function(e) {
             if (e.target.classList.contains('morph-word')) {
@@ -787,7 +829,7 @@ const morphologyData = {};
                     cancelMorphTooltipHide();
                     return;
                 }
-                scheduleMorphTooltipHide(280);
+                scheduleMorphTooltipHide(IS_DESKTOP_HOST ? 0 : 280);
             }
         });
         document.addEventListener('mouseover', function(e) {
@@ -796,13 +838,18 @@ const morphologyData = {};
             }
         });
         
-        // Click handler for root highlighting
+        // Click handler: on desktop show tooltip (no root toggle); on standalone toggle root
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('morph-word')) {
                 const ayah = parseInt(e.target.getAttribute('data-ayah'));
                 const wordIndex = parseInt(e.target.getAttribute('data-word-index'));
-                
-                if (ayah && wordIndex && dataLoaded) {
+                if (!ayah || !wordIndex) return;
+                if (IS_DESKTOP_HOST) {
+                    highlightMatchingWords(ayah, wordIndex);
+                    showTooltip(e.target, ayah, wordIndex);
+                    return;
+                }
+                if (dataLoaded) {
                     const wordData = morphologyData[ayah] && morphologyData[ayah][wordIndex];
                     if (wordData && wordData.root) {
                         toggleRootHighlight(wordData.root);
@@ -1004,6 +1051,76 @@ const morphologyData = {};
             minimapWords.forEach(minimapWord => {
                 minimapWord.style.backgroundColor = '#ccc'; // Reset to default minimap color
                 minimapWord.classList.remove('root-highlighted');
+            });
+        });
+    }
+    
+    // Search-item region highlight colors (one per item, cycle) – visible as one contiguous region
+    const SEARCH_REGION_HIGHLIGHT_COLORS = [
+        'rgba(78, 205, 196, 0.5)',
+        'rgba(255, 183, 77, 0.55)',
+        'rgba(129, 199, 132, 0.5)',
+        'rgba(149, 117, 205, 0.5)',
+        'rgba(77, 208, 225, 0.5)',
+        'rgba(239, 154, 154, 0.5)',
+        'rgba(178, 223, 219, 0.55)',
+        'rgba(255, 224, 178, 0.55)'
+    ];
+    
+    function clearSearchRegionHighlights() {
+        document.querySelectorAll('.morph-word.search-region-highlight').forEach(function(w) {
+            w.style.backgroundColor = '';
+            w.classList.remove('search-region-highlight', 'search-region-first', 'search-region-middle', 'search-region-last');
+            w.removeAttribute('data-search-item-index');
+        });
+    }
+    
+    function applySearchItemHighlights(suraNum) {
+        clearSearchRegionHighlights();
+        suraNum = suraNum != null ? Number(suraNum) : (window.sureNumber != null ? Number(window.sureNumber) : null);
+        if (!suraNum || !selectedSearchItems.length) return;
+        
+        selectedSearchItems.forEach(function(entry, searchItemIndex) {
+            const regions = entry.regions;
+            if (!Array.isArray(regions) || regions.length === 0) return;
+            const color = SEARCH_REGION_HIGHLIGHT_COLORS[searchItemIndex % SEARCH_REGION_HIGHLIGHT_COLORS.length];
+            
+            regions.forEach(function(region) {
+                const regionSura = Number(region.sura);
+                if (regionSura !== suraNum) return;
+                const matches = (region.matches || []).filter(function(m) { return Number(m.sura) === suraNum; });
+                if (matches.length === 0) return;
+                matches.sort(function(a, b) { return (Number(a.ayah) - Number(b.ayah)) || (Number(a.wordIndex) - Number(b.wordIndex)); });
+                
+                var firstLast = [];
+                matches.forEach(function(m) {
+                    var ayah = String(m.ayah);
+                    var wi = String(m.wordIndex);
+                    var q = document.querySelectorAll('.morph-word[data-ayah="' + ayah + '"][data-word-index="' + wi + '"]');
+                    if (q.length > 0) firstLast.push(q[0]);
+                });
+                if (firstLast.length === 0) return;
+                firstLast.sort(function(a, b) {
+                    return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+                });
+                var first = firstLast[0];
+                var last = firstLast[firstLast.length - 1];
+                var allMorph = Array.from(document.querySelectorAll('.morph-word'));
+                allMorph.sort(function(a, b) {
+                    return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+                });
+                var iFirst = allMorph.indexOf(first);
+                var iLast = allMorph.indexOf(last);
+                if (iFirst < 0 || iLast < 0) return;
+                for (var i = iFirst; i <= iLast; i++) {
+                    var w = allMorph[i];
+                    w.classList.add('search-region-highlight');
+                    w.style.backgroundColor = color;
+                    w.setAttribute('data-search-item-index', String(searchItemIndex));
+                    if (i === iFirst) w.classList.add('search-region-first');
+                    else if (i === iLast) w.classList.add('search-region-last');
+                    else w.classList.add('search-region-middle');
+                }
             });
         });
     }
@@ -1405,6 +1522,91 @@ const morphologyData = {};
         updateHighlightedRootsPanel();
     }
     
+    function getSearchEmbedUrl(extraParams) {
+        var base = (window.location.pathname || '').indexOf('/Yasir/') !== -1 ? '../search.html' : 'search.html';
+        var sure = window.sureNumber != null ? window.sureNumber : 1;
+        var url = base + '?embed=1&sure=' + sure;
+        if (extraParams && typeof extraParams === 'object') {
+            if (extraParams.lem) url += '&lem=' + encodeURIComponent(extraParams.lem);
+            if (extraParams.root) url += '&root=' + encodeURIComponent(extraParams.root);
+        }
+        return url;
+    }
+    function openSearchModal(initialParams) {
+        if (document.getElementById('search-embed-modal-overlay')) return;
+        var overlay = document.createElement('div');
+        overlay.id = 'search-embed-modal-overlay';
+        overlay.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;';
+        var box = document.createElement('div');
+        box.style.cssText = 'background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); max-width: 95%; max-height: 90%; width: 900px; height: 80vh; display: flex; flex-direction: column; overflow: hidden; position: relative;';
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = '×';
+        closeBtn.style.cssText = 'position: absolute; top: 8px; left: 8px; z-index: 10; width: 32px; height: 32px; border: none; background: #eee; border-radius: 4px; font-size: 20px; cursor: pointer; line-height: 1;';
+        closeBtn.addEventListener('click', closeSearchModal);
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeSearchModal();
+        });
+        var iframe = document.createElement('iframe');
+        iframe.src = getSearchEmbedUrl(initialParams);
+        iframe.style.cssText = 'flex: 1; width: 100%; border: none; border-radius: 0 0 8px 8px;';
+        box.appendChild(closeBtn);
+        box.appendChild(iframe);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    }
+    function closeSearchModal() {
+        var el = document.getElementById('search-embed-modal-overlay');
+        if (el) el.remove();
+    }
+    function afterSearchItemAdded() {
+        updateHighlightedRootsPanel();
+        var suraForHighlight = window.sureNumber != null ? Number(window.sureNumber) : null;
+        setTimeout(function() { applySearchItemHighlights(suraForHighlight); }, 100);
+    }
+
+    /**
+     * Add a search item to the selected roots list. Single entry point for both search window and lemma +.
+     * @param {Object} data - payload (same shape as search postMessage: display, items, itemCheckedState, distance, crossSura, statsRows, searchDetails, regions; optional root, lemma)
+     */
+    function addSearchItemToSelected(data) {
+        if (!data || data.display == null) return;
+        if (data.preventDuplicate && data.root != null && data.lemma != null && selectedSearchItems.some(function(entry) { return entry.root === data.root && entry.lemma === data.lemma; })) return;
+        var items = Array.isArray(data.items) ? data.items : [];
+        var entry = {
+            display: data.display,
+            items: items,
+            itemCheckedState: Array.isArray(data.itemCheckedState) ? data.itemCheckedState : [],
+            distance: data.distance,
+            crossSura: data.crossSura,
+            stats: Array.isArray(data.stats) ? data.stats : (Array.isArray(data.statsRows) ? data.statsRows : null),
+            searchDetails: typeof data.searchDetails === 'string' ? data.searchDetails : null,
+            regions: Array.isArray(data.regions) ? data.regions : null
+        };
+        if (Array.isArray(data.statsScopeSuras)) entry.statsScopeSuras = data.statsScopeSuras.slice();
+        else if (data.statsScopeSuras === null) entry.statsScopeSuras = null;
+        if (data.root != null) entry.root = data.root;
+        if (data.lemma != null) entry.lemma = data.lemma;
+        else if (items.length === 1 && items[0] && items[0].type === 'root') entry.root = items[0].value;
+        selectedSearchItems.push(entry);
+        afterSearchItemAdded();
+    }
+
+    /** Build regions for root+lemma in current sura (morphologyData is local). Then use shared payload builder. */
+    function buildRegionsForRootWithLemma(root, lemma, suraNum) {
+        if (!morphologyData || !suraNum) return null;
+        var matches = [];
+        for (var ayah in morphologyData) {
+            if (!Object.prototype.hasOwnProperty.call(morphologyData, ayah)) continue;
+            for (var wi in morphologyData[ayah]) {
+                if (!Object.prototype.hasOwnProperty.call(morphologyData[ayah], wi)) continue;
+                var d = morphologyData[ayah][wi];
+                if (d && d.root === root && d.lemma === lemma) matches.push({ sura: suraNum, ayah: Number(ayah), wordIndex: Number(wi) });
+            }
+        }
+        matches.sort(function(a, b) { return (a.ayah - b.ayah) || (a.wordIndex - b.wordIndex); });
+        return matches.length > 0 ? matches.map(function(m) { return { sura: suraNum, startAyah: m.ayah, endAyah: m.ayah, matches: [m] }; }) : null;
+    }
+    
     // Update the highlighted roots panel
     function updateHighlightedRootsPanel() {
         const content = document.getElementById('highlighted-roots-content');
@@ -1430,38 +1632,41 @@ const morphologyData = {};
             gap: 4px;
         `;
         const selectedTitleText = document.createElement('span');
-        selectedTitleText.textContent = 'ریشه‌های انتخاب شده';
+        selectedTitleText.textContent = 'عبارت‌های انتخاب شده';
         selectedSection.appendChild(selectedTitle);
         selectedTitle.appendChild(selectedTitleText);
+        if (IS_DESKTOP_HOST) {
+            const addSearchBtn = document.createElement('button');
+            addSearchBtn.textContent = '+';
+            addSearchBtn.title = 'افزودن جستجوی ترکیبی';
+            addSearchBtn.style.cssText = 'width: 10px; height: 10px; padding: 2px 0px 0px 0px; font-size: 10px; line-height: normal; border: 1px solid #4ecdc4; border-radius: 2px; background: transparent; color: #4ecdc4; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;';
+            addSearchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openSearchModal();
+            });
+            selectedTitle.appendChild(addSearchBtn);
+            const clearSearchBtn = document.createElement('button');
+            clearSearchBtn.textContent = '✕';
+            clearSearchBtn.title = 'پاک کردن همهٔ جستجوها و ریشه‌های انتخاب شده';
+            clearSearchBtn.style.cssText = 'width: 10px; height: 10px; padding: 2px 0px 0px 0px; font-size: 10px; line-height: normal; border: 1px solid #4ecdc4; border-radius: 2px; background: transparent; color: #4ecdc4; cursor: pointer; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;';
+            clearSearchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectedSearchItems.length = 0;
+                Object.keys(highlightedRoots).slice().forEach(function(r) { removeRootHighlight(r); });
+                updateHighlightedRootsPanel();
+                applySearchItemHighlights();
+                if (typeof window.__hideSelectedRootTooltip === 'function') window.__hideSelectedRootTooltip();
+            });
+            selectedTitle.appendChild(clearSearchBtn);
+        }
         
         const selectedContent = document.createElement('div');
         selectedContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';
         
         const roots = Object.keys(highlightedRoots);
-        if (roots.length === 0) {
+        if (roots.length === 0 && selectedSearchItems.length === 0) {
             selectedContent.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای مشخص نشده</div>';
-        } else {
-            // Add button to unhighlight currently selected word
-            const unhighlightBtn = document.createElement('button');
-            unhighlightBtn.textContent = 'لغو برجسته‌سازی';
-            unhighlightBtn.style.cssText = `
-                width: 100%;
-                padding: 4px;
-                margin-bottom: 4px;
-                font-size: 9px;
-                cursor: pointer;
-                background: #ff8800;
-                color: white;
-                border: none;
-                border-radius: 2px;
-                ${IS_DESKTOP_HOST ? '' : 'font-family: Arial, sans-serif;'}
-            `;
-            unhighlightBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                unhighlightCurrentSelection();
-            });
-            selectedContent.appendChild(unhighlightBtn);
-            
+        } else if (roots.length > 0) {
             roots.forEach(root => {
                 const { colorIndex, color } = highlightedRoots[root];
                 const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
@@ -1522,6 +1727,23 @@ const morphologyData = {};
                 selectedContent.appendChild(rootDiv);
             });
         }
+        selectedSearchItems.forEach(function(entry, idx) {
+            const chip = document.createElement('div');
+            chip.setAttribute('data-search-item-index', String(idx));
+            chip.style.cssText = 'display: inline-flex; align-items: center; gap: 2px; background: #e8f4f8; border: 1px solid #4ecdc4; border-radius: 2px; cursor: default; padding: 1px 4px; font-size: 8px; line-height: 1.1; margin: 1px 0;';
+            chip.textContent = entry.display || 'جستجو';
+            chip.title = ''; /* tooltip shown by desktop.js hover */
+            chip.addEventListener('click', function(e) {
+                if (e.ctrlKey) {
+                    e.stopPropagation();
+                    selectedSearchItems.splice(idx, 1);
+                    updateHighlightedRootsPanel();
+                    applySearchItemHighlights();
+                    if (typeof window.__hideSelectedRootTooltip === 'function') window.__hideSelectedRootTooltip();
+                }
+            });
+            selectedContent.appendChild(chip);
+        });
         
         selectedSection.appendChild(selectedContent);
         content.appendChild(selectedSection);
@@ -3426,9 +3648,12 @@ const morphologyData = {};
             window.addEventListener('resize', handleScroll, { passive: true });
         }
 
-        // Click handler to scroll to clicked position
+        // Click handler to scroll to clicked position (capture phase so it runs before root-panel handlers)
         minimapContent.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent event bubbling
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            // Ignore if click was not actually on the minimap (e.g. delegated from elsewhere)
+            if (!e.target || !minimap.contains(e.target)) return;
             
             // Get click position relative to minimapContent
             // Account for minimap container's scroll position if it's scrollable
@@ -3476,19 +3701,26 @@ const morphologyData = {};
                 });
             } else {
                 // Center the viewport on the clicked position
-                // Scroll so that the clicked point is in the middle of the viewport
-                const viewportHeight = window.innerHeight;
-                const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
-                
-                // Scroll to the calculated position
-                window.scrollTo({
-                    top: Math.max(0, centeredScrollTop),
-                    behavior: 'smooth'
-                });
+                const desktopWrapper = document.getElementById('desktop-content-wrapper');
+                if (desktopWrapper) {
+                    const viewportHeight = desktopWrapper.clientHeight;
+                    const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
+                    desktopWrapper.scrollTo({
+                        top: Math.max(0, centeredScrollTop),
+                        behavior: 'smooth'
+                    });
+                } else {
+                    const viewportHeight = window.innerHeight;
+                    const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
+                    window.scrollTo({
+                        top: Math.max(0, centeredScrollTop),
+                        behavior: 'smooth'
+                    });
+                }
             }
             
             // The scroll event will trigger updateVisibleHighlight automatically
-        });
+        }, true);
 
         // Initial update
         updateVisibleHighlight();
@@ -3514,6 +3746,20 @@ const morphologyData = {};
             .morph-word-highlighted {
                 background-color: rgba(255, 255, 0, 0.5) !important;
             }
+            .search-region-highlight {
+                padding: 1px 3px;
+                margin-inline: -1px;
+            }
+            /* RTL: first word = start of phrase (right); last = end (left). Round outer edges for band effect. */
+            .search-region-first {
+                border-radius: 0 4px 4px 0;
+            }
+            .search-region-last {
+                border-radius: 4px 0 0 4px;
+            }
+            .search-region-middle {
+                border-radius: 0;
+            }
             .minimap-word {
                 transition: background-color 0.1s;
             }
@@ -3538,7 +3784,27 @@ const morphologyData = {};
     function init(sureNumber) {
         if (typeof console !== 'undefined' && console.log) console.log('[morph-hover] init sura', sureNumber);
         addStyles();
-        
+        if (IS_DESKTOP_HOST && !window._searchEmbedMessageListenerAdded) {
+            window._searchEmbedMessageListenerAdded = true;
+            window.__getSelectedSearchItemStats = function(index) {
+                return selectedSearchItems[index] ? selectedSearchItems[index].stats : null;
+            };
+            window.__getSelectedSearchItemDetails = function(index) {
+                return selectedSearchItems[index] ? selectedSearchItems[index].searchDetails : null;
+            };
+            window.__getSelectedSearchItemEntry = function(index) {
+                return selectedSearchItems[index] || null;
+            };
+            window.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'addSearchItem' && e.data.display != null) {
+                    if (typeof console !== 'undefined' && console.log) {
+                        console.log('[morph-hover] addSearchItem received, regions:', Array.isArray(e.data.regions) ? e.data.regions.length : 0);
+                    }
+                    addSearchItemToSelected(e.data);
+                    closeSearchModal();
+                }
+            });
+        }
         // Make sura header clickable
         makeSuraHeaderClickable();
         
@@ -3562,7 +3828,30 @@ const morphologyData = {};
                 attachHoverListeners();
                 // Create highlighted roots panel
                 createHighlightedRootsPanel();
+                // Debug: pre-add a search item to test region highlighting (re-enable to use)
+                // if (typeof IS_DESKTOP_HOST !== 'undefined' && IS_DESKTOP_HOST && !window._debugSearchItemAdded) {
+                //     window._debugSearchItemAdded = true;
+                //     selectedSearchItems.push({
+                //         display: 'قوم+ملک C5',
+                //         items: [],
+                //         itemCheckedState: [],
+                //         distance: 5,
+                //         crossSura: false,
+                //         stats: null,
+                //         searchDetails: null,
+                //         regions: [{
+                //             sura: sureNumber,
+                //             startAyah: 1,
+                //             endAyah: 1,
+                //             matches: [
+                //                 { sura: sureNumber, ayah: 1, wordIndex: 1 },
+                //                 { sura: sureNumber, ayah: 1, wordIndex: 6 }
+                //             ]
+                //         }]
+                //     });
+                // }
                 updateHighlightedRootsPanel();
+                applySearchItemHighlights(sureNumber);
                 
                 // Load and store root frequency data for current sura
                 loadRootsFreqData().then((data) => {

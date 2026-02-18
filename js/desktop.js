@@ -13,6 +13,10 @@
     const rootCharts = new Map();
     let rootClickTraceActive = false;
 
+    let _desktopMorphologyCache = null;
+    let _desktopStatsUniverseCache = null;
+    let _desktopMorphologyLoadStarted = false;
+
     const LAST_SURA_COOKIE = 'desktopLastSura';
     function setCookie(name, value, days = 365) {
         try {
@@ -310,7 +314,7 @@
             if (existing) existing.remove();
             const script = document.createElement('script');
             script.id = 'morphology-hover-script';
-            script.src = 'Yasir/morphology-hover.js?v=2';
+            script.src = 'Yasir/morphology-hover.js?v=3';
             script.onload = () => resolve();
             script.onerror = () => resolve(); // resolve anyway to not block
             document.body.appendChild(script);
@@ -735,33 +739,30 @@
         return selectedRootTooltip;
     }
 
-    // Show tooltip for selected root
+    // Show tooltip for selected root (or fallback when no measure data)
     function showSelectedRootTooltip(rootElement, root) {
         const measures = getAllMeasuresForRootFromDOM(root);
-        
-        if (!measures) return;
-        
         const tooltip = getSelectedRootTooltip();
-        tooltip.innerHTML = formatMeasuresTooltip(root, measures);
-        
+        if (measures && measures.length > 0) {
+            tooltip.innerHTML = formatMeasuresTooltip(root, measures);
+        } else {
+            const countSpan = rootElement.querySelector('span:last-child');
+            const count = countSpan ? countSpan.textContent : '';
+            tooltip.innerHTML = `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #555;">${root}</div><div style="font-size:10px;">${count ? 'تعداد در سوره: ' + count : 'ریشهٔ انتخاب‌شده'}</div>`;
+        }
         const rect = rootElement.getBoundingClientRect();
         const tooltipWidth = 240;
-        
-        // Position to the right of element, or left if not enough space
         let left = rect.right + 8;
         if (left + tooltipWidth > window.innerWidth - 10) {
             left = rect.left - tooltipWidth - 8;
         }
         left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
-        
         let top = rect.top;
-        // Keep within viewport vertically
-        const tooltipHeight = 150; // estimate
+        const tooltipHeight = 150;
         if (top + tooltipHeight > window.innerHeight - 10) {
             top = window.innerHeight - tooltipHeight - 10;
         }
         top = Math.max(10, top);
-        
         tooltip.style.left = `${left}px`;
         tooltip.style.top = `${top}px`;
         tooltip.style.opacity = '1';
@@ -775,42 +776,140 @@
         tooltip.style.visibility = 'hidden';
     }
 
-    // Setup hover events for selected roots section
+    // Format per-sura stats for a search item (row from search.html stats)
+    function formatSearchItemStatsTooltip(display, row) {
+        const pct = (x) => fmtFaInText((Number(x) * 100).toFixed(2) + '%');
+        const num = (x, d) => fmtFaInText(Number(x).toFixed(d));
+        let html = `<div style="font-size:11px;font-weight:bold;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #555;">${fmtFaInText(display)}</div>`;
+        html += `<div style="font-size:9px;line-height:1.4;"><span style="color:#4ecdc4;font-weight:bold;">تعداد:</span> ${fmtFa(row.count || 0)}</div>`;
+        html += `<div style="font-size:9px;line-height:1.4;"><span style="color:#4ecdc4;font-weight:bold;">فراوانی:</span> ${pct(row.relInSura)}</div>`;
+        html += `<div style="font-size:9px;line-height:1.4;"><span style="color:#4ecdc4;font-weight:bold;">تمایز:</span> ${num(row.ratio, 3)}</div>`;
+        html += `<div style="font-size:9px;line-height:1.4;"><span style="color:#4ecdc4;font-weight:bold;">KL:</span> ${num(row.kl, 4)}</div>`;
+        html += `<div style="font-size:9px;line-height:1.4;"><span style="color:#4ecdc4;font-weight:bold;">N²/N:</span> ${num(row.m, 3)}</div>`;
+        return html;
+    }
+
+    // Setup hover events for selected roots section (roots + selected search items)
     function setupSelectedRootsHover() {
         const rootPanel = document.getElementById('highlighted-roots-panel');
         if (!rootPanel) return;
+        window.__hideSelectedRootTooltip = hideSelectedRootTooltip;
         
-        // Use event delegation
+        function isInSelectedSection(el) {
+            const content = document.getElementById('highlighted-roots-content');
+            const first = content && content.firstElementChild;
+            return el && first && first.contains(el);
+        }
+        
         rootPanel.addEventListener('mouseover', (e) => {
-            const target = e.target.closest('[data-root]');
-            if (!target) return;
-            
-            // Check if this is in the selected roots section (first section in the panel)
-            const section = target.closest('div[style*="margin-bottom"]');
-            if (!section) return;
-            
-            // The selected roots section doesn't have an ID, but it's the first one
-            // Check if it's NOT in one of the measure sections
-            const measureSections = ['top-roots-section', 'selective-roots-section', 'high-kl-roots-section', 'n2n-roots-section'];
-            const inMeasureSection = measureSections.some(id => target.closest(`#${id}`));
-            
-            if (!inMeasureSection) {
-                const root = target.getAttribute('data-root');
-                if (root) {
-                    showSelectedRootTooltip(target, root);
+            const rootTarget = e.target.closest('[data-root]');
+            const searchTarget = e.target.closest('[data-search-item-index]');
+            if (rootTarget && isInSelectedSection(rootTarget)) {
+                const measureSections = ['top-roots-section', 'selective-roots-section', 'high-kl-roots-section', 'n2n-roots-section'];
+                if (!measureSections.some(id => rootTarget.closest(`#${id}`))) {
+                    const root = rootTarget.getAttribute('data-root');
+                    if (root) showSelectedRootTooltip(rootTarget, root);
                 }
+                return;
+            }
+            if (searchTarget && isInSelectedSection(searchTarget)) {
+                const tooltip = getSelectedRootTooltip();
+                const display = (searchTarget.textContent || '').trim() || 'جستجو';
+                const idx = parseInt(searchTarget.getAttribute('data-search-item-index'), 10);
+                const statsRows = (typeof window.__getSelectedSearchItemStats === 'function' && window.__getSelectedSearchItemStats(idx)) || null;
+                const searchDetails = (typeof window.__getSelectedSearchItemDetails === 'function' && window.__getSelectedSearchItemDetails(idx)) || null;
+                const currentSura = Number(window.sureNumber) || Number(new URLSearchParams(window.location.search).get('s')) || null;
+                const row = statsRows && statsRows.length && currentSura ? statsRows.find(r => Number(r.sura) === currentSura) : null;
+                const fallbackRow = statsRows && statsRows.length && !row ? statsRows[0] : null;
+                const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
+                const detailsBlock = searchDetails ? '<div style="font-size:9px;color:#8ab;margin-top:6px;padding-top:4px;border-top:1px solid #444;">جزئیات جستجو:<br>' + esc(searchDetails) + '</div>' : '';
+                if (row) {
+                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, row) + detailsBlock;
+                } else if (fallbackRow) {
+                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, fallbackRow) +
+                        '<div style="font-size:8px;color:#888;margin-top:4px;">آمار سورهٔ ' + fmtFa(fallbackRow.sura) + '</div>' + detailsBlock;
+                } else {
+                    let computedRow = null;
+                    if (window.SearchShared && typeof window.__getSelectedSearchItemEntry === 'function') {
+                        const entry = window.__getSelectedSearchItemEntry(idx);
+                        let matches = [];
+                        if (entry && _desktopStatsUniverseCache) {
+                            const entryScope = Array.isArray(entry.statsScopeSuras) ? entry.statsScopeSuras : (entry && entry.statsScopeSuras === null ? null : null);
+                            if (entry.root != null && entry.lemma != null && _desktopMorphologyCache) {
+                                const scopeSet = Array.isArray(entryScope) ? new Set(entryScope.map(Number)) : null;
+                                for (const suraKey of Object.keys(_desktopMorphologyCache)) {
+                                    const suraNum = Number(suraKey);
+                                    if (!Number.isFinite(suraNum)) continue;
+                                    if (scopeSet && !scopeSet.has(suraNum)) continue;
+                                    if (!scopeSet && currentSura != null && Number.isFinite(currentSura) && suraNum !== currentSura) continue;
+                                    const suraData = _desktopMorphologyCache[suraKey];
+                                    for (const ayahKey of Object.keys(suraData)) {
+                                        const ayahData = suraData[ayahKey] || {};
+                                        for (const wi of Object.keys(ayahData)) {
+                                            const w = ayahData[wi];
+                                            if (w && w.root === entry.root && w.lemma === entry.lemma) {
+                                                matches.push({ sura: suraNum, ayah: Number(ayahKey), wordIndex: Number(wi) });
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                matches = entry && Array.isArray(entry.regions) ? entry.regions.flatMap(r => r.matches || []) : [];
+                            }
+                            if (matches.length) {
+                                const itemType = (entry && entry.root) ? 'root' : 'text';
+                                const focusedLem = (entry && entry.lemma) ? entry.lemma : null;
+                                const scope = Array.isArray(entryScope)
+                                    ? entryScope
+                                    : (entry && entry.statsScopeSuras === null ? null : ((currentSura != null && Number.isFinite(currentSura)) ? [currentSura] : null));
+                                const universe = window.SearchShared.resolveStatsUniverseScoped(
+                                    _desktopStatsUniverseCache,
+                                    itemType,
+                                    scope,
+                                    {
+                                        source: 'desktop.js',
+                                        itemDisplay: display,
+                                        currentSura: currentSura || null
+                                    }
+                                );
+                                const rows = window.SearchShared.computeStatsRowsForItem(matches, itemType, universe, focusedLem);
+                                computedRow = currentSura ? rows.find(r => Number(r.sura) === currentSura) : (rows[0] || null);
+                            }
+                        }
+                        if (!_desktopMorphologyLoadStarted) {
+                            _desktopMorphologyLoadStarted = true;
+                            const base = (window.location.pathname || '').indexOf('/Yasir/') !== -1 ? '../' : '';
+                            fetch(base + 'data/quranic-corpus-morphology-0.4.txt').then(r => r.text()).then(text => {
+                                _desktopMorphologyCache = window.SearchShared.parseMorphologyForStats(text);
+                                _desktopStatsUniverseCache = window.SearchShared.buildStatsUniverseCache(_desktopMorphologyCache);
+                            }).catch(() => {});
+                        }
+                    }
+                    if (computedRow) {
+                        tooltip.innerHTML = formatSearchItemStatsTooltip(display, computedRow) + detailsBlock;
+                    } else {
+                        tooltip.innerHTML = `<div style="font-size:10px;margin-bottom:4px;">برای دیدن آمار این جستجو، در پنجرهٔ جستجو ابتدا <strong>جستجو</strong> را بزنید و سپس <strong>افزودن</strong> را بزنید؛ یا دوباره روی این مورد نگه دارید پس از بارگذاری داده‌ها.</div><div style="font-size:9px;color:#888;">${esc(display)}</div>${detailsBlock}`;
+                    }
+                }
+                const rect = searchTarget.getBoundingClientRect();
+                const tooltipWidth = 260;
+                let left = rect.right + 8;
+                if (left + tooltipWidth > window.innerWidth - 10) left = rect.left - tooltipWidth - 8;
+                left = Math.max(10, Math.min(left, window.innerWidth - tooltipWidth - 10));
+                let top = rect.top;
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+                tooltip.style.opacity = '1';
+                tooltip.style.visibility = 'visible';
             }
         });
         
         rootPanel.addEventListener('mouseout', (e) => {
-            const target = e.target.closest('[data-root]');
-            if (target) {
-                // Check if we're leaving the root element (not just moving within it)
-                const related = e.relatedTarget;
-                if (!related || !target.contains(related)) {
-                    hideSelectedRootTooltip();
-                }
-            }
+            const related = e.relatedTarget;
+            const rootTarget = e.target.closest('[data-root]');
+            const searchTarget = e.target.closest('[data-search-item-index]');
+            if (rootTarget && (!related || !rootTarget.contains(related))) hideSelectedRootTooltip();
+            if (searchTarget && (!related || !searchTarget.contains(related))) hideSelectedRootTooltip();
         });
     }
 
