@@ -270,7 +270,7 @@
       let lemma = null;
       for (const seg of segments) {
         if (!root) {
-          const rootMatch = (seg.features || '').match(/ROOT:([A-Za-z'><&}{\-]+)/);
+          const rootMatch = (seg.features || '').match(/ROOT:([^\|]+)/);
           if (rootMatch) root = toArabic(rootMatch[1]);
         }
         if (!lemma) {

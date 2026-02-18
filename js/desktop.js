@@ -789,6 +789,30 @@
         return html;
     }
 
+    function getSearchItemRegionOccurrenceCount(entry, suraNum) {
+        const targetSura = Number(suraNum);
+        if (!entry || !Array.isArray(entry.regions) || !Number.isFinite(targetSura)) return null;
+        const regionKeys = new Set();
+        let fallbackCounter = 0;
+        entry.regions.forEach((region) => {
+            if (Number(region?.sura) !== targetSura) return;
+            const startAyah = Number(region?.startAyah);
+            const endAyah = Number(region?.endAyah);
+            if (Number.isFinite(startAyah) && Number.isFinite(endAyah)) {
+                regionKeys.add(`${startAyah}:${endAyah}`);
+                return;
+            }
+            const firstMatchAyah = Number(Array.isArray(region?.matches) && region.matches[0] ? region.matches[0].ayah : NaN);
+            if (Number.isFinite(firstMatchAyah)) {
+                regionKeys.add(`${firstMatchAyah}:${firstMatchAyah}`);
+                return;
+            }
+            fallbackCounter += 1;
+            regionKeys.add(`fallback:${fallbackCounter}`);
+        });
+        return regionKeys.size;
+    }
+
     // Setup hover events for selected roots section (roots + selected search items)
     function setupSelectedRootsHover() {
         const rootPanel = document.getElementById('highlighted-roots-panel');
@@ -816,22 +840,28 @@
                 const tooltip = getSelectedRootTooltip();
                 const display = (searchTarget.textContent || '').trim() || 'جستجو';
                 const idx = parseInt(searchTarget.getAttribute('data-search-item-index'), 10);
+                const entry = (typeof window.__getSelectedSearchItemEntry === 'function' && window.__getSelectedSearchItemEntry(idx)) || null;
                 const statsRows = (typeof window.__getSelectedSearchItemStats === 'function' && window.__getSelectedSearchItemStats(idx)) || null;
                 const searchDetails = (typeof window.__getSelectedSearchItemDetails === 'function' && window.__getSelectedSearchItemDetails(idx)) || null;
                 const currentSura = Number(window.sureNumber) || Number(new URLSearchParams(window.location.search).get('s')) || null;
                 const row = statsRows && statsRows.length && currentSura ? statsRows.find(r => Number(r.sura) === currentSura) : null;
                 const fallbackRow = statsRows && statsRows.length && !row ? statsRows[0] : null;
+                const withOccurrenceCount = (rowObj) => {
+                    if (!rowObj) return rowObj;
+                    const occurrenceCount = getSearchItemRegionOccurrenceCount(entry, Number(rowObj.sura));
+                    if (!Number.isFinite(Number(occurrenceCount))) return rowObj;
+                    return { ...rowObj, count: Number(occurrenceCount) };
+                };
                 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/\n/g, '<br>');
                 const detailsBlock = searchDetails ? '<div style="font-size:9px;color:#8ab;margin-top:6px;padding-top:4px;border-top:1px solid #444;">جزئیات جستجو:<br>' + esc(searchDetails) + '</div>' : '';
                 if (row) {
-                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, row) + detailsBlock;
+                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, withOccurrenceCount(row)) + detailsBlock;
                 } else if (fallbackRow) {
-                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, fallbackRow) +
+                    tooltip.innerHTML = formatSearchItemStatsTooltip(display, withOccurrenceCount(fallbackRow)) +
                         '<div style="font-size:8px;color:#888;margin-top:4px;">آمار سورهٔ ' + fmtFa(fallbackRow.sura) + '</div>' + detailsBlock;
                 } else {
                     let computedRow = null;
                     if (window.SearchShared && typeof window.__getSelectedSearchItemEntry === 'function') {
-                        const entry = window.__getSelectedSearchItemEntry(idx);
                         let matches = [];
                         if (entry && _desktopStatsUniverseCache) {
                             const entryScope = Array.isArray(entry.statsScopeSuras) ? entry.statsScopeSuras : (entry && entry.statsScopeSuras === null ? null : null);
@@ -886,7 +916,7 @@
                         }
                     }
                     if (computedRow) {
-                        tooltip.innerHTML = formatSearchItemStatsTooltip(display, computedRow) + detailsBlock;
+                        tooltip.innerHTML = formatSearchItemStatsTooltip(display, withOccurrenceCount(computedRow)) + detailsBlock;
                     } else {
                         tooltip.innerHTML = `<div style="font-size:10px;margin-bottom:4px;">برای دیدن آمار این جستجو، در پنجرهٔ جستجو ابتدا <strong>جستجو</strong> را بزنید و سپس <strong>افزودن</strong> را بزنید؛ یا دوباره روی این مورد نگه دارید پس از بارگذاری داده‌ها.</div><div style="font-size:9px;color:#888;">${esc(display)}</div>${detailsBlock}`;
                     }

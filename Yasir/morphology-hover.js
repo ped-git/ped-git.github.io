@@ -64,6 +64,7 @@ const morphologyData = {};
     // Currently searched root and selected word
     let currentSearchedRoot = null;
     let currentSelectedWord = null; // {ayah, wordIndex}
+    let currentSearchedSearchItemIndex = null;
     
     // Roots frequency data
     let rootsFreqData = null;
@@ -1055,7 +1056,7 @@ const morphologyData = {};
         });
     }
     
-    // Search-item region highlight colors (one per item, cycle) – visible as one contiguous region
+    // Search-item highlight colors (one per item, cycle), rendered as composable overlays.
     const SEARCH_REGION_HIGHLIGHT_COLORS = [
         'rgba(78, 205, 196, 0.5)',
         'rgba(255, 183, 77, 0.55)',
@@ -1069,10 +1070,29 @@ const morphologyData = {};
     
     function clearSearchRegionHighlights() {
         document.querySelectorAll('.morph-word.search-region-highlight').forEach(function(w) {
-            w.style.backgroundColor = '';
+            w.style.boxShadow = '';
             w.classList.remove('search-region-highlight', 'search-region-first', 'search-region-middle', 'search-region-last');
             w.removeAttribute('data-search-item-index');
         });
+        document.querySelectorAll('.minimap-word.search-region-highlight').forEach(function(w) {
+            w.style.boxShadow = '';
+            w.classList.remove('search-region-highlight');
+            w.removeAttribute('data-search-item-index');
+        });
+    }
+
+    const SEARCH_STRIPE_PX_TEXT = 6;
+    const SEARCH_STRIPE_PX_MINIMAP = 3;
+
+    function buildSearchOverlayBoxShadow(colors, stripePx) {
+        if (!Array.isArray(colors) || colors.length === 0) return '';
+        var shadows = [];
+        stripePx = Number(stripePx) || SEARCH_STRIPE_PX_TEXT;
+        for (var i = 0; i < colors.length; i++) {
+            shadows.push('inset 0 -' + String((i + 1) * stripePx) + 'px 0 0 ' + colors[i]);
+        }
+        shadows.push('inset 0 0 0 1px rgba(0,0,0,0.08)');
+        return shadows.join(', ');
     }
     
     function applySearchItemHighlights(suraNum) {
@@ -1080,6 +1100,8 @@ const morphologyData = {};
         suraNum = suraNum != null ? Number(suraNum) : (window.sureNumber != null ? Number(window.sureNumber) : null);
         if (!suraNum || !selectedSearchItems.length) return;
         
+        var overlaysByWord = new Map();
+        var allMorph = Array.from(document.querySelectorAll('.morph-word'));
         selectedSearchItems.forEach(function(entry, searchItemIndex) {
             const regions = entry.regions;
             if (!Array.isArray(regions) || regions.length === 0) return;
@@ -1091,37 +1113,80 @@ const morphologyData = {};
                 const matches = (region.matches || []).filter(function(m) { return Number(m.sura) === suraNum; });
                 if (matches.length === 0) return;
                 matches.sort(function(a, b) { return (Number(a.ayah) - Number(b.ayah)) || (Number(a.wordIndex) - Number(b.wordIndex)); });
-                
-                var firstLast = [];
-                matches.forEach(function(m) {
-                    var ayah = String(m.ayah);
-                    var wi = String(m.wordIndex);
-                    var q = document.querySelectorAll('.morph-word[data-ayah="' + ayah + '"][data-word-index="' + wi + '"]');
-                    if (q.length > 0) firstLast.push(q[0]);
+
+                var startAyah = Number(region.startAyah);
+                var endAyah = Number(region.endAyah);
+                if (!Number.isFinite(startAyah)) startAyah = Number(matches[0].ayah);
+                if (!Number.isFinite(endAyah)) endAyah = Number(matches[matches.length - 1].ayah);
+                if (endAyah < startAyah) {
+                    var tmp = startAyah;
+                    startAyah = endAyah;
+                    endAyah = tmp;
+                }
+
+                var startWord = null;
+                var endWord = null;
+                var startAyahWords = matches
+                    .filter(function(m) { return Number(m.ayah) === startAyah; })
+                    .map(function(m) { return Number(m.wordIndex); })
+                    .filter(function(v) { return Number.isFinite(v); });
+                var endAyahWords = matches
+                    .filter(function(m) { return Number(m.ayah) === endAyah; })
+                    .map(function(m) { return Number(m.wordIndex); })
+                    .filter(function(v) { return Number.isFinite(v); });
+                if (startAyahWords.length > 0) startWord = Math.min.apply(null, startAyahWords);
+                if (endAyahWords.length > 0) endWord = Math.max.apply(null, endAyahWords);
+
+                var regionEls = allMorph.filter(function(w) {
+                    var ay = Number(w.getAttribute('data-ayah'));
+                    var wi = Number(w.getAttribute('data-word-index'));
+                    if (!Number.isFinite(ay) || !Number.isFinite(wi)) return false;
+                    if (ay < startAyah || ay > endAyah) return false;
+                    if (ay === startAyah && startWord != null && wi < startWord) return false;
+                    if (ay === endAyah && endWord != null && wi > endWord) return false;
+                    return true;
                 });
-                if (firstLast.length === 0) return;
-                firstLast.sort(function(a, b) {
-                    return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
-                });
-                var first = firstLast[0];
-                var last = firstLast[firstLast.length - 1];
-                var allMorph = Array.from(document.querySelectorAll('.morph-word'));
-                allMorph.sort(function(a, b) {
-                    return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
-                });
-                var iFirst = allMorph.indexOf(first);
-                var iLast = allMorph.indexOf(last);
-                if (iFirst < 0 || iLast < 0) return;
-                for (var i = iFirst; i <= iLast; i++) {
-                    var w = allMorph[i];
-                    w.classList.add('search-region-highlight');
-                    w.style.backgroundColor = color;
-                    w.setAttribute('data-search-item-index', String(searchItemIndex));
-                    if (i === iFirst) w.classList.add('search-region-first');
-                    else if (i === iLast) w.classList.add('search-region-last');
-                    else w.classList.add('search-region-middle');
+
+                if (regionEls.length === 0) {
+                    // Fallback: at least highlight exact matched words if boundaries are not usable.
+                    regionEls = matches.map(function(m) {
+                        return document.querySelector('.morph-word[data-ayah="' + String(m.ayah) + '"][data-word-index="' + String(m.wordIndex) + '"]');
+                    }).filter(Boolean);
+                }
+
+                var seen = new Set();
+                for (var i = 0; i < regionEls.length; i++) {
+                    var w = regionEls[i];
+                    var ayahAttr = w.getAttribute('data-ayah') || '';
+                    var wordIndexAttr = w.getAttribute('data-word-index') || '';
+                    var key = ayahAttr + ':' + wordIndexAttr;
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    if (!overlaysByWord.has(key)) overlaysByWord.set(key, { el: w, colors: [], indices: [] });
+                    var info = overlaysByWord.get(key);
+                    if (info.indices.indexOf(searchItemIndex) === -1) {
+                        info.indices.push(searchItemIndex);
+                        info.colors.push(color);
+                    }
                 }
             });
+        });
+        overlaysByWord.forEach(function(info) {
+            var w = info.el;
+            w.classList.add('search-region-highlight');
+            w.style.boxShadow = buildSearchOverlayBoxShadow(info.colors, SEARCH_STRIPE_PX_TEXT);
+            w.setAttribute('data-search-item-index', info.indices.join(','));
+
+            var ayahAttr = w.getAttribute('data-ayah');
+            var wordIndexAttr = w.getAttribute('data-word-index');
+            if (ayahAttr != null && wordIndexAttr != null) {
+                var minimapWords = document.querySelectorAll('.minimap-word[data-ayah="' + ayahAttr + '"][data-word-index="' + wordIndexAttr + '"]');
+                minimapWords.forEach(function(minimapWord) {
+                    minimapWord.classList.add('search-region-highlight');
+                    minimapWord.style.boxShadow = buildSearchOverlayBoxShadow(info.colors, SEARCH_STRIPE_PX_MINIMAP);
+                    minimapWord.setAttribute('data-search-item-index', info.indices.join(','));
+                });
+            }
         });
     }
     
@@ -1503,6 +1568,84 @@ const morphologyData = {};
         }
         
         selectWord(nextWord.ayah, nextWord.wordIndex, root);
+        currentSearchedSearchItemIndex = null;
+    }
+
+    function getRegionFirstHighlightedWord(region, suraNum) {
+        if (!region) return null;
+        const targetSura = Number(suraNum);
+        if (!Number.isFinite(targetSura) || Number(region.sura) !== targetSura) return null;
+        const matches = Array.isArray(region.matches) ? region.matches : [];
+        const localMatches = matches
+            .filter(function(m) { return Number(m.sura) === targetSura; })
+            .map(function(m) { return { ayah: Number(m.ayah), wordIndex: Number(m.wordIndex) }; })
+            .filter(function(m) { return Number.isFinite(m.ayah) && Number.isFinite(m.wordIndex); })
+            .sort(function(a, b) { return (a.ayah - b.ayah) || (a.wordIndex - b.wordIndex); });
+        if (localMatches.length === 0) return null;
+
+        let startAyah = Number(region.startAyah);
+        if (!Number.isFinite(startAyah)) startAyah = localMatches[0].ayah;
+        const startAyahMatches = localMatches.filter(function(m) { return m.ayah === startAyah; });
+        if (startAyahMatches.length > 0) {
+            const minWord = Math.min.apply(null, startAyahMatches.map(function(m) { return m.wordIndex; }));
+            return { ayah: startAyah, wordIndex: minWord };
+        }
+        return localMatches[0];
+    }
+
+    function findSearchItemRegionAnchors(searchItemIndex, suraNum) {
+        const entry = selectedSearchItems[searchItemIndex];
+        if (!entry || !Array.isArray(entry.regions)) return [];
+        const anchors = [];
+        const seen = new Set();
+        entry.regions.forEach(function(region) {
+            const ref = getRegionFirstHighlightedWord(region, suraNum);
+            if (!ref) return;
+            const selector = '.morph-word[data-ayah="' + String(ref.ayah) + '"][data-word-index="' + String(ref.wordIndex) + '"]';
+            if (!document.querySelector(selector)) return;
+            const key = String(ref.ayah) + ':' + String(ref.wordIndex);
+            if (seen.has(key)) return;
+            seen.add(key);
+            anchors.push(ref);
+        });
+        anchors.sort(function(a, b) { return (a.ayah - b.ayah) || (a.wordIndex - b.wordIndex); });
+        return anchors;
+    }
+
+    function selectNextRegionForSearchItem(searchItemIndex, direction = 'next') {
+        const suraNum = window.sureNumber != null ? Number(window.sureNumber) : null;
+        if (!suraNum) return;
+        const anchors = findSearchItemRegionAnchors(searchItemIndex, suraNum);
+        if (!anchors.length) return;
+
+        let nextAnchor = null;
+        if (currentSearchedSearchItemIndex === searchItemIndex && currentSelectedWord) {
+            const currentIdx = anchors.findIndex(function(w) {
+                return w.ayah === currentSelectedWord.ayah && w.wordIndex === currentSelectedWord.wordIndex;
+            });
+            if (currentIdx >= 0) {
+                if (direction === 'previous') {
+                    nextAnchor = anchors[currentIdx > 0 ? currentIdx - 1 : anchors.length - 1];
+                } else {
+                    nextAnchor = anchors[(currentIdx + 1) % anchors.length];
+                }
+            }
+        }
+        if (!nextAnchor) {
+            const ayah = currentSelectedWord ? Number(currentSelectedWord.ayah) : null;
+            const wordIndex = currentSelectedWord ? Number(currentSelectedWord.wordIndex) : null;
+            const startIdx = (Number.isFinite(ayah) && Number.isFinite(wordIndex))
+                ? anchors.findIndex(function(w) { return (w.ayah > ayah) || (w.ayah === ayah && w.wordIndex >= wordIndex); })
+                : -1;
+            if (direction === 'previous') {
+                nextAnchor = (startIdx > 0) ? anchors[startIdx - 1] : anchors[anchors.length - 1];
+            } else {
+                nextAnchor = (startIdx >= 0) ? anchors[startIdx] : anchors[0];
+            }
+        }
+        if (!nextAnchor) return;
+        currentSearchedSearchItemIndex = searchItemIndex;
+        selectWord(nextAnchor.ayah, nextAnchor.wordIndex, null);
     }
     
     // Unhighlight currently selected word (but keep root in list)
@@ -1519,6 +1662,7 @@ const morphologyData = {};
         }
         currentSearchedRoot = null;
         currentSelectedWord = null;
+        currentSearchedSearchItemIndex = null;
         updateHighlightedRootsPanel();
     }
     
@@ -1559,6 +1703,9 @@ const morphologyData = {};
         if (el) el.remove();
     }
     function afterSearchItemAdded() {
+        currentSearchedRoot = null;
+        currentSearchedSearchItemIndex = null;
+        currentSelectedWord = null;
         updateHighlightedRootsPanel();
         var suraForHighlight = window.sureNumber != null ? Number(window.sureNumber) : null;
         setTimeout(function() { applySearchItemHighlights(suraForHighlight); }, 100);
@@ -1652,6 +1799,9 @@ const morphologyData = {};
             clearSearchBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 selectedSearchItems.length = 0;
+                currentSearchedSearchItemIndex = null;
+                currentSearchedRoot = null;
+                currentSelectedWord = null;
                 Object.keys(highlightedRoots).slice().forEach(function(r) { removeRootHighlight(r); });
                 updateHighlightedRootsPanel();
                 applySearchItemHighlights();
@@ -1664,6 +1814,9 @@ const morphologyData = {};
         selectedContent.style.cssText = 'display: flex; flex-wrap: wrap; gap: 2px;';
         
         const roots = Object.keys(highlightedRoots);
+        if (roots.length === 0 && selectedSearchItems.length === 0) {
+            if (typeof window.__hideSelectedRootTooltip === 'function') window.__hideSelectedRootTooltip();
+        }
         if (roots.length === 0 && selectedSearchItems.length === 0) {
             selectedContent.innerHTML = '<div style="color: #999; font-style: italic; text-align: center; padding: 3px; width: 100%; font-size: 8px;">ریشه‌ای مشخص نشده</div>';
         } else if (roots.length > 0) {
@@ -1730,16 +1883,26 @@ const morphologyData = {};
         selectedSearchItems.forEach(function(entry, idx) {
             const chip = document.createElement('div');
             chip.setAttribute('data-search-item-index', String(idx));
-            chip.style.cssText = 'display: inline-flex; align-items: center; gap: 2px; background: #e8f4f8; border: 1px solid #4ecdc4; border-radius: 2px; cursor: default; padding: 1px 4px; font-size: 8px; line-height: 1.1; margin: 1px 0;';
+            const isBeingSearched = currentSearchedSearchItemIndex === idx;
+            chip.style.cssText = 'display: inline-flex; align-items: center; gap: 2px; background: #e8f4f8; border: ' + (isBeingSearched ? '2px solid red' : '1px solid #4ecdc4') + '; border-radius: 2px; cursor: pointer; padding: 1px 4px; font-size: 8px; line-height: 1.1; margin: 1px 0;';
             chip.textContent = entry.display || 'جستجو';
             chip.title = ''; /* tooltip shown by desktop.js hover */
             chip.addEventListener('click', function(e) {
                 if (e.ctrlKey) {
                     e.stopPropagation();
                     selectedSearchItems.splice(idx, 1);
+                    if (currentSearchedSearchItemIndex === idx) {
+                        currentSearchedSearchItemIndex = null;
+                        currentSelectedWord = null;
+                    } else if (currentSearchedSearchItemIndex != null && currentSearchedSearchItemIndex > idx) {
+                        currentSearchedSearchItemIndex -= 1;
+                    }
                     updateHighlightedRootsPanel();
                     applySearchItemHighlights();
                     if (typeof window.__hideSelectedRootTooltip === 'function') window.__hideSelectedRootTooltip();
+                } else {
+                    e.stopPropagation();
+                    selectNextRegionForSearchItem(idx, e.shiftKey ? 'previous' : 'next');
                 }
             });
             selectedContent.appendChild(chip);
@@ -3502,6 +3665,13 @@ const morphologyData = {};
         
         // Update minimap positions (will be called on resize)
         updateMinimap(minimap, minimapContent, wordRects, visibleHighlight);
+
+        // Minimap words are recreated here; restore active root/search highlights onto new elements.
+        Object.keys(highlightedRoots).forEach(function(root) {
+            const info = highlightedRoots[root];
+            if (info && info.color) applyRootHighlight(root, info.color);
+        });
+        applySearchItemHighlights(window.sureNumber != null ? Number(window.sureNumber) : null);
         
         // Show root panel if it was visible before
         if (wasRootPanelVisible) {
@@ -3746,18 +3916,18 @@ const morphologyData = {};
             .morph-word-highlighted {
                 background-color: rgba(255, 255, 0, 0.5) !important;
             }
-            .search-region-highlight {
-                padding: 1px 3px;
-                margin-inline: -1px;
+            .morph-word.search-region-highlight {
+                padding: 0;
+                margin-inline: 0;
             }
             /* RTL: first word = start of phrase (right); last = end (left). Round outer edges for band effect. */
-            .search-region-first {
+            .morph-word.search-region-first {
                 border-radius: 0 4px 4px 0;
             }
-            .search-region-last {
+            .morph-word.search-region-last {
                 border-radius: 4px 0 0 4px;
             }
-            .search-region-middle {
+            .morph-word.search-region-middle {
                 border-radius: 0;
             }
             .minimap-word {
