@@ -165,6 +165,28 @@
             margin: 0px;
             font-size: 0.75rem;
         }
+        #settings-menu #page-mode {
+            width: 100%;
+            padding: 0px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: #fff;
+            color: #334155;
+            cursor: pointer;
+            font-family: inherit;
+            direction: rtl;
+        }
+        #settings-menu #page-mode:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        #settings-menu #page-mode option {
+            padding: 0px;
+            margin: 0px;
+            font-size: 0.75rem;
+        }
         #settings-menu .settings-section-links {
             margin-top: 16px;
             padding-top: 14px;
@@ -307,7 +329,7 @@
         .page-content .ayah { display: block; margin-bottom: 0.35em; }
         .page-content .ayah-inline { margin-left: 0.25em; }
         .page-content.layout-ayah-line { text-align: right; line-height: 1.5; }
-        .page-content.layout-ayah-line .ayah { margin-bottom: 0.32em; }
+        .page-content.layout-ayah-line .ayah { margin-bottom: 0.32em; text-align: right; }
         .page-content.layout-ayah-line .ayah,
         .page-content.layout-ayah-line .ayah-inline { text-indent: 0; }
         .page-content.layout-ayah-line .ayah-inline {
@@ -315,14 +337,19 @@
             margin: 0;
             padding: 0;
             line-height: 1.38;
+            text-align: right;
         }
         .page-content.layout-flow .ayah { display: inline; margin-bottom: 0; }
         .page-content.layout-flow .ayah::after { content: '\00a0'; }
         .page-content.layout-flow { text-align: right; }
         .page-content.font-qcf,
-        .page-content.font-qcf.layout-ayah-line,
         .page-content.font-qcf.layout-flow {
             text-align: center;
+        }
+        .page-content.font-qcf.layout-ayah-line,
+        .page-content.font-qcf.layout-ayah-line .ayah,
+        .page-content.font-qcf.layout-ayah-line .ayah-inline {
+            text-align: right;
         }
         .page-content .mushaf-line {
             display: block;
@@ -709,8 +736,13 @@
                 <label><input type="radio" name="layout" value="ayah-line" checked>یک آیه در هر خط</label>
                 <label><input type="radio" name="layout" value="flow">متن پیوسته</label>
                 <h3>حالت صفحه</h3>
-                <label><input type="checkbox" id="two-page">دو صفحه کنار هم (فقط حالت صفحه)</label>
-                <label><input type="checkbox" id="sura-view">حالت سوره (باز کردن سوره به‌صورت نمای سوره)</label>
+                <label class="settings-row-select">
+                    <select id="page-mode" aria-label="حالت صفحه">
+                        <option value="one-page">یک صفحه</option>
+                        <option value="two-pages">دو صفحه</option>
+                        <option value="continuous">پیوسته (سوره)</option>
+                    </select>
+                </label>
                 <div class="settings-section-links">
                     <div class="settings-title">نحوه نمایش</div>
                     <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
@@ -983,8 +1015,9 @@
     }
 
     function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
-    function twoPageMode() { return getSetting('two-page', '0') === '1'; }
-    function suraViewMode() { return getSetting('sura-view', '0') === '1'; }
+    function getPageMode() { return getSetting('page_mode', 'one-page'); }
+    function twoPageMode() { return getPageMode() === 'two-pages'; }
+    function suraViewMode() { return getPageMode() === 'continuous'; }
     function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
     function getVerseTranslationParam() {
         var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
@@ -2077,10 +2110,50 @@
             render();
         });
     });
-    document.getElementById('two-page').addEventListener('change', function() {
-        setSetting('two-page', this.checked ? '1' : '0');
-        render();
-    });
+    var pageModeEl = document.getElementById('page-mode');
+    if (pageModeEl) {
+        pageModeEl.addEventListener('change', async function() {
+            var val = this.value;
+            if (val !== 'one-page' && val !== 'two-pages' && val !== 'continuous') return;
+            setSetting('page_mode', val);
+            var st = getMode();
+            if (val === 'continuous' && st.mode === 'page') {
+                var range = getVisiblePageRange(st.page);
+                var inspectPage = range.startPage;
+                var targetSura = 1;
+                try {
+                    var pdata = await fetchPage(inspectPage);
+                    var verses = pdata.verses || [];
+                    var firstV = firstVerseOfPageBody(verses) || verses[0] || null;
+                    if (firstV && firstV.verse_key) {
+                        var sid = parseInt(String(firstV.verse_key).split(':')[0], 10);
+                        if (sid >= 1 && sid <= 114) targetSura = sid;
+                    }
+                } catch (err) {}
+                if (!chaptersCache || !chaptersCache.length) {
+                    try { await fetchChapters(); } catch (err) {}
+                }
+                if (targetSura < 1 || targetSura > 114) {
+                    var ch = getChapterForPage(inspectPage);
+                    targetSura = ch ? ch.id : 1;
+                }
+                setUrl('sura', 1, targetSura);
+                render();
+                return;
+            }
+            if ((val === 'one-page' || val === 'two-pages') && st.mode === 'sura') {
+                if (!chaptersCache || !chaptersCache.length) {
+                    try { await fetchChapters(); } catch (err) {}
+                }
+                var cur = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === st.sura; }) : null;
+                var firstPage = (cur && cur.pages && cur.pages[0] != null) ? cur.pages[0] : 1;
+                setUrl('page', pageForCurrentMode(firstPage), 1);
+                render();
+                return;
+            }
+            render();
+        });
+    }
     var translationLangEl = document.getElementById('translation-language');
     if (translationLangEl) {
         translationLangEl.addEventListener('change', function() {
@@ -2089,44 +2162,6 @@
             render();
         });
     }
-    document.getElementById('sura-view').addEventListener('change', async function() {
-        var enableSuraMode = this.checked;
-        setSetting('sura-view', enableSuraMode ? '1' : '0');
-        var st = getMode();
-        if (enableSuraMode && st.mode === 'page') {
-            var range = getVisiblePageRange(st.page);
-            var inspectPage = range.startPage;
-            var targetSura = 1;
-            try {
-                var pdata = await fetchPage(inspectPage);
-                var verses = pdata.verses || [];
-                var firstV = firstVerseOfPageBody(verses) || verses[0] || null;
-                if (firstV && firstV.verse_key) {
-                    var sid = parseInt(String(firstV.verse_key).split(':')[0], 10);
-                    if (sid >= 1 && sid <= 114) targetSura = sid;
-                }
-            } catch (err) {}
-            if (!chaptersCache || !chaptersCache.length) {
-                try { await fetchChapters(); } catch (err) {}
-            }
-            if (targetSura < 1 || targetSura > 114) {
-                var ch = getChapterForPage(inspectPage);
-                targetSura = ch ? ch.id : 1;
-            }
-            setUrl('sura', 1, targetSura);
-            render();
-            return;
-        }
-        if (!enableSuraMode && st.mode === 'sura') {
-            if (!chaptersCache || !chaptersCache.length) {
-                try { await fetchChapters(); } catch (err) {}
-            }
-            var cur = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === st.sura; }) : null;
-            var firstPage = (cur && cur.pages && cur.pages[0] != null) ? cur.pages[0] : 1;
-            setUrl('page', pageForCurrentMode(firstPage), 1);
-            render();
-        }
-    });
     navPrevPageBtn.addEventListener('click', function() { navigatePageSpread(-2); });
     navNextPageBtn.addEventListener('click', function() { navigatePageSpread(2); });
     navPrevSuraBtn.addEventListener('click', function() { navigatePrevSuraLikeKey(); });
@@ -2308,13 +2343,16 @@
 
     var savedFont = getSetting('font', 'qurancom');
     var savedLayout = getSetting('layout', 'ayah-line');
-    var savedTwo = getSetting('two-page', '0');
-    var savedSuraView = getSetting('sura-view', '0');
+    var savedPageMode = getSetting('page_mode', '');
+    if (!savedPageMode) {
+        if (getSetting('sura-view', '0') === '1') savedPageMode = 'continuous';
+        else if (getSetting('two-page', '0') === '1') savedPageMode = 'two-pages';
+        else savedPageMode = 'one-page';
+    }
     var savedTranslationLang = getSetting('translation_language', 'fa');
     document.querySelector('input[name="font"][value="' + savedFont + '"]') && (document.querySelector('input[name="font"][value="' + savedFont + '"]').checked = true);
     document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
-    document.getElementById('two-page').checked = savedTwo === '1';
-    document.getElementById('sura-view').checked = savedSuraView === '1';
+    if (document.getElementById('page-mode')) document.getElementById('page-mode').value = savedPageMode;
     if (document.getElementById('translation-language')) document.getElementById('translation-language').value = savedTranslationLang;
 
     render();
