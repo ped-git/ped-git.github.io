@@ -1478,8 +1478,9 @@
                         <button class="apply-btn" id="apply-settings">اعمال</button>
                         <div class="settings-title">نحوه نمایش</div>
                         <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
-                        <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="ابزار جستجو">ابزار جستجو</a>
+                        <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
                         <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                        <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
                     </div>
                 </div>
             </div>
@@ -3843,17 +3844,7 @@
                 const root = params.get('root');
                 const lem = params.get('lem');
                 const sure = params.get('sure');
-                if (root && root.trim()) addSelectedItem('root', root.trim(), root.trim());
-                if (lem && lem.trim()) addSelectedItem('text', lem.trim(), lem.trim());
-                if (root || lem) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('root');
-                    url.searchParams.delete('lem');
-                    if (url.searchParams.toString()) url.search = '?' + url.searchParams.toString();
-                    else url.search = '';
-                    window.history.replaceState({}, '', url.toString());
-                }
-                if (isEmbedMode && sure && /^\d+$/.test(sure)) {
+                if (sure && /^\d+$/.test(sure)) {
                     const suraNum = parseInt(sure, 10);
                     if (suraNum >= 1 && suraNum <= 114) {
                         allSurasSelected = false;
@@ -3862,6 +3853,22 @@
                         buildSuraFilterList();
                         updateSuraFilterLabel();
                     }
+                }
+                if (root && root.trim()) {
+                    // stat.html sends root in Buckwalter (e.g. qwl); convert to Arabic for rootToWordsMap lookup
+                    const rootTrimmed = root.trim();
+                    const rootArabic = (typeof convertBuckwalterToArabic === 'function') ? convertBuckwalterToArabic(rootTrimmed) : rootTrimmed;
+                    addSelectedItem('root', rootArabic, rootArabic);
+                }
+                if (lem && lem.trim()) addSelectedItem('text', lem.trim(), lem.trim());
+                if (root || lem || sure) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('root');
+                    url.searchParams.delete('lem');
+                    url.searchParams.delete('sure');
+                    if (url.searchParams.toString()) url.search = '?' + url.searchParams.toString();
+                    else url.search = '';
+                    window.history.replaceState({}, '', url.toString());
                 }
             });
 
