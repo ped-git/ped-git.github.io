@@ -100,18 +100,103 @@
             position: absolute;
             bottom: 44px;
             left: 0;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            padding: 12px 16px;
-            min-width: 220px;
+            background: linear-gradient(180deg, #ffffff 0%, #fafbfd 100%);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+            padding: 16px 20px;
+            min-width: 260px;
             font-family: inherit;
             direction: rtl;
             text-align: right;
         }
         #settings-menu.open { display: block; }
-        #settings-menu h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: #555; }
-        #settings-menu label { display: block; margin-bottom: 6px; cursor: pointer; font-size: 0.95rem; }
+        #settings-menu h3 {
+            margin: 0 0 0 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        }
+        #settings-menu h3:not(:first-child) { margin-top: 16px; }
+        #settings-menu label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #334155;
+            line-height: 1.2;
+        }
+        #settings-menu label:hover { color: #0f172a; }
+        #settings-menu input[type="radio"],
+        #settings-menu input[type="checkbox"] {
+            accent-color: #3b82f6;
+            width: 1rem;
+            height: 1rem;
+            margin: 0;
+            flex-shrink: 0;
+        }
+        #settings-menu .settings-row-select {
+            display: block;
+            margin-bottom: 4px;
+        }
+        #settings-menu #translation-language {
+            width: 100%;
+            padding: 0px;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: #fff;
+            color: #334155;
+            cursor: pointer;
+            font-family: inherit;
+            direction: rtl;
+        }
+        #settings-menu #translation-language:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        #settings-menu #translation-language option {
+            padding: 0px;
+            margin: 0px;
+            font-size: 0.75rem;
+        }
+        #settings-menu .settings-section-links {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+        }
+        #settings-menu .settings-section-links .settings-title {
+            margin: 0 0 0 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        #settings-menu .desktop-link {
+            display: block;
+            margin-bottom: 6px;
+            padding: 5px 5px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1d4ed8;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        #settings-menu .desktop-link:hover {
+            background: rgba(59, 130, 246, 0.14);
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+        #settings-menu .desktop-link:last-child { margin-bottom: 0; }
         #bottom-nav {
             display: flex;
             align-items: center;
@@ -128,7 +213,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 1rem;
-            line-height: 1;
+            line-height: 1.2;
             padding: 0 8px;
         }
         .bottom-nav-btn:hover { background: #f4f7fb; }
@@ -474,7 +559,7 @@
             border: 1px solid #cfd9e6;
             border-radius: 6px;
             padding: 6px 10px;
-            font-size: 0.78rem;
+            font-size: 0.98rem;
             line-height: 1.35;
             box-shadow: 0 8px 24px rgba(22,34,49,0.16);
             direction: rtl;
@@ -498,6 +583,11 @@
             transform: translateX(-50%);
             border: 4px solid transparent;
             border-top-color: #ffffff;
+        }
+        #word-hover-tooltip .morph-tooltip-line {
+            font-size: 0.9em;
+            opacity: 0.95;
+            font-weight: bold;
         }
 
         #sura-picker-overlay {
@@ -608,12 +698,25 @@
                 <h3>فونت</h3>
                 <label><input type="radio" name="font" value="text">متن (فونت متنی)</label>
                 <label><input type="radio" name="font" value="qurancom" checked>فونت عثمان طه</label>
+                <h3>زبان ترجمه (واژه‌ها)</h3>
+                <label class="settings-row-select">
+                    <select id="translation-language" aria-label="زبان ترجمه واژه">
+                        <option value="fa">فارسی</option>
+                        <option value="en">English</option>
+                    </select>
+                </label>
                 <h3>چیدمان آیه</h3>
                 <label><input type="radio" name="layout" value="ayah-line" checked>یک آیه در هر خط</label>
                 <label><input type="radio" name="layout" value="flow">متن پیوسته</label>
                 <h3>حالت صفحه</h3>
-                <label><input type="checkbox" id="two-page"> دو صفحه کنار هم (فقط حالت صفحه)</label>
-                <label><input type="checkbox" id="sura-view"> حالت سوره (باز کردن سوره به‌صورت نمای سوره)</label>
+                <label><input type="checkbox" id="two-page">دو صفحه کنار هم (فقط حالت صفحه)</label>
+                <label><input type="checkbox" id="sura-view">حالت سوره (باز کردن سوره به‌صورت نمای سوره)</label>
+                <div class="settings-section-links">
+                    <div class="settings-title">نحوه نمایش</div>
+                    <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
+                    <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
+                    <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                </div>
             </div>
         </div>
         <div id="bottom-nav">
@@ -627,6 +730,7 @@
     <div id="word-hover-tooltip"></div>
 
     <script src="js/sura-data.js"></script>
+    <script src="js/buckwalter.js"></script>
     <script>
 (function() {
     const TOTAL_PAGES = 604;
@@ -639,6 +743,60 @@
     const progressTooltip = document.getElementById('progress-tooltip');
     const wordHoverTooltip = document.getElementById('word-hover-tooltip');
     var progressInlineWrap = null;
+    var simpleMorphologyData = {};
+    var simpleMorphologyLoaded = false;
+    function loadSimpleMorphology(cb) {
+        if (simpleMorphologyLoaded) { if (cb) cb(); return; }
+        fetch('data/quranic-corpus-morphology-0.4.txt').then(function(r) { return r.text(); }).then(function(text) {
+            var lines = text.split('\n');
+            var wordSegments = {};
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                if (!line || line.charAt(0) === '#' || line.indexOf('LOCATION') === 0) continue;
+                var parts = line.split('\t');
+                if (parts.length < 4) continue;
+                var loc = parts[0];
+                var wordText = parts[1];
+                var features = parts[3] || '';
+                var m = loc.match(/\((\d+):(\d+):(\d+):(\d+)\)/);
+                if (!m) continue;
+                var sura = parseInt(m[1], 10);
+                var ayah = parseInt(m[2], 10);
+                var wordIndex = parseInt(m[3], 10);
+                var key = sura + ':' + ayah + ':' + wordIndex;
+                if (!wordSegments[key]) wordSegments[key] = [];
+                wordSegments[key].push({ features: features });
+            }
+            for (var k in wordSegments) {
+                var segs = wordSegments[k];
+                var root = null, lemma = null;
+                for (var s = 0; s < segs.length; s++) {
+                    var fe = segs[s].features;
+                    if (!root) { var rm = fe.match(/ROOT:([^|]+)/); if (rm) root = typeof convertBuckwalterToArabic === 'function' ? convertBuckwalterToArabic(rm[1]) : rm[1]; }
+                    if (!lemma) { var lm = fe.match(/LEM:([^\|]+)/); if (lm) lemma = typeof convertBuckwalterToArabic === 'function' ? convertBuckwalterToArabic(lm[1]) : lm[1]; }
+                }
+                var parts = k.split(':');
+                var sura = parseInt(parts[0], 10);
+                var ayah = parseInt(parts[1], 10);
+                var wi = parseInt(parts[2], 10);
+                if (!simpleMorphologyData[sura]) simpleMorphologyData[sura] = {};
+                if (!simpleMorphologyData[sura][ayah]) simpleMorphologyData[sura][ayah] = {};
+                simpleMorphologyData[sura][ayah][wi] = { root: root || '', lemma: lemma || '' };
+            }
+            simpleMorphologyLoaded = true;
+            if (cb) cb();
+        }).catch(function() { if (cb) cb(); });
+    }
+    function getWordMorphology(verseKey, position) {
+        if (!verseKey || !simpleMorphologyLoaded) return null;
+        var mk = verseKey.match(/^(\d+):(\d+)$/);
+        if (!mk) return null;
+        var sura = parseInt(mk[1], 10);
+        var ayah = parseInt(mk[2], 10);
+        var row = simpleMorphologyData[sura] && simpleMorphologyData[sura][ayah] && simpleMorphologyData[sura][ayah][position];
+        return row || null;
+    }
+    loadSimpleMorphology();
     var suraPickerOverlay = null;
     function createSuraPicker() {
         if (suraPickerOverlay) return suraPickerOverlay;
@@ -827,6 +985,24 @@
     function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
     function twoPageMode() { return getSetting('two-page', '0') === '1'; }
     function suraViewMode() { return getSetting('sura-view', '0') === '1'; }
+    function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
+    function getVerseTranslationParam() {
+        var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
+        return (id != null) ? '&translations=' + id : '';
+    }
+    function getVerseTranslationText(verse) {
+        if (!verse || !verse.translations || verse.translations.length === 0) return '';
+        var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
+        if (id == null) return '';
+        for (var i = 0; i < verse.translations.length; i++) {
+            if (verse.translations[i].resource_id === id && verse.translations[i].text) {
+                var t = verse.translations[i].text;
+                if (typeof t === 'string') return t.replace(/<[^>]+>/g, '').trim();
+                return '';
+            }
+        }
+        return '';
+    }
 
     function loadQCFPageFont(page) {
         if (loadedQCFPages.has(page)) return;
@@ -898,12 +1074,30 @@
     function escapeAttr(s) {
         return escapeHtml(String(s == null ? '' : s)).replace(/"/g, '&quot;');
     }
+    // API word-by-word translation is only available for some languages (e.g. en, fa, tr).
+    // For de, ar, etc. the API returns English; we show that and add a short note.
+    var WORD_TRANSLATION_LANG_MAP = { en: 'english', fa: 'persian', tr: 'turkish', ar: 'arabic', de: 'german', fr: 'french', id: 'indonesian', ur: 'urdu' };
+    var WORD_TRANSLATION_LANG_LABELS = { en: 'English', fa: 'فارسی', tr: 'Türkçe', ar: 'العربية', de: 'Deutsch', fr: 'Français', id: 'Indonesia', ur: 'اردو' };
+    // Verse-level translations (from API /resources/translations). Used with translations= id in verses API.
+    var VERSE_TRANSLATION_RESOURCE_IDS = { en: 20, fa: 135, tr: 77, fr: 31, id: 33, ur: 54, de: 27 };
     function getWordTranslation(w) {
         if (!w) return '';
         if (typeof w.translation === 'string') return w.translation;
         if (w.translation && typeof w.translation.text === 'string') return w.translation.text;
         if (w.word_translation && typeof w.word_translation.text === 'string') return w.word_translation.text;
         return '';
+    }
+    function getWordTranslationWithNote(w) {
+        var text = getWordTranslation(w);
+        if (!text) return '';
+        var requested = getTranslationLanguage();
+        var expectedApi = WORD_TRANSLATION_LANG_MAP[requested];
+        var actualApi = (w && w.translation && w.translation.language_name) ? String(w.translation.language_name).toLowerCase() : '';
+        if (expectedApi && actualApi && actualApi !== expectedApi) {
+            var requestedLabel = WORD_TRANSLATION_LANG_LABELS[requested] || requested;
+            return '[' + requestedLabel + ' word-by-word not available; showing ' + (actualApi === 'english' ? 'English' : actualApi) + '.] ' + text;
+        }
+        return text;
     }
 
     function getSuraName(suraNumber) {
@@ -925,30 +1119,35 @@
         return getSetting('layout', 'ayah-line') === 'ayah-line';
     }
 
-    function buildWordHtml(w, pageNum, useQCFFont, verseKey) {
+    function buildWordHtml(w, pageNum, useQCFFont, verseKey, verseTranslation) {
         var vKey = verseKey || '';
         var isEnd = w && w.char_type_name === 'end';
-        var tr = getWordTranslation(w);
+        var tr = getWordTranslationWithNote(w);
         var baseClass = 'qword' + (isEnd ? ' ayah-end' : '');
         var pad = (isEnd && !useQCFFont) ? ' ' : '';
+        var verseTrAttr = (verseTranslation && verseTranslation.length > 0) ? ' data-verse-translation="' + escapeAttr(verseTranslation) + '"' : '';
+        var copyText = (w.text_uthmani || w.text || '').trim();
+        var copyAttr = copyText ? ' data-copy-text="' + escapeAttr(copyText) + '"' : '';
+        var pos = (w.position != null) ? w.position : 0;
         if (useQCFFont) {
             var page = w.v1_page || pageNum;
             loadQCFPageFont(page);
             var padded = String(page).padStart(3, '0');
             var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
-            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
+            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
         }
         var plain = w.text_uthmani || w.text || '';
         // if (plain === 'أُو۟لَـٰٓئِكَ') plain = 'أُو۟★لَـٰٓئِكَ';
-        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '">' + escapeHtml(plain) + '</span>' + pad;
+        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + '>' + escapeHtml(plain) + '</span>' + pad;
     }
     function buildVerseText(verse, useQCFFont) {
         if (!verse.words || verse.words.length === 0) return '';
         var pageNum = verse.page_number || (verse.words[0] && verse.words[0].v1_page);
+        var verseTr = getVerseTranslationText(verse);
         var html = '';
         for (var i = 0; i < verse.words.length; i++) {
             var w = verse.words[i];
-            html += buildWordHtml(w, pageNum, useQCFFont, verse.verse_key);
+            html += buildWordHtml(w, pageNum, useQCFFont, verse.verse_key, verseTr);
             var next = verse.words[i + 1];
             if (!next) continue;
             // In text mode keep real spacing between words; in QCF mode keep glyph flow.
@@ -1080,9 +1279,24 @@
         wordHoverTooltip.style.display = 'none';
         wordHoverTooltip.textContent = '';
     }
-    function showWordHoverTooltip(text, anchorEl) {
-        if (!wordHoverTooltip || !text) return;
-        wordHoverTooltip.textContent = text;
+    function showWordHoverTooltip(text, anchorEl, verseTranslation, root, lemma) {
+        if (!wordHoverTooltip) return;
+        var content = (text && text.length > 0) ? escapeHtml(text) : '';
+        if (root || lemma) {
+            var morphParts = [];
+            if (root && root.length > 0) morphParts.push('ریشه: ' + escapeHtml(root));
+            if (lemma && lemma.length > 0) morphParts.push('صیغه: ' + escapeHtml(lemma));
+            if (morphParts.length > 0) {
+                var morphLine = '<span style="display:block;margin-top:4px;font-size:0.9em;opacity:0.95;" class="morph-tooltip-line">' + morphParts.join(' &nbsp;|&nbsp; ') + '</span>';
+                content = content ? (content + morphLine) : morphLine;
+            }
+        }
+        if (verseTranslation && verseTranslation.length > 0) {
+            var versePart = '<span style="margin-top:4px;display:block;border-top:1px solid rgba(255,255,255,0.2);padding-top:4px;font-size:0.9em;">' + escapeHtml(verseTranslation) + '</span>';
+            content = content ? (content + versePart) : versePart;
+        }
+        if (!content) return;
+        wordHoverTooltip.innerHTML = content;
         wordHoverTooltip.style.display = 'block';
         var a = anchorEl ? anchorEl.getBoundingClientRect() : null;
         var anchorCenter = (a ? (a.left + a.width / 2) : 0);
@@ -1126,7 +1340,14 @@
             activeWord = wordEl;
             activeWord.classList.add('word-hovered');
             var tr = wordEl.getAttribute('data-word-translation') || '';
-            if (tr) showWordHoverTooltip(tr, activeWord);
+            var verseTr = wordEl.getAttribute('data-verse-translation') || '';
+            var vKey = wordEl.getAttribute('data-verse-key') || '';
+            var posStr = wordEl.getAttribute('data-word-position') || '';
+            var pos = posStr ? parseInt(posStr, 10) : 0;
+            var morph = pos ? getWordMorphology(vKey, pos) : null;
+            var root = (morph && morph.root) ? morph.root : '';
+            var lemma = (morph && morph.lemma) ? morph.lemma : '';
+            if (tr || verseTr || root || lemma) showWordHoverTooltip(tr, activeWord, verseTr, root, lemma);
             else hideWordHoverTooltip();
         });
         container.addEventListener('mouseout', function(e) {
@@ -1142,6 +1363,53 @@
             hideWordHoverTooltip();
         });
     }
+
+    function buildCopyTextFromSelection() {
+        var sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return null;
+        var range = sel.getRangeAt(0);
+        if (range.collapsed) return null;
+        var mainEl = document.getElementById('main');
+        if (!mainEl) return null;
+        var pageContents = mainEl.querySelectorAll('.page-content');
+        var selected = [];
+        for (var p = 0; p < pageContents.length; p++) {
+            try {
+                if (!range.intersectsNode(pageContents[p])) continue;
+            } catch (err) { continue; }
+            var wordSpans = pageContents[p].querySelectorAll('.qword');
+            for (var i = 0; i < wordSpans.length; i++) {
+                try {
+                    if (range.intersectsNode(wordSpans[i])) selected.push(wordSpans[i]);
+                } catch (err) { continue; }
+            }
+        }
+        selected.sort(function(a, b) {
+            return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+        });
+        if (selected.length === 0) return null;
+        var parts = [];
+        for (var j = 0; j < selected.length; j++) {
+            var w = selected[j];
+            var text = (w.getAttribute('data-copy-text') || w.textContent || '').trim();
+            if (!text) continue;
+            if (parts.length > 0) {
+                var prevEnd = selected[j - 1].classList.contains('ayah-end');
+                parts.push(prevEnd ? '\n' : ' ');
+            }
+            if (w.classList.contains('ayah-end')) text = '(' + text + ')';
+            parts.push(text);
+        }
+        return parts.join('');
+    }
+
+    document.addEventListener('copy', function(e) {
+        var copyText = buildCopyTextFromSelection();
+        if (copyText != null) {
+            e.preventDefault();
+            e.clipboardData.setData('text/plain', copyText);
+        }
+    });
 
     var chaptersCache = null;
     async function fetchChapters() {
@@ -1676,7 +1944,8 @@
     }
     async function fetchBismillah() {
         if (bismillahVerseCache) return bismillahVerseCache;
-        var res = await fetch('https://api.quran.com/api/v4/verses/by_key/1:1?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa');
+        var lang = getTranslationLanguage();
+        var res = await fetch('https://api.quran.com/api/v4/verses/by_key/1:1?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam());
         if (!res.ok) throw new Error('خطا در دریافت بسم الله');
         var data = await res.json();
         bismillahVerseCache = data.verse;
@@ -1688,14 +1957,16 @@
     }
 
     async function fetchPage(pageNum) {
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa');
+        const lang = getTranslationLanguage();
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam());
         if (!res.ok) throw new Error('خطا در دریافت صفحه');
         const data = await res.json();
         return { pageNumber: pageNum, verses: data.verses || [] };
     }
 
     async function fetchSuraByPage(suraNumber) {
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani&language=fa&per_page=300');
+        const lang = getTranslationLanguage();
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam() + '&per_page=300');
         if (!res.ok) throw new Error('خطا در دریافت سوره');
         const data = await res.json();
         const verses = data.verses || [];
@@ -1810,6 +2081,14 @@
         setSetting('two-page', this.checked ? '1' : '0');
         render();
     });
+    var translationLangEl = document.getElementById('translation-language');
+    if (translationLangEl) {
+        translationLangEl.addEventListener('change', function() {
+            setSetting('translation_language', this.value);
+            bismillahVerseCache = null;
+            render();
+        });
+    }
     document.getElementById('sura-view').addEventListener('change', async function() {
         var enableSuraMode = this.checked;
         setSetting('sura-view', enableSuraMode ? '1' : '0');
@@ -2031,10 +2310,12 @@
     var savedLayout = getSetting('layout', 'ayah-line');
     var savedTwo = getSetting('two-page', '0');
     var savedSuraView = getSetting('sura-view', '0');
+    var savedTranslationLang = getSetting('translation_language', 'fa');
     document.querySelector('input[name="font"][value="' + savedFont + '"]') && (document.querySelector('input[name="font"][value="' + savedFont + '"]').checked = true);
     document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
     document.getElementById('two-page').checked = savedTwo === '1';
     document.getElementById('sura-view').checked = savedSuraView === '1';
+    if (document.getElementById('translation-language')) document.getElementById('translation-language').value = savedTranslationLang;
 
     render();
 })();

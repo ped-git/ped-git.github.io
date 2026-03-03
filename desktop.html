@@ -67,6 +67,7 @@
 
         /* Tooltips/hover popups should use UI font (not Quran font) */
         #settings-menu,
+        #modes-menu,
         #measure-info-tooltip,
         #selected-root-tooltip,
         #root-chart-tooltip {
@@ -125,7 +126,8 @@
             align-items: stretch;
         }
 
-        #settings-button {
+        #settings-button,
+        #modes-button {
             position: relative;
             padding: 6px 10px;
             border-radius: 10px;
@@ -135,13 +137,16 @@
             font-size: calc(12px * var(--ui-font-scale));
             cursor: pointer;
             box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+            font-size: 16px;
         }
 
-        #settings-button:hover {
+        #settings-button:hover,
+        #modes-button:hover {
             background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
         }
 
-        #settings-menu {
+        #settings-menu,
+        #modes-menu {
             position: absolute;
             top: 100%;
             inset-inline-start: auto;
@@ -161,6 +166,13 @@
             line-height: 1.25;
             direction: rtl;
             text-align: right;
+        }
+
+        #modes-menu {
+            width: 180px;
+            padding: 8px;
+            inset-inline-start: 0;
+            inset-inline-end: auto;
         }
 
         #settings-menu label {
@@ -249,7 +261,8 @@
             text-decoration: none;
         }
 
-        #settings-menu .menu-link {
+        #settings-menu .menu-link,
+        #modes-menu .menu-link {
             display: block;
             margin-top: 6px;
             padding: 8px 10px;
@@ -261,8 +274,15 @@
             font-weight: 700;
         }
 
-        #settings-menu .menu-link:hover {
+        #settings-menu .menu-link:hover,
+        #modes-menu .menu-link:hover {
             background: rgba(59, 130, 246, 0.12);
+        }
+
+        #modes-menu button.menu-link {
+            width: 100%;
+            cursor: pointer;
+            font: inherit;
         }
 
         #settings-menu .row {
@@ -325,6 +345,17 @@
         .settings-wrapper {
             position: absolute;
             inset-inline-end: 6px; /* visual left in RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .modes-wrapper {
+            position: absolute;
+            inset-inline-start: 6px; /* visual right in RTL */
             top: 50%;
             transform: translateY(-50%);
             display: inline-flex;
@@ -845,7 +876,8 @@
         </main>
     </div>
 
-    <button id="settings-button">تنظیمات</button>
+    <button id="settings-button" title="تنظیمات">⚙️</button>
+    <button id="modes-button" title="نمایش‌ها">☰</button>
     <div id="settings-menu" hidden>
         <div class="row">
             <label for="sure-number-input">شماره سوره</label>
@@ -894,9 +926,13 @@
             <button id="apply-settings">اعمال</button>
             <button id="close-settings">بستن</button>
         </div>
+        <!-- <a href="mobile.html">نسخه موبایل</a> -->
+    </div>
+    <div id="modes-menu" hidden>
+        نحوه نمایش:
+        <button type="button" class="menu-link" id="modes-yasir-btn">یسیر</button>
         <a id="go-search-link" class="menu-link" href="search.html">ابزار جستجو</a>
         <a id="go-simple-link" class="menu-link" href="simple.html">نمایش</a>
-        <!-- <a href="mobile.html">نسخه موبایل</a> -->
     </div>
 
     <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>

@@ -60,7 +60,9 @@
         panelsColumn: document.getElementById('panels-column'),
         contentColumn: document.getElementById('desktop-content-wrapper'),
         settingsButton: document.getElementById('settings-button'),
+        modesButton: document.getElementById('modes-button'),
         settingsMenu: document.getElementById('settings-menu'),
+        modesMenu: document.getElementById('modes-menu'),
         hypothesisToggle: document.getElementById('hypothesis-toggle'),
         sureInput: document.getElementById('sure-number-input'),
         chartToggle: document.getElementById('root-chart-toggle'),
@@ -1662,12 +1664,23 @@
             wrapper.className = 'settings-wrapper';
             header.appendChild(wrapper);
         }
+        let modesWrapper = header.querySelector('.modes-wrapper');
+        if (!modesWrapper) {
+            modesWrapper = document.createElement('div');
+            modesWrapper.className = 'modes-wrapper';
+            header.appendChild(modesWrapper);
+        }
         wrapper.appendChild(elements.settingsButton);
         wrapper.appendChild(elements.settingsMenu);
+        modesWrapper.appendChild(elements.modesButton);
+        modesWrapper.appendChild(elements.modesMenu);
 
-        // Ensure order: title first, then wrapper. In RTL this places wrapper to the left of the title.
+        // Ensure order: title first, then wrappers.
         if (wrapper.parentElement === header && wrapper.previousElementSibling !== titleSpan) {
             header.appendChild(wrapper);
+        }
+        if (modesWrapper.parentElement === header && modesWrapper.previousElementSibling !== titleSpan) {
+            header.appendChild(modesWrapper);
         }
         return true;
     }
@@ -2235,7 +2248,13 @@
         // Intercept clicks on sura header to show custom menu
         document.addEventListener('click', (e) => {
             const header = e.target.closest('#header');
-            if (header && !e.target.closest('.settings-wrapper')) {
+            if (
+                header &&
+                !e.target.closest('.settings-wrapper') &&
+                !e.target.closest('.modes-wrapper') &&
+                !e.target.closest('#settings-menu') &&
+                !e.target.closest('#modes-menu')
+            ) {
                 e.preventDefault();
                 e.stopPropagation();
                 showCustomSuraMenu();
@@ -2256,11 +2275,25 @@
     }
 
     function toggleSettings(forceState) {
+        if (!elements.settingsMenu) return;
         if (typeof forceState === 'boolean') {
             elements.settingsMenu.hidden = !forceState;
+            if (forceState && elements.modesMenu) elements.modesMenu.hidden = true;
             return;
         }
         elements.settingsMenu.hidden = !elements.settingsMenu.hidden;
+        if (!elements.settingsMenu.hidden && elements.modesMenu) elements.modesMenu.hidden = true;
+    }
+
+    function toggleModes(forceState) {
+        if (!elements.modesMenu) return;
+        if (typeof forceState === 'boolean') {
+            elements.modesMenu.hidden = !forceState;
+            if (forceState && elements.settingsMenu) elements.settingsMenu.hidden = true;
+            return;
+        }
+        elements.modesMenu.hidden = !elements.modesMenu.hidden;
+        if (!elements.modesMenu.hidden && elements.settingsMenu) elements.settingsMenu.hidden = true;
     }
 
     function updateSettingsNumberDisplays() {
@@ -2305,9 +2338,24 @@
             event.stopPropagation();
             toggleSettings();
         });
+        if (elements.modesButton) {
+            elements.modesButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                toggleModes();
+            });
+        }
         elements.closeButton.addEventListener('click', () => toggleSettings(false));
         elements.settingsMenu.addEventListener('click', (event) => {
             event.stopPropagation();
+        });
+        if (elements.modesMenu) {
+            elements.modesMenu.addEventListener('click', (event) => {
+                event.stopPropagation();
+            });
+        }
+        document.addEventListener('click', () => {
+            toggleSettings(false);
+            toggleModes(false);
         });
         document.addEventListener('click', (event) => {
             const target = event.target;
