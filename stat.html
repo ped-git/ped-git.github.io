@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آمار سوره - ذکر یسیر</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap">
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: rgba(15, 23, 42, 0.08);
+            --text: #1e293b;
+            --muted: #64748b;
+            --accent: #3b82f6;
+            --top: #0d9488;
+            --distinctive: #ea580c;
+            --kl: #dc2626;
+            --n2n: #7c3aed;
+            --custom: #059669;
+        }
+        body {
+            margin: 0;
+            font-family: "Vazirmatn", "Sahel", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #f1f5f9;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+        }
+        .header .sura-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+        }
+        .settings-wrap {
+            position: relative;
+        }
+        #settings-btn {
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: inherit;
+            transition: background 0.2s, transform 0.15s;
+        }
+        #settings-btn:hover {
+            background: rgba(255,255,255,0.28);
+            transform: scale(1.03);
+        }
+        .settings-menu {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: calc(100% + 10px);
+            min-width: 280px;
+            max-width: 320px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 20px 50px rgba(15,23,42,0.15), 0 0 0 1px rgba(15,23,42,0.04);
+            z-index: 100;
+            overflow: hidden;
+        }
+        .settings-menu.open { display: block; }
+        .settings-menu .settings-panel-title {
+            margin: 0;
+            padding: 1rem 1.25rem 0.75rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+        }
+        .settings-menu .settings-panel-body {
+            padding: 1rem 1.25rem 1.25rem;
+        }
+        .settings-menu h3 {
+            margin: 0 0 0.6rem 0;
+            padding: 0 0 0 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            border-right: 3px solid var(--accent);
+        }
+        .settings-menu .row {
+            margin-bottom: 0.85rem;
+        }
+        .settings-menu .row:last-of-type { margin-bottom: 0; }
+        .settings-menu label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        .settings-menu input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .settings-menu input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        .settings-section-links {
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .settings-section-links .title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 0.6rem;
+        }
+        .settings-menu .page-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .settings-menu a.menu-link {
+            display: inline-block;
+            padding: 0.4rem 0.75rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+        .settings-menu a.menu-link:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--accent);
+            text-decoration: none;
+        }
+        .settings-menu a.menu-link.current {
+            color: var(--muted);
+            background: var(--bg);
+            border-color: var(--border);
+            cursor: default;
+        }
+        .settings-menu a.menu-link.current:hover {
+            background: var(--bg);
+            border-color: var(--border);
+        }
+        .container {
+            display: flex;
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            align-items: flex-start;
+        }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        .root-detail-column {
+            width: 320px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 1rem;
+        }
+        .root-detail-column .root-detail-placeholder {
+            padding: 1.25rem 1rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+        .error {
+            background: #fef2f2;
+            color: #b91c1c;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .stat-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .stat-card-header .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .stat-card-header .title { font-weight: 700; font-size: 1rem; margin: 0; }
+        .stat-card-header .sub { font-size: 0.8rem; color: var(--muted); margin: 0; }
+        .stat-card-body {
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .stat-card-body .chart-wrap {
+            width: 100%;
+            height: 240px;
+            position: relative;
+        }
+        .stat-card-body .chart-wrap canvas { display: block; cursor: pointer; }
+        .root-boxes-wrap {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 0.35rem;
+        }
+        .root-box {
+            display: inline-block;
+            padding: 0.2rem 0.45rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            border: 1px solid transparent;
+        }
+        .root-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+        }
+        .root-box.highlight {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+            opacity: 1;
+        }
+        .root-boxes-wrap.has-highlight .root-box:not(.highlight) {
+            opacity: 0.5;
+        }
+        #root-tooltip {
+            padding: 1rem 1.25rem;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(15,23,42,0.12);
+            border: 1px solid var(--border);
+            display: none;
+        }
+        #root-tooltip.visible { display: block; }
+        #root-tooltip .tooltip-root {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        #root-tooltip .tooltip-root-link {
+            color: inherit;
+            text-decoration: none;
+            display: inline-block;
+        }
+        #root-tooltip .tooltip-root-link:hover {
+            color: #94a3b8;
+            text-decoration: underline;
+        }
+        #root-tooltip .tooltip-clear-btn {
+            display: block;
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            font-family: inherit;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        #root-tooltip .tooltip-clear-btn:hover {
+            color: #e2e8f0;
+            background: rgba(255,255,255,0.1);
+        }
+        #root-tooltip .tooltip-section {
+            margin-top: 0.6rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.15);
+        }
+        #root-tooltip .tooltip-section:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+        #root-tooltip .tooltip-section.tooltip-section-highlight {
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 0.4rem 0.5rem !important;
+            margin-left: -0.25rem;
+            margin-right: -0.25rem;
+            padding-left: 0.5rem !important;
+            border-left: 3px solid #94a3b8;
+        }
+        #root-tooltip .tooltip-section.tooltip-section-highlight .tooltip-section-title { color: #e2e8f0; }
+        #root-tooltip .tooltip-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        #root-tooltip .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        #root-tooltip .tooltip-label { color: #94a3b8; }
+        #root-tooltip .tooltip-value { font-feature-settings: "ss01"; }
+        .num-fa { font-feature-settings: "ss01"; }
+        .sura-badge {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .sura-badge:hover { opacity: 0.9; }
+        #sura-picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        #sura-picker-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #sura-picker-modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 90vw;
+            width: 520px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sura-picker-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8e6e2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .sura-picker-title { margin: 0; font-size: 1.25rem; color: #2c3e50; }
+        .sura-picker-search {
+            flex: 1;
+            max-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            direction: rtl;
+        }
+        .sura-picker-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: #f0e6e0;
+            color: #8b6914;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sura-picker-body {
+            overflow-y: auto;
+            padding: 16px 20px 20px;
+        }
+        .sura-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .sura-picker-card {
+            padding: 12px 10px;
+            border-radius: 12px;
+            background: #faf8f5;
+            border: 1px solid #e8e6e2;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .sura-picker-card:hover {
+            background: #f0ebe4;
+            border-color: #c4bfb4;
+        }
+        .sura-picker-card.current {
+            background: #e8e6e2;
+            border-color: #2c3e50;
+        }
+        .sura-picker-card .sura-picker-num {
+            font-size: 0.85rem;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .sura-picker-card .sura-picker-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+            color: #2c3e50;
+        }
+        .sura-picker-card.hidden { display: none; }
+        .formula-row-wrap { display: flex; align-items: flex-start; gap: 0.35rem; flex-wrap: wrap; }
+        .formula-row-wrap input[type="text"] { flex: 1; min-width: 140px; }
+        .formula-help {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--muted); color: var(--card-bg); font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; border: none; flex-shrink: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+        .formula-help:hover { background: var(--accent); color: #fff; }
+        .formula-help-popover {
+            display: none; position: absolute; left: 0; top: 100%;
+            margin-top: 6px; min-width: 260px; max-width: 320px;
+            max-height: min(70vh, 320px);
+            overflow-y: auto;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 12px; padding: 0.85rem 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 101;
+            font-size: 0.82rem; line-height: 1.5; text-align: right;
+        }
+        .formula-help-popover.visible { display: block; }
+        .formula-help-popover .popover-title { font-weight: 700; margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text); }
+        .formula-help-popover .help-section-title { font-weight: 600; margin: 0.6rem 0 0.25rem 0; font-size: 0.8rem; color: var(--muted); }
+        .formula-help-popover .help-section-title:first-child { margin-top: 0; }
+        .formula-help-popover .help-row { display: flex; flex-direction: row; justify-content: flex-end; align-items: baseline; gap: 0.5rem; margin-top: 0.25rem; direction: rtl; text-align: right; }
+        .formula-help-popover .help-row:first-of-type { margin-top: 0; }
+        .formula-help-popover .help-var { font-family: monospace; direction: ltr; unicode-bidi: embed; color: var(--accent); flex-shrink: 0; }
+        .formula-help-popover .help-desc { color: var(--muted); flex: 1; }
+        .add-chart-btn {
+            display: block; width: 100%; margin-top: 0.5rem; padding: 0.5rem 0.75rem;
+            font-size: 0.88rem; font-family: inherit; color: var(--accent);
+            background: rgba(59, 130, 246, 0.08); border: 1px dashed rgba(59, 130, 246, 0.4);
+            border-radius: 10px; cursor: pointer;
+        }
+        .add-chart-btn:hover { background: rgba(59, 130, 246, 0.15); border-color: var(--accent); }
+        .chart-block { margin-bottom: 0.85rem; padding: 0.75rem; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); }
+        .chart-block .row { margin-bottom: 0.5rem; }
+        .chart-block .row:last-of-type { margin-bottom: 0; }
+        .chart-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .chart-block-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .remove-chart-btn { padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+        .remove-chart-btn:hover { color: #b91c1c; border-color: #b91c1c; }
+        .chart-block-actions { display: flex; gap: 0.25rem; align-items: center; }
+        .order-chart-btn, .order-xy-btn { padding: 0.2rem 0.4rem; font-size: 0.75rem; min-width: 26px; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+        .order-chart-btn:hover, .order-xy-btn:hover { color: var(--accent); border-color: var(--accent); }
+        .order-chart-btn:disabled, .order-xy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .settings-bulk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .remove-all-btn { padding: 0.4rem 0.75rem; font-size: 0.82rem; color: #b91c1c; background: rgba(185,28,28,0.08); border: 1px solid rgba(185,28,28,0.3); border-radius: 8px; cursor: pointer; }
+        .remove-all-btn:hover { background: rgba(185,28,28,0.15); border-color: #b91c1c; }
+        .add-chart-placeholder {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border);
+            background: rgba(59, 130, 246, 0.04);
+        }
+        .add-chart-placeholder .add-chart-plus-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 2px dashed var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            font-size: 2rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+        }
+        .add-chart-placeholder .add-chart-plus-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+        .chart-config-btn {
+            margin-right: auto;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .chart-config-btn:hover {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+        }
+        #chart-config-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+        }
+        #chart-config-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        #chart-config-modal {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-config-modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chart-config-modal-header h2 { margin: 0; font-size: 1.1rem; }
+        .chart-config-modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .chart-config-modal-close:hover { background: var(--border); color: var(--text); }
+        .chart-config-modal-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+        }
+        .chart-config-type-row {
+            margin-bottom: 1rem;
+        }
+        .chart-config-type-row label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .chart-config-type-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .chart-config-type-btn {
+            flex: 1;
+            padding: 0.6rem 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--card-bg);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .chart-config-type-btn:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.06); }
+        .chart-config-type-btn.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.12); color: var(--accent); }
+        .chart-config-fields-bar,
+        .chart-config-fields-xy { display: none; }
+        .chart-config-fields-bar.visible,
+        .chart-config-fields-xy.visible { display: block; }
+        .chart-config-formula-help .popover-title { font-weight: 700; margin: 0 0 0.5rem 0; font-size: 0.85rem; color: var(--text); }
+        .chart-config-formula-help .help-section-title { font-weight: 600; margin: 0.6rem 0 0.25rem 0; font-size: 0.8rem; color: var(--muted); }
+        .chart-config-formula-help .help-section-title:first-child { margin-top: 0; }
+        .chart-config-formula-help .help-row { display: flex; flex-direction: row; justify-content: flex-end; align-items: baseline; gap: 0.5rem; margin-top: 0.25rem; direction: rtl; text-align: right; }
+        .chart-config-formula-help .help-row:first-of-type { margin-top: 0; }
+        .chart-config-formula-help .help-var { font-family: monospace; direction: ltr; unicode-bidi: embed; color: var(--accent); flex-shrink: 0; }
+        .chart-config-formula-help .help-desc { color: var(--muted); flex: 1; }
+        .chart-config-modal-body .row { margin-bottom: 0.85rem; }
+        .chart-config-modal-body .row label { display: block; margin-bottom: 4px; font-size: 0.9rem; }
+        .chart-config-modal-body input[type="text"],
+        .chart-config-modal-body input[type="number"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+        }
+        .chart-config-modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .chart-config-modal-footer .btn-save,
+        .chart-config-modal-footer .btn-add {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+        }
+        .chart-config-modal-footer .btn-save:hover,
+        .chart-config-modal-footer .btn-add:hover { opacity: 0.9; }
+        .chart-config-modal-footer .btn-delete {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: rgba(185,28,28,0.1);
+            color: #b91c1c;
+            border: 1px solid rgba(185,28,28,0.3);
+        }
+        .chart-config-modal-footer .btn-delete:hover { background: rgba(185,28,28,0.2); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+            <h1 id="page-title" style="margin:0;">آمار سوره</h1>
+            <span class="sura-badge" id="sura-badge" role="button" tabindex="0" title="کلیک برای انتخاب سوره">—</span>
+            <a id="open-in-yasir" href="desktop.html" style="font-size:0.9rem;color:rgba(255,255,255,0.9);text-decoration:none;">باز کردن در یسیر</a>
+        </div>
+        <div class="settings-wrap">
+            <button type="button" id="settings-btn" aria-label="تنظیمات">⚙</button>
+            <div id="settings-menu" class="settings-menu">
+                <h2 class="settings-panel-title">تنظیمات</h2>
+                <div class="settings-panel-body">
+                    <h3>حد نمودارها</h3>
+                    <div class="row">
+                        <label for="top-limit">ریشه‌های پرتکرار</label>
+                        <input id="top-limit" type="number" min="1" max="500" aria-label="حد پرتکرار">
+                    </div>
+                    <div class="row">
+                        <label for="distinctive-limit">ریشه‌های متمایز</label>
+                        <input id="distinctive-limit" type="number" min="1" max="500" aria-label="حد متمایز">
+                    </div>
+                    <div class="row">
+                        <label for="kl-limit">ریشه‌های KL بالا</label>
+                        <input id="kl-limit" type="number" min="1" max="500" aria-label="حد KL">
+                    </div>
+                    <div class="row">
+                        <label for="n2n-limit">ریشه‌های N²/N</label>
+                        <input id="n2n-limit" type="number" min="1" max="500" aria-label="حد N2N">
+                    </div>
+                    <div class="settings-section-links">
+                        <div class="title">صفحات</div>
+                        <div class="page-links">
+                            <a class="menu-link" href="desktop.html" title="یسیر">یسیر</a>
+                            <a class="menu-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
+                            <a class="menu-link" href="simple.html" title="نمایش">نمایش</a>
+                            <a class="menu-link current" href="stat.html" title="آمار سوره">آمار سوره</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        <aside class="root-detail-column" aria-live="polite">
+            <div class="root-detail-placeholder" id="root-detail-placeholder">کلیک یا هاور روی یک ریشه برای نمایش آمار</div>
+            <div id="root-tooltip" aria-hidden="true"></div>
+        </aside>
+        <div class="main-content">
+            <div id="loading" class="loading">در حال بارگذاری...</div>
+            <div id="error" class="error" style="display:none;"></div>
+            <div id="stats-grid" class="stats-grid" style="display:none;"></div>
+        </div>
+    </main>
+    <div id="chart-config-overlay" aria-hidden="true">
+        <div id="chart-config-modal">
+            <div class="chart-config-modal-header">
+                <h2 id="chart-config-modal-title">افزودن نمودار</h2>
+                <button type="button" class="chart-config-modal-close" id="chart-config-close" aria-label="بستن">×</button>
+            </div>
+            <div class="chart-config-modal-body">
+                <div class="chart-config-type-row">
+                    <label>نوع نمودار</label>
+                    <div class="chart-config-type-btns">
+                        <button type="button" class="chart-config-type-btn" data-type="bar" id="chart-config-type-bar">نمودار میله‌ای (فرمول)</button>
+                        <button type="button" class="chart-config-type-btn" data-type="xy" id="chart-config-type-xy">نمودار X–Y</button>
+                    </div>
+                </div>
+                <div id="chart-config-fields-bar" class="chart-config-fields-bar">
+                    <div class="row">
+                        <label>فرمول</label>
+                        <input type="text" id="chart-config-formula" dir="ltr" placeholder="e.g. n*log(m+1)/N" style="font-family:monospace;text-align:left;">
+                    </div>
+                    <details class="chart-config-formula-help" style="margin-bottom:0.75rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--muted);">متغیرها و توابع</summary>
+                        <div style="margin-top:0.5rem;padding:0.85rem 1rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);max-height:min(50vh,280px);overflow-y:auto;">
+                            <div class="popover-title">متغیرها</div>
+                            <div class="help-row"><span class="help-var">n</span><span class="help-desc">تعداد این ریشه در سورهٔ فعلی</span></div>
+                            <div class="help-row"><span class="help-var">N</span><span class="help-desc">تعداد کل ریشه‌ها در سورهٔ فعلی</span></div>
+                            <div class="help-row"><span class="help-var">m</span><span class="help-desc">تعداد این ریشه در کل قرآن</span></div>
+                            <div class="help-row"><span class="help-var">M</span><span class="help-desc">تعداد کل ریشه‌ها در کل قرآن</span></div>
+                            <div class="help-row"><span class="help-var">f[i]</span><span class="help-desc">تعداد این ریشه در سورهٔ i</span></div>
+                            <div class="help-row"><span class="help-var">F[i]</span><span class="help-desc">تعداد کل ریشه‌ها در سورهٔ i</span></div>
+                            <div class="help-section-title">تابع‌ها</div>
+                            <div class="help-row"><span class="help-var">log(x)</span><span class="help-desc">لگاریتم طبیعی</span></div>
+                            <div class="help-row"><span class="help-var">exp(x)</span><span class="help-desc">e به توان x</span></div>
+                            <div class="help-row"><span class="help-var">x ^ y</span><span class="help-desc">x به توان y</span></div>
+                            <div class="help-row"><span class="help-var">S(i, عبارت)</span><span class="help-desc">جمع عبارت روی سوره‌ها (i از ۱ تا ۱۱۴)</span></div>
+                        </div>
+                    </details>
+                    <div class="row">
+                        <label>حد</label>
+                        <input type="number" id="chart-config-limit" min="1" max="500" value="20">
+                    </div>
+                </div>
+                <div id="chart-config-fields-xy" class="chart-config-fields-xy">
+                    <div class="row">
+                        <label>فرمول انتخاب</label>
+                        <input type="text" id="chart-config-xy-selection" dir="ltr" style="font-family:monospace;text-align:left;">
+                    </div>
+                    <div class="row">
+                        <label>فرمول X</label>
+                        <input type="text" id="chart-config-xy-x" dir="ltr" style="font-family:monospace;text-align:left;">
+                    </div>
+                    <div class="row">
+                        <label>فرمول Y</label>
+                        <input type="text" id="chart-config-xy-y" dir="ltr" style="font-family:monospace;text-align:left;">
+                    </div>
+                    <details class="chart-config-formula-help" style="margin-bottom:0.75rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--muted);">؟ متغیرها و توابع</summary>
+                        <div style="margin-top:0.5rem;padding:0.85rem 1rem;background:var(--bg);border-radius:12px;border:1px solid var(--border);max-height:min(50vh,280px);overflow-y:auto;">
+                            <div class="popover-title">متغیرها</div>
+                            <div class="help-row"><span class="help-var">n</span><span class="help-desc">تعداد این ریشه در سورهٔ فعلی</span></div>
+                            <div class="help-row"><span class="help-var">N</span><span class="help-desc">تعداد کل ریشه‌ها در سورهٔ فعلی</span></div>
+                            <div class="help-row"><span class="help-var">m</span><span class="help-desc">تعداد این ریشه در کل قرآن</span></div>
+                            <div class="help-row"><span class="help-var">M</span><span class="help-desc">تعداد کل ریشه‌ها در کل قرآن</span></div>
+                            <div class="help-row"><span class="help-var">f[i]</span><span class="help-desc">تعداد این ریشه در سورهٔ i</span></div>
+                            <div class="help-row"><span class="help-var">F[i]</span><span class="help-desc">تعداد کل ریشه‌ها در سورهٔ i</span></div>
+                            <div class="help-section-title">تابع‌ها</div>
+                            <div class="help-row"><span class="help-var">log(x)</span><span class="help-desc">لگاریتم طبیعی</span></div>
+                            <div class="help-row"><span class="help-var">exp(x)</span><span class="help-desc">e به توان x</span></div>
+                            <div class="help-row"><span class="help-var">x ^ y</span><span class="help-desc">x به توان y</span></div>
+                            <div class="help-row"><span class="help-var">S(i, عبارت)</span><span class="help-desc">جمع عبارت روی سوره‌ها (i از ۱ تا ۱۱۴)</span></div>
+                        </div>
+                    </details>
+                    <div class="row">
+                        <label>حد</label>
+                        <input type="number" id="chart-config-xy-limit" min="1" max="500" value="20">
+                    </div>
+                </div>
+            </div>
+            <div class="chart-config-modal-footer">
+                <button type="button" class="btn-delete" id="chart-config-btn-delete" style="display:none;">حذف</button>
+                <button type="button" class="btn-save" id="chart-config-btn-save" style="display:none;">ذخیره</button>
+                <button type="button" class="btn-add" id="chart-config-btn-add">افزودن</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/buckwalter.js"></script>
+    <script src="js/sura-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+(function() {
+    const STORAGE_KEY = 'desktopRootLimits';
+    const DEFAULT_LIMIT = 20;
+    const faNumber = new Intl.NumberFormat('fa-IR');
+    function fmtFa(n) {
+        const x = Number(n);
+        if (!Number.isFinite(x)) return '';
+        return faNumber.format(x);
+    }
+    function getSuraFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        const s = parseInt(params.get('s') || '1', 10);
+        return Math.max(1, Math.min(114, s));
+    }
+    function loadLimits() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            const limits = stored ? JSON.parse(stored) : {};
+            var chart_slots = Array.isArray(limits.chart_slots) ? limits.chart_slots : [];
+            if (chart_slots.length === 0) {
+                var custom_charts = Array.isArray(limits.custom_charts) ? limits.custom_charts : [];
+                if (custom_charts.length === 0 && (typeof limits.custom_formula === 'string' || Number.isInteger(limits.custom_roots))) {
+                    custom_charts = [{ formula: limits.custom_formula || 'n * log(m+1) / N', limit: Number.isInteger(limits.custom_roots) ? limits.custom_roots : DEFAULT_LIMIT }];
+                }
+                var custom_xy_charts = Array.isArray(limits.custom_xy_charts) ? limits.custom_xy_charts : [];
+                if (custom_xy_charts.length === 0 && (limits.custom_xy_x_formula || limits.custom_xy_selection_formula)) {
+                    custom_xy_charts = [{
+                        selectionFormula: limits.custom_xy_selection_formula || 'n',
+                        xFormula: limits.custom_xy_x_formula || 'n/N',
+                        yFormula: limits.custom_xy_y_formula || 'm/M',
+                        limit: Number.isInteger(limits.custom_xy_limit) ? limits.custom_xy_limit : DEFAULT_LIMIT
+                    }];
+                }
+                chart_slots = custom_charts.map(function(c) { return { type: 'bar', formula: c.formula || 'n * log(m+1) / N', limit: c.limit || DEFAULT_LIMIT }; })
+                    .concat(custom_xy_charts.map(function(c) { return { type: 'xy', selectionFormula: c.selectionFormula || 'n', xFormula: c.xFormula || 'n/N', yFormula: c.yFormula || 'm/M', limit: c.limit || DEFAULT_LIMIT }; }));
+            }
+            return {
+                top_roots: Number.isInteger(limits.top_roots) ? limits.top_roots : DEFAULT_LIMIT,
+                distinctive_roots: Number.isInteger(limits.distinctive_roots) ? limits.distinctive_roots : DEFAULT_LIMIT,
+                high_kl_roots: Number.isInteger(limits.high_kl_roots) ? limits.high_kl_roots : DEFAULT_LIMIT,
+                n2_N_roots: Number.isInteger(limits.n2_N_roots) ? limits.n2_N_roots : DEFAULT_LIMIT,
+                chart_slots: chart_slots
+            };
+        } catch (e) { return { top_roots: DEFAULT_LIMIT, distinctive_roots: DEFAULT_LIMIT, high_kl_roots: DEFAULT_LIMIT, n2_N_roots: DEFAULT_LIMIT, chart_slots: [] }; }
+    }
+    function saveLimits(limits) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(limits)); } catch (e) {}
+    }
+    function toArabic(bw) {
+        return (typeof convertBuckwalterToArabic === 'function') ? convertBuckwalterToArabic(bw) : bw;
+    }
+    function getSuraName(num) {
+        return (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[num]) ? SURA_NAMES[num] : ('سوره ' + fmtFa(num));
+    }
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const gridEl = document.getElementById('stats-grid');
+    const titleEl = document.getElementById('page-title');
+    const badgeEl = document.getElementById('sura-badge');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsMenu = document.getElementById('settings-menu');
+    let rootsData = null;
+    let currentSuraData = null;
+    let charts = {};
+    let chartSlices = {};
+    var tooltipCache = {};
+    var currentSectionLists = {};
+    let chartHoverIndex = {};
+    let sectionColors = {};
+    function hexToRgba(hex, alpha) {
+        if (!hex || hex.indexOf('#') !== 0) return hex;
+        var s = hex.slice(1);
+        if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+        var r = parseInt(s.slice(0, 2), 16);
+        var g = parseInt(s.slice(2, 4), 16);
+        var b = parseInt(s.slice(4, 6), 16);
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha != null ? alpha : 1) + ')';
+    }
+    function setSectionHighlight(sectionId, index) {
+        chartHoverIndex[sectionId] = index;
+        var card = document.getElementById('card-' + sectionId);
+        if (card) {
+            var wrap = card.querySelector('.root-boxes-wrap');
+            var boxes = card.querySelectorAll('.root-box');
+            if (wrap) wrap.classList.toggle('has-highlight', index != null);
+            boxes.forEach(function(box) {
+                box.classList.toggle('highlight', parseInt(box.getAttribute('data-index'), 10) === index);
+            });
+        }
+        var canvasId = 'chart-' + sectionId;
+        var ch = charts[canvasId];
+        if (ch && ch.data && ch.data.datasets && ch.data.datasets[0]) {
+            var color = sectionColors[sectionId] || ch.data.datasets[0].backgroundColor;
+            var baseColor = (typeof color === 'string') ? color : (color[0] || '#999');
+            var len = (ch.data.labels && ch.data.labels.length) || (ch.data.datasets[0].data && ch.data.datasets[0].data.length) || 0;
+            ch.data.datasets[0].backgroundColor = Array(len).fill(0).map(function(_, i) {
+                return i === index ? baseColor : hexToRgba(baseColor, 0.35);
+            });
+            ch.data.datasets[0].borderColor = Array(len).fill(0).map(function(_, i) {
+                return i === index ? baseColor : hexToRgba(baseColor, 0.35);
+            });
+            ch.update('none');
+        }
+    }
+    function clearSectionHighlight(sectionId) {
+        chartHoverIndex[sectionId] = null;
+        var card = document.getElementById('card-' + sectionId);
+        if (card) {
+            var wrap = card.querySelector('.root-boxes-wrap');
+            var boxes = card.querySelectorAll('.root-box');
+            if (wrap) wrap.classList.remove('has-highlight');
+            boxes.forEach(function(box) { box.classList.remove('highlight'); });
+        }
+        var canvasId = 'chart-' + sectionId;
+        var ch = charts[canvasId];
+        if (ch && ch.data && ch.data.datasets && ch.data.datasets[0]) {
+            var color = sectionColors[sectionId] || ch.data.datasets[0].backgroundColor;
+            var baseColor = (typeof color === 'string') ? color : (color && color[0]) || '#999';
+            var len = (ch.data.labels && ch.data.labels.length) || (ch.data.datasets[0].data && ch.data.datasets[0].data.length) || 0;
+            ch.data.datasets[0].backgroundColor = Array(len).fill(baseColor);
+            ch.data.datasets[0].borderColor = Array(len).fill(baseColor);
+            ch.update('none');
+        }
+    }
+    function clearAllHighlights() {
+        Object.keys(currentSectionLists || {}).forEach(clearSectionHighlight);
+    }
+    function showError(msg) {
+        loadingEl.style.display = 'none';
+        gridEl.style.display = 'none';
+        errorEl.textContent = msg;
+        errorEl.style.display = 'block';
+    }
+    var currentChartSlots = [];
+    function applyLimitsToInputs(limits) {
+        const top = document.getElementById('top-limit');
+        const dist = document.getElementById('distinctive-limit');
+        const kl = document.getElementById('kl-limit');
+        const n2n = document.getElementById('n2n-limit');
+        if (top) top.value = limits.top_roots;
+        if (dist) dist.value = limits.distinctive_roots;
+        if (kl) kl.value = limits.high_kl_roots;
+        if (n2n) n2n.value = limits.n2_N_roots;
+        currentChartSlots = Array.isArray(limits.chart_slots) ? limits.chart_slots.slice() : [];
+    }
+    function getLimitsFromInputs() {
+        const top = parseInt(document.getElementById('top-limit').value, 10);
+        const dist = parseInt(document.getElementById('distinctive-limit').value, 10);
+        const kl = parseInt(document.getElementById('kl-limit').value, 10);
+        const n2n = parseInt(document.getElementById('n2n-limit').value, 10);
+        return {
+            top_roots: Number.isInteger(top) && top > 0 ? top : DEFAULT_LIMIT,
+            distinctive_roots: Number.isInteger(dist) && dist > 0 ? dist : DEFAULT_LIMIT,
+            high_kl_roots: Number.isInteger(kl) && kl > 0 ? kl : DEFAULT_LIMIT,
+            n2_N_roots: Number.isInteger(n2n) && n2n > 0 ? n2n : DEFAULT_LIMIT,
+            chart_slots: currentChartSlots.slice()
+        };
+    }
+    function openChartConfigModal(mode, slotIndex) {
+        var overlay = document.getElementById('chart-config-overlay');
+        var titleEl = document.getElementById('chart-config-modal-title');
+        var typeBar = document.getElementById('chart-config-type-bar');
+        var typeXy = document.getElementById('chart-config-type-xy');
+        var fieldsBar = document.getElementById('chart-config-fields-bar');
+        var fieldsXy = document.getElementById('chart-config-fields-xy');
+        var btnAdd = document.getElementById('chart-config-btn-add');
+        var btnSave = document.getElementById('chart-config-btn-save');
+        var btnDelete = document.getElementById('chart-config-btn-delete');
+        if (!overlay) return;
+        var isAdd = (mode === 'add');
+        titleEl.textContent = isAdd ? 'افزودن نمودار' : 'تنظیم نمودار';
+        btnAdd.style.display = isAdd ? 'block' : 'none';
+        btnSave.style.display = isAdd ? 'none' : 'block';
+        btnDelete.style.display = isAdd ? 'none' : 'block';
+        if (isAdd) {
+            typeBar.classList.add('selected');
+            typeXy.classList.remove('selected');
+            fieldsBar.classList.add('visible');
+            fieldsXy.classList.remove('visible');
+            document.getElementById('chart-config-formula').value = 'n * log(m+1) / N';
+            document.getElementById('chart-config-limit').value = DEFAULT_LIMIT;
+            document.getElementById('chart-config-xy-selection').value = 'n';
+            document.getElementById('chart-config-xy-x').value = 'n/N';
+            document.getElementById('chart-config-xy-y').value = 'm/M';
+            document.getElementById('chart-config-xy-limit').value = DEFAULT_LIMIT;
+        } else {
+            var slot = currentChartSlots[slotIndex];
+            if (slot && slot.type === 'bar') {
+                typeBar.classList.add('selected');
+                typeXy.classList.remove('selected');
+                fieldsBar.classList.add('visible');
+                fieldsXy.classList.remove('visible');
+                document.getElementById('chart-config-formula').value = slot.formula || 'n * log(m+1) / N';
+                document.getElementById('chart-config-limit').value = slot.limit || DEFAULT_LIMIT;
+            } else {
+                typeXy.classList.add('selected');
+                typeBar.classList.remove('selected');
+                fieldsXy.classList.add('visible');
+                fieldsBar.classList.remove('visible');
+                document.getElementById('chart-config-xy-selection').value = (slot && slot.selectionFormula) || 'n';
+                document.getElementById('chart-config-xy-x').value = (slot && slot.xFormula) || 'n/N';
+                document.getElementById('chart-config-xy-y').value = (slot && slot.yFormula) || 'm/M';
+                document.getElementById('chart-config-xy-limit').value = (slot && slot.limit) || DEFAULT_LIMIT;
+            }
+        }
+        overlay.setAttribute('data-mode', mode);
+        overlay.setAttribute('data-slot-index', String(slotIndex != null ? slotIndex : -1));
+        overlay.classList.add('visible');
+        overlay.setAttribute('aria-hidden', 'false');
+    }
+    function closeChartConfigModal() {
+        var overlay = document.getElementById('chart-config-overlay');
+        if (overlay) {
+            overlay.classList.remove('visible');
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+    }
+    function getChartConfigFromModal() {
+        var typeBar = document.getElementById('chart-config-type-bar');
+        if (typeBar.classList.contains('selected')) {
+            return {
+                type: 'bar',
+                formula: (document.getElementById('chart-config-formula').value || '').trim() || 'n * log(m+1) / N',
+                limit: parseInt(document.getElementById('chart-config-limit').value, 10) || DEFAULT_LIMIT
+            };
+        }
+        return {
+            type: 'xy',
+            selectionFormula: (document.getElementById('chart-config-xy-selection').value || '').trim() || 'n',
+            xFormula: (document.getElementById('chart-config-xy-x').value || '').trim() || 'n/N',
+            yFormula: (document.getElementById('chart-config-xy-y').value || '').trim() || 'm/M',
+            limit: parseInt(document.getElementById('chart-config-xy-limit').value, 10) || DEFAULT_LIMIT
+        };
+    }
+    const COLORS = { top: '#0d9488', distinctive: '#ea580c', kl: '#dc2626', n2n: '#7c3aed', custom: '#059669', xy: '#2563eb' };
+    var CUSTOM_PALETTE = ['#059669', '#0d9488', '#0f766e', '#14b8a6', '#2dd4bf'];
+    var XY_PALETTE = ['#2563eb', '#7c3aed', '#6d28d9', '#4f46e5', '#6366f1'];
+    var rootToGlobal = {};
+    var rootToSuraCounts = {};
+    var suraTotals = {};
+    function buildRootToGlobal() {
+        rootToGlobal = {};
+        rootToSuraCounts = {};
+        suraTotals = {};
+        if (!rootsData || !rootsData.suras) return;
+        Object.keys(rootsData.suras).forEach(function(suraKey) {
+            var sura = rootsData.suras[suraKey];
+            suraTotals[suraKey] = sura.total_root_tokens || 0;
+            var list = sura.n2_N_roots;
+            if (Array.isArray(list)) list.forEach(function(item) {
+                if (item && item.root != null && item.global != null) rootToGlobal[item.root] = item.global;
+            });
+            list = sura.top_roots;
+            if (Array.isArray(list)) list.forEach(function(item) {
+                if (item && item.root != null) {
+                    if (!rootToSuraCounts[item.root]) rootToSuraCounts[item.root] = {};
+                    rootToSuraCounts[item.root][suraKey] = Number(item.count) || 0;
+                }
+            });
+        });
+    }
+    function findMatchingParen(str, openIdx) {
+        var depth = 1;
+        for (var i = openIdx + 1; i < str.length; i++) {
+            if (str[i] === '(') depth++;
+            else if (str[i] === ')') { depth--; if (depth === 0) return i; }
+        }
+        return -1;
+    }
+    function findInnermostS(formula) {
+        var idx = formula.indexOf('S(');
+        if (idx === -1) return null;
+        var afterOpen = idx + 2;
+        var rest = formula.slice(afterOpen).replace(/^\s+/, '');
+        var varMatch = rest.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*/);
+        if (!varMatch) return null;
+        var indexVar = varMatch[1];
+        var bodyStart = afterOpen + varMatch[0].length;
+        var closeIdx = findMatchingParen(formula, idx + 1);
+        if (closeIdx === -1) return null;
+        var body = formula.slice(bodyStart, closeIdx).trim();
+        if (body.indexOf('S(') !== -1) {
+            var inner = findInnermostS(body);
+            if (inner) return { indexVar: inner.indexVar, body: inner.body, start: bodyStart + inner.start, end: bodyStart + inner.end };
+        }
+        return { indexVar: indexVar, body: body, start: idx, end: closeIdx + 1 };
+    }
+    function replaceInnermostSWithCall(formula) {
+        var match = findInnermostS(formula);
+        if (!match) return formula;
+        var bodyEscaped = match.body.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+        var before = formula.slice(0, match.start);
+        var mid = '__S__("' + match.indexVar + '","' + bodyEscaped + '")';
+        var after = formula.slice(match.end);
+        return before + mid + after;
+    }
+    function replaceAllS(formula) {
+        var match;
+        while ((match = findInnermostS(formula)) !== null) formula = replaceInnermostSWithCall(formula);
+        return formula;
+    }
+    function getOperandLeft(str, caretIdx) {
+        var i = caretIdx - 1;
+        while (i >= 0 && /[\s]/.test(str[i])) i--;
+        if (i < 0) return null;
+        var end = caretIdx;
+        if (str[i] === ')') {
+            var depth = 1;
+            i--;
+            while (i >= 0 && depth > 0) {
+                if (str[i] === ')') depth++;
+                else if (str[i] === '(') depth--;
+                i--;
+            }
+            var start = i + 1;
+            i--;
+            while (i >= 0 && /[\s]/.test(str[i])) i--;
+            if (i >= 0 && /[a-zA-Z_]/.test(str[i])) {
+                while (i >= 0 && /[a-zA-Z0-9_.]/.test(str[i])) i--;
+                start = i + 1;
+            }
+            return { start: start, end: end };
+        }
+        while (i >= 0 && /[a-zA-Z0-9_.]/.test(str[i])) i--;
+        return { start: i + 1, end: caretIdx };
+    }
+    function getOperandRight(str, caretIdx) {
+        var i = caretIdx + 1;
+        while (i < str.length && /[\s]/.test(str[i])) i++;
+        if (i >= str.length) return null;
+        var end = i;
+        if (str[i] === '(') {
+            var depth = 1;
+            i++;
+            while (i < str.length && depth > 0) {
+                if (str[i] === '(') depth++;
+                else if (str[i] === ')') depth--;
+                i++;
+            }
+            return { start: caretIdx + 1, end: i };
+        }
+        while (i < str.length && /[a-zA-Z0-9_.]/.test(str[i])) i++;
+        return { start: caretIdx + 1, end: i };
+    }
+    function replacePower(formula) {
+        var idx;
+        while ((idx = formula.lastIndexOf('^')) !== -1) {
+            var left = getOperandLeft(formula, idx);
+            var right = getOperandRight(formula, idx);
+            if (!left || !right) break;
+            formula = formula.slice(0, left.start) + 'Math.pow(' + formula.slice(left.start, left.end) + ',' + formula.slice(right.start, right.end) + ')' + formula.slice(right.end);
+        }
+        return formula;
+    }
+    function makeCustomEvaluator(formulaStr) {
+        if (!formulaStr || typeof formulaStr !== 'string') formulaStr = 'n * log(m+1) / N';
+        var raw = formulaStr.trim();
+        var formula = raw.replace(/\blog\s*\(/g, 'Math.log(').replace(/\bexp\s*\(/g, 'Math.exp(');
+        formula = formula.replace(/\bf\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]/g, 'getF($1)').replace(/\bF\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]/g, 'getFTotal($1)');
+        formula = replaceAllS(formula);
+        formula = replacePower(formula);
+        var withoutMath = formula.replace(/Math\.log/g, '').replace(/Math\.exp/g, '').replace(/Math\.pow/g, '').replace(/getF/g, '').replace(/getFTotal/g, '').replace(/__S__/g, '');
+        if (!/^[\s"(),a-zA-Z0-9_+\-*.\/\\]*$/.test(withoutMath)) {
+            console.warn('[stat custom formula] Formula rejected: contains disallowed characters. Allowed: n,N,m,M, log, exp, ^, f[i], F[i], S(i,expr), numbers, + - * / ( )', { formula: raw, withoutMath: withoutMath });
+            return null;
+        }
+        try {
+            var fn = new Function('n', 'N', 'm', 'M', 'getF', 'getFTotal', '__S__', 'return (' + formula + ');');
+            return function(n, N, m, M, getF, getFTotal) {
+                var SImpl = function(idx, bodyStr) {
+                    var sum = 0;
+                    for (var k = 1; k <= 114; k++) {
+                        try {
+                            var inner = new Function('getF', 'getFTotal', 'n', 'N', 'm', 'M', '__S__', idx, 'return (' + bodyStr + ');');
+                            sum += inner(getF, getFTotal, n, N, m, M, SImpl, k);
+                        } catch (e) {
+                            console.warn('[stat custom formula] S(' + idx + ', ...) evaluation error for k=' + k, e);
+                            sum += Number.NaN;
+                        }
+                    }
+                    return sum;
+                };
+                try {
+                    return fn(n, N, m, M, getF, getFTotal, SImpl);
+                } catch (e) {
+                    console.warn('[stat custom formula] Formula evaluation error', { formula: raw, n: n, N: N, m: m, M: M, error: e });
+                    throw e;
+                }
+            };
+        } catch (e) {
+            console.warn('[stat custom formula] Formula compile error', { formula: raw, error: e });
+            return null;
+        }
+    }
+    const STAT_LABELS = {
+        count: 'تعداد',
+        rel_in_sura: 'نسبت در سوره',
+        rel_elsewhere: 'نسبت در سایر سوره‌ها',
+        ratio: 'نسبت تمایز',
+        log_ratio: 'لگاریتم نسبت',
+        p_sura: 'احتمال در سوره',
+        p_else: 'احتمال در سایر',
+        kl: 'KL',
+        global: 'تعداد در کل قرآن',
+        p: 'p (سوره)',
+        q: 'q (کل)',
+        m: 'N²/N',
+        customValue: 'فرمول',
+        custom_n: 'n',
+        custom_N: 'N',
+        custom_m: 'm',
+        custom_M: 'M',
+        custom_xy_x: 'X',
+        custom_xy_y: 'Y'
+    };
+    function escapeHtml(s) {
+        if (s == null) return '';
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+    var CATEGORY_LABELS = ['پرتکرار', 'متمایز', 'KL بالا', 'N²/N'];
+    var SECTION_TO_CATEGORY_INDEX = { top: 0, distinctive: 1, kl: 2, n2n: 3 };
+    var currentSections = [];
+    function mergeRootStatsByCategory(suraData, rootBw, sections) {
+        if (!suraData || !rootBw) return [];
+        var out = [];
+        (sections || currentSections).forEach(function(sec, idx) {
+            var list = sec.list || [];
+            if (!Array.isArray(list)) return;
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] && list[i].root === rootBw) {
+                    out.push({ label: (sec.title || ''), item: list[i] });
+                    break;
+                }
+            }
+        });
+        return out;
+    }
+    function formatStatValue(key, val) {
+        if (val === undefined || val === null) return '';
+        if (typeof val !== 'number') return String(val);
+        if (key === 'count' || key === 'global') return fmtFa(Math.round(val));
+        if (val < 0.001 && val > 0) return val.toExponential(2);
+        return Number(val).toFixed(4);
+    }
+    function formatStatsTooltip(rootAr, byCategory, highlightCategoryIndex, suraNum, rootBw) {
+        if (!byCategory || !byCategory.length) return '';
+        var rootLine;
+        if (suraNum != null && rootAr && rootBw) {
+            // Use Buckwalter root in URL (e.g. root=qwl) so the param is always 3–4 ASCII chars; search.html converts to Arabic
+            var href = 'search.html?sure=' + encodeURIComponent(String(suraNum)) + '&root=' + encodeURIComponent(rootBw);
+            rootLine = '<div class="tooltip-root"><a class="tooltip-root-link" href="' + escapeHtml(href) + '" title="جستجو در ابزار جستجو">' + escapeHtml('> ') + escapeHtml(rootAr) + '</a></div>';
+        } else {
+            rootLine = '<div class="tooltip-root">' + escapeHtml('> ') + escapeHtml(rootAr) + '</div>';
+        }
+        var html = rootLine;
+        var order = ['count', 'rel_in_sura', 'ratio', 'rel_elsewhere', 'log_ratio', 'p_sura', 'p_else', 'kl', 'global', 'p', 'q', 'm', 'customValue', 'custom_n', 'custom_N', 'custom_m', 'custom_M', 'custom_xy_x', 'custom_xy_y'];
+        byCategory.forEach(function(block, idx) {
+            var item = block.item;
+            if (!item || typeof item !== 'object') return;
+            var sectionClass = 'tooltip-section' + (idx === highlightCategoryIndex ? ' tooltip-section-highlight' : '');
+            html += '<div class="' + sectionClass + '">';
+            html += '<div class="tooltip-section-title">' + escapeHtml(block.label) + '</div>';
+            order.forEach(function(key) {
+                if (!(key in item)) return;
+                var val = item[key];
+                if (val === undefined || val === null) return;
+                var label = STAT_LABELS[key] || key;
+                var text = formatStatValue(key, val);
+                html += '<div class="tooltip-row"><span class="tooltip-label">' + escapeHtml(label) + '</span><span class="tooltip-value num-fa">' + escapeHtml(text) + '</span></div>';
+            });
+            html += '</div>';
+        });
+        return html;
+    }
+    function showRootTooltip(content) {
+        var tip = document.getElementById('root-tooltip');
+        var placeholder = document.getElementById('root-detail-placeholder');
+        if (!tip) return;
+        tip.innerHTML = content;
+        tip.classList.add('visible');
+        if (placeholder) placeholder.style.display = 'none';
+    }
+    function hideRootTooltip() {
+        var tip = document.getElementById('root-tooltip');
+        var placeholder = document.getElementById('root-detail-placeholder');
+        if (tip) { tip.classList.remove('visible'); tip.innerHTML = ''; }
+        if (placeholder) placeholder.style.display = 'block';
+    }
+    var fixedRoot = null;
+    var hoveredRoot = null;
+    var hoveredFromChart = false;
+    function applyHighlightsForRoot(rootBw) {
+        if (!rootBw || !currentSectionLists) return;
+        Object.keys(currentSectionLists).forEach(function(secId) {
+            var list = currentSectionLists[secId];
+            var idx = -1;
+            if (list) {
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] && list[i].root === rootBw) { idx = i; break; }
+                }
+            }
+            if (idx >= 0) setSectionHighlight(secId, idx); else clearSectionHighlight(secId);
+        });
+    }
+    function updateDisplay() {
+        var displayRoot = hoveredRoot || fixedRoot;
+        if (!displayRoot) {
+            hideRootTooltip();
+            setTimeout(function() { clearAllHighlights(); }, 0);
+            return;
+        }
+        if (!currentSuraData || !currentSectionLists) return;
+        var rootBw = displayRoot.rootBw;
+        var rootAr = displayRoot.rootAr;
+        if (!tooltipCache[rootBw]) {
+            tooltipCache[rootBw] = { byCategory: mergeRootStatsByCategory(currentSuraData, rootBw), rootAr: rootAr };
+        }
+        var cached = tooltipCache[rootBw];
+        var suraNum = getSuraFromUrl();
+        var highlightCat = displayRoot.categoryIndex;
+        var content = formatStatsTooltip(cached.rootAr, cached.byCategory, highlightCat, suraNum, rootBw);
+        showRootTooltip(content);
+        if (fixedRoot && displayRoot && displayRoot.rootBw === fixedRoot.rootBw) {
+            var tip = document.getElementById('root-tooltip');
+            if (tip) {
+                var clearBtn = document.createElement('button');
+                clearBtn.type = 'button';
+                clearBtn.className = 'tooltip-clear-btn';
+                clearBtn.textContent = 'حذف انتخاب';
+                clearBtn.addEventListener('click', function() {
+                    fixedRoot = null;
+                    updateDisplay();
+                });
+                tip.appendChild(clearBtn);
+            }
+        }
+        var skipHighlights = hoveredRoot && hoveredFromChart;
+        if (!skipHighlights) {
+            var rootToHighlight = rootBw;
+            setTimeout(function() { applyHighlightsForRoot(rootToHighlight); }, 0);
+        }
+    }
+    var suraPickerOverlay = null;
+    function createSuraPicker() {
+        if (suraPickerOverlay) return suraPickerOverlay;
+        suraPickerOverlay = document.createElement('div');
+        suraPickerOverlay.id = 'sura-picker-overlay';
+        var modal = document.createElement('div');
+        modal.id = 'sura-picker-modal';
+        var header = document.createElement('div');
+        header.className = 'sura-picker-header';
+        var title = document.createElement('h2');
+        title.className = 'sura-picker-title';
+        title.textContent = 'انتخاب سوره';
+        var search = document.createElement('input');
+        search.type = 'text';
+        search.className = 'sura-picker-search';
+        search.placeholder = 'جستجو...';
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'sura-picker-close';
+        closeBtn.textContent = '\u00D7';
+        closeBtn.addEventListener('click', hideSuraPicker);
+        header.appendChild(title);
+        header.appendChild(search);
+        header.appendChild(closeBtn);
+        var body = document.createElement('div');
+        body.className = 'sura-picker-body';
+        var grid = document.createElement('div');
+        grid.className = 'sura-picker-grid';
+        grid.id = 'sura-picker-grid';
+        for (var i = 1; i <= 114; i++) {
+            var card = document.createElement('div');
+            card.className = 'sura-picker-card';
+            card.setAttribute('data-sura', i);
+            card.setAttribute('data-name', (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[i]) ? SURA_NAMES[i] : '');
+            card.innerHTML = '<div class="sura-picker-num">' + fmtFa(i) + '</div><div class="sura-picker-name">' + escapeHtml(getSuraName(i)) + '</div>';
+            card.addEventListener('click', function() {
+                var num = parseInt(this.getAttribute('data-sura'), 10);
+                var url = new URL(window.location.href);
+                url.searchParams.set('s', num);
+                window.history.replaceState({}, '', url);
+                render(num, loadLimits());
+                hideSuraPicker();
+            });
+            grid.appendChild(card);
+        }
+        search.addEventListener('input', function() {
+            var q = this.value.trim().toLowerCase();
+            var cards = grid.querySelectorAll('.sura-picker-card');
+            for (var j = 0; j < cards.length; j++) {
+                var c = cards[j];
+                var name = (c.getAttribute('data-name') || '').toLowerCase();
+                var num = c.getAttribute('data-sura');
+                c.classList.toggle('hidden', q && name.indexOf(q) === -1 && num.indexOf(q) === -1);
+            }
+        });
+        body.appendChild(grid);
+        modal.appendChild(header);
+        modal.appendChild(body);
+        suraPickerOverlay.appendChild(modal);
+        suraPickerOverlay.addEventListener('click', function(e) {
+            if (e.target === suraPickerOverlay) hideSuraPicker();
+        });
+        document.addEventListener('keydown', function onEsc(e) {
+            if (e.key === 'Escape' && suraPickerOverlay && suraPickerOverlay.classList.contains('visible')) hideSuraPicker();
+        });
+        document.body.appendChild(suraPickerOverlay);
+        return suraPickerOverlay;
+    }
+    function openSuraPicker(currentSura) {
+        createSuraPicker();
+        var grid = document.getElementById('sura-picker-grid');
+        if (grid) {
+            grid.querySelectorAll('.sura-picker-card').forEach(function(card) {
+                card.classList.toggle('current', parseInt(card.getAttribute('data-sura'), 10) === currentSura);
+            });
+        }
+        var search = suraPickerOverlay.querySelector('.sura-picker-search');
+        if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+        suraPickerOverlay.classList.add('visible');
+    }
+    function hideSuraPicker() {
+        if (suraPickerOverlay) suraPickerOverlay.classList.remove('visible');
+    }
+    function renderScatterChart(canvasId, slice, color) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !window.Chart) return;
+        chartSlices[canvasId] = slice || [];
+        var points = (slice || []).map(function(p) { return { x: Number(p.x) || 0, y: Number(p.y) || 0 }; });
+        var sectionId = canvasId.replace('chart-', '');
+        if (charts[canvasId]) {
+            charts[canvasId].data.datasets[0].data = points;
+            charts[canvasId].data.datasets[0].backgroundColor = sectionColors[sectionId] || color;
+            charts[canvasId].data.datasets[0].borderColor = sectionColors[sectionId] || color;
+            charts[canvasId].update('none');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        var sliceRef = slice || [];
+        charts[canvasId] = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    data: points,
+                    backgroundColor: sectionColors[sectionId] || color,
+                    borderColor: sectionColors[sectionId] || color,
+                    borderWidth: 1,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: function(evt, elements, chart) {
+                    if (elements && elements.length > 0) {
+                        var dataIndex = elements[0].index;
+                        var item = sliceRef[dataIndex];
+                        if (item && item.root) {
+                            var rootBw = item.root;
+                            var rootAr = toArabic(rootBw);
+                            fixedRoot = { rootBw: rootBw, rootAr: rootAr };
+                            hoveredFromChart = false;
+                            setTimeout(function() { updateDisplay(); }, 0);
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: false,
+                        external: function(context) {
+                            var tooltip = context.tooltip;
+                            if (!tooltip || tooltip.opacity === 0) {
+                                hoveredRoot = null;
+                                setTimeout(function() { updateDisplay(); }, 0);
+                                return;
+                            }
+                            var dataPoints = tooltip.dataPoints || [];
+                            if (dataPoints.length === 0) return;
+                            var dataIndex = dataPoints[0].dataIndex;
+                            var item = sliceRef[dataIndex];
+                            if (!item || !item.root) return;
+                            var rootBw = item.root;
+                            var rootAr = toArabic(rootBw);
+                            hoveredFromChart = true;
+                            hoveredRoot = { rootBw: rootBw, rootAr: rootAr, categoryIndex: SECTION_TO_CATEGORY_INDEX[sectionId] };
+                            updateDisplay();
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { font: { size: 10 } },
+                        grid: { color: 'rgba(0,0,0,0.06)' }
+                    },
+                    y: {
+                        ticks: { font: { size: 10 } },
+                        grid: { color: 'rgba(0,0,0,0.06)' }
+                    }
+                }
+            }
+        });
+    }
+    function renderChart(canvasId, labels, values, color, title, slice) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !window.Chart) return;
+        chartSlices[canvasId] = slice || [];
+        if (charts[canvasId]) {
+            var sectionId = canvasId.replace('chart-', '');
+            charts[canvasId].data.labels = labels;
+            charts[canvasId].data.datasets[0].data = values;
+            var baseColor = sectionColors[sectionId] || color;
+            charts[canvasId].data.datasets[0].backgroundColor = labels.map(function() { return baseColor; });
+            charts[canvasId].data.datasets[0].borderColor = labels.map(function() { return baseColor; });
+            charts[canvasId].update('none');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        const sliceRef = slice || [];
+        var bgColors = labels.map(function() { return color; });
+        charts[canvasId] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: bgColors,
+                    borderColor: bgColors,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                    maxBarThickness: 24
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                onClick: function(evt, elements, chart) {
+                    if (elements && elements.length > 0) {
+                        var dataIndex = elements[0].index;
+                        var item = sliceRef[dataIndex];
+                        if (item && item.root) {
+                            var rootBw = item.root;
+                            var rootAr = toArabic(rootBw);
+                            fixedRoot = { rootBw: rootBw, rootAr: rootAr };
+                            hoveredFromChart = false;
+                            setTimeout(function() { updateDisplay(); }, 0);
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: false,
+                        external: function(context) {
+                            var tooltip = context.tooltip;
+                            var sectionId = (context.chart && context.chart.canvas && context.chart.canvas.id) ? context.chart.canvas.id.replace('chart-', '') : '';
+                            if (!tooltip || tooltip.opacity === 0) {
+                                hoveredRoot = null;
+                                setTimeout(function() { updateDisplay(); }, 0);
+                                return;
+                            }
+                            var dataPoints = tooltip.dataPoints || [];
+                            if (dataPoints.length === 0) return;
+                            var dataIndex = dataPoints[0].dataIndex;
+                            var item = sliceRef[dataIndex];
+                            if (!item || !item.root) return;
+                            var rootBw = item.root;
+                            var rootAr = toArabic(rootBw);
+                            var catIndex = SECTION_TO_CATEGORY_INDEX[sectionId];
+                            hoveredFromChart = true;
+                            hoveredRoot = { rootBw: rootBw, rootAr: rootAr, categoryIndex: catIndex };
+                            updateDisplay();
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        reverse: true,
+                        ticks: { font: { size: 11 }, maxRotation: 45 },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { font: { size: 10 } },
+                        grid: { color: 'rgba(0,0,0,0.06)' }
+                    }
+                }
+            }
+        });
+    }
+    function render(suraNum, limits) {
+        if (!rootsData || !rootsData.suras) return;
+        const suraKey = String(suraNum);
+        const data = rootsData.suras[suraKey];
+        if (!data) {
+            showError('داده‌ای برای سوره ' + fmtFa(suraNum) + ' یافت نشد.');
+            return;
+        }
+        currentSuraData = data;
+        tooltipCache = {};
+        fixedRoot = null;
+        hoveredRoot = null;
+        Object.keys(charts).forEach(function(id) {
+            try { charts[id].destroy(); } catch (e) {}
+        });
+        charts = {};
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'none';
+        gridEl.style.display = 'grid';
+        titleEl.textContent = 'آمار سوره';
+        badgeEl.textContent = getSuraName(suraNum);
+        var yasirLink = document.getElementById('open-in-yasir');
+        if (yasirLink) yasirLink.href = 'desktop.html?s=' + suraNum;
+        const sections = [
+            {
+                id: 'top',
+                title: 'ریشه‌های پرتکرار',
+                sub: 'بیشترین تکرار در این سوره',
+                list: data.top_roots || [],
+                limit: limits.top_roots,
+                valueKey: 'count',
+                chartTitle: 'count',
+                color: COLORS.top
+            },
+            {
+                id: 'distinctive',
+                title: 'ریشه‌های متمایز',
+                sub: 'فراوانی نسبی بالاتر نسبت به سایر سوره‌ها',
+                list: data.distinctive_roots || [],
+                limit: limits.distinctive_roots,
+                valueKey: 'ratio',
+                chartTitle: 'ratio',
+                color: COLORS.distinctive
+            },
+            {
+                id: 'kl',
+                title: 'ریشه‌های با KL بالا',
+                sub: 'سهم در واگرایی کولبک‌لایبلر',
+                list: data.high_kl_roots || [],
+                limit: limits.high_kl_roots,
+                valueKey: 'kl',
+                chartTitle: 'kl',
+                color: COLORS.kl
+            },
+            {
+                id: 'n2n',
+                title: 'ریشه‌های N²/N',
+                sub: 'تعداد × تمرکز',
+                list: data.n2_N_roots || [],
+                limit: limits.n2_N_roots,
+                valueKey: 'm',
+                chartTitle: 'm',
+                color: COLORS.n2n
+            }
+        ];
+        var N = data.total_root_tokens || 1;
+        var M = (rootsData.meta && rootsData.meta.total_root_tokens) ? rootsData.meta.total_root_tokens : 49968;
+        var chartSlots = limits.chart_slots || [];
+        chartSlots.forEach(function(cfg, i) {
+            var secId = 'slot-' + i;
+            if (cfg.type === 'bar') {
+                var customEval = makeCustomEvaluator(cfg.formula);
+                var customList = [];
+                if (customEval && Array.isArray(data.top_roots)) {
+                    data.top_roots.forEach(function(item) {
+                        if (!item || !item.root) return;
+                        var root = item.root;
+                        var n = Number(item.count) || 0;
+                        var m = rootToGlobal[root] != null ? rootToGlobal[root] : 0;
+                        var getF = function(suraNum) { var key = String(suraNum); return (rootToSuraCounts[root] && rootToSuraCounts[root][key]) || 0; };
+                        var getFTotal = function(suraNum) { return suraTotals[String(suraNum)] || 1; };
+                        var val;
+                        try { val = customEval(n, N, m, M, getF, getFTotal); } catch (e) { val = -Infinity; }
+                        if (!Number.isFinite(val)) val = -Infinity;
+                        customList.push({ root: root, count: n, global: m, customValue: val, custom_n: n, custom_N: N, custom_m: m, custom_M: M });
+                    });
+                    customList.sort(function(a, b) { return (b.customValue || -Infinity) - (a.customValue || -Infinity); });
+                    customList = customList.slice(0, cfg.limit || DEFAULT_LIMIT);
+                }
+                sections.push({
+                    id: secId,
+                    title: 'فرمول سفارشی',
+                    sub: cfg.formula || 'بالاترین مقدار فرمول',
+                    list: customList,
+                    limit: cfg.limit || DEFAULT_LIMIT,
+                    valueKey: 'customValue',
+                    chartTitle: 'customValue',
+                    color: CUSTOM_PALETTE[i % CUSTOM_PALETTE.length],
+                    slotIndex: i
+                });
+            } else if (cfg.type === 'xy') {
+                var evalSelection = makeCustomEvaluator(cfg.selectionFormula || 'n');
+                var evalX = makeCustomEvaluator(cfg.xFormula || 'n/N');
+                var evalY = makeCustomEvaluator(cfg.yFormula || 'm/M');
+                var xyList = [];
+                if (evalSelection && evalX && evalY && Array.isArray(data.top_roots)) {
+                    var withSelection = [];
+                    data.top_roots.forEach(function(item) {
+                        if (!item || !item.root) return;
+                        var root = item.root;
+                        var n = Number(item.count) || 0;
+                        var m = rootToGlobal[root] != null ? rootToGlobal[root] : 0;
+                        var getF = function(suraNum) { var key = String(suraNum); return (rootToSuraCounts[root] && rootToSuraCounts[root][key]) || 0; };
+                        var getFTotal = function(suraNum) { return suraTotals[String(suraNum)] || 1; };
+                        var selVal;
+                        try { selVal = evalSelection(n, N, m, M, getF, getFTotal); } catch (e) { selVal = -Infinity; }
+                        if (!Number.isFinite(selVal)) selVal = -Infinity;
+                        withSelection.push({ root: root, count: n, global: m, selectionValue: selVal, getF: getF, getFTotal: getFTotal });
+                    });
+                    withSelection.sort(function(a, b) { return (b.selectionValue || -Infinity) - (a.selectionValue || -Infinity); });
+                    var selected = withSelection.slice(0, cfg.limit || DEFAULT_LIMIT);
+                    selected.forEach(function(p) {
+                        var xVal, yVal;
+                        try { xVal = evalX(p.count, N, p.global, M, p.getF, p.getFTotal); } catch (e) { xVal = NaN; }
+                        try { yVal = evalY(p.count, N, p.global, M, p.getF, p.getFTotal); } catch (e) { yVal = NaN; }
+                        if (!Number.isFinite(xVal)) xVal = NaN;
+                        if (!Number.isFinite(yVal)) yVal = NaN;
+                        if (Number.isFinite(xVal) && Number.isFinite(yVal)) {
+                            xyList.push({ root: p.root, count: p.count, global: p.global, x: xVal, y: yVal, custom_xy_x: xVal, custom_xy_y: yVal });
+                        }
+                    });
+                }
+                sections.push({
+                    id: secId,
+                    title: 'نمودار X–Y',
+                    sub: 'انتخاب: ' + (cfg.selectionFormula || 'n') + ' ؛ X: ' + (cfg.xFormula || 'n/N') + ' ، Y: ' + (cfg.yFormula || 'm/M'),
+                    list: xyList,
+                    limit: cfg.limit || DEFAULT_LIMIT,
+                    valueKey: 'x',
+                    chartTitle: 'x',
+                    color: XY_PALETTE[i % XY_PALETTE.length],
+                    isScatter: true,
+                    slotIndex: i
+                });
+            }
+        });
+        currentSections = sections;
+        CATEGORY_LABELS = sections.map(function(s) { return s.title; });
+        SECTION_TO_CATEGORY_INDEX = {};
+        sections.forEach(function(sec, idx) { SECTION_TO_CATEGORY_INDEX[sec.id] = idx; });
+        sections.forEach(function(sec) { sectionColors[sec.id] = sec.color; });
+        currentSectionLists = {};
+        sections.forEach(function(sec) { currentSectionLists[sec.id] = (sec.list || []).slice(0, sec.limit); });
+        let html = '';
+        sections.forEach(function(sec) {
+            const slice = (sec.list || []).slice(0, sec.limit);
+            const labels = slice.map(function(r) { return toArabic(r.root); });
+            const values = slice.map(function(r) { return Number(r[sec.valueKey]) || 0; });
+            const cardId = 'card-' + sec.id;
+            const chartId = 'chart-' + sec.id;
+            let boxesHtml = '';
+            slice.forEach(function(r, idx) {
+                const rootAr = toArabic(r.root);
+                const rootBw = (r.root || '').replace(/"/g, '&quot;');
+                boxesHtml += '<span class="root-box" data-index="' + idx + '" data-section="' + escapeHtml(sec.id) + '" data-root="' + escapeHtml(rootAr) + '" data-root-bw="' + escapeHtml(rootBw) + '" style="background:' + sec.color + '22;border-color:' + sec.color + ';color:' + sec.color + ';">' + escapeHtml(rootAr) + '</span>';
+            });
+            var configBtnHtml = (sec.slotIndex != null) ? '<button type="button" class="chart-config-btn" data-slot-index="' + sec.slotIndex + '" title="تنظیمات">&#9881;</button>' : '';
+            html += '<div class="stat-card" id="' + cardId + '">' +
+                '<div class="stat-card-header">' +
+                '<span class="dot" style="background:' + sec.color + '"></span>' +
+                '<div><h2 class="title">' + sec.title + '</h2><p class="sub">' + sec.sub + '</p></div>' +
+                configBtnHtml +
+                '</div>' +
+                '<div class="stat-card-body">' +
+                '<div class="chart-wrap"><canvas id="' + chartId + '"></canvas></div>' +
+                '<div class="root-boxes-wrap">' + boxesHtml + '</div>' +
+                '</div></div>';
+        });
+        html += '<div class="stat-card add-chart-placeholder" id="add-chart-placeholder">' +
+            '<div class="stat-card-body" style="display:flex;align-items:center;justify-content:center;min-height:200px;">' +
+            '<button type="button" class="add-chart-plus-btn" id="add-chart-plus-btn">+</button>' +
+            '</div></div>';
+        gridEl.innerHTML = html;
+        gridEl.querySelectorAll('.root-box').forEach(function(box) {
+            box.addEventListener('mouseenter', function() {
+                var sectionId = this.getAttribute('data-section');
+                var rootAr = this.getAttribute('data-root');
+                var rootBw = this.getAttribute('data-root-bw');
+                var catIndex = SECTION_TO_CATEGORY_INDEX[sectionId];
+                hoveredFromChart = false;
+                hoveredRoot = { rootBw: rootBw, rootAr: rootAr, categoryIndex: catIndex };
+                updateDisplay();
+            });
+            box.addEventListener('mouseleave', function() {
+                hoveredRoot = null;
+                updateDisplay();
+            });
+            box.addEventListener('click', function(e) {
+                e.preventDefault();
+                var rootAr = this.getAttribute('data-root');
+                var rootBw = this.getAttribute('data-root-bw');
+                fixedRoot = { rootBw: rootBw, rootAr: rootAr };
+                updateDisplay();
+            });
+        });
+        sections.forEach(function(sec) {
+            const slice = (sec.list || []).slice(0, sec.limit);
+            if (sec.isScatter) {
+                setTimeout(function() {
+                    renderScatterChart('chart-' + sec.id, slice, sec.color);
+                }, 0);
+            } else {
+                const labels = slice.map(function(r) { return toArabic(r.root); });
+                const values = slice.map(function(r) { return Number(r[sec.valueKey]) || 0; });
+                setTimeout(function() {
+                    renderChart('chart-' + sec.id, labels, values, sec.color, sec.chartTitle, slice);
+                }, 0);
+            }
+        });
+        var plusBtn = document.getElementById('add-chart-plus-btn');
+        if (plusBtn) {
+            plusBtn.addEventListener('click', function() {
+                openChartConfigModal('add');
+            });
+        }
+        gridEl.querySelectorAll('.chart-config-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(this.getAttribute('data-slot-index'), 10);
+                if (!Number.isNaN(idx)) openChartConfigModal('edit', idx);
+            });
+        });
+        updateDisplay();
+    }
+    function run() {
+        const suraNum = getSuraFromUrl();
+        const limits = loadLimits();
+        applyLimitsToInputs(limits);
+        fetch('data/roots-freq.json')
+            .then(function(r) {
+                if (!r.ok) throw new Error('بارگذاری داده‌ها ناموفق');
+                return r.json();
+            })
+            .then(function(data) {
+                rootsData = data;
+                buildRootToGlobal();
+                render(suraNum, limits);
+            })
+            .catch(function(err) {
+                showError(err.message || 'خطا در بارگذاری.');
+            });
+    }
+    settingsBtn.addEventListener('click', function() {
+        settingsMenu.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+        if (!settingsMenu.contains(e.target) && e.target !== settingsBtn) {
+            settingsMenu.classList.remove('open');
+        }
+    });
+    ['top-limit', 'distinctive-limit', 'kl-limit', 'n2n-limit'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                const limits = getLimitsFromInputs();
+                saveLimits(limits);
+                const suraNum = getSuraFromUrl();
+                render(suraNum, limits);
+            });
+        }
+    });
+    (function chartConfigModalSetup() {
+        var overlay = document.getElementById('chart-config-overlay');
+        var closeBtn = document.getElementById('chart-config-close');
+        var typeBar = document.getElementById('chart-config-type-bar');
+        var typeXy = document.getElementById('chart-config-type-xy');
+        var fieldsBar = document.getElementById('chart-config-fields-bar');
+        var fieldsXy = document.getElementById('chart-config-fields-xy');
+        var btnAdd = document.getElementById('chart-config-btn-add');
+        var btnSave = document.getElementById('chart-config-btn-save');
+        var btnDelete = document.getElementById('chart-config-btn-delete');
+        function showFieldsForType(type) {
+            if (type === 'bar') {
+                typeBar.classList.add('selected');
+                typeXy.classList.remove('selected');
+                fieldsBar.classList.add('visible');
+                fieldsXy.classList.remove('visible');
+            } else {
+                typeXy.classList.add('selected');
+                typeBar.classList.remove('selected');
+                fieldsXy.classList.add('visible');
+                fieldsBar.classList.remove('visible');
+            }
+        }
+        if (typeBar) typeBar.addEventListener('click', function() { showFieldsForType('bar'); });
+        if (typeXy) typeXy.addEventListener('click', function() { showFieldsForType('xy'); });
+        if (closeBtn) closeBtn.addEventListener('click', closeChartConfigModal);
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeChartConfigModal();
+            });
+        }
+        function applyAndClose() {
+            var limits = getLimitsFromInputs();
+            saveLimits(limits);
+            applyLimitsToInputs(limits);
+            closeChartConfigModal();
+            render(getSuraFromUrl(), limits);
+        }
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function() {
+                var cfg = getChartConfigFromModal();
+                currentChartSlots.push(cfg);
+                applyAndClose();
+            });
+        }
+        if (btnSave) {
+            btnSave.addEventListener('click', function() {
+                var idx = parseInt(overlay.getAttribute('data-slot-index'), 10);
+                if (Number.isNaN(idx) || idx < 0 || idx >= currentChartSlots.length) return;
+                var cfg = getChartConfigFromModal();
+                currentChartSlots[idx] = cfg;
+                applyAndClose();
+            });
+        }
+        if (btnDelete) {
+            btnDelete.addEventListener('click', function() {
+                var idx = parseInt(overlay.getAttribute('data-slot-index'), 10);
+                if (Number.isNaN(idx) || idx < 0 || idx >= currentChartSlots.length) return;
+                currentChartSlots.splice(idx, 1);
+                applyAndClose();
+            });
+        }
+    })();
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var overlay = document.getElementById('chart-config-overlay');
+            if (overlay && overlay.classList.contains('visible')) closeChartConfigModal();
+        }
+    });
+    (function() {
+        var helpBtn = document.getElementById('formula-help-btn');
+        var popover = document.getElementById('formula-help-popover');
+        if (!helpBtn || !popover) return;
+        helpBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            popover.classList.toggle('visible');
+            popover.setAttribute('aria-hidden', popover.classList.contains('visible') ? 'false' : 'true');
+        });
+        document.addEventListener('click', function(e) {
+            if (popover.classList.contains('visible') && !popover.contains(e.target) && e.target !== helpBtn) {
+                popover.classList.remove('visible');
+                popover.setAttribute('aria-hidden', 'true');
+            }
+        });
+    })();
+    if (badgeEl) {
+        badgeEl.addEventListener('click', function() {
+            openSuraPicker(getSuraFromUrl());
+        });
+        badgeEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openSuraPicker(getSuraFromUrl());
+            }
+        });
+    }
+    var rootTooltipEl = document.getElementById('root-tooltip');
+    if (rootTooltipEl) {
+        rootTooltipEl.addEventListener('mouseleave', function() {
+            updateDisplay();
+        });
+    }
+    var scrollTimer = null;
+    window.addEventListener('scroll', function() {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+            scrollTimer = null;
+            setTimeout(function() {
+                Object.keys(charts).forEach(function(id) {
+                    try {
+                        if (charts[id] && charts[id].canvas) charts[id].update('none');
+                    } catch (e) {}
+                });
+            }, 0);
+        }, 50);
+    }, { passive: true });
+    run();
+})();
+    </script>
+</body>
+</html>
