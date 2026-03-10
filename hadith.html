@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="fa-IR" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>احادیث مرتبط با آیه</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        @font-face {
+            font-family: 'BLotus';
+            src: url('fonts/B%20LOTUS%20S1%20REGULAR%20R1.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'QPC Uthmani Hafs';
+            src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+                 url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'BLotus', 'Traditional Arabic', 'Scheherazade New', system-ui, sans-serif;
+            background: #f5f3ef;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+        h1 {
+            font-size: 1.35rem;
+            margin: 0 0 16px;
+            color: #1a202c;
+        }
+        #page-title, .ayah-arabic-label, .ayah-translation-label {
+            display: none;
+        }
+        .ayah-section {
+            background: linear-gradient(135deg, #e8f0f7 0%, #f0f4f8 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .ayah-meta {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+        .ayah-meta .sura-name-click {
+            cursor: pointer;
+            font-weight: bold;
+            color: #475569;
+        }
+        .ayah-meta .sura-name-click:hover { text-decoration: underline; }
+        .ayah-meta .ayah-nav-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .ayah-meta .ayah-nav-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+        }
+        .ayah-meta .ayah-nav-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .ayah-meta .ayah-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #sura-picker-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s;
+        }
+        #sura-picker-overlay.visible { opacity: 1; visibility: visible; }
+        #sura-picker-modal {
+            background: #fff; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 90vw; width: 520px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sura-picker-header { padding: 16px 20px; border-bottom: 1px solid #e8e6e2; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .sura-picker-title { margin: 0; font-size: 1.25rem; color: #2c3e50; }
+        .sura-picker-search { flex: 1; max-width: 200px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; direction: rtl; }
+        .sura-picker-close { width: 36px; height: 36px; border: none; border-radius: 8px; background: #f0e6e0; color: #8b6914; font-size: 1.2rem; cursor: pointer; }
+        .sura-picker-body { overflow-y: auto; padding: 16px 20px 20px; }
+        .sura-picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .sura-picker-card { padding: 12px 10px; border-radius: 12px; background: #faf8f5; border: 1px solid #e8e6e2; cursor: pointer; text-align: center; transition: background 0.15s, border-color 0.15s; }
+        .sura-picker-card:hover { background: #f0ebe4; border-color: #c4bfb4; }
+        .sura-picker-card.current { background: #e8e6e2; border-color: #2c3e50; }
+        .sura-picker-card .sura-picker-num { font-size: 0.85rem; color: #555; margin-bottom: 4px; }
+        .sura-picker-card .sura-picker-name { font-weight: bold; font-size: 0.95rem; color: #2c3e50; }
+        .sura-picker-card.hidden { display: none; }
+        .ayah-arabic-label, .ayah-translation-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 6px;
+        }
+        .ayah-text {
+            font-family: 'QPC Uthmani Hafs', 'Traditional Arabic', serif;
+            font-size: 1.75rem;
+            line-height: 1.85;
+            color: #0f172a;
+            margin-bottom: 16px;
+        }
+        .ayah-text.ayah-text-qcf { font-size: clamp(1.4rem, 4vw, 2.2rem); line-height: 1.75; }
+        .ayah-text .qcf-word { display: inline; }
+        .ayah-translation {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #334155;
+        }
+        .ayah-translation-label { margin-top: 4px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+        .hadith-section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .hadith-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .hadith-card .hadith-narrators {
+            background: linear-gradient(90deg, #fef3c7 0%, #fef9c3 100%);
+            border-right: 4px solid #d97706;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #78350f;
+        }
+        .hadith-card .hadith-sodur {
+            font-size: 0.85rem;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .hadith-card .hadith-text {
+            /* font-family: 'Traditional Arabic', 'Scheherazade New', serif; */
+            font-size: 1.25rem;
+            line-height: 1.7;
+            color: #0f172a;
+            margin-bottom: 14px;
+        }
+        .hadith-card .hadith-translation {
+            background: #f8fafc;
+            border-right: 4px solid #3b82f6;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            border-radius: 6px;
+            font-size: 0.98rem;
+            line-height: 1.7;
+            color: #334155;
+        }
+        .hadith-segment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .hadith-segment-table th {
+            background: #1e293b;
+            color: #fff;
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 600;
+        }
+        .hadith-segment-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .hadith-segment-table tr:last-child td { border-bottom: none; }
+        .hadith-segment-table tr:nth-child(even) td { background: #fafbfc; }
+        .hadith-segment-table .col-ar {
+            /* font-family: 'Traditional Arabic', serif; */
+            font-size: 1.05rem;
+            color: #0f172a;
+            width: 50%;
+        }
+        .hadith-segment-table .col-fa {
+            color: #475569;
+            line-height: 1.65;
+        }
+        .hadith-refs {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .hadith-refs-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 8px;
+        }
+        .hadith-ref {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+        .hadith-ref .book { font-weight: 600; color: #475569; }
+        .loading, .error, .no-params {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-size: 1.05rem;
+        }
+        .error { color: #b91c1c; }
+        .no-params a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        .no-params a:hover { text-decoration: underline; }
+        .translation-variants {
+            margin-top: 10px;
+        }
+        .translation-variants summary {
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: #64748b;
+        }
+        .translation-variants .variant {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .hadith-quranic {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            color: #1e3a8a;
+            padding: 1px 1px;
+            border-radius: 4px;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .hadith-footnote {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 1px 1px;
+            border-radius: 3px;
+            text-decoration: none;
+            font-size: 0.9em;
+            border: 1px solid #fcd34d;
+
+            font-size: 0.50em;
+            vertical-align: super;
+            line-height: 0;
+            text-decoration: none;
+        }
+        .hadith-footnote:hover {
+            background: #fde68a;
+            text-decoration: underline;
+        }
+        .hadith-card--loading .hadith-card-placeholder {
+            padding: 24px 20px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        .hadith-card--loading .hadith-card-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: hadith-spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes hadith-spin { to { transform: rotate(360deg); } }
+        .hadith-card--error .hadith-card-error {
+            padding: 16px 20px;
+            color: #b91c1c;
+            font-size: 0.95rem;
+        }
+        .hadith-retry-btn {
+            margin: 0 20px 16px;
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .hadith-retry-btn:hover { background: #2563eb; }
+        #hadith-load-more-wrap { text-align: center; margin: 20px 0; }
+        .hadith-load-more-btn {
+            padding: 10px 24px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .hadith-load-more-btn:hover { background: #2563eb; }
+        .hadith-load-more-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        #hadith-error-log {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 120px;
+            overflow: auto;
+            background: #fef2f2;
+            border-top: 2px solid #dc2626;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-family: monospace;
+            color: #991b1b;
+            z-index: 100;
+            display: none;
+        }
+        #hadith-error-log:not(:empty) { display: block; }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <h1 id="page-title">احادیث مرتبط با آیه</h1>
+        <div id="content"></div>
+    </div>
+    <div id="hadith-error-log" aria-live="polite"></div>
+    <script src="js/sura-data.js"></script>
+    <script>
+        (function() {
+            const HADITH_AYAH_URL = 'https://hadith.ai/get_hadith_content/get_ayah';
+            const HADITH_CONTENT_URL = 'https://hadith.ai/get_hadith_content/get_hadith';
+            const QURAN_VERSE_URL = 'https://api.quran.com/api/v4/verses/by_key';
+            const HADITH_PAGE_SIZE = 10;
+            var allHadithIds = [];
+            var YASIR_PATHS = [];
+            (function() {
+                var names = ['Fatiha','Baqarah','AleImran','Nissa','Maedah','Anaam','Araf','Anfal','Tawbah','Yunus','Hud','Yusof','Raad','Ibrahim','Hejr','Nahl','Esra','Kahf','Maryam','Taha','Anbia','Haj','Momenun','Noor','Forqan','Shoara','Naml','Qasas','Ankabut','Rum','Loqman','Sajda','Ahzab','Saba','Fater','Yasin','Saffat','Saad','Zomar','Ghafer','Fussilat','Showra','Zokhrof','Dokhan','Jathiah','Ahqaf','Muhammad','Fath','Hojorat','Qaf','Zariyat','Tur','Najm','Qamar','AlRahman','Waqea','Hadid','Mojadala','Hashr','Momtahena','Saff','Jome','Monafequn','Taqabon','Talaq','Tahrim','Molk','Qalam','Haqqa','Maarij','Nuh','Jin','Mozamel','Modathir','Qiyamah','Ensan','Morsalat','Nabaa','Nazeat','Abas','Takwir','Enfetar','Motafefin','Ensheqaq','Boruj','Tareq','Aala','Qashiya','Fajr','Balad','Shams','Layl','Dhoha','Sharh','Tin','Alaq','Qadr','Bayyenah','Zelzelah','Aadiyat','Qareah','Takathor','Aasr','Homazah','Fil','Qoraysh','Maaun','Kawthar','Kaferun','Nasr','Masad','Ekhlas','Falaq','Nas'];
+                for (var i = 1; i <= 114; i++) {
+                    var pad = (i < 10) ? '00' + i : (i < 100) ? '0' + i : '' + i;
+                    YASIR_PATHS[i] = 'Yasir/' + pad + '_' + names[i - 1] + '_html.html';
+                }
+            })();
+
+            var SURA_ARABIC_TO_NUM = {
+                'الفاتحة':1,'الفاطحة':1,'فاتحة':1,'البقرة':2,'البقره':2,'بقرة':2,'بقره':2,'آل عمران':3,'ال عمران':3,'عمران':3,'النساء':4,'نساء':4,'المائدة':5,'المائده':5,'مائدة':5,'الأنعام':6,'الانعام':6,'أنعام':6,'الاعراف':7,'الأعراف':7,'اعراف':7,'الانفال':8,'الأنفال':8,'انفال':8,'التوبة':9,'توبة':9,'يونس':10,'یونس':10,'هود':11,'يوسف':12,'یوسف':12,'الرعد':13,'رعد':13,'ابراهيم':14,'ابراهیم':14,'الحجر':15,'حجر':15,'النحل':16,'نحل':16,'الاسراء':17,'الإسراء':17,'اسراء':17,'الكهف':18,'کهف':18,'الكهف':18,'مريم':19,'مریم':19,'طه':20,'الانبياء':21,'الأنبياء':21,'انبياء':21,'الحج':22,'حج':22,'المؤمنون':23,'المومنون':23,'مؤمنون':23,'النور':24,'نور':24,'الفرقان':25,'فرقان':25,'الشعراء':26,'شعراء':26,'النمل':27,'نمل':27,'القصص':28,'قصص':28,'العنكبوت':29,'العنکبوت':29,'عنكبوت':29,'الروم':30,'روم':30,'لقمان':31,'السجدة':32,'السجده':32,'سجدة':32,'الاحزاب':33,'الأحزاب':33,'احزاب':33,'سبا':34,'سبأ':34,'فاطر':35,'يس':36,'یس':36,'الصافات':37,'صافات':37,'ص':38,'الزمر':39,'زمر':39,'غافر':40,'الغافر':40,'فصلت':41,'الشورى':42,'الشوري':42,'شورى':42,'الزخرف':43,'زخرف':43,'الدخان':44,'دخان':44,'الجاثية':45,'الجاثيه':45,'جاثية':45,'الاحقاف':46,'الأحقاف':46,'احقاف':46,'محمد':47,'الفتح':48,'فتح':48,'الحجرات':49,'حجرات':49,'ق':50,'الذاريات':51,'ذاريات':51,'الطور':52,'طور':52,'النجم':53,'نجم':53,'القمر':54,'قمر':54,'الرحمن':55,'رحمن':55,'الواقعة':56,'الواقعه':56,'واقعة':56,'الحديد':57,'حديد':57,'المجادلة':58,'المجادله':58,'مجادلة':58,'الحشر':59,'حشر':59,'الممتحنة':60,'الممتحنه':60,'ممتحنة':60,'الصف':61,'صف':61,'الجمعة':62,'الجمعه':62,'جمعة':62,'المنافقون':63,'منافقون':63,'التغابن':64,'تغابن':64,'الطلاق':65,'طلاق':65,'التحريم':66,'تحريم':66,'الملك':67,'ملك':67,'القلم':68,'قلم':68,'الحاقة':69,'الحاقه':69,'حاقة':69,'المعارج':70,'معارج':70,'نوح':71,'الجن':72,'جن':72,'المزمل':73,'مزمل':73,'المدثر':74,'مدثر':74,'القيامة':75,'القيامه':75,'قيامة':75,'الانسان':76,'الإنسان':76,'انسان':76,'المرسلات':77,'مرسلات':77,'النبأ':78,'النبا':78,'نبأ':78,'النازعات':79,'نازعات':79,'عبس':80,'التكوير':81,'تكوير':81,'الانفطار':82,'الإنفطار':82,'انفطار':82,'المطففين':83,'المطففين':83,'مطففين':83,'الانشقاق':84,'الإنشقاق':84,'انشقاق':84,'البروج':85,'بروج':85,'الطارق':86,'طارق':86,'الاعلى':87,'الأعلى':87,'اعلى':87,'الغاشية':88,'الغاشيه':88,'غاشية':88,'الفجر':89,'فجر':89,'البلد':90,'بلد':90,'الشمس':91,'شمس':91,'الليل':92,'ليل':92,'الضحى':93,'ضحى':93,'الشرح':94,'شرح':94,'التين':95,'تين':95,'العلق':96,'علق':96,'القدر':97,'قدر':97,'البينة':98,'البينه':98,'بينة':98,'الزلزلة':99,'الزلزله':99,'زلزلة':99,'العاديات':100,'عاديات':100,'القارعة':101,'القارعه':101,'قارعة':101,'التكاثر':102,'تكاثر':102,'العصر':103,'عصر':103,'الهمزة':104,'الهمزه':104,'همزة':104,'الفيل':105,'فيل':105,'قريش':106,'الماعون':107,'ماعون':107,'الكوثر':108,'كوثر':108,'الكافرون':109,'كافرون':109,'النصر':110,'نصر':110,'المسد':111,'مسد':111,'الاخلاص':112,'الإخلاص':112,'اخلاص':112,'الفلق':113,'فلق':113,'الناس':114,'ناس':114
+            };
+
+            function getParams() {
+                const params = new URLSearchParams(window.location.search);
+                const s = parseInt(params.get('s'), 10);
+                const a = parseInt(params.get('a'), 10);
+                return { s, a };
+            }
+
+            function escapeHtml(str) {
+                if (str == null) return '';
+                str = String(str);
+                if (str.length === 0) return '';
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function footnoteToYasirLink(footnoteContent) {
+                var m = String(footnoteContent).trim().match(/^(.+?)(\d+)$/);
+                if (!m) return null;
+
+                var namePart = m[1].trim().replace(/\s+/g, ' ');
+                var ayahNum = parseInt(m[2], 10);
+                if (ayahNum < 1 || ayahNum > 286) return null;
+
+                var suraNum = SURA_ARABIC_TO_NUM[namePart];
+                if (!suraNum && namePart.indexOf('ال') === 0)
+                    suraNum = SURA_ARABIC_TO_NUM[namePart.slice(2)];
+
+                if (!suraNum) return null;
+
+                return {
+                    href: `/desktop.html?s=${suraNum}&a=${ayahNum}`,
+                    sura: suraNum,
+                    ayah: ayahNum
+                };
+            }
+            
+            function processHadithText(html) {
+                if (html == null) return '';
+                if (typeof html !== 'string') html = String(html);
+
+
+                // Convert [SurahX] patterns to <footnote> if there is no HTML
+                if (!html.includes('<')) {
+                    html = html.replace(/\[([^\[\]]+?\d+)\]/g, (match) => {
+                        return `<footnote>${match}</footnote>`;
+                    });
+                }
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('quranic_text').forEach(node => {
+                    // console.log("quranic_text:", node.textContent)
+                    const span = doc.createElement('span');
+                    span.className = 'hadith-quranic';
+                    if (node.textContent.startsWith("«") && node.textContent.endsWith("»")) {
+                        span.textContent = "«" + node.textContent.substr(1, node.textContent.length-2).trim() + "»";
+                        // span.textContent = node.textContent || '';
+                    } else {
+                        span.textContent = node.textContent || '';
+                    }
+                    node.replaceWith(span);
+                });
+
+                doc.querySelectorAll('footnote').forEach(node => {
+                    const fnInner = (node.textContent || '').trim();
+                    const bracketContent = fnInner.replace(/^\[|\]$/g, '').trim();
+                    const link = footnoteToYasirLink(bracketContent);
+
+                    let el;
+                    if (link) {
+                        el = doc.createElement('a');
+                        el.className = 'hadith-footnote';
+                        el.href = link.href;
+                        el.title = `سوره ${link.sura}، آیه ${link.ayah}`;
+                    } else {
+                        el = doc.createElement('span');
+                        el.className = 'hadith-footnote';
+                    }
+
+                    el.textContent = fnInner;
+                    node.replaceWith(el);
+                });
+
+                // Remove whitespace between quranic text and footnote
+                doc.querySelectorAll('.hadith-quranic').forEach(qNode => {
+                    let next = qNode.nextSibling;
+
+                    if (
+                        next &&
+                        next.nodeType === Node.TEXT_NODE &&
+                        /^[\s\u00A0]+$/.test(next.nodeValue || '')
+                    ) {
+                        const after = next.nextSibling;
+                        if (
+                            after &&
+                            after.nodeType === Node.ELEMENT_NODE &&
+                            after.classList &&
+                            after.classList.contains('hadith-footnote')
+                        ) {
+                            next.remove();
+                        }
+                    }
+                });
+
+                return doc.body.innerHTML;
+            }
+
+            function fmtFa(n) {
+                var x = Number(n);
+                if (!Number.isFinite(x)) return '';
+                return String(x).replace(/[0-9]/g, function(d) { return String.fromCharCode(0x06F0 + parseInt(d, 10)); });
+            }
+            function getSuraName(num) {
+                return (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[num]) ? SURA_NAMES[num] : ('سوره ' + num);
+            }
+            function getMaxAyahForSura(sura) {
+                return (typeof SURA_AYAT !== 'undefined' && SURA_AYAT[sura]) ? SURA_AYAT[sura] : 286;
+            }
+            var suraPickerOverlay = null;
+            function createSuraPicker() {
+                if (suraPickerOverlay) return suraPickerOverlay;
+                suraPickerOverlay = document.createElement('div');
+                suraPickerOverlay.id = 'sura-picker-overlay';
+                var modal = document.createElement('div');
+                modal.id = 'sura-picker-modal';
+                var header = document.createElement('div');
+                header.className = 'sura-picker-header';
+                var title = document.createElement('h2');
+                title.className = 'sura-picker-title';
+                title.textContent = 'انتخاب سوره';
+                var search = document.createElement('input');
+                search.type = 'text';
+                search.className = 'sura-picker-search';
+                search.placeholder = 'جستجو...';
+                var closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'sura-picker-close';
+                closeBtn.textContent = '\u00D7';
+                closeBtn.addEventListener('click', hideSuraPicker);
+                header.appendChild(title);
+                header.appendChild(search);
+                header.appendChild(closeBtn);
+                var body = document.createElement('div');
+                body.className = 'sura-picker-body';
+                var grid = document.createElement('div');
+                grid.className = 'sura-picker-grid';
+                grid.id = 'sura-picker-grid';
+                for (var i = 1; i <= 114; i++) {
+                    var card = document.createElement('div');
+                    card.className = 'sura-picker-card';
+                    card.setAttribute('data-sura', i);
+                    card.setAttribute('data-name', (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[i]) ? SURA_NAMES[i] : '');
+                    card.innerHTML = '<div class="sura-picker-num">' + fmtFa(i) + '</div><div class="sura-picker-name">' + escapeHtml(getSuraName(i)) + '</div>';
+                    card.addEventListener('click', function() {
+                        var num = parseInt(this.getAttribute('data-sura'), 10);
+                        var curA = getParams().a;
+                        var maxA = getMaxAyahForSura(num);
+                        var newA = (curA >= 1 && curA <= maxA) ? curA : 1;
+                        window.location.href = 'hadith.html?s=' + num + '&a=' + newA;
+                    });
+                    grid.appendChild(card);
+                }
+                search.addEventListener('input', function() {
+                    var q = this.value.trim().toLowerCase();
+                    var cards = grid.querySelectorAll('.sura-picker-card');
+                    for (var j = 0; j < cards.length; j++) {
+                        var c = cards[j];
+                        var name = (c.getAttribute('data-name') || '').toLowerCase();
+                        var num = c.getAttribute('data-sura');
+                        c.classList.toggle('hidden', q && name.indexOf(q) === -1 && num.indexOf(q) === -1);
+                    }
+                });
+                body.appendChild(grid);
+                modal.appendChild(header);
+                modal.appendChild(body);
+                suraPickerOverlay.appendChild(modal);
+                suraPickerOverlay.addEventListener('click', function(e) {
+                    if (e.target === suraPickerOverlay) hideSuraPicker();
+                });
+                document.addEventListener('keydown', function onEsc(e) {
+                    if (e.key === 'Escape' && suraPickerOverlay && suraPickerOverlay.classList.contains('visible')) hideSuraPicker();
+                });
+                document.body.appendChild(suraPickerOverlay);
+                return suraPickerOverlay;
+            }
+            function openSuraPicker(currentSura) {
+                createSuraPicker();
+                var grid = document.getElementById('sura-picker-grid');
+                if (grid) {
+                    grid.querySelectorAll('.sura-picker-card').forEach(function(card) {
+                        card.classList.toggle('current', parseInt(card.getAttribute('data-sura'), 10) === currentSura);
+                    });
+                }
+                var search = suraPickerOverlay.querySelector('.sura-picker-search');
+                if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+                suraPickerOverlay.classList.add('visible');
+            }
+            function hideSuraPicker() {
+                if (suraPickerOverlay) suraPickerOverlay.classList.remove('visible');
+            }
+
+            function show(el, html) {
+                el.innerHTML = html;
+                el.style.display = '';
+            }
+
+            function showLoading(msg) {
+                const content = document.getElementById('content');
+                show(content, '<div class="loading">' + escapeHtml(msg || 'در حال بارگذاری...') + '</div>');
+            }
+
+            function showError(msg) {
+                const content = document.getElementById('content');
+                show(content, '<div class="error">' + escapeHtml(msg) + '</div>');
+            }
+
+            function showNoParams() {
+                const content = document.getElementById('content');
+                show(content, '<div class="no-params">برای مشاهده احادیث، آدرس را با پارامترهای سوره و آیه وارد کنید. مثال: <a href="hadith.html?s=3&amp;a=37">hadith.html?s=3&amp;a=37</a></div>');
+            }
+
+            async function fetchVerse(sura, ayah) {
+                var url = QURAN_VERSE_URL + '/' + sura + ':' + ayah + '?translations=135&fields=text_uthmani&words=true&word_fields=v1_page,code_v1,text_uthmani';
+                var res = await fetch(url);
+                if (!res.ok) throw new Error('خطا در دریافت آیه');
+                var data = await res.json();
+                return data.verse || null;
+            }
+
+            var QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
+            var loadedQCFPages = {};
+            function loadQCFPageFont(page) {
+                if (loadedQCFPages[page]) return;
+                loadedQCFPages[page] = true;
+                var padded = String(page).length >= 3 ? String(page) : ('000' + page).slice(-3);
+                var fontFamily = 'QCF_P' + padded;
+                var woff2Url = QCF_CDN + '/woff2/p' + page + '.woff2';
+                var woffUrl = QCF_CDN + '/woff/p' + page + '.woff';
+                var style = document.createElement('style');
+                style.textContent = '@font-face{font-family:\'' + fontFamily + '\';src:url(\'' + woff2Url + '\') format(\'woff2\'),url(\'' + woffUrl + '\') format(\'woff\');font-display:swap;}';
+                document.head.appendChild(style);
+            }
+            function buildAyahWithQCF(verse) {
+                var words = verse.words;
+                if (!words || words.length === 0) return '';
+                var pageNum = verse.page_number || (words[0] && words[0].v1_page) || 1;
+                var html = '';
+                for (var i = 0; i < words.length; i++) {
+                    var w = words[i];
+                    var page = w.v1_page || pageNum;
+                    loadQCFPageFont(page);
+                    var padded = String(page).length >= 3 ? String(page) : ('000' + page).slice(-3);
+                    var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
+                    var isEnd = w.char_type_name === 'end';
+                    var pad = isEnd ? ' ' : '';
+                    var cls = 'qcf-word' + (isEnd ? ' ayah-end' : '');
+                    html += pad + '<span class="' + cls + '" style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
+                    if (i < words.length - 1 && w.char_type_name !== 'end' && words[i + 1].char_type_name !== 'end') html += '<wbr>';
+                }
+                return html;
+            }
+
+            const HADITH_FETCH_TIMEOUT_MS = 12000;
+
+            async function fetchHadithIds(suraId, ayaId) {
+                var res = await fetch(HADITH_AYAH_URL, {
+                    method: 'POST',
+                    headers: { 'accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ suraId: suraId, ayaId: ayaId })
+                });
+                if (!res.ok) {
+                    // throw new Error('خطا در دریافت لیست احادیث');
+                    console.error('خطا در دریافت لیست احادیث', res);
+                    return [];
+                }
+                var raw = await res.json();
+                var arr = null;
+                if (Array.isArray(raw)) arr = raw;
+                else if (raw && typeof raw === 'object') {
+                    if (Array.isArray(raw.data)) arr = raw.data;
+                    else if (Array.isArray(raw.ids)) arr = raw.ids;
+                    else if (Array.isArray(raw.hadith_ids)) arr = raw.hadith_ids;
+                    else if (Array.isArray(raw.result)) arr = raw.result;
+                }
+                if (!arr || arr.length === 0) return [];
+                var ids = [];
+                for (var j = 0; j < arr.length; j++) {
+                    var item = arr[j];
+                    if (item != null && typeof item === 'object' && (item.hid != null || item.id != null)) ids.push(String(item.hid != null ? item.hid : item.id));
+                    else if (item != null) ids.push(String(item));
+                }
+                return ids;
+            }
+
+            function fetchSingleHadith(hid) {
+                var controller = new AbortController();
+                var timeoutId = setTimeout(function() { controller.abort(); }, HADITH_FETCH_TIMEOUT_MS);
+                return fetch(HADITH_CONTENT_URL, {
+                    method: 'POST',
+                    headers: { 'accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hid: [String(hid)], out_type: 'json' }),
+                    signal: controller.signal
+                }).then(function(res) {
+                    clearTimeout(timeoutId);
+                    if (!res.ok) throw new Error('خطا در دریافت حدیث');
+                    return res.json();
+                }).then(function(arr) {
+                    if (Array.isArray(arr) && arr.length > 0) return arr[0];
+                    throw new Error('حدیث خالی');
+                }).catch(function(err) {
+                    clearTimeout(timeoutId);
+                    throw err;
+                });
+            }
+
+            function buildRefsHtml(refs) {
+                if (!refs || refs.length === 0) return '';
+                const unique = [];
+                const seen = new Set();
+                for (const r of refs) {
+                    const key = (r.book || '') + (r.volumeNumber || '') + (r.pageNumber || '');
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    unique.push(r);
+                }
+                return unique.slice(0, 8).map(function(r) {
+                    const parts = [r.book, r.volumeName, 'ص ' + (r.pageNumber || '')].filter(Boolean);
+                    return '<div class="hadith-ref"><span class="book">' + escapeHtml(r.book || '') + '</span> — ' + escapeHtml(parts.join('، ')) + '</div>';
+                }).join('');
+            }
+
+            function buildSegmentTable(segments, translationObj) {
+                if (!Array.isArray(segments) || segments.length === 0) return '';
+                var transLines = [];
+                if (translationObj && typeof translationObj === 'object') {
+                    var firstKey = Object.keys(translationObj)[0];
+                    if (firstKey && Array.isArray(translationObj[firstKey])) transLines = translationObj[firstKey];
+                }
+                var segLen = segments.length;
+                var transLen = Array.isArray(transLines) ? transLines.length : 0;
+                var maxRows = Math.min(10000, Math.max(segLen, transLen));
+                if (maxRows !== maxRows || maxRows < 0) maxRows = 0;
+                var rowParts = [];
+                for (var i = 0; i < maxRows; i++) {
+                    rowParts.push('<tr><td class="col-ar hadith-text">', processHadithText(segments[i] || ''), '</td><td class="col-fa">', escapeHtml(transLines[i] || ''), '</td></tr>');
+                }
+                return '<table class="hadith-segment-table"><thead><tr><th>متن عربی</th><th>ترجمه</th></tr></thead><tbody>' + rowParts.join('') + '</tbody></table>';
+            }
+
+            function buildTranslationVariants(translationNn) {
+                if (!translationNn || typeof translationNn !== 'object') return '';
+                const keys = Object.keys(translationNn).filter(function(k) { return Array.isArray(translationNn[k]) && translationNn[k].length > 0; });
+                if (keys.length <= 1) return '';
+                let html = '<div class="translation-variants"><details><summary>ترجمه‌های دیگر</summary>';
+                for (let i = 0; i < keys.length; i++) {
+                    if (i === 0) continue;
+                    const key = keys[i];
+                    const lines = translationNn[key];
+                    const text = Array.isArray(lines) ? lines.join(' ') : String(lines);
+                    html += '<div class="variant"><strong>' + escapeHtml(key) + '</strong><br>' + escapeHtml(text) + '</div>';
+                }
+                html += '</details></div>';
+                return html;
+            }
+
+            function renderHadith(h) {
+                let html = '';
+                if (h.narrators) {
+                    html += '<div class="hadith-narrators">' + processHadithText(h.narrators) + '</div>';
+                }
+                if (h.sodur) {
+                    html += '<div class="hadith-sodur">' + escapeHtml(h.sodur) + '</div>';
+                }
+                const hasSegments = h.segments_by_nn && h.segments_by_nn.length > 0;
+                const transNn = h.translation_nn || {};
+                const firstTransKey = Object.keys(transNn)[0];
+                const firstTrans = firstTransKey ? transNn[firstTransKey] : null;
+
+                if (hasSegments && firstTrans && firstTrans.length > 0) {
+                    html += buildSegmentTable(h.segments_by_nn, transNn);
+                    if (h.translation) {
+                        html += '<div class="hadith-translation">' + escapeHtml(h.translation) + '</div>';
+                    }
+                    html += buildTranslationVariants(transNn);
+                } else {
+                    if (h.text) {
+                        html += '<div class="hadith-text">' + processHadithText(h.text) + '</div>';
+                    }
+                    if (h.translation) {
+                        html += '<div class="hadith-translation">' + escapeHtml(h.translation) + '</div>';
+                    }
+                    if (transNn && firstTransKey && transNn[firstTransKey]) {
+                        html += buildTranslationVariants(transNn);
+                    }
+                }
+                if (h.reference && h.reference.length > 0) {
+                    html += '<div class="hadith-refs"><div class="hadith-refs-title">منابع</div>' + buildRefsHtml(h.reference) + '</div>';
+                }
+                return html;
+            }
+
+            function renderVerseAndPlaceholders(verse, hadithIds) {
+                var s = getParams().s, a = getParams().a;
+                var title = document.getElementById('page-title');
+                title.textContent = 'احادیث مرتبط با آیه — ' + getSuraName(s) + '، آیه ' + a;
+
+                var html = '';
+                if (verse) {
+                    var useQCF = verse.words && verse.words.length > 0;
+                    var arabicHtml = '';
+                    if (useQCF) arabicHtml = buildAyahWithQCF(verse);
+                    else arabicHtml = escapeHtml(verse.text_uthmani || verse.text || '');
+                    var tr = (verse.translations && verse.translations[0]) ? verse.translations[0].text : '';
+                    var maxA = getMaxAyahForSura(s);
+                    html += '<section class="ayah-section">';
+                    html += '<div class="ayah-meta">';
+                    html += '<span class="sura-name-click" data-sura="' + s + '" role="button" tabindex="0">' + escapeHtml(getSuraName(s)) + '</span>';
+                    html += '<span class="ayah-nav-wrap">';
+                    html += '<button type="button" class="ayah-nav-btn" data-dir="prev" aria-label="آیه قبل"' + (a <= 1 ? ' disabled' : '') + '>\u2039</button>';
+                    html += '<span> آیه ' + fmtFa(a) + ' </span>';
+                    html += '<button type="button" class="ayah-nav-btn" data-dir="next" aria-label="آیه بعد"' + (a >= maxA ? ' disabled' : '') + '>\u203A</button>';
+                    html += '</span></div>';
+                    if (arabicHtml) {
+                        html += '<div class="ayah-arabic-label">متن عربی</div>';
+                        html += '<div class="ayah-text' + (useQCF ? ' ayah-text-qcf' : '') + '">' + arabicHtml + '</div>';
+                    }
+                    if (tr) {
+                        html += '<div class="ayah-translation-label">ترجمه</div>';
+                        html += '<div class="ayah-translation">' + escapeHtml(tr) + '</div>';
+                    }
+                    html += '</section>';
+                }
+
+                if (hadithIds.length > 0) {
+                    var initialCount = Math.min(10, hadithIds.length);
+                    html += '<h2 class="hadith-section-title">احادیث مرتبط (' + fmtFa(hadithIds.length) + ')</h2>';
+                    html += '<div id="hadith-list">';
+                    for (var hi = 0; hi < initialCount; hi++) {
+                        var id = hadithIds[hi];
+                        html += '<article class="hadith-card hadith-card--loading" data-hid="' + escapeHtml(String(id)) + '">';
+                        html += '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
+                        html += '</article>';
+                    }
+                    html += '<div id="hadith-load-more-wrap">';
+                    if (hadithIds.length > 10) {
+                        html += '<button type="button" class="hadith-load-more-btn">بارگذاری ۱۰ حدیث بعد</button>';
+                    }
+                    html += '</div></div>';
+                } else {
+                    html += '<p class="loading">احادیثی برای این آیه یافت نشد.</p>';
+                }
+
+                show(document.getElementById('content'), html);
+            }
+
+            function getCardByHid(hid) {
+                var list = document.getElementById('hadith-list');
+                if (!list) return null;
+                var cards = list.querySelectorAll('.hadith-card');
+                var sid = String(hid);
+                for (var i = 0; i < cards.length; i++) {
+                    if (cards[i].getAttribute('data-hid') === sid) return cards[i];
+                }
+                return null;
+            }
+
+            function setCardContent(card, hadithHtml) {
+                if (!card) return;
+                card.classList.remove('hadith-card--loading', 'hadith-card--error');
+                card.innerHTML = hadithHtml;
+            }
+
+            function setCardLoading(card) {
+                if (!card) return;
+                card.classList.add('hadith-card--loading');
+                card.classList.remove('hadith-card--error');
+                card.innerHTML = '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
+            }
+
+            function logHadithError(msg, hid, detail) {
+                var el = document.getElementById('hadith-error-log');
+                if (!el) return;
+                var line = '[' + (hid != null ? 'hid=' + hid : '') + '] ' + (msg || '') + (detail ? ' — ' + detail : '');
+                el.appendChild(document.createTextNode(line + '\n'));
+            }
+
+            function setCardError(card, hid, errMsg) {
+                if (!card) return;
+                card.classList.remove('hadith-card--loading');
+                card.classList.add('hadith-card--error');
+                card.innerHTML = '<div class="hadith-card-error">' + escapeHtml(errMsg || 'خطا در بارگذاری') + '</div>' +
+                    '<button type="button" class="hadith-retry-btn" data-hid="' + escapeHtml(String(hid)) + '">بارگذاری مجدد</button>';
+            }
+
+            function onRetryClick(e) {
+                var btn = e.target;
+                if (!btn.classList.contains('hadith-retry-btn')) return;
+                var hid = btn.getAttribute('data-hid');
+                if (!hid) return;
+                var card = getCardByHid(hid);
+                if (!card) return;
+                setCardLoading(card);
+                fetchSingleHadith(hid).then(function(h) {
+                    setCardContent(card, renderHadith(h));
+                }).catch(function(err) {
+                    setCardError(card, hid, err.message || 'خطا در بارگذاری');
+                });
+            }
+            function onContentClick(e) {
+                var target = e.target;
+                if (target.classList && target.classList.contains('hadith-retry-btn')) {
+                    onRetryClick(e);
+                    return;
+                }
+                var suraEl = target.closest && target.closest('.sura-name-click');
+                if (suraEl) {
+                    e.preventDefault();
+                    var s = parseInt(suraEl.getAttribute('data-sura'), 10);
+                    if (s >= 1 && s <= 114) openSuraPicker(s);
+                    return;
+                }
+                var navBtn = target.closest && target.closest('.ayah-nav-btn');
+                if (navBtn && !navBtn.disabled) {
+                    var dir = navBtn.getAttribute('data-dir');
+                    var params = getParams();
+                    var s = params.s, a = params.a;
+                    var maxA = getMaxAyahForSura(s);
+                    if (dir === 'prev' && a > 1) {
+                        window.location.href = 'hadith.html?s=' + s + '&a=' + (a - 1);
+                    } else if (dir === 'next' && a < maxA) {
+                        window.location.href = 'hadith.html?s=' + s + '&a=' + (a + 1);
+                    }
+                    return;
+                }
+                var loadMoreBtn = target.closest && target.closest('.hadith-load-more-btn');
+                if (loadMoreBtn && !loadMoreBtn.disabled && allHadithIds.length > 0) {
+                    var list = document.getElementById('hadith-list');
+                    var wrap = document.getElementById('hadith-load-more-wrap');
+                    if (!list || !wrap) return;
+                    var currentCount = list.querySelectorAll('.hadith-card').length;
+                    if (currentCount >= allHadithIds.length) return;
+                    var nextCount = Math.min(HADITH_PAGE_SIZE, allHadithIds.length - currentCount);
+                    for (var i = 0; i < nextCount; i++) {
+                        var id = allHadithIds[currentCount + i];
+                        var article = document.createElement('article');
+                        article.className = 'hadith-card hadith-card--loading';
+                        article.setAttribute('data-hid', String(id));
+                        article.innerHTML = '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
+                        list.insertBefore(article, wrap);
+                    }
+                    if (currentCount + nextCount >= allHadithIds.length) loadMoreBtn.style.display = 'none';
+                    else loadMoreBtn.textContent = 'بارگذاری ۱۰ حدیث بعد';
+                    loadHadithsInRange(currentCount, currentCount + nextCount);
+                }
+            }
+            async function loadHadithsInRange(startIdx, endIdx) {
+                for (var i = startIdx; i < endIdx && i < allHadithIds.length; i++) {
+                    var id = allHadithIds[i];
+                    var card = getCardByHid(id);
+                    if (!card || !card.classList.contains('hadith-card--loading')) continue;
+                    try {
+                        var h = await fetchSingleHadith(id);
+                        try {
+                            setCardContent(card, renderHadith(h));
+                        } catch (renderErr) {
+                            var detail = '';
+                            try {
+                                if (h && (h.segments_by_nn || h.translation_nn)) {
+                                    var seg = h.segments_by_nn;
+                                    var tn = h.translation_nn;
+                                    detail = 'segments_by_nn=' + (Array.isArray(seg) ? seg.length : typeof seg) + ', translation_nn keys=' + (tn ? Object.keys(tn).length : 0);
+                                }
+                            } catch (e) {}
+                            logHadithError(renderErr.message || 'خطا در نمایش', id, detail);
+                            setCardError(card, id, (renderErr.message || 'خطا در نمایش') + (renderErr.name ? ' (' + renderErr.name + ')' : ''));
+                        }
+                    } catch (err) {
+                        logHadithError(err.message || 'خطا در بارگذاری', id, '');
+                        setCardError(card, id, err.message || 'خطا در بارگذاری');
+                    }
+                    await new Promise(function(r) { setTimeout(r, 0); });
+                }
+            }
+
+            async function run() {
+                var s = getParams().s, a = getParams().a;
+                if (!s || s < 1 || s > 114 || !a || a < 1) {
+                    showNoParams();
+                    return;
+                }
+
+                showLoading('در حال بارگذاری آیه و لیست احادیث...');
+                try {
+                    var verse = await fetchVerse(s, a);
+                    var hadithIds = await fetchHadithIds(s, a);
+                    allHadithIds = hadithIds;
+                    renderVerseAndPlaceholders(verse, hadithIds);
+                    document.getElementById('content').addEventListener('click', onContentClick);
+
+                    if (hadithIds.length > 0) {
+                        var initialCount = Math.min(HADITH_PAGE_SIZE, hadithIds.length);
+                        loadHadithsInRange(0, initialCount);
+                    }
+                } catch (err) {
+                    showError(err.message || 'خطایی رخ داد.');
+                }
+            }
+
+            run();
+        })();
+    </script>
+</body>
+</html>
