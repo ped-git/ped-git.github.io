@@ -41,3 +41,8 @@ const SURA_AYAT = {
     111: 5, 112: 4, 113: 5, 114: 6
 };
 
+// Expose on window so scripts loaded after this (e.g. sura-picker.js) can read them
+if (typeof window !== 'undefined') {
+    window.SURA_NAMES = SURA_NAMES;
+    window.SURA_AYAT = SURA_AYAT;
+}

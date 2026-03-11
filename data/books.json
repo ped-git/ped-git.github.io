@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "name": "المیزان",
+        "description": "تفسیر المیزان",
+        "image": "https://upload.wikimedia.org/wikipedia/en/d/d0/Tafsir_al-Mizan_spines.png",
+        "folder": "almizan"
+    },
+    {
+        "id": 2,
+        "name": "نور",
+        "description": "تفسیر نور",
+        "image": "https://upload.wikimedia.org/wikipedia/en/1/16/Tafsir_Noor%2C_spines.png",
+        "folder": "noor"
+    },
+    {
+        "id": 3,
+        "name": "نمونه",
+        "description": "تفسیر نمونه",
+        "image": "https://upload.wikimedia.org/wikipedia/en/thumb/c/ce/Tafsir_Nemooneh%2C_spines.png/250px-Tafsir_Nemooneh%2C_spines.png",
+        "folder": "nemooneh"
+    }
+]

@@ -617,99 +617,6 @@
             font-weight: bold;
         }
 
-        #sura-picker-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.2s, visibility 0.2s;
-        }
-        #sura-picker-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        #sura-picker-modal {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            max-width: 90vw;
-            width: 520px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        .sura-picker-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e8e6e2;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-        .sura-picker-title { margin: 0; font-size: 1.25rem; color: #2c3e50; }
-        .sura-picker-search {
-            flex: 1;
-            max-width: 200px;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            direction: rtl;
-        }
-        .sura-picker-close {
-            width: 36px;
-            height: 36px;
-            border: none;
-            border-radius: 8px;
-            background: #f0e6e0;
-            color: #8b6914;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-        .sura-picker-body {
-            overflow-y: auto;
-            padding: 16px 20px 20px;
-        }
-        .sura-picker-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-        }
-        .sura-picker-card {
-            padding: 12px 10px;
-            border-radius: 12px;
-            background: #faf8f5;
-            border: 1px solid #e8e6e2;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.15s, border-color 0.15s;
-        }
-        .sura-picker-card:hover {
-            background: #f0ebe4;
-            border-color: #c4bfb4;
-        }
-        .sura-picker-card.current {
-            background: #e8e6e2;
-            border-color: #2c3e50;
-        }
-        .sura-picker-card .sura-picker-num {
-            font-size: 0.85rem;
-            color: #555;
-            margin-bottom: 4px;
-        }
-        .sura-picker-card .sura-picker-name {
-            font-weight: bold;
-            font-size: 0.95rem;
-            color: #2c3e50;
-        }
-        .sura-picker-card.hidden { display: none; }
         .sura-name-click { cursor: pointer; }
         .sura-name-click:hover { text-decoration: underline; }
         #sura-hadith-tooltip {
@@ -764,6 +671,8 @@
                     <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
                     <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
                     <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
+                    <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+                    <a id="go-stat-link" class="desktop-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>
                 </div>
             </div>
         </div>
@@ -779,6 +688,7 @@
     <div id="sura-hadith-tooltip"></div>
 
     <script src="js/sura-data.js"></script>
+    <script src="js/sura-picker.js"></script>
     <script src="js/buckwalter.js"></script>
     <script>
 (function() {
@@ -847,96 +757,49 @@
         return row || null;
     }
     loadSimpleMorphology();
-    var suraPickerOverlay = null;
-    function createSuraPicker() {
-        if (suraPickerOverlay) return suraPickerOverlay;
-        suraPickerOverlay = document.createElement('div');
-        suraPickerOverlay.id = 'sura-picker-overlay';
-        var modal = document.createElement('div');
-        modal.id = 'sura-picker-modal';
-        var header = document.createElement('div');
-        header.className = 'sura-picker-header';
-        var title = document.createElement('h2');
-        title.className = 'sura-picker-title';
-        title.textContent = 'انتخاب سوره';
-        var search = document.createElement('input');
-        search.type = 'text';
-        search.className = 'sura-picker-search';
-        search.placeholder = 'جستجو...';
-        var closeBtn = document.createElement('button');
-        closeBtn.type = 'button';
-        closeBtn.className = 'sura-picker-close';
-        closeBtn.textContent = '×';
-        closeBtn.addEventListener('click', hideSuraPicker);
-        header.appendChild(title);
-        header.appendChild(search);
-        header.appendChild(closeBtn);
-        var body = document.createElement('div');
-        body.className = 'sura-picker-body';
-        var grid = document.createElement('div');
-        grid.className = 'sura-picker-grid';
-        grid.id = 'sura-picker-grid';
-        for (var i = 1; i <= 114; i++) {
-            var card = document.createElement('div');
-            card.className = 'sura-picker-card';
-            card.setAttribute('data-sura', i);
-            card.setAttribute('data-name', (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[i]) ? SURA_NAMES[i] : '');
-            card.innerHTML = '<div class="sura-picker-num">' + fmtFa(i) + '</div><div class="sura-picker-name">' + escapeHtml(getSuraName(i)) + '</div>';
-            card.addEventListener('click', async function() {
-                var num = parseInt(this.getAttribute('data-sura'), 10);
+    function openSuraPicker(currentSura) {
+        SuraPicker.open({
+            currentSura: currentSura,
+            onSelect: function(sura, ayah) {
                 var currentMode = getMode().mode;
                 if (currentMode === 'sura') {
-                    setUrl('sura', 1, num);
+                    setUrl('sura', 1, sura);
+                    render();
+                    return;
+                }
+                function goToPage(pageNum) {
+                    setUrl('page', pageForCurrentMode(pageNum), 1);
+                    render();
+                }
+                function goToSuraStart() {
+                    var ch = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === sura; }) : null;
+                    var firstPage = (ch && ch.pages && ch.pages[0] != null) ? ch.pages[0] : 1;
+                    goToPage(firstPage);
+                }
+                if (ayah != null && ayah >= 1) {
+                    fetch('https://api.quran.com/api/v4/verses/by_key/' + sura + ':' + ayah)
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            var verse = data && data.verse;
+                            var p = (verse && (verse.page_number != null || (verse.words && verse.words[0] && verse.words[0].v1_page != null)))
+                                ? (verse.page_number || (verse.words[0] && verse.words[0].v1_page))
+                                : null;
+                            if (p >= 1 && p <= TOTAL_PAGES) {
+                                goToPage(p);
+                            } else {
+                                goToSuraStart();
+                            }
+                        })
+                        .catch(function() { goToSuraStart(); });
                 } else {
                     if (!chaptersCache || !chaptersCache.length) {
-                        try { await fetchChapters(); } catch (err) {}
+                        fetchChapters().then(goToSuraStart).catch(goToSuraStart);
+                    } else {
+                        goToSuraStart();
                     }
-                    var ch = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === num; }) : null;
-                    var firstPage = (ch && ch.pages && ch.pages[0] != null) ? ch.pages[0] : 1;
-                    setUrl('page', pageForCurrentMode(firstPage), 1);
                 }
-                render();
-                hideSuraPicker();
-            });
-            grid.appendChild(card);
-        }
-        search.addEventListener('input', function() {
-            var q = this.value.trim().toLowerCase();
-            var cards = grid.querySelectorAll('.sura-picker-card');
-            for (var j = 0; j < cards.length; j++) {
-                var c = cards[j];
-                var name = (c.getAttribute('data-name') || '').toLowerCase();
-                var num = c.getAttribute('data-sura');
-                c.classList.toggle('hidden', q && name.indexOf(q) === -1 && num.indexOf(q) === -1);
             }
         });
-        body.appendChild(grid);
-        modal.appendChild(header);
-        modal.appendChild(body);
-        suraPickerOverlay.appendChild(modal);
-        suraPickerOverlay.addEventListener('click', function(e) {
-            if (e.target === suraPickerOverlay) hideSuraPicker();
-        });
-        document.addEventListener('keydown', function onEsc(e) {
-            if (e.key === 'Escape' && suraPickerOverlay && suraPickerOverlay.classList.contains('visible')) hideSuraPicker();
-        });
-        document.body.appendChild(suraPickerOverlay);
-        return suraPickerOverlay;
-    }
-    function openSuraPicker(currentSura) {
-        createSuraPicker();
-        var grid = document.getElementById('sura-picker-grid');
-        if (grid) {
-            grid.querySelectorAll('.sura-picker-card').forEach(function(card) {
-                card.classList.toggle('current', parseInt(card.getAttribute('data-sura'), 10) === currentSura);
-            });
-        }
-        var search = suraPickerOverlay.querySelector('.sura-picker-search');
-        if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
-        suraPickerOverlay.classList.add('visible');
-    }
-    function hideSuraPicker() {
-        if (suraPickerOverlay) suraPickerOverlay.classList.remove('visible');
     }
     const settingsBtn = document.getElementById('settings-btn');
     const settingsMenu = document.getElementById('settings-menu');
