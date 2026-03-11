@@ -1239,7 +1239,7 @@
         var s = m[1], a = m[2];
         var tt = document.getElementById('sura-hadith-tooltip');
         if (!tt) return;
-        tt.innerHTML = '<a href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">حدیث</a>';
+        tt.innerHTML = '<div><a href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">حدیث</a></div><div><a href="book.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">کتاب</a></div>';
         tt.style.display = 'block';
         var r = anchorEl.getBoundingClientRect();
         tt.style.left = (r.left + r.width / 2) + 'px';
