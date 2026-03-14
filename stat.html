@@ -142,16 +142,20 @@
             margin-bottom: 0.6rem;
         }
         .settings-menu .page-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.4rem;
         }
         .settings-menu a.menu-link {
-            display: inline-block;
-            padding: 0.4rem 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 0.3rem 0.45rem;
             color: var(--accent);
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 0.8rem;
+            line-height: 1.15;
             font-weight: 500;
             border-radius: 10px;
             background: rgba(59, 130, 246, 0.08);
@@ -581,7 +585,7 @@
         <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;">
             <h1 id="page-title" style="margin:0;">آمار سوره</h1>
             <span class="sura-badge" id="sura-badge" role="button" tabindex="0" title="کلیک برای انتخاب سوره">—</span>
-            <a id="open-in-yasir" href="desktop.html" style="font-size:0.9rem;color:rgba(255,255,255,0.9);text-decoration:none;">باز کردن در یسیر</a>
+            <a id="open-in-yasir" href="yasir.html" style="font-size:0.9rem;color:rgba(255,255,255,0.9);text-decoration:none;">باز کردن در یسیر</a>
         </div>
         <div class="settings-wrap">
             <button type="button" id="settings-btn" aria-label="تنظیمات">⚙</button>
@@ -608,12 +612,12 @@
                     <div class="settings-section-links">
                         <div class="title">صفحات</div>
                         <div class="page-links">
-                            <a class="menu-link" href="desktop.html" title="یسیر">یسیر</a>
+                            <a class="menu-link" href="yasir.html" title="یسیر">یسیر</a>
                             <a class="menu-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
                             <a class="menu-link" href="simple.html" title="نمایش">نمایش</a>
                             <a class="menu-link current" href="stat.html" title="آمار سوره">آمار سوره</a>
-                            <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
-                            <a id="go-stat-link" class="desktop-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>
+                            <a class="menu-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+                            <a class="menu-link" href="commentary.html" title="نمایش تفسیر">کتاب تفسیر</a>
                         </div>
                     </div>
                 </div>
@@ -1464,7 +1468,7 @@
         titleEl.textContent = 'آمار سوره';
         badgeEl.textContent = getSuraName(suraNum);
         var yasirLink = document.getElementById('open-in-yasir');
-        if (yasirLink) yasirLink.href = 'desktop.html?s=' + suraNum;
+        if (yasirLink) yasirLink.href = 'yasir.html?s=' + suraNum;
         const sections = [
             {
                 id: 'top',

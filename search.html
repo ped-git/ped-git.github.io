@@ -1216,19 +1216,30 @@
             background: #2980b9;
         }
 
-        .desktop-link {
-            display: block;
+        .settings-links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
             margin-top: 8px;
+        }
+
+        .desktop-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0;
             width: 100%;
+            min-height: 34px;
             text-align: center;
-            padding: 8px;
+            padding: 4px 6px;
             border-radius: 6px;
             border: 1px solid #d6e7fb;
             background: #f3f9ff;
             color: #1e6fbf;
             text-decoration: none;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 12px;
+            line-height: 1.15;
         }
 
         .desktop-link:hover {
@@ -1477,12 +1488,14 @@
                         </div>
                         <button class="apply-btn" id="apply-settings">اعمال</button>
                         <div class="settings-title">نحوه نمایش</div>
-                        <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
-                        <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
-                        <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
-                        <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
-                        <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
-                        <a id="go-stat-link" class="desktop-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>
+                        <div class="settings-links-grid">
+                            <a id="go-desktop-link" class="desktop-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>
+                            <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
+                            <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                            <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
+                            <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+                            <a id="go-stat-link" class="desktop-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>
+                        </div>
                         </div>
                 </div>
             </div>
@@ -3525,7 +3538,7 @@
                         `</tr></thead><tbody>`;
                     for (let r = 0; r < sortedRows.length; r++) {
                         const row = sortedRows[r];
-                        html += `<tr><td><a class="stats-sura-link num-hindi" href="desktop.html?s=${row.sura}" title="باز کردن سوره در یسیر">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
+                        html += `<tr><td><a class="stats-sura-link num-hindi" href="yasir.html?s=${row.sura}" title="باز کردن سوره در یسیر">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
                         html += `<td class="num-hindi stats-sura-count" data-sura="${row.sura}" role="button" tabindex="0" title="تعداد بازه‌ها با همهٔ موارد، پیش از ادغام (ممکن است با بازه‌های ادغام‌شده در نتایج جستجو متفاوت باشد). کلیک: فیلتر به این سوره و نمایش نتایج">${fmtFa(row.count)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('freq', row).replace(/"/g, '&quot;')}">${fmtFaPercent(row.relInSura)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('ratio', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.ratio, 3)}</td>`;
@@ -3669,13 +3682,13 @@
                     const viewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                     if (viewMode === 'rows') {
                         html += `<div class="ayah-row">`;
-                        html += `<a class="ayah-ref-leading num-hindi" href="desktop.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += `<a class="ayah-ref-leading num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
                         html += `<span class="result-ayah">${highlightedText}</span>`;
                         html += `</div>`;
                     } else {
                         html += `<span class="result-ayah">`;
                         html += highlightedText;
-                        html += `<a class="result-ref num-hindi" href="desktop.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += `<a class="result-ref num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
                         html += `</span> `;
                     }
                 }
@@ -4292,7 +4305,7 @@
                     } else if (!allSurasSelected && selectedSuras.size === 1) {
                         sura = [...selectedSuras][0];
                     }
-                    const url = new URL('desktop.html', window.location.href);
+                    const url = new URL('yasir.html', window.location.href);
                     url.searchParams.set('s', String(sura));
                     if (ayah) url.searchParams.set('a', String(ayah));
                     goDesktopLink.href = url.toString();
@@ -4522,4 +4535,3 @@
     </script>
 </body>
 </html>
-

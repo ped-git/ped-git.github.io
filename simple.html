@@ -85,6 +85,67 @@
             position: relative;
             z-index: 60;
         }
+        #search-wrap {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            justify-content: center;
+            padding: 0 12px;
+        }
+        #search-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: min(100%, 560px);
+            direction: rtl;
+        }
+        #simple-search-input {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 36px;
+            border: 1px solid #c9d2dd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #1f2937;
+            padding: 0 12px;
+            font: inherit;
+            direction: rtl;
+            text-align: right;
+        }
+        #simple-search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+        #simple-search-input.search-not-found {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+        }
+        .search-action-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #c9d2dd;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #2c3e50;
+            cursor: pointer;
+            font: inherit;
+            font-size: 1rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex: 0 0 auto;
+        }
+        .search-action-btn:hover {
+            background: #f4f7fb;
+        }
+        .search-action-btn:disabled {
+            opacity: 0.45;
+            cursor: default;
+            background: #f8fafc;
+        }
         #settings-btn {
             background: #2c3e50;
             color: #fff;
@@ -200,15 +261,24 @@
             color: #64748b;
             text-transform: uppercase;
         }
+        #settings-menu .settings-links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 10px;
+        }
         #settings-menu .desktop-link {
-            display: block;
-            margin-bottom: 6px;
-            padding: 5px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 4px 6px;
             border-radius: 10px;
             text-align: center;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            line-height: 1.15;
             color: #1d4ed8;
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.2);
@@ -262,6 +332,10 @@
             flex-wrap: nowrap;
             align-items: flex-start;
         }
+        .page-container.page-with-translation {
+            flex-wrap: nowrap;
+            align-items: flex-start;
+        }
         .page-container.two-pages .page-card {
             flex: 1 1 0;
             min-width: 290px;
@@ -269,7 +343,18 @@
             display: flex;
             flex-direction: column;
         }
+        .page-container.page-with-translation .page-card {
+            flex: 1 1 0;
+            min-width: 290px;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
         .page-container.two-pages .page-card .page-content {
+            flex: 1;
+            min-height: 0;
+        }
+        .page-container.page-with-translation .page-card .page-content {
             flex: 1;
             min-height: 0;
         }
@@ -371,6 +456,34 @@
         .page-card.page-1 .page-content.font-qcf .mushaf-line,
         .page-card.page-2 .page-content.font-qcf .mushaf-line { text-align: center; }
         .page-content .mushaf-line .qcf-word { display: inline; }
+        .page-card.translation-card .page-content {
+            font-family: 'Sahel', 'BLotus', system-ui, sans-serif;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            line-height: 1.9;
+            text-align: right;
+            color: #243447;
+            background: #fcfbf8;
+            font-size: 0.9em;
+        }
+        .page-card.translation-card .page-header {
+            background: #f8f4ec;
+        }
+        .translation-content .translation-ayah {
+            display: block;
+            margin-bottom: 0.8em;
+        }
+        .translation-content.layout-flow .translation-ayah {
+            display: inline;
+            margin-bottom: 0;
+        }
+        .translation-content.layout-flow .translation-ayah::after {
+            content: '\00a0';
+        }
+        .translation-content .ayah-num {
+            color: #8a5b2b;
+            font-weight: 700;
+            white-space: nowrap;
+        }
         .page-content .qword {
             transition: color 0.12s ease;
         }
@@ -379,6 +492,22 @@
         }
         .page-content .qword.ayah-hovered {
             color: #2ca4ab;
+        }
+        .page-content .qword.search-match {
+            border-radius: 0.25em;
+            background-color: rgba(250, 204, 21, 0.38);
+        }
+        .page-content .qword.search-match.search-match-2 {
+            background-color: rgba(134, 239, 172, 0.42);
+        }
+        .page-content .qword.search-match.search-match-3 {
+            background-color: rgba(147, 197, 253, 0.42);
+        }
+        .page-content .qword.search-match.search-match-4 {
+            background-color: rgba(249, 168, 212, 0.42);
+        }
+        .page-content .qword.search-match.search-match-5 {
+            background-color: rgba(196, 181, 253, 0.42);
         }
         .page-content .sura-name-in-page {
             display: block;
@@ -662,18 +791,30 @@
                     <select id="page-mode" aria-label="حالت صفحه">
                         <option value="one-page">یک صفحه</option>
                         <option value="two-pages">دو صفحه</option>
+                        <option value="one-page-translation">یک صفحه + ترجمه</option>
                         <option value="continuous">پیوسته (سوره)</option>
                     </select>
                 </label>
                 <div class="settings-section-links">
                     <div class="settings-title">نحوه نمایش</div>
-                    <a id="go-desktop-link" class="desktop-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
-                    <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
-                    <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
-                    <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
-                    <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
-                    <a id="go-stat-link" class="desktop-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>
+                    <div class="settings-links-grid">
+                        <a id="go-desktop-link" class="desktop-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>
+                        <a id="go-search-link" class="desktop-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
+                        <a id="go-simple-link" class="desktop-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                        <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
+                        <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+                        <a id="go-stat-link" class="desktop-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>
+                    </div>
                 </div>
+            </div>
+        </div>
+        <div id="search-wrap">
+            <div id="search-controls">
+                <button type="button" id="search-prev-btn" class="search-action-btn" aria-label="نتیجه قبلی">→</button>
+                <button type="button" id="search-next-btn" class="search-action-btn" aria-label="نتیجه بعدی">←</button>
+                <input type="text" id="simple-search-input" placeholder="جستجو در همین صفحه و صفحه‌های بعد" aria-label="جستجو در صفحه‌های قرآن">
+                <button type="button" id="search-ok-btn" class="search-action-btn" aria-label="تایید جستجو">✓</button>
+                <button type="button" id="search-cancel-btn" class="search-action-btn" aria-label="لغو جستجو">✕</button>
             </div>
         </div>
         <div id="bottom-nav">
@@ -807,7 +948,27 @@
     const navPrevPageBtn = document.getElementById('nav-prev-page');
     const navNextPageBtn = document.getElementById('nav-next-page');
     const navNextSuraBtn = document.getElementById('nav-next-sura');
+    const simpleSearchInput = document.getElementById('simple-search-input');
+    const searchPrevBtn = document.getElementById('search-prev-btn');
+    const searchNextBtn = document.getElementById('search-next-btn');
+    const searchOkBtn = document.getElementById('search-ok-btn');
+    const searchCancelBtn = document.getElementById('search-cancel-btn');
     let bismillahVerseCache = null;
+    var searchState = {
+        activeTerms: [],
+        committedQuery: '',
+        committedTerms: [],
+        committedPage: null,
+        committedMode: 'page',
+        committedSura: null,
+        draftOriginPage: null,
+        draftOriginMode: null,
+        draftOriginSura: null,
+        previewPage: null,
+        requestId: 0,
+        hasMatch: false,
+        controller: null
+    };
 
     var pageToSura = [];
     var pageToJuz = [];
@@ -863,6 +1024,383 @@
         if (!s) return NaN;
         return parseInt(s, 10);
     }
+    function normalizeArabicForSearch(text) {
+        if (!text) return '';
+        return String(text)
+            .normalize('NFC')
+            .replace(/\u0640/g, '')
+            .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED]/g, '')
+            .replace(/\u0670+/g, 'ا')
+            .replace(/[أإآٱا]/g, 'ا')
+            .replace(/ؤ/g, 'و')
+            .replace(/ئ/g, 'ی')
+            .replace(/[يى]/g, 'ی')
+            .replace(/ك/g, 'ک')
+            .replace(/ة/g, 'ه')
+            .trim();
+    }
+    function parseSearchTerms(query) {
+        var raw = String(query == null ? '' : query).trim();
+        if (!raw) return [];
+        var parts = raw.split(/\s+/);
+        var out = [];
+        for (var i = 0; i < parts.length; i++) {
+            var term = normalizeArabicForSearch(parts[i]);
+            if (term) out.push(term);
+        }
+        return out;
+    }
+    function setSearchNotFound(flag) {
+        if (!simpleSearchInput) return;
+        simpleSearchInput.classList.toggle('search-not-found', !!flag);
+        updateSearchButtons();
+    }
+    function clearSearchHighlights(container) {
+        var root = container || main;
+        if (!root || !root.querySelectorAll) return;
+        root.querySelectorAll('.qword.search-match').forEach(function(el) {
+            el.classList.remove('search-match', 'search-match-1', 'search-match-2', 'search-match-3', 'search-match-4', 'search-match-5');
+        });
+    }
+    function applySearchHighlights(container) {
+        clearSearchHighlights(container);
+        if (!container || !searchState.activeTerms || !searchState.activeTerms.length) return false;
+        var matched = false;
+        var words = container.querySelectorAll('.qword[data-search-text]');
+        for (var i = 0; i < words.length; i++) {
+            var word = words[i];
+            var normalizedWord = normalizeArabicForSearch(word.getAttribute('data-search-text') || '');
+            if (!normalizedWord) continue;
+            for (var ti = 0; ti < searchState.activeTerms.length; ti++) {
+                if (normalizedWord.indexOf(searchState.activeTerms[ti]) !== -1) {
+                    word.classList.add('search-match', 'search-match-' + (((ti % 5) + 1)));
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        return matched;
+    }
+    function spreadHasAllTerms(pageSpread, terms) {
+        if (!terms || !terms.length) return false;
+        var found = {};
+        for (var ti = 0; ti < terms.length; ti++) found[terms[ti]] = false;
+        for (var pi = 0; pi < pageSpread.length; pi++) {
+            var verses = pageSpread[pi] && pageSpread[pi].verses ? pageSpread[pi].verses : [];
+            for (var vi = 0; vi < verses.length; vi++) {
+                var words = verses[vi].words || [];
+                for (var wi = 0; wi < words.length; wi++) {
+                    var w = words[wi];
+                    if (!w || w.char_type_name === 'end') continue;
+                    var normalizedWord = normalizeArabicForSearch(w.text_uthmani || w.text || '');
+                    if (!normalizedWord) continue;
+                    for (var tj = 0; tj < terms.length; tj++) {
+                        if (!found[terms[tj]] && normalizedWord.indexOf(terms[tj]) !== -1) found[terms[tj]] = true;
+                    }
+                }
+            }
+        }
+        for (var key in found) {
+            if (!found[key]) return false;
+        }
+        return true;
+    }
+    function cancelInFlightSearch() {
+        if (searchState.controller) {
+            try { searchState.controller.abort(); } catch (e) {}
+            searchState.controller = null;
+        }
+    }
+    function createSearchController() {
+        cancelInFlightSearch();
+        if (typeof AbortController === 'undefined') return null;
+        searchState.controller = new AbortController();
+        return searchState.controller;
+    }
+    async function preparePageDataForDisplay(pdata) {
+        if (!pdata) return pdata;
+        var vs = pdata.verses || [];
+        if (vs.length > 0) {
+            var firstKey = vs[0].verse_key;
+            var m = firstKey && firstKey.match(/^(\d+):1$/);
+            if (m && suraHasBismillah(parseInt(m[1], 10))) {
+                var bismillah1 = await fetchBismillah();
+                if (bismillah1) pdata.verses = [bismillahWithoutNumber(bismillah1)].concat(vs);
+            }
+            var bismillah2 = await fetchBismillah();
+            if (bismillah2) {
+                var b = bismillahWithoutNumber(bismillah2);
+                for (var i = pdata.verses.length - 1; i >= 1; i--) {
+                    var v = pdata.verses[i];
+                    var match = v.verse_key && v.verse_key.match(/^(\d+):1$/);
+                    if (match && suraHasBismillah(parseInt(match[1], 10))) {
+                        if (pdata.verses[i - 1].verse_key !== '1:1') {
+                            pdata.verses.splice(i, 0, b);
+                        }
+                    }
+                }
+            }
+        }
+        return pdata;
+    }
+    function searchUsesTwoPageUnits() {
+        return getMode().mode === 'page' && twoPageMode();
+    }
+    async function fetchDisplayPageSpread(startPage, signal, forceSinglePage) {
+        var firstPage = clampPage(startPage);
+        var pages = [await fetchPage(firstPage, signal)];
+        if (!forceSinglePage && searchUsesTwoPageUnits() && firstPage + 1 <= TOTAL_PAGES) {
+            pages.push(await fetchPage(firstPage + 1, signal));
+        }
+        for (var i = 0; i < pages.length; i++) {
+            await preparePageDataForDisplay(pages[i]);
+        }
+        return pages;
+    }
+    function getSpreadSequence(startPage, direction) {
+        var first = pageForCurrentMode(startPage);
+        var unitStep = searchUsesTwoPageUnits() ? 2 : 1;
+        var step = unitStep * (direction === -1 ? -1 : 1);
+        var seen = {};
+        var out = [];
+        var current = first;
+        while (!seen[current]) {
+            seen[current] = true;
+            out.push(current);
+            current += step;
+            if (current < 1) {
+                current = unitStep === 2 ? pageToOdd(TOTAL_PAGES) : TOTAL_PAGES;
+            } else if (current > TOTAL_PAGES) {
+                current = 1;
+            }
+            current = pageForCurrentMode(current);
+        }
+        return out;
+    }
+    async function findSearchTargetPage(startPage, terms, requestId, direction, signal) {
+        var sequence = getSpreadSequence(startPage, direction);
+        for (var i = 0; i < sequence.length; i++) {
+            if (requestId !== searchState.requestId) return null;
+            var spreadStart = sequence[i];
+            if (signal && signal.aborted) return null;
+            var spread = await fetchDisplayPageSpread(spreadStart, signal, !searchUsesTwoPageUnits());
+            if (requestId !== searchState.requestId) return null;
+            if (spreadHasAllTerms(spread, terms)) {
+                return spreadStart;
+            }
+        }
+        return null;
+    }
+    function getCurrentContinuousPage() {
+        var blocks = main ? main.querySelectorAll('.sura-page-block[data-page-number]') : [];
+        if (!blocks || !blocks.length) return null;
+        var viewportMid = (window.innerHeight || document.documentElement.clientHeight || 0) / 2;
+        var bestPage = null;
+        var bestDistance = Infinity;
+        for (var i = 0; i < blocks.length; i++) {
+            var rect = blocks[i].getBoundingClientRect();
+            if (rect.bottom <= 0 || rect.top >= (window.innerHeight || document.documentElement.clientHeight || 0)) continue;
+            var center = rect.top + (rect.height / 2);
+            var distance = Math.abs(center - viewportMid);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestPage = parseInt(blocks[i].getAttribute('data-page-number'), 10);
+            }
+        }
+        if (bestPage != null) return bestPage;
+        return parseInt(blocks[0].getAttribute('data-page-number'), 10) || null;
+    }
+    function getSearchAnchorPage() {
+        if (searchState.previewPage != null) return pageForCurrentMode(searchState.previewPage);
+        if (searchState.committedPage != null) return pageForCurrentMode(searchState.committedPage);
+        var st = getMode();
+        if (st.mode === 'sura') return pageForCurrentMode(getCurrentContinuousPage() || 1);
+        return pageForCurrentMode(st.page);
+    }
+    function getSequentialSpreadStart(currentPage, direction) {
+        var step = searchUsesTwoPageUnits() ? 2 : 1;
+        var nextPage = currentPage + (direction * step);
+        if (nextPage < 1) {
+            nextPage = step === 2 ? pageToOdd(TOTAL_PAGES) : TOTAL_PAGES;
+        } else if (nextPage > TOTAL_PAGES) {
+            nextPage = 1;
+        }
+        return pageForCurrentMode(nextPage);
+    }
+    function captureDraftOriginIfNeeded() {
+        if (searchState.draftOriginMode != null) return;
+        var st = getMode();
+        searchState.draftOriginMode = st.mode;
+        searchState.draftOriginSura = st.mode === 'sura' ? st.sura : null;
+        searchState.draftOriginPage = st.mode === 'sura' ? (getCurrentContinuousPage() || 1) : pageForCurrentMode(st.page);
+    }
+    async function jumpBetweenSearchResults(direction) {
+        var terms = parseSearchTerms(simpleSearchInput ? simpleSearchInput.value : '');
+        if (!terms.length) return;
+        captureDraftOriginIfNeeded();
+        searchState.activeTerms = terms.slice();
+        searchState.requestId++;
+        var controller = createSearchController();
+        var requestId = searchState.requestId;
+        var startFrom = getSequentialSpreadStart(getSearchAnchorPage(), direction);
+        var foundPage = null;
+        try {
+            foundPage = await findSearchTargetPage(startFrom, terms, requestId, direction, controller ? controller.signal : null);
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            throw err;
+        }
+        if (requestId !== searchState.requestId) return;
+        searchState.hasMatch = foundPage != null;
+        if (foundPage == null) {
+            setSearchNotFound(true);
+            clearSearchHighlights(main);
+            updateSearchButtons();
+            return;
+        }
+        setSearchNotFound(false);
+        updateSearchButtons();
+        await goToPageForSearch(foundPage, false);
+    }
+    function updateSearchButtons() {
+        var hasQuery = !!parseSearchTerms(simpleSearchInput ? simpleSearchInput.value : '').length;
+        var canNavigate = hasQuery && searchState.hasMatch;
+        if (searchPrevBtn) searchPrevBtn.disabled = !canNavigate;
+        if (searchNextBtn) searchNextBtn.disabled = !canNavigate;
+        if (searchOkBtn) searchOkBtn.disabled = !hasQuery;
+        if (searchCancelBtn) searchCancelBtn.disabled = !(hasQuery || !!searchState.committedQuery || searchState.draftOriginPage != null);
+    }
+    async function goToPageForSearch(targetPage, preserveOrigin) {
+        var st = getMode();
+        var normalizedTarget = pageForCurrentMode(targetPage);
+        var currentPage = st.mode === 'sura' ? pageForCurrentMode(getCurrentContinuousPage() || normalizedTarget) : pageForCurrentMode(st.page);
+        if (preserveOrigin) captureDraftOriginIfNeeded();
+        searchState.previewPage = normalizedTarget;
+        if (normalizedTarget === currentPage) {
+            applySearchHighlights(main);
+            return;
+        }
+        if (st.mode === 'sura') {
+            if (!chaptersCache || !chaptersCache.length) {
+                try { await fetchChapters(); } catch (err) {}
+            }
+            var ch = getChapterForPage(normalizedTarget);
+            setSetting('page_mode', 'continuous');
+            setUrl('sura', 1, ch ? ch.id : 1);
+        } else {
+            setUrl('page', normalizedTarget, 1);
+        }
+        render();
+    }
+    function commitSearchPreview() {
+        var st = getMode();
+        searchState.committedQuery = simpleSearchInput ? simpleSearchInput.value : '';
+        searchState.committedTerms = searchState.activeTerms.slice();
+        searchState.committedMode = st.mode;
+        searchState.committedSura = st.mode === 'sura' ? st.sura : null;
+        searchState.committedPage = st.mode === 'sura' ? (getCurrentContinuousPage() || searchState.previewPage || 1) : pageForCurrentMode(st.page);
+        searchState.draftOriginPage = null;
+        searchState.draftOriginMode = null;
+        searchState.draftOriginSura = null;
+        searchState.previewPage = null;
+        searchState.hasMatch = !!searchState.activeTerms.length;
+        cancelInFlightSearch();
+        setSearchNotFound(false);
+        updateSearchButtons();
+    }
+    function cancelSearchPreview() {
+        searchState.requestId++;
+        cancelInFlightSearch();
+        var restoreQuery = searchState.committedQuery || '';
+        var restoreTerms = (searchState.committedTerms || []).slice();
+        var restorePage = searchState.draftOriginPage;
+        var restoreMode = searchState.draftOriginMode;
+        var restoreSura = searchState.draftOriginSura;
+        searchState.activeTerms = restoreTerms;
+        searchState.draftOriginPage = null;
+        searchState.draftOriginMode = null;
+        searchState.draftOriginSura = null;
+        searchState.previewPage = null;
+        searchState.hasMatch = !!restoreTerms.length;
+        if (simpleSearchInput) simpleSearchInput.value = restoreQuery;
+        setSearchNotFound(false);
+        updateSearchButtons();
+        if (restorePage != null && restoreMode === 'sura') {
+            setSetting('page_mode', 'continuous');
+            setUrl('sura', 1, restoreSura || 1);
+            render();
+            return;
+        }
+        if (restorePage != null) {
+            setUrl('page', pageForCurrentMode(restorePage), 1);
+            render();
+            return;
+        }
+        applySearchHighlights(main);
+    }
+    async function handleSearchInputChange() {
+        if (!simpleSearchInput) return;
+        var st = getMode();
+        var rawQuery = simpleSearchInput.value || '';
+        var terms = parseSearchTerms(rawQuery);
+        searchState.requestId++;
+        var controller = createSearchController();
+        var requestId = searchState.requestId;
+        if (!terms.length) {
+            searchState.activeTerms = [];
+            searchState.previewPage = null;
+            searchState.hasMatch = false;
+            setSearchNotFound(false);
+            if (searchState.draftOriginPage != null) {
+                var backPage = searchState.draftOriginPage;
+                var backMode = searchState.draftOriginMode;
+                var backSura = searchState.draftOriginSura;
+                searchState.draftOriginPage = null;
+                searchState.draftOriginMode = null;
+                searchState.draftOriginSura = null;
+                updateSearchButtons();
+                if (backMode === 'sura') {
+                    setSetting('page_mode', 'continuous');
+                    setUrl('sura', 1, backSura || 1);
+                } else {
+                    setUrl('page', pageForCurrentMode(backPage), 1);
+                }
+                render();
+                return;
+            }
+            searchState.committedQuery = '';
+            searchState.committedTerms = [];
+            searchState.committedMode = st.mode;
+            searchState.committedSura = st.mode === 'sura' ? st.sura : null;
+            searchState.committedPage = st.mode === 'sura' ? (getCurrentContinuousPage() || 1) : pageForCurrentMode(st.page);
+            clearSearchHighlights(main);
+            updateSearchButtons();
+            return;
+        }
+        captureDraftOriginIfNeeded();
+        searchState.activeTerms = terms.slice();
+        setSearchNotFound(false);
+        var searchStartPage = searchState.draftOriginPage != null ? searchState.draftOriginPage : getSearchAnchorPage();
+        var foundPage = null;
+        try {
+            foundPage = await findSearchTargetPage(searchStartPage, terms, requestId, 1, controller ? controller.signal : null);
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+            throw err;
+        }
+        if (requestId !== searchState.requestId) return;
+        if (foundPage == null) {
+            searchState.hasMatch = false;
+            setSearchNotFound(true);
+            clearSearchHighlights(main);
+            updateSearchButtons();
+            return;
+        }
+        searchState.hasMatch = true;
+        setSearchNotFound(false);
+        updateSearchButtons();
+        await goToPageForSearch(foundPage, false);
+    }
 
     function getMode() {
         const params = new URLSearchParams(window.location.search);
@@ -898,6 +1436,7 @@
     function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
     function getPageMode() { return getSetting('page_mode', 'one-page'); }
     function twoPageMode() { return getPageMode() === 'two-pages'; }
+    function onePageTranslationMode() { return getPageMode() === 'one-page-translation'; }
     function suraViewMode() { return getPageMode() === 'continuous'; }
     function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
     function getVerseTranslationParam() {
@@ -1032,6 +1571,10 @@
     function layoutAyahPerLine() {
         return getSetting('layout', 'ayah-line') === 'ayah-line';
     }
+    function getAyahNumberFromVerseKey(verseKey) {
+        var m = String(verseKey || '').match(/^\d+:(\d+)$/);
+        return m ? parseInt(m[1], 10) : null;
+    }
 
     function buildWordHtml(w, pageNum, useQCFFont, verseKey, verseTranslation) {
         var vKey = verseKey || '';
@@ -1042,17 +1585,18 @@
         var verseTrAttr = (verseTranslation && verseTranslation.length > 0) ? ' data-verse-translation="' + escapeAttr(verseTranslation) + '"' : '';
         var copyText = (w.text_uthmani || w.text || '').trim();
         var copyAttr = copyText ? ' data-copy-text="' + escapeAttr(copyText) + '"' : '';
+        var searchTextAttr = copyText ? ' data-search-text="' + escapeAttr(copyText) + '"' : '';
         var pos = (w.position != null) ? w.position : 0;
         if (useQCFFont) {
             var page = w.v1_page || pageNum;
             loadQCFPageFont(page);
             var padded = String(page).padStart(3, '0');
             var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
-            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
+            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
         }
         var plain = w.text_uthmani || w.text || '';
         // if (plain === 'أُو۟لَـٰٓئِكَ') plain = 'أُو۟★لَـٰٓئِكَ';
-        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + '>' + escapeHtml(plain) + '</span>' + pad;
+        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + '>' + escapeHtml(plain) + '</span>' + pad;
     }
     function buildVerseText(verse, useQCFFont) {
         if (!verse.words || verse.words.length === 0) return '';
@@ -1188,6 +1732,22 @@
         container.innerHTML = html;
         attachWordHoverInteractions(container);
     }
+    function renderTranslationPageContent(verses, container) {
+        container.classList.add('translation-content');
+        container.classList.toggle('layout-ayah-line', layoutAyahPerLine());
+        container.classList.toggle('layout-flow', !layoutAyahPerLine());
+        var html = '';
+        for (var i = 0; i < verses.length; i++) {
+            var verse = verses[i];
+            if (!verse || verse.verse_key === '1:1') continue;
+            var translation = getVerseTranslationText(verse);
+            if (!translation) continue;
+            var ayahNum = getAyahNumberFromVerseKey(verse.verse_key);
+            var numHtml = ayahNum != null ? '<span class="ayah-num">(' + escapeHtml(fmtFa(ayahNum)) + ')</span>' : '';
+            html += '<span class="translation-ayah">' + escapeHtml(translation) + (numHtml ? (' ' + numHtml) : '') + '</span>';
+        }
+        container.innerHTML = html || '<div class="loading">ترجمه‌ای برای این صفحه پیدا نشد.</div>';
+    }
     function hideWordHoverTooltip() {
         if (!wordHoverTooltip) return;
         wordHoverTooltip.style.display = 'none';
@@ -1239,7 +1799,7 @@
         var s = m[1], a = m[2];
         var tt = document.getElementById('sura-hadith-tooltip');
         if (!tt) return;
-        tt.innerHTML = '<div><a href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">حدیث</a></div><div><a href="book.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">کتاب</a></div>';
+        tt.innerHTML = '<div><a href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">حدیث</a></div><div><a href="commentary.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '">تفسیر</a></div>';
         tt.style.display = 'block';
         var r = anchorEl.getBoundingClientRect();
         tt.style.left = (r.left + r.width / 2) + 'px';
@@ -1789,8 +2349,11 @@
     function renderPageMode(pages) {
         const useQCFFont = useQCF();
         const twoPage = twoPageMode();
+        const withTranslation = onePageTranslationMode();
         const pageContainer = document.createElement('div');
-        pageContainer.className = 'page-container' + (twoPage && pages.length === 2 ? ' two-pages' : '');
+        pageContainer.className = 'page-container'
+            + (twoPage && pages.length === 2 ? ' two-pages' : '')
+            + (withTranslation ? ' page-with-translation' : '');
         const pageList = [];
         for (let i = 0; i < pages.length; i++) pageList.push(pages[i]);
         for (let cardIndex = 0; cardIndex < pageList.length; cardIndex++) {
@@ -1847,7 +2410,21 @@
             renderPageContent(verses, content, useQCFFont);
             pageContainer.appendChild(card);
         }
-        if (twoPage && pageContainer.children.length === 2) {
+        if (withTranslation && pageList.length > 0) {
+            var sourcePage = pageList[0];
+            var tCard = document.createElement('div');
+            tCard.className = 'page-card translation-card single';
+            tCard.innerHTML =
+                '<div class="page-header">' +
+                '<span class="sura-name">ترجمه</span>' +
+                '<span class="page-meta">ص ' + fmtFa(sourcePage.pageNumber || 1) + '</span>' +
+                '</div>' +
+                '<div class="page-content"></div>';
+            var tContent = tCard.querySelector('.page-content');
+            renderTranslationPageContent(sourcePage.verses || [], tContent);
+            pageContainer.appendChild(tCard);
+        }
+        if ((twoPage && pageContainer.children.length === 2) || (withTranslation && pageContainer.children.length === 2)) {
             var cards = Array.prototype.slice.call(pageContainer.querySelectorAll('.page-card'));
             function equalizeTwoPageCardHeights() {
                 cards.forEach(function(c) { c.style.height = ''; c.style.minHeight = '0'; });
@@ -1905,6 +2482,7 @@
         for (const block of pageBlocks) {
             const div = document.createElement('div');
             div.className = 'sura-page-block';
+            div.setAttribute('data-page-number', String(block.pageNumber || 1));
             const content = document.createElement('div');
             content.className = 'page-content';
             renderPageContent(block.verses, content, useQCFFont);
@@ -1914,6 +2492,12 @@
         container.appendChild(scroll);
         main.innerHTML = '';
         main.appendChild(container);
+        if (searchState.previewPage != null) {
+            var targetBlock = container.querySelector('.sura-page-block[data-page-number="' + String(searchState.previewPage) + '"]');
+            if (targetBlock && typeof targetBlock.scrollIntoView === 'function') {
+                targetBlock.scrollIntoView({ block: 'center', behavior: 'auto' });
+            }
+        }
     }
 
     function setLoading(show) {
@@ -1940,9 +2524,9 @@
         return Object.assign({}, verse, { words: verse.words.filter(function(w) { return w.char_type_name !== 'end'; }) });
     }
 
-    async function fetchPage(pageNum) {
+    async function fetchPage(pageNum, signal) {
         const lang = getTranslationLanguage();
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam());
+        const res = await fetch('https://api.quran.com/api/v4/verses/by_page/' + pageNum + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam(), signal ? { signal: signal } : undefined);
         if (!res.ok) throw new Error('خطا در دریافت صفحه');
         const data = await res.json();
         return { pageNumber: pageNum, verses: data.verses || [] };
@@ -1976,36 +2560,7 @@
             setLoading(true);
             (async function() {
                 try {
-                    const pages = [];
-                    pages.push(await fetchPage(startPage));
-                    if (twoPage && startPage + 1 <= TOTAL_PAGES) {
-                        pages.push(await fetchPage(startPage + 1));
-                    }
-                    for (var pi = 0; pi < pages.length; pi++) {
-                        var pdata = pages[pi];
-                        var vs = pdata.verses || [];
-                        if (vs.length > 0) {
-                            var firstKey = vs[0].verse_key;
-                            var m = firstKey.match(/^(\d+):1$/);
-                            if (m && suraHasBismillah(parseInt(m[1], 10))) {
-                                var bismillah = await fetchBismillah();
-                                if (bismillah) pdata.verses = [bismillahWithoutNumber(bismillah)].concat(vs);
-                            }
-                            var bismillah = await fetchBismillah();
-                            if (bismillah) {
-                                var b = bismillahWithoutNumber(bismillah);
-                                for (var i = pdata.verses.length - 1; i >= 1; i--) {
-                                    var v = pdata.verses[i];
-                                    var match = v.verse_key && v.verse_key.match(/^(\d+):1$/);
-                                    if (match && suraHasBismillah(parseInt(match[1], 10))) {
-                                        if (pdata.verses[i - 1].verse_key !== '1:1') {
-                                            pdata.verses.splice(i, 0, b);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    const pages = await fetchDisplayPageSpread(startPage);
                     await fetchChapters();
                     buildPageMaps();
                     if (useQCF()) {
@@ -2013,6 +2568,10 @@
                     }
                     setLoading(false);
                     renderPageMode(pages);
+                    applySearchHighlights(main);
+                    if (searchState.draftOriginPage == null && searchState.committedTerms.length) {
+                        searchState.committedPage = startPage;
+                    }
                     updateProgressHighlight(progressInlineWrap, startPage);
                 } catch (e) {
                     console.error('Page mode error:', e);
@@ -2037,6 +2596,7 @@
                     }
                     setLoading(false);
                     renderSuraMode(sura, pageBlocks);
+                    applySearchHighlights(main);
                 } catch (e) {
                     console.error('Sura mode error:', e);
                     setLoading(false);
@@ -2065,7 +2625,7 @@
     if (pageModeEl) {
         pageModeEl.addEventListener('change', async function() {
             var val = this.value;
-            if (val !== 'one-page' && val !== 'two-pages' && val !== 'continuous') return;
+            if (val !== 'one-page' && val !== 'two-pages' && val !== 'one-page-translation' && val !== 'continuous') return;
             setSetting('page_mode', val);
             var st = getMode();
             if (val === 'continuous' && st.mode === 'page') {
@@ -2092,7 +2652,7 @@
                 render();
                 return;
             }
-            if ((val === 'one-page' || val === 'two-pages') && st.mode === 'sura') {
+            if ((val === 'one-page' || val === 'two-pages' || val === 'one-page-translation') && st.mode === 'sura') {
                 if (!chaptersCache || !chaptersCache.length) {
                     try { await fetchChapters(); } catch (err) {}
                 }
@@ -2129,6 +2689,40 @@
             settingsMenu.classList.remove('open');
         }
     });
+    if (simpleSearchInput) {
+        simpleSearchInput.addEventListener('input', function() {
+            handleSearchInputChange();
+        });
+        simpleSearchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                commitSearchPreview();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelSearchPreview();
+            }
+        });
+    }
+    if (searchPrevBtn) {
+        searchPrevBtn.addEventListener('click', function() {
+            jumpBetweenSearchResults(-1);
+        });
+    }
+    if (searchNextBtn) {
+        searchNextBtn.addEventListener('click', function() {
+            jumpBetweenSearchResults(1);
+        });
+    }
+    if (searchOkBtn) {
+        searchOkBtn.addEventListener('click', function() {
+            commitSearchPreview();
+        });
+    }
+    if (searchCancelBtn) {
+        searchCancelBtn.addEventListener('click', function() {
+            cancelSearchPreview();
+        });
+    }
 
     function pageToOdd(pageNum) {
         var p = parseInt(pageNum, 10);
@@ -2309,6 +2903,8 @@
     document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
     if (document.getElementById('page-mode')) document.getElementById('page-mode').value = savedPageMode;
     if (document.getElementById('translation-language')) document.getElementById('translation-language').value = savedTranslationLang;
+    if (simpleSearchInput) simpleSearchInput.value = searchState.committedQuery;
+    updateSearchButtons();
 
     render();
 })();

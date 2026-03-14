@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>کتاب تفسیر</title>
+    <title>تفسیر</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
         @font-face {
@@ -276,6 +276,30 @@
             margin: 0 0 12px;
             font-size: 1.1rem;
         }
+        .book-settings-links {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .book-settings-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 4px 6px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.82rem;
+            line-height: 1.15;
+            color: #1e293b;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.14);
+        }
+        .book-settings-link:hover {
+            background: rgba(59, 130, 246, 0.12);
+        }
         .book-settings-inner button {
             margin-top: 12px;
             padding: 8px 16px;
@@ -315,7 +339,7 @@
             <a href="#" class="book-nav-btn" id="book-prev" aria-label="قبلی">→</a>
             <div class="book-title-block">
                 <span class="book-name-wrap">
-                    <button type="button" class="book-name-btn" id="book-name-btn" aria-haspopup="listbox" aria-expanded="false">کتاب</button>
+                    <button type="button" class="book-name-btn" id="book-name-btn" aria-haspopup="listbox" aria-expanded="false">تفسیر</button>
                     <div class="book-name-dropdown" id="book-name-dropdown" role="listbox" aria-hidden="true"></div>
                 </span>
                 <span class="book-sura-ayes" id="book-sura-ayes"></span>
@@ -331,8 +355,14 @@
 
     <div class="book-settings-panel" id="book-settings-panel">
         <div class="book-settings-inner">
-            <h3>تنظیمات</h3>
-            <p>امکانات تنظیمات در نسخه‌های بعد اضافه می‌شود.</p>
+            <h3>نحوه نمایش</h3>
+            <div class="book-settings-links">
+                <a class="book-settings-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>
+                <a class="book-settings-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>
+                <a class="book-settings-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                <a class="book-settings-link" href="stat.html" title="آمار سوره">آمار سوره</a>
+                <a class="book-settings-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+            </div>
             <button type="button" id="book-settings-close">بستن</button>
         </div>
     </div>
@@ -670,7 +700,7 @@
         showLoading(true);
         fetch('data/books.json')
             .then(function (r) {
-                if (!r.ok) throw new Error('بارگذاری فهرست کتاب‌ها ناموفق');
+                if (!r.ok) throw new Error('بارگذاری فهرست تفسیرها ناموفق');
                 return r.json();
             })
             .then(function (list) {

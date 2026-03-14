@@ -263,15 +263,20 @@
 
         #settings-menu .menu-link,
         #modes-menu .menu-link {
-            display: block;
-            margin-top: 6px;
-            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0;
+            min-height: 34px;
+            padding: 4px 6px;
             border-radius: 10px;
             text-align: center;
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.18);
             color: #1d4ed8;
             font-weight: 700;
+            font-size: 12px;
+            line-height: 1.15;
         }
 
         #settings-menu .menu-link:hover,
@@ -283,6 +288,12 @@
             width: 100%;
             cursor: pointer;
             font: inherit;
+        }
+        #modes-menu .links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
         }
 
         #settings-menu .row {
@@ -440,12 +451,14 @@
     </div>
     <div id="modes-menu" hidden>
         نحوه نمایش:
-        <button type="button" class="menu-link" id="modes-yasir-btn">یسیر</button>
-        <a id="go-search-link" class="menu-link" href="search.html">ابزار جستجو</a>
-        <a id="go-simple-link" class="menu-link" href="simple.html">نمایش</a>
-        <a id="go-stat-link" class="menu-link" href="stat.html">آمار سوره</a>
-        <a id="go-stat-link" class="menu-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
-        <a id="go-stat-link" class="menu-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>
+        <div class="links-grid">
+            <button type="button" class="menu-link" id="modes-yasir-btn">یسیر</button>
+            <a id="go-search-link" class="menu-link" href="search.html">ابزار جستجو</a>
+            <a id="go-simple-link" class="menu-link" href="simple.html">نمایش</a>
+            <a id="go-stat-link" class="menu-link" href="stat.html">آمار سوره</a>
+            <a id="go-stat-link" class="menu-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+            <a id="go-stat-link" class="menu-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>
+        </div>
     </div>
 
     <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -453,6 +466,6 @@
     <script src="js/sura-data.js"></script>
     <script src="js/sura-picker.js"></script>
     <script src="js/search.js"></script>
-    <script src="js/desktop.js"></script>
+    <script src="js/yasir.js"></script>
 </body>
 </html>

@@ -116,7 +116,7 @@
             top: 100%;
             left: 0;
             margin-top: 4px;
-            min-width: 100px;
+            min-width: 200px;
             background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -131,14 +131,28 @@
             font-weight: 600;
             color: #64748b;
         }
+        .hadith-links-menu .hadith-links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            padding: 0 12px 4px;
+        }
         .hadith-links-menu .hadith-link {
-            display: block;
-            padding: 2px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 4px 6px;
             color: #1e293b;
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.82rem;
+            line-height: 1.15;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.14);
+            text-align: center;
         }
-        .hadith-links-menu .hadith-link:hover { background: rgba(59, 130, 246, 0.1); }
+        .hadith-links-menu .hadith-link:hover { background: rgba(59, 130, 246, 0.12); }
         .ayah-arabic-label, .ayah-translation-label {
             font-size: 0.8rem;
             font-weight: 600;
@@ -399,7 +413,14 @@
             const HADITH_CONTENT_URL = 'https://hadith.ai/get_hadith_content/get_hadith';
             const QURAN_VERSE_URL = 'https://api.quran.com/api/v4/verses/by_key';
             const HADITH_PAGE_SIZE = 10;
+            const HADITH_FETCH_TIMEOUT_MS = 12000;
             var allHadithIds = [];
+
+            function hadithLog(service, msg, data) {
+                var prefix = '[hadith-service ' + service + '] ';
+                if (data !== undefined) console.log(prefix + msg, data);
+                else console.log(prefix + msg);
+            }
             var YASIR_PATHS = [];
             (function() {
                 var names = ['Fatiha','Baqarah','AleImran','Nissa','Maedah','Anaam','Araf','Anfal','Tawbah','Yunus','Hud','Yusof','Raad','Ibrahim','Hejr','Nahl','Esra','Kahf','Maryam','Taha','Anbia','Haj','Momenun','Noor','Forqan','Shoara','Naml','Qasas','Ankabut','Rum','Loqman','Sajda','Ahzab','Saba','Fater','Yasin','Saffat','Saad','Zomar','Ghafer','Fussilat','Showra','Zokhrof','Dokhan','Jathiah','Ahqaf','Muhammad','Fath','Hojorat','Qaf','Zariyat','Tur','Najm','Qamar','AlRahman','Waqea','Hadid','Mojadala','Hashr','Momtahena','Saff','Jome','Monafequn','Taqabon','Talaq','Tahrim','Molk','Qalam','Haqqa','Maarij','Nuh','Jin','Mozamel','Modathir','Qiyamah','Ensan','Morsalat','Nabaa','Nazeat','Abas','Takwir','Enfetar','Motafefin','Ensheqaq','Boruj','Tareq','Aala','Qashiya','Fajr','Balad','Shams','Layl','Dhoha','Sharh','Tin','Alaq','Qadr','Bayyenah','Zelzelah','Aadiyat','Qareah','Takathor','Aasr','Homazah','Fil','Qoraysh','Maaun','Kawthar','Kaferun','Nasr','Masad','Ekhlas','Falaq','Nas'];
@@ -442,7 +463,7 @@
                 if (!suraNum) return null;
 
                 return {
-                    href: `/desktop.html?s=${suraNum}&a=${ayahNum}`,
+                    href: `/yasir.html?s=${suraNum}&a=${ayahNum}`,
                     sura: suraNum,
                     ayah: ayahNum
                 };
@@ -554,7 +575,8 @@
                 show(content, '<div class="loading">' + escapeHtml(msg || 'در حال بارگذاری...') + '</div>');
             }
 
-            function showError(msg) {
+            function showError(msg, err) {
+                console.error('[hadith-service] showError:', msg, err !== undefined ? err : '');
                 const content = document.getElementById('content');
                 show(content, '<div class="error">' + escapeHtml(msg) + '</div>');
             }
@@ -562,10 +584,19 @@
 
             async function fetchVerse(sura, ayah) {
                 var url = QURAN_VERSE_URL + '/' + sura + ':' + ayah + '?translations=135&fields=text_uthmani&words=true&word_fields=v1_page,code_v1,text_uthmani';
+                hadithLog('quran', 'GET ' + url);
                 var res = await fetch(url);
+                hadithLog('quran', 'response status=' + res.status + ' ' + res.statusText + ', Content-Type=' + (res.headers.get('Content-Type') || ''));
                 if (!res.ok) throw new Error('خطا در دریافت آیه');
-                var data = await res.json();
-                return data.verse || null;
+                var text = await res.text();
+                try {
+                    var data = JSON.parse(text);
+                    return data.verse || null;
+                } catch (e) {
+                    console.error('[hadith-service quran] JSON parse error:', e.message, e);
+                    hadithLog('quran', 'body start: ' + (text ? text.substring(0, 80) : '') + (text && text.length > 80 ? '...' : ''));
+                    throw e;
+                }
             }
 
             var QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
@@ -601,17 +632,37 @@
                 return html;
             }
 
-            const HADITH_FETCH_TIMEOUT_MS = 12000;
+            function normalizeExportAyahResponse(raw) {
+                if (!raw) return [];
+                if (Array.isArray(raw)) return raw;
+                if (raw && typeof raw === 'object') {
+                    if (Array.isArray(raw.hadiths)) return raw.hadiths;
+                    if (Array.isArray(raw.data)) return raw.data;
+                    if (Array.isArray(raw.result)) return raw.result;
+                    if (Array.isArray(raw.items)) return raw.items;
+                    if (raw.groups && Array.isArray(raw.groups)) {
+                        var combined = [];
+                        for (var gi = 0; gi < raw.groups.length; gi++) {
+                            var g = raw.groups[gi];
+                            if (g && Array.isArray(g.hadiths)) {
+                                combined = combined.concat(g.hadiths);
+                            }
+                        }
+                        if (combined.length > 0) return combined;
+                    }
+                }
+                return [];
+            }
 
             async function fetchHadithIds(suraId, ayaId) {
+                hadithLog('get_ayah', 'POST ' + HADITH_AYAH_URL, { suraId: suraId, ayaId: ayaId });
                 var res = await fetch(HADITH_AYAH_URL, {
                     method: 'POST',
                     headers: { 'accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ suraId: suraId, ayaId: ayaId })
                 });
                 if (!res.ok) {
-                    // throw new Error('خطا در دریافت لیست احادیث');
-                    console.error('خطا در دریافت لیست احادیث', res);
+                    console.error('[hadith-service get_ayah] error: non-OK status', res.status, res.statusText);
                     return [];
                 }
                 var raw = await res.json();
@@ -630,6 +681,7 @@
                     if (item != null && typeof item === 'object' && (item.hid != null || item.id != null)) ids.push(String(item.hid != null ? item.hid : item.id));
                     else if (item != null) ids.push(String(item));
                 }
+                hadithLog('get_ayah', 'hadith ids count=' + ids.length);
                 return ids;
             }
 
@@ -740,6 +792,38 @@
                 return html;
             }
 
+            function getCardByHid(hid) {
+                var list = document.getElementById('hadith-list');
+                if (!list) return null;
+                var cards = list.querySelectorAll('.hadith-card');
+                var sid = String(hid);
+                for (var i = 0; i < cards.length; i++) {
+                    if (cards[i].getAttribute('data-hid') === sid) return cards[i];
+                }
+                return null;
+            }
+
+            function setCardContent(card, hadithHtml) {
+                if (!card) return;
+                card.classList.remove('hadith-card--loading', 'hadith-card--error');
+                card.innerHTML = hadithHtml;
+            }
+
+            function setCardLoading(card) {
+                if (!card) return;
+                card.classList.add('hadith-card--loading');
+                card.classList.remove('hadith-card--error');
+                card.innerHTML = '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
+            }
+
+            function setCardError(card, hid, errMsg) {
+                if (!card) return;
+                card.classList.remove('hadith-card--loading');
+                card.classList.add('hadith-card--error');
+                card.innerHTML = '<div class="hadith-card-error">' + escapeHtml(errMsg || 'خطا در بارگذاری') + '</div>' +
+                    '<button type="button" class="hadith-retry-btn" data-hid="' + escapeHtml(String(hid)) + '">بارگذاری مجدد</button>';
+            }
+
             function renderVerseAndPlaceholders(verse, hadithIds) {
                 var s = getParams().s, a = getParams().a;
                 var title = document.getElementById('page-title');
@@ -766,12 +850,14 @@
                     html += '<button type="button" class="hadith-menu-btn" aria-label="منو">\u2630</button>';
                     html += '<div class="hadith-links-menu" id="hadith-links-menu">';
                     html += '<div class="hadith-links-title">نحوه نمایش</div>';
-                    html += '<a class="hadith-link" href="desktop.html" title="رفتن به یسیر">یسیر</a>';
+                    html += '<div class="hadith-links-grid">';
+                    html += '<a class="hadith-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>';
                     html += '<a class="hadith-link" href="search.html" title="ابزار جستجو">ابزار جستجو</a>';
                     html += '<a class="hadith-link" href="simple.html" title="رفتن به نمایش">نمایش</a>';
                     html += '<a class="hadith-link" href="stat.html" title="آمار سوره">آمار سوره</a>';
                     html += '<a class="hadith-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>';
-                    html += '<a class="hadith-link" href="book.html" title="نمایش کتاب‌ها">کتاب</a>';
+                    html += '<a class="hadith-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>';
+                    html += '</div>';
                     html += '</div></div></div>';
                     if (arabicHtml) {
                         html += '<div class="ayah-arabic-label">متن عربی</div>';
@@ -785,7 +871,7 @@
                 }
 
                 if (hadithIds.length > 0) {
-                    var initialCount = Math.min(10, hadithIds.length);
+                    var initialCount = Math.min(HADITH_PAGE_SIZE, hadithIds.length);
                     html += '<h2 class="hadith-section-title">احادیث مرتبط (' + fmtFa(hadithIds.length) + ')</h2>';
                     html += '<div id="hadith-list">';
                     for (var hi = 0; hi < initialCount; hi++) {
@@ -795,7 +881,7 @@
                         html += '</article>';
                     }
                     html += '<div id="hadith-load-more-wrap">';
-                    if (hadithIds.length > 10) {
+                    if (hadithIds.length > HADITH_PAGE_SIZE) {
                         html += '<button type="button" class="hadith-load-more-btn">بارگذاری ۱۰ حدیث بعد</button>';
                     }
                     html += '</div></div>';
@@ -804,45 +890,6 @@
                 }
 
                 show(document.getElementById('content'), html);
-            }
-
-            function getCardByHid(hid) {
-                var list = document.getElementById('hadith-list');
-                if (!list) return null;
-                var cards = list.querySelectorAll('.hadith-card');
-                var sid = String(hid);
-                for (var i = 0; i < cards.length; i++) {
-                    if (cards[i].getAttribute('data-hid') === sid) return cards[i];
-                }
-                return null;
-            }
-
-            function setCardContent(card, hadithHtml) {
-                if (!card) return;
-                card.classList.remove('hadith-card--loading', 'hadith-card--error');
-                card.innerHTML = hadithHtml;
-            }
-
-            function setCardLoading(card) {
-                if (!card) return;
-                card.classList.add('hadith-card--loading');
-                card.classList.remove('hadith-card--error');
-                card.innerHTML = '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
-            }
-
-            function logHadithError(msg, hid, detail) {
-                var el = document.getElementById('hadith-error-log');
-                if (!el) return;
-                var line = '[' + (hid != null ? 'hid=' + hid : '') + '] ' + (msg || '') + (detail ? ' — ' + detail : '');
-                el.appendChild(document.createTextNode(line + '\n'));
-            }
-
-            function setCardError(card, hid, errMsg) {
-                if (!card) return;
-                card.classList.remove('hadith-card--loading');
-                card.classList.add('hadith-card--error');
-                card.innerHTML = '<div class="hadith-card-error">' + escapeHtml(errMsg || 'خطا در بارگذاری') + '</div>' +
-                    '<button type="button" class="hadith-retry-btn" data-hid="' + escapeHtml(String(hid)) + '">بارگذاری مجدد</button>';
             }
 
             function onRetryClick(e) {
@@ -856,9 +903,11 @@
                 fetchSingleHadith(hid).then(function(h) {
                     setCardContent(card, renderHadith(h));
                 }).catch(function(err) {
+                    console.error('[hadith-service get_hadith] retry hid=' + hid, err);
                     setCardError(card, hid, err.message || 'خطا در بارگذاری');
                 });
             }
+
             function onContentClick(e) {
                 var target = e.target;
                 if (target.classList && target.classList.contains('hadith-retry-btn')) {
@@ -915,6 +964,7 @@
                     loadHadithsInRange(currentCount, currentCount + nextCount);
                 }
             }
+
             async function loadHadithsInRange(startIdx, endIdx) {
                 for (var i = startIdx; i < endIdx && i < allHadithIds.length; i++) {
                     var id = allHadithIds[i];
@@ -922,22 +972,9 @@
                     if (!card || !card.classList.contains('hadith-card--loading')) continue;
                     try {
                         var h = await fetchSingleHadith(id);
-                        try {
-                            setCardContent(card, renderHadith(h));
-                        } catch (renderErr) {
-                            var detail = '';
-                            try {
-                                if (h && (h.segments_by_nn || h.translation_nn)) {
-                                    var seg = h.segments_by_nn;
-                                    var tn = h.translation_nn;
-                                    detail = 'segments_by_nn=' + (Array.isArray(seg) ? seg.length : typeof seg) + ', translation_nn keys=' + (tn ? Object.keys(tn).length : 0);
-                                }
-                            } catch (e) {}
-                            logHadithError(renderErr.message || 'خطا در نمایش', id, detail);
-                            setCardError(card, id, (renderErr.message || 'خطا در نمایش') + (renderErr.name ? ' (' + renderErr.name + ')' : ''));
-                        }
+                        setCardContent(card, renderHadith(h));
                     } catch (err) {
-                        logHadithError(err.message || 'خطا در بارگذاری', id, '');
+                        console.error('[hadith-service get_hadith] hid=' + id, err);
                         setCardError(card, id, err.message || 'خطا در بارگذاری');
                     }
                     await new Promise(function(r) { setTimeout(r, 0); });
@@ -969,7 +1006,8 @@
                         loadHadithsInRange(0, initialCount);
                     }
                 } catch (err) {
-                    showError(err.message || 'خطایی رخ داد.');
+                    console.error('[hadith-service] run() failed:', err);
+                    showError(err.message || 'خطایی رخ داد.', err);
                 }
             }
 
