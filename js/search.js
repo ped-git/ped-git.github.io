@@ -44,14 +44,13 @@
       .replace(/\u0640/g, '')
       // 2) remove harakat + common Qur'anic annotation marks (BUT keep dagger alif U+0670 for now)
       .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED]/g, '')
-      // 3) dagger alif: collapse one-or-more (ٰ or ٰٰ) into ONE "ا"
+      // 3) dagger alif: if it sits on an alif, keep one alif; otherwise normalize it to alif
+      .replace(/ا\u0670+/g, 'ا')
       .replace(/\u0670+/g, 'ا')
       // 4) normalize alef forms to ا
       .replace(/[أإآٱا]/g, 'ا')
-      // 5) hamza forms: for search, usually best to drop hamza “shape”
-      // .replace(/ء/g, '')
-      .replace(/ؤ/g, 'و')
-      .replace(/ئ/g, 'ی')
+      // 5) keep hamza-bearing letters meaningful for search
+      // Standalone hamza stays ء; chair forms stay distinct.
       // 6) Persian-friendly letter unification (optional but matches what you typed)
       .replace(/[يى]/g, 'ی')
       .replace(/ك/g, 'ک')
@@ -127,9 +126,9 @@
     return cache;
   }
 
-  /** Full-universe stats for itemType: 'root' | 'lemma' | 'lem' | 'word' | 'text' */
+  /** Full-universe stats for itemType: 'root' | 'similar-root' | 'lemma' | 'lem' | 'word' | 'text' */
   function resolveStatsUniverse(cache, itemType) {
-    if (itemType === 'root') {
+    if (itemType === 'root' || itemType === 'similar-root') {
       return {
         totalTokens: cache.totalRootTokens || 1,
         tokensBySura: cache.rootTokensBySura || {},
@@ -190,7 +189,7 @@
   /**
    * Compute per-sura stats rows for one item.
    * @param {Array<{sura: number, ayah?: number, wordIndex?: number}>} matches
-   * @param {string} itemType - 'root' | 'lemma' | 'word' | 'text'
+   * @param {string} itemType - 'root' | 'similar-root' | 'lemma' | 'word' | 'text'
    * @param {{ totalTokens, tokensBySura, vocabularySize }} universe
    * @param {string|null} focusedLem - if set, use lemma universe (root+lem case)
    * @returns {Array<{ sura, count, relInSura, ratio, kl, m }>}

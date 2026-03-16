@@ -119,6 +119,10 @@
         .suggestion-item.root {
             background: #e8f5e9;
         }
+
+        .suggestion-item.similar-root {
+            background: #e8f0fe;
+        }
         
         .suggestion-type {
             font-size: 11px;
@@ -562,6 +566,77 @@
         .lem-subrow .lem-count {
             font-size: 10px;
             color: #888;
+        }
+
+        .similar-roots-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-right: 18px;
+            padding-right: 8px;
+            border-right: 1px dashed #c7d7f7;
+        }
+
+        .similar-roots-container.collapsed {
+            max-height: 0 !important;
+        }
+
+        .similar-root-subrow {
+            padding: 4px 22px 4px 8px;
+            margin-bottom: 2px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .similar-root-subrow:hover {
+            background: #f7f9ff;
+        }
+
+        .similar-root-subrow.highlighted {
+            background: #e8f0fe;
+            border: 1px solid #b6c8f8;
+        }
+
+        .similar-root-subrow.unchecked {
+            opacity: 0.5;
+        }
+
+        .similar-root-subrow.unchecked .similar-root-label {
+            text-decoration: line-through;
+        }
+
+        .similar-root-subrow input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .similar-root-subrow .similar-root-label {
+            flex: 1;
+        }
+
+        .similar-root-subrow .similar-root-meta {
+            font-size: 10px;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .similar-root-lem-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-right: 16px;
+            padding-right: 8px;
+            border-right: 1px dotted #d9e3f8;
+        }
+
+        .similar-root-lem-container.collapsed {
+            max-height: 0 !important;
+        }
+
+        .similar-root-lem-subrow {
+            padding-right: 34px;
         }
         
         .result-group {
@@ -1486,6 +1561,17 @@
                                 <option value="text">رنگ متن</option>
                             </select>
                         </div>
+                        <div class="settings-item">
+                            <label>شباهت ریشه:</label>
+                            <select id="root-similarity-select">
+                                <option value="similarity">روش ۱</option>
+                                <option value="similarity2">روش ۲</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label>آستانه شباهت:</label>
+                            <input id="root-similarity-threshold" type="number" min="0" max="1" step="0.01" value="0.20" style="flex:1; padding:6px; border:1px solid #ddd; border-radius:4px; font-family:inherit; font-size:13px;">
+                        </div>
                         <button class="apply-btn" id="apply-settings">اعمال</button>
                         <div class="settings-title">نحوه نمایش</div>
                         <div class="settings-links-grid">
@@ -1535,6 +1621,7 @@
         const ITEM_ICONS = {
             // More meaningful than old 🌱📝🔍
             root: '🌳', // ریشه
+            'similar-root': '🪢', // ریشه‌های مشابه
             word: '🔠', // واژه
             text: '📝'  // عبارت
         };
@@ -1563,6 +1650,9 @@
         const rootToWordsMap = {}; // {root: [{sura, ayah, wordIndex}, ...]}
         const wordTextsMap = {}; // {text: [{sura, ayah, wordIndex}, ...]}
         const ayahTexts = {}; // {sura: {ayah: "full text"}}
+        let rootSimilarityMap = {}; // {root: {count, related: [{root, similarity, count, ...}]}}
+        const ROOT_SIMILARITY_STORAGE_KEY = 'searchRootSimilaritySource';
+        const ROOT_SIMILARITY_THRESHOLD_STORAGE_KEY = 'searchRootSimilarityThreshold';
         let dataLoaded = false;
         
         // Selected search items
@@ -1574,7 +1664,10 @@
         // LEM tracking for roots
         const rootLemData = {}; // {root: {lems: [{lem, count, selected}], allSelected: boolean}}
         const rootExpandedState = {}; // {root: boolean} - tracks if root LEMs are expanded
-        let highlightedItem = null; // {type: 'item'|'lem', itemIndex, lem?} - for focus mode
+        const similarRootData = {}; // {root: {relatedRoots: [{root, similarity, count, selected, lems: [...] }], allSelected: boolean}}
+        const similarRootExpandedState = {}; // {root: boolean}
+        const similarRootChildExpandedState = {}; // {"base::related": boolean}
+        let highlightedItem = null; // {type: 'item'|'lem'|'similar-root-node'|'similar-root-lem', itemIndex, similarRoot?, lem?} - for focus mode
         
         // Sura filter
         const selectedSuras = new Set(); // empty = all suras selected
@@ -1599,6 +1692,22 @@
                 .map(([lem, count]) => ({ lem, count, selected: true }))
                 .sort((a, b) => b.count - a.count);
         }
+
+        function getRootCount(root, filterBySura = true) {
+            const locations = rootToWordsMap[root] || [];
+            if (!filterBySura) return locations.length;
+            let count = 0;
+            for (const loc of locations) {
+                if (isSuraSelected(loc.sura)) count++;
+            }
+            return count;
+        }
+
+        function syncRootLemSelectionState(root) {
+            const data = rootLemData[root];
+            if (!data) return;
+            data.allSelected = data.lems.length > 0 && data.lems.every(l => l.selected);
+        }
         
         // Initialize LEM data for a root (preserves selection state on refresh)
         function initRootLemData(root, forceRefresh = false) {
@@ -1620,7 +1729,102 @@
                     selected: oldSelections[l.lem] !== undefined ? oldSelections[l.lem] : true
                 }));
             }
+            syncRootLemSelectionState(root);
             return rootLemData[root];
+        }
+
+        function getSimilarRootsForRoot(root) {
+            const related = rootSimilarityMap?.[root]?.related;
+            if (!Array.isArray(related)) return [];
+            const threshold = getRootSimilarityThreshold();
+            return related.filter(entry => getRootSimilarityScore(entry) >= threshold);
+        }
+
+        function getRootSimilaritySource() {
+            const saved = localStorage.getItem(ROOT_SIMILARITY_STORAGE_KEY);
+            return saved === 'similarity2' ? 'similarity2' : 'similarity';
+        }
+
+        function getRootSimilarityThreshold() {
+            const saved = parseFloat(localStorage.getItem(ROOT_SIMILARITY_THRESHOLD_STORAGE_KEY) || '0.20');
+            if (!Number.isFinite(saved)) return 0.20;
+            return Math.max(0, Math.min(1, saved));
+        }
+
+        function getRootSimilarityScore(entry) {
+            if (!entry || typeof entry !== 'object') return 0;
+            if (Number.isFinite(entry.score)) return entry.score;
+            if (Number.isFinite(entry.similarity)) return entry.similarity;
+            return 0;
+        }
+
+        function clearSimilarRootCache() {
+            rootSimilarityMap = {};
+            for (const key of Object.keys(similarRootData)) delete similarRootData[key];
+            for (const key of Object.keys(similarRootExpandedState)) delete similarRootExpandedState[key];
+            for (const key of Object.keys(similarRootChildExpandedState)) delete similarRootChildExpandedState[key];
+        }
+
+        function getSimilarRootChildKey(baseRoot, relatedRoot) {
+            return `${baseRoot}::${relatedRoot}`;
+        }
+
+        function syncSimilarRootSelectionState(root) {
+            const data = similarRootData[root];
+            if (!data) return;
+            data.relatedRoots.forEach(entry => {
+                entry.selected = entry.lems.length > 0 && entry.lems.every(l => l.selected);
+            });
+            data.allSelected = data.relatedRoots.length > 0 && data.relatedRoots.every(entry => entry.selected);
+        }
+
+        function initSimilarRootData(root, forceRefresh = false) {
+            const relatedRoots = getSimilarRootsForRoot(root);
+
+            if (!similarRootData[root]) {
+                similarRootData[root] = {
+                    relatedRoots: [],
+                    allSelected: true
+                };
+                forceRefresh = true;
+            }
+
+            if (forceRefresh) {
+                const oldSelections = {};
+                const oldLemmaSelections = {};
+                (similarRootData[root].relatedRoots || []).forEach(entry => {
+                    oldSelections[entry.root] = entry.selected;
+                    oldLemmaSelections[entry.root] = {};
+                    (entry.lems || []).forEach(lem => {
+                        oldLemmaSelections[entry.root][lem.lem] = lem.selected;
+                    });
+                });
+
+                similarRootData[root].relatedRoots = relatedRoots.map(entry => {
+                    const lems = getLemsForRoot(entry.root).map(lemInfo => ({
+                        ...lemInfo,
+                        selected: oldLemmaSelections[entry.root]?.[lemInfo.lem] !== undefined
+                            ? oldLemmaSelections[entry.root][lemInfo.lem]
+                            : true
+                    }));
+                    const similarityValue = Number.isFinite(entry.similarity)
+                        ? entry.similarity
+                        : (Number.isFinite(entry.score) ? entry.score : 0);
+                    return {
+                        root: entry.root,
+                        similarity: similarityValue,
+                        score: Number.isFinite(entry.score) ? entry.score : similarityValue,
+                        count: getRootCount(entry.root),
+                        support: entry.support,
+                        maxSimilarity: entry.max_similarity,
+                        selected: oldSelections[entry.root] !== undefined ? oldSelections[entry.root] : true,
+                        lems
+                    };
+                });
+            }
+
+            syncSimilarRootSelectionState(root);
+            return similarRootData[root];
         }
         
         // Build items panel HTML
@@ -1634,23 +1838,42 @@
             }
             
             const icons = ITEM_ICONS;
-            const typeLabels = { text: 'عبارت', word: 'واژه', root: 'ریشه' };
+            const typeLabels = { text: 'عبارت', word: 'واژه', root: 'ریشه', 'similar-root': 'ریشه مشابه' };
             let html = '';
             
             selectedItems.forEach((item, index) => {
                 const colorIndex = index % 8;
                 const isHighlighted = highlightedItem?.type === 'item' && highlightedItem?.itemIndex === index;
-                const isChecked = itemCheckedState[index] !== false;
                 const isRoot = item.type === 'root';
-                const isExpanded = isRoot ? (rootExpandedState[item.value] !== false) : false;
+                const isSimilarRoot = item.type === 'similar-root';
+                const isExpandable = isRoot || isSimilarRoot;
+                const manualChecked = itemCheckedState[index] !== false;
+                let isChecked = manualChecked;
+                let isPartial = false;
+                if (isRoot) {
+                    const lemData = initRootLemData(item.value, true);
+                    const selectedCount = lemData.lems.filter(l => l.selected).length;
+                    isChecked = manualChecked && selectedCount > 0;
+                    isPartial = isChecked && selectedCount < lemData.lems.length;
+                } else if (isSimilarRoot) {
+                    const similarData = initSimilarRootData(item.value, true);
+                    const selectedCount = similarData.relatedRoots.filter(entry => entry.lems.some(l => l.selected)).length;
+                    isChecked = manualChecked && selectedCount > 0;
+                    isPartial = isChecked && selectedCount < similarData.relatedRoots.length;
+                }
+                const isExpanded = isRoot
+                    ? (rootExpandedState[item.value] !== false)
+                    : isSimilarRoot
+                        ? (similarRootExpandedState[item.value] !== false)
+                        : false;
                 
                 html += `<div class="search-item-row ${isHighlighted ? 'highlighted' : ''} ${!isChecked ? 'unchecked' : ''}" 
                               data-item-index="${index}" data-item-type="${item.type}" data-root="${item.value || ''}">
-                    <input type="checkbox" class="item-checkbox" ${isChecked ? 'checked' : ''} 
+                    <input type="checkbox" class="item-checkbox" ${isChecked ? 'checked' : ''} data-partial="${isPartial ? 'true' : 'false'}"
                            onclick="event.stopPropagation()">`;
                 
-                // Add expand/collapse toggle for roots, or spacer for non-roots
-                if (isRoot) {
+                // Add expand/collapse toggle for tree items, or spacer for flat items
+                if (isExpandable) {
                     html += `<span class="expand-toggle ${!isExpanded ? 'collapsed' : ''}" 
                                    onclick="event.stopPropagation()">▼</span>`;
                 } else {
@@ -1662,7 +1885,6 @@
                     <span class="item-type">${typeLabels[item.type]}</span>
                 </div>`;
                 
-                // If root, show LEMs in collapsible container
                 if (isRoot) {
                     const lemData = initRootLemData(item.value, true); // true = refresh counts for current sura filter
                     html += `<div class="lems-container ${!isExpanded ? 'collapsed' : ''}" data-root="${item.value}">`;
@@ -1677,6 +1899,41 @@
                             <span class="lem-label">${lemInfo.lem}</span>
                             <span class="lem-count num-hindi">${fmtFa(lemInfo.count)}</span>
                         </div>`;
+                    });
+                    html += `</div>`;
+                } else if (isSimilarRoot) {
+                    const similarData = initSimilarRootData(item.value, true);
+                    html += `<div class="similar-roots-container ${!isExpanded ? 'collapsed' : ''}" data-similar-root="${item.value}">`;
+                    similarData.relatedRoots.forEach((similarInfo, similarIndex) => {
+                        const childKey = getSimilarRootChildKey(item.value, similarInfo.root);
+                        const isChildExpanded = similarRootChildExpandedState[childKey] !== false;
+                        const selectedLemCount = similarInfo.lems.filter(lem => lem.selected).length;
+                        const isSimilarChecked = selectedLemCount > 0;
+                        const isSimilarPartial = isSimilarChecked && selectedLemCount < similarInfo.lems.length;
+                        const isSimilarHighlighted = highlightedItem?.type === 'similar-root-node' &&
+                            highlightedItem?.itemIndex === index &&
+                            highlightedItem?.similarRoot === similarInfo.root;
+                        html += `<div class="similar-root-subrow ${isSimilarHighlighted ? 'highlighted' : ''} ${!isSimilarChecked ? 'unchecked' : ''}"
+                                      data-item-index="${index}" data-similar-index="${similarIndex}" data-similar-root="${similarInfo.root}">
+                            <input type="checkbox" ${isSimilarChecked ? 'checked' : ''} data-partial="${isSimilarPartial ? 'true' : 'false'}" onclick="event.stopPropagation()">
+                            <span class="expand-toggle ${!isChildExpanded ? 'collapsed' : ''}" data-role="similar-toggle" onclick="event.stopPropagation()">▼</span>
+                            <span class="similar-root-label">${similarInfo.root}</span>
+                            <span class="similar-root-meta num-hindi">${similarInfo.similarity.toFixed(3)} | ${fmtFa(similarInfo.count)}</span>
+                        </div>`;
+                        html += `<div class="similar-root-lem-container ${!isChildExpanded ? 'collapsed' : ''}" data-similar-root-lem="${childKey}">`;
+                        similarInfo.lems.forEach((lemInfo, lemIndex) => {
+                            const isSimilarLemHighlighted = highlightedItem?.type === 'similar-root-lem' &&
+                                highlightedItem?.itemIndex === index &&
+                                highlightedItem?.similarRoot === similarInfo.root &&
+                                highlightedItem?.lem === lemInfo.lem;
+                            html += `<div class="lem-subrow similar-root-lem-subrow ${isSimilarLemHighlighted ? 'highlighted' : ''} ${!lemInfo.selected ? 'unchecked' : ''}"
+                                          data-item-index="${index}" data-similar-index="${similarIndex}" data-lem-index="${lemIndex}" data-lem="${lemInfo.lem}">
+                                <input type="checkbox" ${lemInfo.selected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <span class="lem-label">${lemInfo.lem}</span>
+                                <span class="lem-count num-hindi">${fmtFa(lemInfo.count)}</span>
+                            </div>`;
+                        });
+                        html += `</div>`;
                     });
                     html += `</div>`;
                 }
@@ -1694,21 +1951,24 @@
                 row.querySelector('.item-checkbox').addEventListener('change', (e) => {
                     handleItemCheckbox(row, e.target.checked);
                 });
+                row.querySelector('.item-checkbox').indeterminate = row.querySelector('.item-checkbox').dataset.partial === 'true';
                 
                 // Expand/collapse toggle for roots
                 const toggle = row.querySelector('.expand-toggle');
                 if (toggle) {
                     toggle.addEventListener('click', () => {
                         const root = row.dataset.root;
-                        // Current state: undefined or true = expanded, false = collapsed
-                        const currentlyExpanded = rootExpandedState[root] !== false;
-                        rootExpandedState[root] = !currentlyExpanded;
+                        const expandedState = row.dataset.itemType === 'similar-root'
+                            ? similarRootExpandedState
+                            : rootExpandedState;
+                        const currentlyExpanded = expandedState[root] !== false;
+                        expandedState[root] = !currentlyExpanded;
                         buildItemsPanel();
                     });
                 }
             });
             
-            container.querySelectorAll('.lem-subrow').forEach(row => {
+            container.querySelectorAll('.lem-subrow:not(.similar-root-lem-subrow)').forEach(row => {
                 row.addEventListener('click', (e) => {
                     if (e.target.type !== 'checkbox') {
                         handleLemClick(row);
@@ -1716,6 +1976,42 @@
                 });
                 row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                     handleLemCheckbox(row, e.target.checked);
+                });
+            });
+
+            container.querySelectorAll('.similar-root-subrow').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox' && !e.target.classList.contains('expand-toggle')) {
+                        handleSimilarRootClick(row);
+                    }
+                });
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
+                    handleSimilarRootCheckbox(row, e.target.checked);
+                });
+                checkbox.indeterminate = checkbox.dataset.partial === 'true';
+                const toggle = row.querySelector('[data-role="similar-toggle"]');
+                if (toggle) {
+                    toggle.addEventListener('click', () => {
+                        const itemIndex = parseInt(row.dataset.itemIndex, 10);
+                        const baseRoot = selectedItems[itemIndex]?.value;
+                        const similarRoot = row.dataset.similarRoot;
+                        const key = getSimilarRootChildKey(baseRoot, similarRoot);
+                        const currentlyExpanded = similarRootChildExpandedState[key] !== false;
+                        similarRootChildExpandedState[key] = !currentlyExpanded;
+                        buildItemsPanel();
+                    });
+                }
+            });
+
+            container.querySelectorAll('.similar-root-lem-subrow').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        handleSimilarRootLemClick(row);
+                    }
+                });
+                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    handleSimilarRootLemCheckbox(row, e.target.checked);
                 });
             });
         }
@@ -1750,6 +2046,42 @@
             buildItemsPanel();
             requestAutoSearch(0);
         }
+
+        function handleSimilarRootClick(row) {
+            const itemIndex = parseInt(row.dataset.itemIndex, 10);
+            const similarRoot = row.dataset.similarRoot;
+
+            if (highlightedItem?.type === 'similar-root-node' &&
+                highlightedItem?.itemIndex === itemIndex &&
+                highlightedItem?.similarRoot === similarRoot) {
+                highlightedItem = null;
+            } else {
+                highlightedItem = { type: 'similar-root-node', itemIndex, similarRoot };
+            }
+
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
+
+        function handleSimilarRootLemClick(row) {
+            const itemIndex = parseInt(row.dataset.itemIndex, 10);
+            const similarIndex = parseInt(row.dataset.similarIndex, 10);
+            const item = selectedItems[itemIndex];
+            const similarRoot = similarRootData[item?.value]?.relatedRoots?.[similarIndex]?.root || null;
+            const lem = row.dataset.lem;
+
+            if (highlightedItem?.type === 'similar-root-lem' &&
+                highlightedItem?.itemIndex === itemIndex &&
+                highlightedItem?.similarRoot === similarRoot &&
+                highlightedItem?.lem === lem) {
+                highlightedItem = null;
+            } else {
+                highlightedItem = { type: 'similar-root-lem', itemIndex, similarRoot, lem };
+            }
+
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
         
         // Handle LEM checkbox change
         function handleLemCheckbox(row, checked) {
@@ -1759,8 +2091,44 @@
             
             if (rootLemData[root]) {
                 rootLemData[root].lems[lemIndex].selected = checked;
+                syncRootLemSelectionState(root);
+                itemCheckedState[itemIndex] = rootLemData[root].lems.some(l => l.selected);
             }
             
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
+
+        function handleSimilarRootCheckbox(row, checked) {
+            const itemIndex = parseInt(row.dataset.itemIndex, 10);
+            const similarIndex = parseInt(row.dataset.similarIndex, 10);
+            const root = selectedItems[itemIndex].value;
+            const data = similarRootData[root];
+            const entry = data?.relatedRoots?.[similarIndex];
+            if (!entry) return;
+
+            entry.selected = checked;
+            entry.lems.forEach(lem => {
+                lem.selected = checked;
+            });
+            syncSimilarRootSelectionState(root);
+            itemCheckedState[itemIndex] = data.relatedRoots.some(node => node.lems.some(lem => lem.selected));
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
+
+        function handleSimilarRootLemCheckbox(row, checked) {
+            const itemIndex = parseInt(row.dataset.itemIndex, 10);
+            const similarIndex = parseInt(row.dataset.similarIndex, 10);
+            const lemIndex = parseInt(row.dataset.lemIndex, 10);
+            const root = selectedItems[itemIndex].value;
+            const data = similarRootData[root];
+            const entry = data?.relatedRoots?.[similarIndex];
+            if (!entry || !entry.lems?.[lemIndex]) return;
+
+            entry.lems[lemIndex].selected = checked;
+            syncSimilarRootSelectionState(root);
+            itemCheckedState[itemIndex] = data.relatedRoots.some(node => node.lems.some(lem => lem.selected));
             buildItemsPanel();
             requestAutoSearch(0);
         }
@@ -1768,7 +2136,27 @@
         // Handle item checkbox change
         function handleItemCheckbox(row, checked) {
             const itemIndex = parseInt(row.dataset.itemIndex);
+            const item = selectedItems[itemIndex];
             itemCheckedState[itemIndex] = checked;
+
+            if (item?.type === 'root') {
+                const lemData = initRootLemData(item.value, false);
+                lemData.lems.forEach(lem => {
+                    lem.selected = checked;
+                });
+                syncRootLemSelectionState(item.value);
+                itemCheckedState[itemIndex] = checked;
+            } else if (item?.type === 'similar-root') {
+                const data = initSimilarRootData(item.value, false);
+                data.relatedRoots.forEach(entry => {
+                    entry.selected = checked;
+                    entry.lems.forEach(lem => {
+                        lem.selected = checked;
+                    });
+                });
+                syncSimilarRootSelectionState(item.value);
+                itemCheckedState[itemIndex] = checked;
+            }
             
             buildItemsPanel();
             requestAutoSearch(0);
@@ -1908,6 +2296,22 @@
                 document.getElementById('search-input').placeholder = 'خطا در بارگذاری داده‌ها';
             }
         }
+
+        async function loadSimilarityData() {
+            const source = getRootSimilaritySource();
+            const path = source === 'similarity2'
+                ? 'data/similarity2/r2rvec.json'
+                : 'data/similarity/r2rvec.json';
+            try {
+                const response = await fetch(`${path}?source=${encodeURIComponent(source)}&ts=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const payload = await response.json();
+                rootSimilarityMap = (payload && payload.roots && typeof payload.roots === 'object') ? payload.roots : {};
+            } catch (error) {
+                console.warn('Error loading root similarity data:', error);
+                rootSimilarityMap = {};
+            }
+        }
         
         function parseMorphologyData(text) {
             statsUniverseCache = null;
@@ -1999,6 +2403,7 @@
             
             const normalizedQuery = normalizeArabic(query);
             const rootSuggestions = [];
+            const similarRootSuggestions = [];
             const wordSuggestions = [];
             const textSuggestions = [];
             
@@ -2063,6 +2468,7 @@
             
             // 2. Build root suggestions (roots from matched words first, then directly matching)
             const addedRoots = new Set();
+            const addedSimilarRoots = new Set();
             
             // Roots from matched words
             rootsFromWords.forEach((sampleWords, root) => {
@@ -2086,6 +2492,21 @@
                         icon: ITEM_ICONS.root
                     });
                     addedRoots.add(root);
+
+                    const related = getSimilarRootsForRoot(root);
+                    if (related.length > 0) {
+                        const similarSamples = related.slice(0, 4).map(entry => entry.root);
+                        const similarEllipsis = related.length > similarSamples.length ? '، ...' : '';
+                        const similarDisplay = similarSamples.length > 0 ? `${root} ← ${similarSamples.join('، ')}${similarEllipsis}` : root;
+                        similarRootSuggestions.push({
+                            type: 'similar-root',
+                            value: root,
+                            display: similarDisplay,
+                            count: related.length,
+                            icon: ITEM_ICONS['similar-root']
+                        });
+                        addedSimilarRoots.add(root);
+                    }
                 }
             });
             
@@ -2109,6 +2530,29 @@
                     icon: ITEM_ICONS.root
                 });
             });
+
+            const similarRootMatches = Object.keys(rootSimilarityMap)
+                .filter(root => {
+                    if (addedSimilarRoots.has(root)) return false;
+                    if (!(root.includes(query) || normalizeArabic(root).includes(normalizedQuery))) return false;
+                    return getSimilarRootsForRoot(root).length > 0;
+                })
+                .sort((a, b) => getSimilarRootsForRoot(b).length - getSimilarRootsForRoot(a).length)
+                .slice(0, 8);
+
+            similarRootMatches.forEach(root => {
+                const related = getSimilarRootsForRoot(root);
+                const samples = related.slice(0, 4).map(entry => entry.root);
+                const ellipsis = related.length > samples.length ? '، ...' : '';
+                const display = samples.length > 0 ? `${root} ← ${samples.join('، ')}${ellipsis}` : root;
+                similarRootSuggestions.push({
+                    type: 'similar-root',
+                    value: root,
+                    display,
+                    count: related.length,
+                    icon: ITEM_ICONS['similar-root']
+                });
+            });
             
             // 3. Add text search option (partial match in any word)
             const textCount = countTextMatches(normalizedQuery);
@@ -2122,8 +2566,8 @@
                 });
             }
             
-            // Return in order: roots, words, text
-            return [...rootSuggestions, ...wordSuggestions, ...textSuggestions];
+            // Return in order: roots, similar roots, words, text
+            return [...rootSuggestions, ...similarRootSuggestions, ...wordSuggestions, ...textSuggestions];
         }
         
         function countTextMatches(normalizedText) {
@@ -2235,9 +2679,10 @@
         
         // Find words matching an item
         // Find all matches for a search item, respecting LEM selection
-        // focusedLem: specific LEM to search (ignore others)
-        // ignoreFilters: if true, ignore LEM checkboxes (used when root item is highlighted)
-        function findMatchingWords(item, itemIndex = -1, focusedLem = null, ignoreFilters = false) {
+        // focusedLem: specific lemma to search
+        // ignoreFilters: if true, ignore child checkbox filters
+        // focusedRelatedRoot: for similar-root items, search only one related root
+        function findMatchingWords(item, itemIndex = -1, focusedLem = null, ignoreFilters = false, focusedRelatedRoot = null) {
             const matches = [];
             const normalized = normalizeArabic(item.value || '');
             
@@ -2269,6 +2714,32 @@
                     }
                     
                     matches.push({ ...w, matchType: 'root' });
+                });
+            } else if (item.type === 'similar-root') {
+                const data = initSimilarRootData(item.value, false);
+                const relatedRoots = (data?.relatedRoots || []).filter(entry => {
+                    if (!focusedRelatedRoot) return true;
+                    return entry.root === focusedRelatedRoot;
+                });
+
+                relatedRoots.forEach(entry => {
+                    let allowedLems = null;
+                    if (focusedLem) {
+                        allowedLems = new Set([focusedLem]);
+                    } else if (!ignoreFilters) {
+                        const selectedLems = entry.lems.filter(l => l.selected).map(l => l.lem);
+                        if (selectedLems.length === 0) return;
+                        allowedLems = new Set(selectedLems);
+                    }
+
+                    const words = rootToWordsMap[entry.root] || [];
+                    words.forEach(w => {
+                        if (!isSuraSelected(w.sura)) return;
+                        const wordData = morphologyData[w.sura]?.[w.ayah]?.[w.wordIndex];
+                        const wordLem = wordData?.lemma;
+                        if (allowedLems && wordLem && !allowedLems.has(wordLem)) return;
+                        matches.push({ ...w, matchType: 'similar-root', sourceRoot: item.value, relatedRoot: entry.root });
+                    });
                 });
             } else if (item.type === 'word') {
                 // Exact word match
@@ -2380,25 +2851,32 @@
                 const item = selectedItems[itemIndex];
                 
                 let focusedLem = null;
+                let focusedRelatedRoot = null;
                 let ignoreFilters = false;
                 
                 if (highlightedItem.type === 'lem') {
                     // Specific LEM highlighted - search only that LEM
+                    focusedLem = highlightedItem.lem;
+                } else if (highlightedItem.type === 'similar-root-node') {
+                    focusedRelatedRoot = highlightedItem.similarRoot;
+                    ignoreFilters = true;
+                } else if (highlightedItem.type === 'similar-root-lem') {
+                    focusedRelatedRoot = highlightedItem.similarRoot;
                     focusedLem = highlightedItem.lem;
                 } else if (highlightedItem.type === 'item') {
                     // Entire item highlighted - ignore LEM filters, search all
                     ignoreFilters = true;
                 }
                 
-                const matches = findMatchingWords(item, itemIndex, focusedLem, ignoreFilters);
+                const matches = findMatchingWords(item, itemIndex, focusedLem, ignoreFilters, focusedRelatedRoot);
                 matches.forEach(m => m.itemIndex = itemIndex);
-                const groups = groupMatchesByRegion(matches.sort(comparePositions), crossSura);
+                const groups = groupMatchesByRegion(matches.sort(comparePositions), crossSura, distance);
                 groups.__combinedCSBySura = {};
                 groups.__combinedStartAyahsBySura = {};
                 groups.__combinedStartDebug = [];
                 groups.__combinedTotalCS = 0;
                 groups.__combinedEligible = false;
-                groups.__statsInput = { sections: [{ item, itemIndex, matches, focusedLem }] };
+                groups.__statsInput = { sections: [{ item, itemIndex, matches, focusedLem, focusedRelatedRoot }] };
                 return groups;
             }
             
@@ -2435,7 +2913,7 @@
             const startCandidates = [...new Set(M.flat())].sort((a, b) => a - b);
 
             if (n === 1) {
-                const groups = groupMatchesByRegion(matchesByItem[0], crossSura);
+                const groups = groupMatchesByRegion(matchesByItem[0], crossSura, distance);
                 groups.__combinedCSBySura = {};
                 groups.__combinedStartAyahsBySura = {};
                 groups.__combinedStartDebug = [];
@@ -2857,7 +3335,7 @@
         }
 
         function getActiveHighlightSpecs() {
-            // Returns array of { item, itemIndex, focusedLem, ignoreFilters }
+            // Returns array of { item, itemIndex, focusedLem, ignoreFilters, focusedRelatedRoot }
             if (selectedItems.length === 0) return [];
             
             // Focus mode
@@ -2867,17 +3345,23 @@
                 if (!item) return [];
                 
                 if (highlightedItem.type === 'lem') {
-                    return [{ item, itemIndex, focusedLem: highlightedItem.lem, ignoreFilters: false }];
+                    return [{ item, itemIndex, focusedLem: highlightedItem.lem, ignoreFilters: false, focusedRelatedRoot: null }];
+                }
+                if (highlightedItem.type === 'similar-root-node') {
+                    return [{ item, itemIndex, focusedLem: null, ignoreFilters: true, focusedRelatedRoot: highlightedItem.similarRoot }];
+                }
+                if (highlightedItem.type === 'similar-root-lem') {
+                    return [{ item, itemIndex, focusedLem: highlightedItem.lem, ignoreFilters: false, focusedRelatedRoot: highlightedItem.similarRoot }];
                 }
                 // highlightedItem.type === 'item'
-                return [{ item, itemIndex, focusedLem: null, ignoreFilters: true }];
+                return [{ item, itemIndex, focusedLem: null, ignoreFilters: true, focusedRelatedRoot: null }];
             }
             
             // Normal mode: only checked items, respect LEM filtering for roots
             const specs = [];
             for (let itemIndex = 0; itemIndex < selectedItems.length; itemIndex++) {
                 if (itemCheckedState[itemIndex] === false) continue;
-                specs.push({ item: selectedItems[itemIndex], itemIndex, focusedLem: null, ignoreFilters: false });
+                specs.push({ item: selectedItems[itemIndex], itemIndex, focusedLem: null, ignoreFilters: false, focusedRelatedRoot: null });
             }
             return specs;
         }
@@ -2888,7 +3372,7 @@
             
             const matches = [];
             for (const spec of specs) {
-                const m = findMatchingWords(spec.item, spec.itemIndex, spec.focusedLem, spec.ignoreFilters) || [];
+                const m = findMatchingWords(spec.item, spec.itemIndex, spec.focusedLem, spec.ignoreFilters, spec.focusedRelatedRoot) || [];
                 for (const x of m) {
                     if (x.sura !== group.sura) continue;
                     if (x.ayah < group.startAyah || x.ayah > group.endAyah) continue;
@@ -2903,7 +3387,7 @@
         // Build a summary of the current search for tooltip
         function buildSearchSummary() {
             const lines = [];
-            const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت' };
+            const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت' };
             
             // Search items
             lines.push('جستجو:');
@@ -2924,6 +3408,10 @@
                     } else {
                         itemLine += ` [همه ${fmtFa(totalLems)} صیغه]`;
                     }
+                } else if (item.type === 'similar-root' && similarRootData[item.value]) {
+                    const data = similarRootData[item.value];
+                    const selectedRoots = data.relatedRoots.filter(r => r.lems.some(l => l.selected));
+                    itemLine += ` [${fmtFa(selectedRoots.length)}/${fmtFa(data.relatedRoots.length)} ریشه]`;
                 }
                 
                 lines.push(itemLine);
@@ -2934,6 +3422,10 @@
                 const item = selectedItems[highlightedItem.itemIndex];
                 if (highlightedItem.type === 'lem') {
                     lines.push(`\nحالت تمرکز: صیغه "${highlightedItem.lem}" از ریشه "${item.value}"`);
+                } else if (highlightedItem.type === 'similar-root-node') {
+                    lines.push(`\nحالت تمرکز: ریشه مشابه "${highlightedItem.similarRoot}" از "${item.value}"`);
+                } else if (highlightedItem.type === 'similar-root-lem') {
+                    lines.push(`\nحالت تمرکز: صیغه "${highlightedItem.lem}" از ریشه مشابه "${highlightedItem.similarRoot}" در "${item.value}"`);
                 } else {
                     lines.push(`\nحالت تمرکز: ${typeLabels[item.type]} "${item.value}"`);
                 }
@@ -3151,17 +3643,18 @@
         
         // Group matches by region for single item search
         // Always creates separate groups for each sura
-        function groupMatchesByRegion(matches, crossSura) {
+        function groupMatchesByRegion(matches, crossSura, distanceOverride = null) {
             const groups = [];
             const sorted = [...matches].sort(comparePositions);
+            const maxDistance = distanceOverride == null ? getDistanceValueClamped() : Math.max(0, Number(distanceOverride) || 0);
             
             let currentGroup = null;
             
             for (const match of sorted) {
                 if (!currentGroup) {
                     currentGroup = { sura: match.sura, startAyah: match.ayah, endAyah: match.ayah, matches: [match] };
-                } else if (match.sura === currentGroup.sura && match.ayah <= currentGroup.endAyah + 1) {
-                    // Same sura and adjacent ayah - merge
+                } else if (match.sura === currentGroup.sura && match.ayah <= currentGroup.endAyah + maxDistance) {
+                    // Same sura and within allowed ayah distance - merge
                     currentGroup.matches.push(match);
                     currentGroup.endAyah = Math.max(currentGroup.endAyah, match.ayah);
                 } else {
@@ -3365,7 +3858,7 @@
             html += statsSortControlsHtml();
             html += `</div>`;
 
-            const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
+            const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
             const series = [
                 { key: 'count', label: 'تعداد', color: '#dc2626' },
                 { key: 'relInSura', label: 'فراوانی', color: '#2563eb' },
@@ -3513,7 +4006,7 @@
             html += `<button type="button" class="stats-match-toggle" id="stats-match-toggle" aria-pressed="${statsMatchMode === 'all' ? 'true' : 'false'}" title="همه: تعداد آیات شروع که همه موارد در فاصله دارند؛ هر کدام: آمار جداگانه هر مورد"><span class="stats-match-dot" aria-hidden="true"></span>${statsMatchMode === 'all' ? 'همه' : 'هر کدام'}</button>`;
             html += statsSortControlsHtml();
             html += `</div>`;
-            const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
+            const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
             for (let i = 0; i < itemSections.length; i++) {
                 const sec = itemSections[i];
                 const item = sec.item || {};
@@ -3590,7 +4083,14 @@
 
             // Keep the normal found-items text unchanged even in stats mode.
             const uniqueIntervals = new Set(safeGroups.map(g => g.intervalId ?? g));
-            resultsCount.textContent = `${fmtFa(uniqueIntervals.size)} مورد یافت شد`;
+            const totalMatches = Array.isArray(safeGroups.__statsInput?.sections)
+                ? safeGroups.__statsInput.sections.reduce((sum, sec) => sum + (Array.isArray(sec.matches) ? sec.matches.length : 0), 0)
+                : 0;
+            if (totalMatches > 0 && totalMatches !== uniqueIntervals.size) {
+                resultsCount.textContent = `${fmtFa(uniqueIntervals.size)} بازه، ${fmtFa(totalMatches)} تطابق`;
+            } else {
+                resultsCount.textContent = `${fmtFa(uniqueIntervals.size)} مورد یافت شد`;
+            }
             resultsCount.title = buildSearchSummary();
 
             // In stats/table modes, render per-item/per-sura stats in-place of regions.
@@ -3795,8 +4295,30 @@
                 return;
             }
             selectedItems.push({ type, value, display: display || value });
+            if (type === 'root') initRootLemData(value, true);
+            if (type === 'similar-root') initSimilarRootData(value, true);
             updateSelectedItemsUI();
             requestAutoSearch(0);
+        }
+
+        function clearSearchResultsUI() {
+            highlightedItem = null;
+            lastRenderedGroups = [];
+            lastRenderedStats = [];
+            lastCombinedSearchMeta = null;
+
+            const resultsBox = document.getElementById('results-box');
+            const resultsContent = document.getElementById('results-content');
+            const resultsCount = document.getElementById('results-count');
+            const itemsPanelContent = document.getElementById('items-panel-content');
+
+            if (resultsBox) resultsBox.style.display = 'none';
+            if (resultsContent) resultsContent.innerHTML = '';
+            if (resultsCount) {
+                resultsCount.textContent = '';
+                resultsCount.title = '';
+            }
+            if (itemsPanelContent) itemsPanelContent.innerHTML = '';
         }
         
         function removeSelectedItem(index) {
@@ -3811,6 +4333,10 @@
                 }
             }
             updateSelectedItemsUI();
+            if (selectedItems.length === 0) {
+                clearSearchResultsUI();
+                return;
+            }
             requestAutoSearch(0);
         }
         
@@ -3854,7 +4380,7 @@
             }
             
             // Load data, then apply URL params (e.g. from desktop tooltip links)
-            loadMorphologyData().then(() => {
+            Promise.all([loadMorphologyData(), loadSimilarityData()]).then(() => {
                 const params = new URLSearchParams(window.location.search);
                 const root = params.get('root');
                 const lem = params.get('lem');
@@ -3916,6 +4442,7 @@
                         const next = e.key === 'ArrowUp' ? Math.min(100, v + 1) : Math.max(0, v - 1);
                         setDistanceValueClamped(next);
                         updateDistanceDisplay();
+                        requestAutoSearch(0);
                     }
                 });
                 distanceInput.addEventListener('wheel', (e) => {
@@ -3925,6 +4452,7 @@
                     const dir = e.deltaY < 0 ? 1 : -1;
                     setDistanceValueClamped(Math.max(0, Math.min(100, v + dir)));
                     updateDistanceDisplay();
+                    requestAutoSearch(0);
                 }, { passive: false });
             }
             
@@ -3937,7 +4465,7 @@
                     const results = getSuggestions(query);
                     
                     if (results.length > 0) {
-                        const typeLabels = { root: 'ریشه', word: 'واژه', text: 'عبارت' };
+                        const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت' };
                         suggestions.innerHTML = results.map(r => `
                             <div class="suggestion-item ${r.type}" data-type="${r.type}" data-value="${r.value}" data-display="${r.display.replace(/"/g, '&quot;')}">
                                 <span>${r.icon} ${r.display}</span>
@@ -3955,8 +4483,10 @@
             suggestions.addEventListener('click', (e) => {
                 const item = e.target.closest('.suggestion-item');
                 if (item) {
-                    // For roots, use value as display (without sample words in parenthesis)
-                    const display = item.dataset.type === 'root' ? item.dataset.value : item.dataset.display;
+                    // For root-like items, use the root itself as the chip label.
+                    const display = (item.dataset.type === 'root' || item.dataset.type === 'similar-root')
+                        ? item.dataset.value
+                        : item.dataset.display;
                     addSelectedItem(item.dataset.type, item.dataset.value, display);
                     searchInput.value = '';
                     suggestions.classList.remove('visible');
@@ -3993,7 +4523,7 @@
                 function buildSearchDetails() {
                     const distance = getDistanceValueClamped();
                     const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true';
-                    const typeLabels = { root: 'ریشه', text: 'عبارت/واژه', word: 'واژه' };
+                    const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', text: 'عبارت/واژه', word: 'واژه' };
                     const parts = [];
                     selectedItems.forEach((item, idx) => {
                         if (itemCheckedState[idx] === false) return;
@@ -4008,6 +4538,11 @@
                             } else {
                                 parts.push(`${label}: ${val}`);
                             }
+                        } else if (item.type === 'similar-root' && similarRootData[item.value]) {
+                            const data = similarRootData[item.value];
+                            const selectedRoots = data.relatedRoots.filter(entry => entry.lems.some(lem => lem.selected));
+                            const names = selectedRoots.map(entry => entry.root).join('، ');
+                            parts.push(`${label}: ${item.value} [${fmtFa(selectedRoots.length)}/${fmtFa(data.relatedRoots.length)}: ${names}]`);
                         } else {
                             parts.push(`${label}: ${val}`);
                         }
@@ -4270,6 +4805,8 @@
             const fontSelect = document.getElementById('font-select');
             const viewModeSelect = document.getElementById('view-mode-select');
             const highlightModeSelect = document.getElementById('highlight-mode-select');
+            const rootSimilaritySelect = document.getElementById('root-similarity-select');
+            const rootSimilarityThresholdInput = document.getElementById('root-similarity-threshold');
             const applySettings = document.getElementById('apply-settings');
             const goDesktopLink = document.getElementById('go-desktop-link');
 
@@ -4332,8 +4869,12 @@
             // Load saved view/highlight preferences
             const savedViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
             const savedHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+            const savedRootSimilarity = getRootSimilaritySource();
+            const savedRootSimilarityThreshold = getRootSimilarityThreshold();
             viewModeSelect.value = savedViewMode;
             highlightModeSelect.value = savedHighlightMode;
+            if (rootSimilaritySelect) rootSimilaritySelect.value = savedRootSimilarity;
+            if (rootSimilarityThresholdInput) rootSimilarityThresholdInput.value = savedRootSimilarityThreshold.toFixed(2);
             
             function applyFontSetting(font) {
                 if (font === 'qurancom') {
@@ -4369,23 +4910,41 @@
             });
             
             // Apply settings
-            applySettings.addEventListener('click', () => {
+            applySettings.addEventListener('click', async () => {
                 const newFont = fontSelect.value;
                 const currentFont = localStorage.getItem('quranFont') || 'local';
                 const newViewMode = viewModeSelect.value;
                 const newHighlightMode = highlightModeSelect.value;
+                const newRootSimilarity = rootSimilaritySelect ? rootSimilaritySelect.value : 'similarity';
+                const newRootSimilarityThreshold = rootSimilarityThresholdInput
+                    ? Math.max(0, Math.min(1, parseFloat(rootSimilarityThresholdInput.value || '0.20') || 0.20))
+                    : 0.20;
                 const currentViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                 const currentHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+                const currentRootSimilarity = getRootSimilaritySource();
+                const currentRootSimilarityThreshold = getRootSimilarityThreshold();
 
                 // Persist view/highlight settings
                 if (newViewMode !== currentViewMode) localStorage.setItem('searchViewMode', newViewMode);
                 if (newHighlightMode !== currentHighlightMode) localStorage.setItem('searchHighlightMode', newHighlightMode);
+                if (newRootSimilarity !== currentRootSimilarity) localStorage.setItem(ROOT_SIMILARITY_STORAGE_KEY, newRootSimilarity);
+                if (newRootSimilarityThreshold !== currentRootSimilarityThreshold) {
+                    localStorage.setItem(ROOT_SIMILARITY_THRESHOLD_STORAGE_KEY, newRootSimilarityThreshold.toFixed(2));
+                    if (rootSimilarityThresholdInput) rootSimilarityThresholdInput.value = newRootSimilarityThreshold.toFixed(2);
+                }
                 
                 if (newFont !== currentFont) {
                     localStorage.setItem('quranFont', newFont);
                     // Reload page to apply font properly
                     location.reload();
                 } else {
+                    if (newRootSimilarity !== currentRootSimilarity || newRootSimilarityThreshold !== currentRootSimilarityThreshold) {
+                        clearSimilarRootCache();
+                        await loadSimilarityData();
+                        refreshRootLemDataForSuraFilter();
+                        buildItemsPanel();
+                        requestAutoSearch(0);
+                    }
                     closeSettingsMenu();
                     // Re-render results to apply view/highlight immediately (no reload)
                     if (lastRenderedGroups && lastRenderedGroups.length) {
@@ -4489,6 +5048,7 @@
             function refreshRootLemDataForSuraFilter() {
                 selectedItems.forEach((item) => {
                     if (item.type === 'root') initRootLemData(item.value, true);
+                    if (item.type === 'similar-root') initSimilarRootData(item.value, true);
                 });
             }
 
