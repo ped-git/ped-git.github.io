@@ -1665,6 +1665,7 @@
         const rootLemData = {}; // {root: {lems: [{lem, count, selected}], allSelected: boolean}}
         const rootExpandedState = {}; // {root: boolean} - tracks if root LEMs are expanded
         const similarRootData = {}; // {root: {relatedRoots: [{root, similarity, count, selected, lems: [...] }], allSelected: boolean}}
+        const similarRootSelectionState = {}; // {baseRoot: {relatedRoots: {relatedRoot: {lems: {lem: selected}}}}}
         const similarRootExpandedState = {}; // {root: boolean}
         const similarRootChildExpandedState = {}; // {"base::related": boolean}
         let highlightedItem = null; // {type: 'item'|'lem'|'similar-root-node'|'similar-root-lem', itemIndex, similarRoot?, lem?} - for focus mode
@@ -1740,6 +1741,14 @@
             return related.filter(entry => getRootSimilarityScore(entry) >= threshold);
         }
 
+        function getSimilarRootSearchEntries(root) {
+            const related = getSimilarRootsForRoot(root).filter(entry => entry.root !== root);
+            return [
+                { root, score: 1, similarity: 1, self: true },
+                ...related
+            ];
+        }
+
         function getRootSimilaritySource() {
             const saved = localStorage.getItem(ROOT_SIMILARITY_STORAGE_KEY);
             return saved === 'similarity2' ? 'similarity2' : 'similarity';
@@ -1758,15 +1767,45 @@
             return 0;
         }
 
-        function clearSimilarRootCache() {
+        function clearSimilarRootCache(clearSelections = true) {
             rootSimilarityMap = {};
             for (const key of Object.keys(similarRootData)) delete similarRootData[key];
             for (const key of Object.keys(similarRootExpandedState)) delete similarRootExpandedState[key];
             for (const key of Object.keys(similarRootChildExpandedState)) delete similarRootChildExpandedState[key];
+            if (clearSelections) {
+                for (const key of Object.keys(similarRootSelectionState)) delete similarRootSelectionState[key];
+            }
         }
 
         function getSimilarRootChildKey(baseRoot, relatedRoot) {
             return `${baseRoot}::${relatedRoot}`;
+        }
+
+        function getSimilarRootSelectionBucket(baseRoot, relatedRoot, createIfMissing = false) {
+            if (!baseRoot || !relatedRoot) return null;
+            if (!similarRootSelectionState[baseRoot]) {
+                if (!createIfMissing) return null;
+                similarRootSelectionState[baseRoot] = { relatedRoots: {} };
+            }
+            if (!similarRootSelectionState[baseRoot].relatedRoots[relatedRoot]) {
+                if (!createIfMissing) return null;
+                similarRootSelectionState[baseRoot].relatedRoots[relatedRoot] = { lems: {} };
+            }
+            return similarRootSelectionState[baseRoot].relatedRoots[relatedRoot];
+        }
+
+        function getStoredSimilarRootLemmaSelection(baseRoot, relatedRoot, lem) {
+            const bucket = getSimilarRootSelectionBucket(baseRoot, relatedRoot, false);
+            if (!bucket) return undefined;
+            return bucket.lems?.[lem];
+        }
+
+        function storeSimilarRootEntrySelection(baseRoot, entry) {
+            if (!baseRoot || !entry?.root || !Array.isArray(entry.lems)) return;
+            const bucket = getSimilarRootSelectionBucket(baseRoot, entry.root, true);
+            entry.lems.forEach(lem => {
+                bucket.lems[lem.lem] = lem.selected !== false;
+            });
         }
 
         function syncSimilarRootSelectionState(root) {
@@ -1774,12 +1813,13 @@
             if (!data) return;
             data.relatedRoots.forEach(entry => {
                 entry.selected = entry.lems.length > 0 && entry.lems.every(l => l.selected);
+                storeSimilarRootEntrySelection(root, entry);
             });
             data.allSelected = data.relatedRoots.length > 0 && data.relatedRoots.every(entry => entry.selected);
         }
 
         function initSimilarRootData(root, forceRefresh = false) {
-            const relatedRoots = getSimilarRootsForRoot(root);
+            const relatedRoots = getSimilarRootSearchEntries(root);
 
             if (!similarRootData[root]) {
                 similarRootData[root] = {
@@ -1790,22 +1830,17 @@
             }
 
             if (forceRefresh) {
-                const oldSelections = {};
-                const oldLemmaSelections = {};
                 (similarRootData[root].relatedRoots || []).forEach(entry => {
-                    oldSelections[entry.root] = entry.selected;
-                    oldLemmaSelections[entry.root] = {};
-                    (entry.lems || []).forEach(lem => {
-                        oldLemmaSelections[entry.root][lem.lem] = lem.selected;
-                    });
+                    storeSimilarRootEntrySelection(root, entry);
                 });
 
                 similarRootData[root].relatedRoots = relatedRoots.map(entry => {
                     const lems = getLemsForRoot(entry.root).map(lemInfo => ({
                         ...lemInfo,
-                        selected: oldLemmaSelections[entry.root]?.[lemInfo.lem] !== undefined
-                            ? oldLemmaSelections[entry.root][lemInfo.lem]
-                            : true
+                        selected: (() => {
+                            const saved = getStoredSimilarRootLemmaSelection(root, entry.root, lemInfo.lem);
+                            return saved !== undefined ? saved : true;
+                        })()
                     }));
                     const similarityValue = Number.isFinite(entry.similarity)
                         ? entry.similarity
@@ -1817,7 +1852,7 @@
                         count: getRootCount(entry.root),
                         support: entry.support,
                         maxSimilarity: entry.max_similarity,
-                        selected: oldSelections[entry.root] !== undefined ? oldSelections[entry.root] : true,
+                        selected: lems.length > 0 && lems.every(lem => lem.selected),
                         lems
                     };
                 });
@@ -2493,7 +2528,7 @@
                     });
                     addedRoots.add(root);
 
-                    const related = getSimilarRootsForRoot(root);
+                    const related = getSimilarRootSearchEntries(root);
                     if (related.length > 0) {
                         const similarSamples = related.slice(0, 4).map(entry => entry.root);
                         const similarEllipsis = related.length > similarSamples.length ? '، ...' : '';
@@ -2535,13 +2570,13 @@
                 .filter(root => {
                     if (addedSimilarRoots.has(root)) return false;
                     if (!(root.includes(query) || normalizeArabic(root).includes(normalizedQuery))) return false;
-                    return getSimilarRootsForRoot(root).length > 0;
+                    return getSimilarRootSearchEntries(root).length > 0;
                 })
-                .sort((a, b) => getSimilarRootsForRoot(b).length - getSimilarRootsForRoot(a).length)
+                .sort((a, b) => getSimilarRootSearchEntries(b).length - getSimilarRootSearchEntries(a).length)
                 .slice(0, 8);
 
             similarRootMatches.forEach(root => {
-                const related = getSimilarRootsForRoot(root);
+                const related = getSimilarRootSearchEntries(root);
                 const samples = related.slice(0, 4).map(entry => entry.root);
                 const ellipsis = related.length > samples.length ? '، ...' : '';
                 const display = samples.length > 0 ? `${root} ← ${samples.join('، ')}${ellipsis}` : root;
@@ -4967,7 +5002,7 @@
                     location.reload();
                 } else {
                     if (newRootSimilarity !== currentRootSimilarity || newRootSimilarityThreshold !== currentRootSimilarityThreshold) {
-                        clearSimilarRootCache();
+                        clearSimilarRootCache(newRootSimilarity !== currentRootSimilarity);
                         await loadSimilarityData();
                         refreshRootLemDataForSuraFilter();
                         sanitizeHighlightedItem();
