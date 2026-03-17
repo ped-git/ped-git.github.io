@@ -3366,6 +3366,34 @@
             return specs;
         }
 
+        function sanitizeHighlightedItem() {
+            if (!highlightedItem) return;
+            const item = selectedItems[highlightedItem.itemIndex];
+            if (!item) {
+                highlightedItem = null;
+                return;
+            }
+            if (highlightedItem.type === 'item') return;
+            if (highlightedItem.type === 'lem') {
+                const lemData = rootLemData[item.value];
+                const exists = !!lemData?.lems?.some(lem => lem.lem === highlightedItem.lem);
+                if (!exists) highlightedItem = null;
+                return;
+            }
+            if (highlightedItem.type === 'similar-root-node' || highlightedItem.type === 'similar-root-lem') {
+                const similarData = similarRootData[item.value];
+                const related = similarData?.relatedRoots?.find(entry => entry.root === highlightedItem.similarRoot);
+                if (!related) {
+                    highlightedItem = null;
+                    return;
+                }
+                if (highlightedItem.type === 'similar-root-lem') {
+                    const exists = related.lems?.some(lem => lem.lem === highlightedItem.lem);
+                    if (!exists) highlightedItem = null;
+                }
+            }
+        }
+
         function computeHighlightMatchesForGroup(group) {
             const specs = getActiveHighlightSpecs();
             if (specs.length === 0) return [];
@@ -4942,8 +4970,13 @@
                         clearSimilarRootCache();
                         await loadSimilarityData();
                         refreshRootLemDataForSuraFilter();
+                        sanitizeHighlightedItem();
                         buildItemsPanel();
-                        requestAutoSearch(0);
+                        if (selectedItems.length === 0) {
+                            clearSearchResultsUI();
+                        } else {
+                            await triggerSearch();
+                        }
                     }
                     closeSettingsMenu();
                     // Re-render results to apply view/highlight immediately (no reload)
