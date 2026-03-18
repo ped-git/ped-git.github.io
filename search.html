@@ -768,7 +768,7 @@
             background: #e8e8e8;
             padding: 1px 6px;
             border-radius: 3px;
-            margin-right: 8px;
+            margin-right: 0px;
             vertical-align: middle;
             text-decoration: none;
         }
@@ -1609,6 +1609,7 @@
     </div>
 
     <script src="js/buckwalter.js"></script>
+    <script src="js/corpus.js"></script>
     <script src="js/sura-data.js"></script>
     <script src="js/search.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -2321,9 +2322,18 @@
         // Load morphology data
         async function loadMorphologyData() {
             try {
-                const response = await fetch('data/quranic-corpus-morphology-0.4.txt');
-                const text = await response.text();
-                parseMorphologyData(text);
+                statsUniverseCache = null;
+                const dataset = await window.CorpusData.loadMorphologyData({
+                    includeText: true,
+                    includeWordTextsMap: true,
+                    normalizeArabic
+                });
+                Object.keys(morphologyData).forEach(key => delete morphologyData[key]);
+                Object.keys(rootToWordsMap).forEach(key => delete rootToWordsMap[key]);
+                Object.keys(wordTextsMap).forEach(key => delete wordTextsMap[key]);
+                Object.assign(morphologyData, dataset.morphologyData || {});
+                Object.assign(rootToWordsMap, dataset.rootToWordsMap || {});
+                Object.assign(wordTextsMap, dataset.wordTextsMap || {});
                 dataLoaded = true;
                 document.getElementById('search-input').placeholder = 'واژه یا ریشه را وارد کنید...';
             } catch (error) {
@@ -2348,87 +2358,96 @@
             }
         }
         
-        function parseMorphologyData(text) {
-            statsUniverseCache = null;
-            const lines = text.split('\n');
-            
-            // First pass: collect all segments for each word
-            const wordSegments = {}; // key: "sura:ayah:word" -> [{segment, text, features}, ...]
-            
-            for (const line of lines) {
-                if (!line || line.startsWith('#') || line.startsWith('LOCATION')) continue;
-                
-                const parts = line.split('\t');
-                if (parts.length < 3) continue;
-                
-                const location = parts[0];
-                const wordText = parts[1];
-                const features = parts[3] || '';
-                
-                // Parse location (sura:ayah:word:segment)
-                const locMatch = location.match(/\((\d+):(\d+):(\d+):(\d+)\)/);
-                if (!locMatch) continue;
-                
-                const sura = parseInt(locMatch[1]);
-                const ayah = parseInt(locMatch[2]);
-                const wordIndex = parseInt(locMatch[3]);
-                const segment = parseInt(locMatch[4]);
-                
-                const key = `${sura}:${ayah}:${wordIndex}`;
-                if (!wordSegments[key]) {
-                    wordSegments[key] = { sura, ayah, wordIndex, segments: [] };
+        
+        function toBuckwalterSafe(text) {
+            if (typeof convertArabicToBuckwalter === 'function') {
+                try {
+                    return convertArabicToBuckwalter(text || '');
+                } catch (_) {
+                    return '';
                 }
-                wordSegments[key].segments.push({ segment, text: wordText, features });
             }
-            
-            // Second pass: combine segments and build data structures
-            for (const key in wordSegments) {
-                const { sura, ayah, wordIndex, segments } = wordSegments[key];
-                
-                // Sort segments by segment number
-                segments.sort((a, b) => a.segment - b.segment);
-                
-                // Combine all segment texts to form the full word
-                const fullWordBuckwalter = segments.map(s => s.text).join('');
-                const arabicWord = convertBuckwalterToArabic(fullWordBuckwalter);
-                
-                // Find root from any segment (usually in STEM segment)
-                let root = null;
-                let lemma = null;
-                for (const seg of segments) {
-                    if (!root) {
-                        const rootMatch = seg.features.match(/ROOT:([^|]+)/);
-                        if (rootMatch) root = convertBuckwalterToArabic(rootMatch[1]);
-                    }
-                    if (!lemma) {
-                        const lemmaMatch = seg.features.match(/LEM:([^\|]+)/);
-                        if (lemmaMatch) lemma = convertBuckwalterToArabic(lemmaMatch[1]);
-                    }
+            return '';
+        }
+
+        function getRootDebugRows(root, limit = 5) {
+            const locations = rootToWordsMap[root] || [];
+            return locations.slice(0, limit).map(loc => {
+                const wordData = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex] || {};
+                return {
+                    sura: loc.sura,
+                    ayah: loc.ayah,
+                    wordIndex: loc.wordIndex,
+                    word: wordData.text || '',
+                    wordNormalized: normalizeArabic(wordData.text || ''),
+                    wordBuckwalter: toBuckwalterSafe(wordData.text || ''),
+                    lemma: wordData.lemma || '',
+                    lemmaNormalized: normalizeArabic(wordData.lemma || ''),
+                    lemmaBuckwalter: toBuckwalterSafe(wordData.lemma || ''),
+                    root: wordData.root || root,
+                    rootNormalized: normalizeArabic(wordData.root || root),
+                    rootBuckwalter: toBuckwalterSafe(wordData.root || root)
+                };
+            });
+        }
+
+        function logSuggestionDebug(query, normalizedQuery, suggestions, matchingWords) {
+            try {
+                const summaryRows = suggestions.map(item => ({
+                    type: item.type,
+                    icon: item.icon,
+                    value: item.value,
+                    valueNormalized: normalizeArabic(item.value || ''),
+                    valueBuckwalter: toBuckwalterSafe(item.value || ''),
+                    display: item.display,
+                    count: item.count
+                }));
+
+                const matchingWordRows = matchingWords.map(([word, locations]) => ({
+                    wordRaw: locations[0]?.original || word,
+                    wordNormalized: word,
+                    wordBuckwalter: toBuckwalterSafe(locations[0]?.original || word),
+                    count: locations.length,
+                    firstRoot: morphologyData[locations[0]?.sura]?.[locations[0]?.ayah]?.[locations[0]?.wordIndex]?.root || '',
+                    firstLemma: morphologyData[locations[0]?.sura]?.[locations[0]?.ayah]?.[locations[0]?.wordIndex]?.lemma || '',
+                    firstLocation: locations[0] ? `${locations[0].sura}:${locations[0].ayah}:${locations[0].wordIndex}` : ''
+                }));
+
+                console.groupCollapsed(`[search-debug] ${query} -> ${normalizedQuery} (${suggestions.length} suggestions)`);
+                console.log('query', {
+                    raw: query,
+                    normalized: normalizedQuery,
+                    rawBuckwalter: toBuckwalterSafe(query),
+                    trimmed: query.trim()
+                });
+                if (matchingWordRows.length > 0) {
+                    console.log('matching words before root suggestion building');
+                    console.table(matchingWordRows);
                 }
-                
-                // Store in morphologyData
-                if (!morphologyData[sura]) morphologyData[sura] = {};
-                if (!morphologyData[sura][ayah]) morphologyData[sura][ayah] = {};
-                morphologyData[sura][ayah][wordIndex] = { root, lemma, text: arabicWord };
-                
-                // Build root-to-words map
-                if (root) {
-                    if (!rootToWordsMap[root]) rootToWordsMap[root] = [];
-                    // Avoid duplicates
-                    const exists = rootToWordsMap[root].some(
-                        w => w.sura === sura && w.ayah === ayah && w.wordIndex === wordIndex
-                    );
-                    if (!exists) {
-                        rootToWordsMap[root].push({ sura, ayah, wordIndex });
-                    }
+                if (summaryRows.length > 0) {
+                    console.log('final suggestions');
+                    console.table(summaryRows);
                 }
-                
-                // Build word texts map (normalized - remove diacritics for search)
-                const normalizedWord = normalizeArabic(arabicWord);
-                if (normalizedWord.length > 1) {
-                    if (!wordTextsMap[normalizedWord]) wordTextsMap[normalizedWord] = [];
-                    wordTextsMap[normalizedWord].push({ sura, ayah, wordIndex, original: arabicWord });
-                }
+                suggestions
+                    .filter(item => item.type === 'root' || item.type === 'similar-root')
+                    .forEach(item => {
+                        console.groupCollapsed(`[search-debug:item] ${item.icon} ${item.value}`);
+                        console.log('item', {
+                            type: item.type,
+                            value: item.value,
+                            valueNormalized: normalizeArabic(item.value || ''),
+                            valueBuckwalter: toBuckwalterSafe(item.value || ''),
+                            display: item.display,
+                            count: item.count
+                        });
+                        const rows = getRootDebugRows(item.value);
+                        if (rows.length > 0) console.table(rows);
+                        else console.log('No rootToWordsMap rows found for this item value.');
+                        console.groupEnd();
+                    });
+                console.groupEnd();
+            } catch (error) {
+                console.warn('[search-debug] failed to log suggestions', error);
             }
         }
         
@@ -2602,7 +2621,9 @@
             }
             
             // Return in order: roots, similar roots, words, text
-            return [...rootSuggestions, ...similarRootSuggestions, ...wordSuggestions, ...textSuggestions];
+            const suggestions = [...rootSuggestions, ...similarRootSuggestions, ...wordSuggestions, ...textSuggestions];
+            logSuggestionDebug(query, normalizedQuery, suggestions, matchingWords);
+            return suggestions;
         }
         
         function countTextMatches(normalizedText) {
@@ -3532,8 +3553,8 @@
                 for (let ayah = group.startAyah; ayah <= group.endAyah; ayah++) {
                     const ayahText = getAyahText(group.sura, ayah);
                     if (!ayahText) continue;
-                    // Put reference at end (consistent with UI paragraph mode)
-                    parts.push(`${ayahText} (${SURA_NAMES[group.sura]} ${fmtFa(ayah)})`);
+                    // Put reference at end with the whole address bracketed for clearer pasted text
+                    parts.push(`${ayahText} [${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]`);
                 }
                 if (parts.length) paragraphs.push(parts.join(' '));
             }
@@ -3606,7 +3627,7 @@
                 const ayahParts = [];
                 for (let ay = group.startAyah; ay <= group.endAyah; ay++) {
                     const ayahHtml = buildHighlightedAyahHTML(group.sura, ay, highlightMatchesForGroup);
-                    const ref = `${SURA_NAMES[group.sura]} ${fmtFa(ay)}`;
+                    const ref = `[${SURA_NAMES[group.sura]} ${fmtFa(ay)}]`;
                     ayahParts.push(`${ayahHtml} <span style="color:#777;font-size:11px;">(${escapeHtml(ref)})</span>`);
                 }
                 paras.push(`<p dir="rtl" style="margin:0 0 12px 0;line-height:2;direction:rtl;unicode-bidi:plaintext;text-align:right;">${ayahParts.join(' ')}</p>`);
@@ -4245,13 +4266,14 @@
                     const viewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                     if (viewMode === 'rows') {
                         html += `<div class="ayah-row">`;
-                        html += `<a class="ayah-ref-leading num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += `<a class="ayah-ref-leading num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a> `;
                         html += `<span class="result-ayah">${highlightedText}</span>`;
                         html += `</div>`;
                     } else {
                         html += `<span class="result-ayah">`;
                         html += highlightedText;
-                        html += `<a class="result-ref num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">${SURA_NAMES[group.sura]} ${fmtFa(ayah)}</a>`;
+                        html += ` `;
+                        html += `<a class="result-ref num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a>`;
                         html += `</span> `;
                     }
                 }
@@ -4361,6 +4383,7 @@
             if (type === 'root') initRootLemData(value, true);
             if (type === 'similar-root') initSimilarRootData(value, true);
             updateSelectedItemsUI();
+            buildItemsPanel();
             requestAutoSearch(0);
         }
 
@@ -4385,8 +4408,20 @@
         }
         
         function removeSelectedItem(index) {
+            const removedItem = selectedItems[index];
             selectedItems.splice(index, 1);
             itemCheckedState.splice(index, 1);
+            if (removedItem?.type === 'root') {
+                delete rootLemData[removedItem.value];
+                delete itemExpandedState[removedItem.value];
+            } else if (removedItem?.type === 'similar-root') {
+                delete similarRootData[removedItem.value];
+                delete similarRootExpandedState[removedItem.value];
+                delete similarRootSelectionState[removedItem.value];
+                Object.keys(similarRootChildExpandedState).forEach(key => {
+                    if (key.startsWith(`${removedItem.value}::`)) delete similarRootChildExpandedState[key];
+                });
+            }
             // Reset highlighted item if it's affected
             if (highlightedItem) {
                 if (highlightedItem.itemIndex === index) {
@@ -4396,6 +4431,7 @@
                 }
             }
             updateSelectedItemsUI();
+            buildItemsPanel();
             if (selectedItems.length === 0) {
                 clearSearchResultsUI();
                 return;

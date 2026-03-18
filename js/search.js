@@ -237,6 +237,12 @@
    * @returns {{ [sura]: { [ayah]: { [wordIndex]: { root, lemma, text } } } }
    */
   function parseMorphologyForStats(text, convertBuckwalterToArabicFn) {
+    if (typeof window !== 'undefined' && window.CorpusData && typeof window.CorpusData.parseMorphologyText === 'function') {
+      return window.CorpusData.parseMorphologyText(text, {
+        toArabic: convertBuckwalterToArabicFn || (typeof window !== 'undefined' && window.convertBuckwalterToArabic),
+        includeText: true
+      }).morphologyData;
+    }
     const toArabic = convertBuckwalterToArabicFn || (typeof window !== 'undefined' && window.convertBuckwalterToArabic) || (function(s) { return s; });
     const morphologyData = {};
     const lines = text.split('\n');

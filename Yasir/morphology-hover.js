@@ -48,6 +48,24 @@ const morphologyData = {};
         updateVisibleHighlight();
     }
 
+    let corpusDataReadyPromise = null;
+    function getCorpusBasePath() {
+        return (window.location.pathname || '').indexOf('/Yasir/') !== -1 ? '../' : '';
+    }
+
+    function ensureCorpusData() {
+        if (window.CorpusData) return Promise.resolve(window.CorpusData);
+        if (corpusDataReadyPromise) return corpusDataReadyPromise;
+        corpusDataReadyPromise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = getCorpusBasePath() + 'js/corpus.js';
+            script.onload = () => resolve(window.CorpusData);
+            script.onerror = () => reject(new Error('Failed to load shared corpus.js'));
+            document.head.appendChild(script);
+        });
+        return corpusDataReadyPromise;
+    }
+
     // Morphology data structure: {ayah: {wordIndex: {root, lemma}}}
     let dataLoaded = false;
     
@@ -320,25 +338,20 @@ const morphologyData = {};
     // Load morphology data from file
     async function loadMorphologyData(sureNumber) {
         try {
-            const response = await fetch('data/quranic-corpus-morphology-0.4.txt');
-            if (!response.ok) {
-                console.error('Failed to load morphology data');
-                return;
-            }
-
-            const text = await response.text();
-            const lines = text.split('\n');
-            let wordIndexFixOffset = 0;
-
-            // Skip header line
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (line && line.startsWith('(' + sureNumber + ':')) {
-                    // console.log(line);
-                    let lineInfo = parseMorphologyLine(line, sureNumber, wordIndexFixOffset);
-                    wordIndexFixOffset = lineInfo.wordIndexFixOffset;
-                }
-            }
+            const corpus = await ensureCorpusData();
+            const dataset = await corpus.loadMorphologyData({
+                basePath: getCorpusBasePath(),
+                filterSura: sureNumber,
+                includeText: false,
+                toArabic: convertBuckwalterToArabic
+            });
+            Object.keys(morphologyData).forEach(key => delete morphologyData[key]);
+            Object.keys(rootToWordsMap).forEach(key => delete rootToWordsMap[key]);
+            const suraData = dataset.morphologyData[sureNumber] || {};
+            Object.keys(suraData).forEach(ayah => {
+                morphologyData[ayah] = suraData[ayah];
+            });
+            Object.assign(rootToWordsMap, dataset.rootToWordsMap || {});
 
             dataLoaded = true;
             console.log('Morphology data loaded for Surah ' + sureNumber);
@@ -4145,4 +4158,3 @@ const morphologyData = {};
         init(sureNum);
     }
 })();
-

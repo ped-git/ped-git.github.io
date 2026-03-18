@@ -924,8 +924,8 @@
                         if (!_desktopMorphologyLoadStarted) {
                             _desktopMorphologyLoadStarted = true;
                             const base = (window.location.pathname || '').indexOf('/Yasir/') !== -1 ? '../' : '';
-                            fetch(base + 'data/quranic-corpus-morphology-0.4.txt').then(r => r.text()).then(text => {
-                                _desktopMorphologyCache = window.SearchShared.parseMorphologyForStats(text);
+                            window.CorpusData.loadMorphologyData({ basePath: base, includeText: true }).then((dataset) => {
+                                _desktopMorphologyCache = dataset.morphologyData || {};
                                 _desktopStatsUniverseCache = window.SearchShared.buildStatsUniverseCache(_desktopMorphologyCache);
                             }).catch(() => {});
                         }
@@ -2150,4 +2150,3 @@
 
     init();
 })();
-

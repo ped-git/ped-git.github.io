@@ -204,7 +204,9 @@
             display: block;
             margin-bottom: 4px;
         }
-        #settings-menu #translation-language {
+        #settings-menu #translation-language,
+        #settings-menu #page-mode,
+        #settings-menu #copy-ayah-style {
             width: 100%;
             padding: 0px;
             font-size: 0.95rem;
@@ -216,34 +218,16 @@
             font-family: inherit;
             direction: rtl;
         }
-        #settings-menu #translation-language:focus {
+        #settings-menu #translation-language:focus,
+        #settings-menu #page-mode:focus,
+        #settings-menu #copy-ayah-style:focus {
             outline: none;
             border-color: rgba(59, 130, 246, 0.5);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-        #settings-menu #translation-language option {
-            padding: 0px;
-            margin: 0px;
-            font-size: 0.75rem;
-        }
-        #settings-menu #page-mode {
-            width: 100%;
-            padding: 0px;
-            font-size: 0.95rem;
-            border-radius: 10px;
-            border: 1px solid rgba(15, 23, 42, 0.14);
-            background: #fff;
-            color: #334155;
-            cursor: pointer;
-            font-family: inherit;
-            direction: rtl;
-        }
-        #settings-menu #page-mode:focus {
-            outline: none;
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-        #settings-menu #page-mode option {
+        #settings-menu #translation-language option,
+        #settings-menu #page-mode option,
+        #settings-menu #copy-ayah-style option {
             padding: 0px;
             margin: 0px;
             font-size: 0.75rem;
@@ -795,6 +779,15 @@
                         <option value="continuous">پیوسته (سوره)</option>
                     </select>
                 </label>
+                <h3>شماره آیه در کپی</h3>
+                <label class="settings-row-select">
+                    <select id="copy-ayah-style" aria-label="نحوه کپی شماره آیه">
+                        <option value="paren">(شماره‌آیه)</option>
+                        <option value="bracket">[شماره‌آیه]</option>
+                        <option value="sura-name">[نام‌سوره شماره‌آیه]</option>
+                        <option value="contextual">حالت هوشمند انتخاب</option>
+                    </select>
+                </label>
                 <div class="settings-section-links">
                     <div class="settings-title">نحوه نمایش</div>
                     <div class="settings-links-grid">
@@ -831,6 +824,7 @@
     <script src="js/sura-data.js"></script>
     <script src="js/sura-picker.js"></script>
     <script src="js/buckwalter.js"></script>
+    <script src="js/corpus.js"></script>
     <script>
 (function() {
     const TOTAL_PAGES = 604;
@@ -848,42 +842,8 @@
     var simpleMorphologyLoaded = false;
     function loadSimpleMorphology(cb) {
         if (simpleMorphologyLoaded) { if (cb) cb(); return; }
-        fetch('data/quranic-corpus-morphology-0.4.txt').then(function(r) { return r.text(); }).then(function(text) {
-            var lines = text.split('\n');
-            var wordSegments = {};
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-                if (!line || line.charAt(0) === '#' || line.indexOf('LOCATION') === 0) continue;
-                var parts = line.split('\t');
-                if (parts.length < 4) continue;
-                var loc = parts[0];
-                var wordText = parts[1];
-                var features = parts[3] || '';
-                var m = loc.match(/\((\d+):(\d+):(\d+):(\d+)\)/);
-                if (!m) continue;
-                var sura = parseInt(m[1], 10);
-                var ayah = parseInt(m[2], 10);
-                var wordIndex = parseInt(m[3], 10);
-                var key = sura + ':' + ayah + ':' + wordIndex;
-                if (!wordSegments[key]) wordSegments[key] = [];
-                wordSegments[key].push({ features: features });
-            }
-            for (var k in wordSegments) {
-                var segs = wordSegments[k];
-                var root = null, lemma = null;
-                for (var s = 0; s < segs.length; s++) {
-                    var fe = segs[s].features;
-                    if (!root) { var rm = fe.match(/ROOT:([^|]+)/); if (rm) root = typeof convertBuckwalterToArabic === 'function' ? convertBuckwalterToArabic(rm[1]) : rm[1]; }
-                    if (!lemma) { var lm = fe.match(/LEM:([^\|]+)/); if (lm) lemma = typeof convertBuckwalterToArabic === 'function' ? convertBuckwalterToArabic(lm[1]) : lm[1]; }
-                }
-                var parts = k.split(':');
-                var sura = parseInt(parts[0], 10);
-                var ayah = parseInt(parts[1], 10);
-                var wi = parseInt(parts[2], 10);
-                if (!simpleMorphologyData[sura]) simpleMorphologyData[sura] = {};
-                if (!simpleMorphologyData[sura][ayah]) simpleMorphologyData[sura][ayah] = {};
-                simpleMorphologyData[sura][ayah][wi] = { root: root || '', lemma: lemma || '' };
-            }
+        window.CorpusData.loadMorphologyData({ includeText: false }).then(function(dataset) {
+            simpleMorphologyData = dataset.morphologyData || {};
             simpleMorphologyLoaded = true;
             if (cb) cb();
         }).catch(function() { if (cb) cb(); });
@@ -1575,6 +1535,142 @@
         var m = String(verseKey || '').match(/^\d+:(\d+)$/);
         return m ? parseInt(m[1], 10) : null;
     }
+    function getSuraNumberFromVerseKey(verseKey) {
+        var m = String(verseKey || '').match(/^(\d+):\d+$/);
+        return m ? parseInt(m[1], 10) : null;
+    }
+    function getCopyAyahStyle() {
+        var mode = getSetting('copy_ayah_style', 'paren');
+        if (mode !== 'paren' && mode !== 'bracket' && mode !== 'sura-name' && mode !== 'contextual') return 'paren';
+        return mode;
+    }
+    function buildAyahMarker(verseKey, mode) {
+        var ayahNum = getAyahNumberFromVerseKey(verseKey);
+        if (ayahNum == null) return '';
+        if (mode === 'paren') return '(' + ayahNum + ')';
+        if (mode === 'bracket') return '[' + ayahNum + ']';
+        var suraNum = getSuraNumberFromVerseKey(verseKey);
+        var suraName = suraNum != null ? getSuraName(suraNum) : '';
+        if (mode === 'sura-name' || mode === 'contextual') {
+            return '[' + String(suraName || '') + String(ayahNum) + ']';
+        }
+        return '(' + ayahNum + ')';
+    }
+    function trimTrailingAyahDigits(text) {
+        return String(text || '').replace(/\s*[\u0660-\u0669\u06F0-\u06F9]+$/u, '').trim();
+    }
+    function trimLeadingAyahDigits(text) {
+        return String(text || '').replace(/^[\u0660-\u0669\u06F0-\u06F9]+\s*/u, '').trim();
+    }
+    function stripAyahMarkerRemainder(text) {
+        return String(text || '')
+            .replace(/[\s\u00a0\u0660-\u0669\u06F0-\u06F9\(\)\[\]\{\}﴿﴾۝۞]+/gu, '')
+            .trim();
+    }
+    function hasSubstantiveArabicText(text) {
+        return /[\p{Script=Arabic}\p{Letter}\p{Mark}]/u.test(String(text || ''));
+    }
+    function getSelectedTextWithinNode(range, node) {
+        if (!range || !node) return '';
+        try {
+            if (!range.intersectsNode(node)) return '';
+            var nodeRange = document.createRange();
+            nodeRange.selectNodeContents(node);
+            var selectedRange = document.createRange();
+            if (range.compareBoundaryPoints(Range.START_TO_START, nodeRange) > 0) {
+                selectedRange.setStart(range.startContainer, range.startOffset);
+            } else {
+                selectedRange.setStart(nodeRange.startContainer, nodeRange.startOffset);
+            }
+            if (range.compareBoundaryPoints(Range.END_TO_END, nodeRange) < 0) {
+                selectedRange.setEnd(range.endContainer, range.endOffset);
+            } else {
+                selectedRange.setEnd(nodeRange.endContainer, nodeRange.endOffset);
+            }
+            return (selectedRange.toString() || '').trim();
+        } catch (err) {
+            return '';
+        }
+    }
+    function getTextBeforeRangePointInNode(node, container, offset) {
+        if (!node) return '';
+        try {
+            var r = document.createRange();
+            r.selectNodeContents(node);
+            r.setEnd(container, offset);
+            return r.toString() || '';
+        } catch (err) {
+            return '';
+        }
+    }
+    function getTextAfterRangePointInNode(node, container, offset) {
+        if (!node) return '';
+        try {
+            var r = document.createRange();
+            r.selectNodeContents(node);
+            r.setStart(container, offset);
+            return r.toString() || '';
+        } catch (err) {
+            return '';
+        }
+    }
+    function selectionStartsInsideWord(range, node) {
+        if (!range || !node) return false;
+        try {
+            var nodeRange = document.createRange();
+            nodeRange.selectNodeContents(node);
+            if (range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0) return false;
+        } catch (err) {}
+        var beforeText = trimLeadingAyahDigits(getTextBeforeRangePointInNode(node, range.startContainer, range.startOffset));
+        if (beforeText.length > 0) return true;
+        var fullText = trimTrailingAyahDigits(node.getAttribute('data-copy-text') || node.textContent || '');
+        var selectedText = trimTrailingAyahDigits(getSelectedTextWithinNode(range, node));
+        return !!(fullText && selectedText && selectedText.length < fullText.length && fullText.indexOf(selectedText) > 0);
+    }
+    function selectionReachesAyahEnd(range, node) {
+        if (!range || !node) return false;
+        try {
+            var nodeRange = document.createRange();
+            nodeRange.selectNodeContents(node);
+            if (range.compareBoundaryPoints(Range.END_TO_END, nodeRange) >= 0) return true;
+        } catch (err) {}
+        var fullText = trimTrailingAyahDigits(node.getAttribute('data-copy-text') || node.textContent || '');
+        var selectedText = trimTrailingAyahDigits(getSelectedTextWithinNode(range, node));
+        if (fullText && selectedText && selectedText.length < fullText.length) {
+            return fullText.indexOf(selectedText) === 0 && (fullText.indexOf(selectedText) + selectedText.length === fullText.length);
+        }
+        if (!(node.contains && node.contains(range.endContainer))) return true;
+        var trailingText = getTextAfterRangePointInNode(node, range.endContainer, range.endOffset);
+        if (node.classList && node.classList.contains('ayah-end')) {
+            return !hasSubstantiveArabicText(stripAyahMarkerRemainder(trimTrailingAyahDigits(trailingText)));
+        }
+        return trailingText.trim().length === 0;
+    }
+    function getVerseSelectionStats(mainEl, verseKey) {
+        var stats = {
+            ayahEndPosition: 0,
+            lastTextWordPosition: 0,
+            totalTextWords: 0
+        };
+        if (!mainEl || !verseKey) return stats;
+        var verseWords = mainEl.querySelectorAll('.qword[data-verse-key="' + verseKey + '"]');
+        for (var i = 0; i < verseWords.length; i++) {
+            var wordEl = verseWords[i];
+            var pos = parseInt(wordEl.getAttribute('data-word-position') || '0', 10) || 0;
+            if (wordEl.classList.contains('ayah-end')) {
+                if (pos > stats.ayahEndPosition) stats.ayahEndPosition = pos;
+            }
+            var text = trimTrailingAyahDigits(wordEl.getAttribute('data-copy-text') || wordEl.textContent || '');
+            if (text) {
+                stats.totalTextWords += 1;
+                if (pos > stats.lastTextWordPosition) stats.lastTextWordPosition = pos;
+            }
+        }
+        return stats;
+    }
+    function isSyntheticBismillahWord(wordEl) {
+        return !!(wordEl && wordEl.getAttribute && wordEl.getAttribute('data-synthetic-bismillah') === '1');
+    }
 
     function buildWordHtml(w, pageNum, useQCFFont, verseKey, verseTranslation) {
         var vKey = verseKey || '';
@@ -1586,17 +1682,18 @@
         var copyText = (w.text_uthmani || w.text || '').trim();
         var copyAttr = copyText ? ' data-copy-text="' + escapeAttr(copyText) + '"' : '';
         var searchTextAttr = copyText ? ' data-search-text="' + escapeAttr(copyText) + '"' : '';
+        var syntheticBismillahAttr = (w && w.synthetic_bismillah) ? ' data-synthetic-bismillah="1"' : '';
         var pos = (w.position != null) ? w.position : 0;
         if (useQCFFont) {
             var page = w.v1_page || pageNum;
             loadQCFPageFont(page);
             var padded = String(page).padStart(3, '0');
             var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
-            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
+            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
         }
         var plain = w.text_uthmani || w.text || '';
         // if (plain === 'أُو۟لَـٰٓئِكَ') plain = 'أُو۟★لَـٰٓئِكَ';
-        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + '>' + escapeHtml(plain) + '</span>' + pad;
+        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + '>' + escapeHtml(plain) + '</span>' + pad;
     }
     function buildVerseText(verse, useQCFFont) {
         if (!verse.words || verse.words.length === 0) return '';
@@ -1929,19 +2026,82 @@
             return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
         });
         if (selected.length === 0) return null;
-        var parts = [];
+        var copyMode = getCopyAyahStyle();
+        var groups = [];
         for (var j = 0; j < selected.length; j++) {
             var w = selected[j];
-            var text = (w.getAttribute('data-copy-text') || w.textContent || '').trim();
-            if (!text) continue;
-            if (parts.length > 0) {
-                var prevEnd = selected[j - 1].classList.contains('ayah-end');
-                parts.push(prevEnd ? '\n' : ' ');
+            var verseKey = w.getAttribute('data-verse-key') || '';
+            if (!verseKey) continue;
+            var group = groups.length > 0 ? groups[groups.length - 1] : null;
+            if (!group || group.verseKey !== verseKey) {
+                group = { verseKey: verseKey, words: [], syntheticBismillah: isSyntheticBismillahWord(w) };
+                groups.push(group);
             }
-            if (w.classList.contains('ayah-end')) text = '(' + text + ')';
-            parts.push(text);
+            group.words.push(w);
+            if (isSyntheticBismillahWord(w)) group.syntheticBismillah = true;
         }
-        return parts.join('');
+        if (groups.length === 0) return null;
+        var firstWord = groups[0].words[0];
+        var lastGroup = groups[groups.length - 1];
+        var lastWord = lastGroup.words[lastGroup.words.length - 1];
+        var verseStats = getVerseSelectionStats(mainEl, lastGroup.verseKey);
+        var lastWordPosition = parseInt(lastWord.getAttribute('data-word-position') || '0', 10) || 0;
+        var startsPartial = (parseInt(firstWord.getAttribute('data-word-position') || '0', 10) > 1) || selectionStartsInsideWord(range, firstWord);
+        var selectionEndsAtLastTextWord = verseStats.lastTextWordPosition > 0
+            && lastWordPosition === verseStats.lastTextWordPosition
+            && selectionReachesAyahEnd(range, lastWord);
+        var selectedAllTextWordsInLastAyah = verseStats.totalTextWords > 0
+            && lastGroup.words.length >= verseStats.totalTextWords
+            && lastWordPosition === verseStats.lastTextWordPosition;
+        var selectionEndsAtAyahMarker = lastWord.classList.contains('ayah-end') && selectionReachesAyahEnd(range, lastWord);
+        var endsPartial = !(selectionEndsAtLastTextWord || selectionEndsAtAyahMarker || selectedAllTextWordsInLastAyah);
+        console.log('[copy-debug]', {
+            verseKey: lastGroup.verseKey,
+            lastSelectedWord: (lastWord.getAttribute('data-copy-text') || lastWord.textContent || '').trim(),
+            lastSelectedWordPosition: lastWordPosition,
+            ayahEndPosition: verseStats.ayahEndPosition,
+            lastTextWordPosition: verseStats.lastTextWordPosition,
+            totalTextWords: verseStats.totalTextWords,
+            isLastSelectedWordAyahEnd: lastWord.classList.contains('ayah-end'),
+            selectionReachesLastSelectedWordEnd: selectionReachesAyahEnd(range, lastWord),
+            selectionEndsAtLastTextWord: selectionEndsAtLastTextWord,
+            selectedAllTextWordsInLastAyah: selectedAllTextWordsInLastAyah,
+            selectionReachesAyahEnd: !endsPartial,
+            copiedWordsInLastAyah: lastGroup.words.length
+        });
+        var useContextualDots = copyMode === 'contextual';
+        var lines = [];
+        for (var g = 0; g < groups.length; g++) {
+            var groupWords = groups[g].words;
+            var groupLastWord = groupWords[groupWords.length - 1];
+            var groupHasAyahEnd = !!(groupLastWord && groupLastWord.classList.contains('ayah-end'));
+            var words = [];
+            for (var k = 0; k < groupWords.length; k++) {
+                var wordEl = groupWords[k];
+                var text = (wordEl.getAttribute('data-copy-text') || wordEl.textContent || '').trim();
+                if (wordEl.classList.contains('ayah-end')) text = trimTrailingAyahDigits(text);
+                if (text) words.push(text);
+            }
+            if (words.length === 0) continue;
+            var line = words.join(' ');
+            if (useContextualDots && g === 0 && startsPartial) line = '... ' + line;
+            var currentSura = getSuraNumberFromVerseKey(groups[g].verseKey);
+            var nextSura = (g + 1 < groups.length) ? getSuraNumberFromVerseKey(groups[g + 1].verseKey) : null;
+            var markerMode = copyMode;
+            if (copyMode === 'contextual') {
+                markerMode = 'bracket';
+                if (g === groups.length - 1 || (currentSura != null && nextSura != null && currentSura !== nextSura)) {
+                    markerMode = 'contextual';
+                }
+            }
+            if (useContextualDots && g === groups.length - 1 && endsPartial) line += ' ...';
+            var shouldAddMarker = copyMode === 'contextual' || groupHasAyahEnd;
+            if (groups[g].syntheticBismillah) shouldAddMarker = false;
+            var marker = shouldAddMarker ? buildAyahMarker(groups[g].verseKey, markerMode) : '';
+            if (marker) line += ' ' + marker;
+            lines.push(line);
+        }
+        return lines.length ? lines.join('\n') : null;
     }
 
     document.addEventListener('copy', function(e) {
@@ -2521,7 +2681,12 @@
     }
     function bismillahWithoutNumber(verse) {
         if (!verse || !verse.words) return verse;
-        return Object.assign({}, verse, { words: verse.words.filter(function(w) { return w.char_type_name !== 'end'; }) });
+        return Object.assign({}, verse, {
+            is_synthetic_bismillah: true,
+            words: verse.words.filter(function(w) { return w.char_type_name !== 'end'; }).map(function(w) {
+                return Object.assign({}, w, { synthetic_bismillah: true });
+            })
+        });
     }
 
     async function fetchPage(pageNum, signal) {
@@ -2671,6 +2836,12 @@
             setSetting('translation_language', this.value);
             bismillahVerseCache = null;
             render();
+        });
+    }
+    var copyAyahStyleEl = document.getElementById('copy-ayah-style');
+    if (copyAyahStyleEl) {
+        copyAyahStyleEl.addEventListener('change', function() {
+            setSetting('copy_ayah_style', this.value);
         });
     }
     navPrevPageBtn.addEventListener('click', function() { 
@@ -2899,10 +3070,12 @@
         else savedPageMode = 'one-page';
     }
     var savedTranslationLang = getSetting('translation_language', 'fa');
+    var savedCopyAyahStyle = getCopyAyahStyle();
     document.querySelector('input[name="font"][value="' + savedFont + '"]') && (document.querySelector('input[name="font"][value="' + savedFont + '"]').checked = true);
     document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
     if (document.getElementById('page-mode')) document.getElementById('page-mode').value = savedPageMode;
     if (document.getElementById('translation-language')) document.getElementById('translation-language').value = savedTranslationLang;
+    if (document.getElementById('copy-ayah-style')) document.getElementById('copy-ayah-style').value = savedCopyAyahStyle;
     if (simpleSearchInput) simpleSearchInput.value = searchState.committedQuery;
     updateSearchButtons();
 
