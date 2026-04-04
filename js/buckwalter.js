@@ -69,7 +69,10 @@ const buckwalterToArabic = {
     '+': '',    // U+06EB EmptyCentreHighStop (extended)
     '%': '',    // U+06EC RoundedHighStopWithFilledCentre (extended)
     '"': '',    // U+06E0 SmallHighUprightRectangularZero (extended)
-    '_': ''     // U+0640 Tatweel (extended)
+    '_': '',     // U+0640 Tatweel (extended)
+
+    // manual mappings
+    '2': ''
 };
 
 // Create reverse mapping from Arabic to Buckwalter

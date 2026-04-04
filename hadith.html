@@ -153,6 +153,83 @@
             text-align: center;
         }
         .hadith-links-menu .hadith-link:hover { background: rgba(59, 130, 246, 0.12); }
+        .hadith-settings-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .hadith-settings-row {
+            padding: 0 16px 10px;
+        }
+        .hadith-settings-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .hadith-settings-select {
+            width: 100%;
+            min-height: 38px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            color: #1e293b;
+            font: inherit;
+        }
+        .hadith-settings-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+        }
+        .hadith-export-btn {
+            width: calc(100% - 32px);
+            margin: 0 16px;
+            min-height: 38px;
+            border: 1px solid #2563eb;
+            border-radius: 10px;
+            background: #2563eb;
+            color: #fff;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .hadith-export-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+        .hadith-export-btn:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+        .hadith-export-note {
+            padding: 8px 16px 0;
+            font-size: 0.8rem;
+            line-height: 1.55;
+            color: #64748b;
+        }
+        .hadith-export-status {
+            padding: 8px 16px 0;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #1d4ed8;
+        }
+        .hadith-export-status.is-error {
+            color: #b91c1c;
+        }
+        .hadith-source-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            color: #334155;
+            cursor: pointer;
+        }
+        .hadith-source-option input {
+            margin: 0;
+            accent-color: #2563eb;
+        }
         .ayah-arabic-label, .ayah-translation-label {
             font-size: 0.8rem;
             font-weight: 600;
@@ -308,28 +385,39 @@
         }
         .hadith-quranic {
             background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
-            color: #1e3a8a;
-            padding: 1px 1px;
+            color: #1d4ed8;
+            padding: 1px 3px;
             border-radius: 4px;
-            font-weight: 500;
+            font-weight: 600;
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
+        .hadith-quranic-current {
+            background: linear-gradient(135deg, #fef3c7 0%, #fdba74 100%);
+            color: #9a3412;
+            border-color: rgba(234, 88, 12, 0.36);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+            font-weight: 700;
+        }
         .hadith-footnote {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 1px 1px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 1px 2px;
             border-radius: 3px;
             text-decoration: none;
-            font-size: 0.9em;
-            border: 1px solid #fcd34d;
-
+            border: 1px solid #93c5fd;
             font-size: 0.50em;
             vertical-align: super;
             line-height: 0;
             text-decoration: none;
         }
+        .hadith-footnote-current {
+            background: #fed7aa;
+            color: #9a3412;
+            border-color: #fb923c;
+            font-weight: 700;
+        }
         .hadith-footnote:hover {
-            background: #fde68a;
+            background: #dbeafe;
             text-decoration: underline;
         }
         .hadith-card--loading .hadith-card-placeholder {
@@ -380,6 +468,220 @@
         }
         .hadith-load-more-btn:hover { background: #2563eb; }
         .hadith-load-more-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .consensus-card {
+            background: #fff;
+            border: 1px solid #dbe4ee;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .consensus-card-title {
+            margin: 0 0 8px;
+            font-size: 1.02rem;
+            color: #0f172a;
+        }
+        .consensus-card-meta {
+            font-size: 0.88rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+        .consensus-card-headerline {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 14px;
+            line-height: 1.7;
+        }
+        .consensus-card-loading,
+        .consensus-card-empty {
+            padding: 18px 14px;
+            background: #f8fafc;
+            border-radius: 10px;
+            color: #64748b;
+            text-align: center;
+        }
+        .consensus-segment-table,
+        .consensus-members-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            font-size: 0.94rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .consensus-table-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            margin: 14px 0;
+        }
+        .consensus-table-scroll .consensus-members-table {
+            margin: 0;
+            min-width: max-content;
+        }
+        .consensus-segment-table th,
+        .consensus-members-table th {
+            background: #1e293b;
+            color: #fff;
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 600;
+        }
+        .consensus-segment-table td,
+        .consensus-members-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        .consensus-segment-table tr:last-child td,
+        .consensus-members-table tr:last-child td {
+            border-bottom: none;
+        }
+        .consensus-segment-table tr:nth-child(even) td,
+        .consensus-members-table tr:nth-child(even) td {
+            background: #fafbfc;
+        }
+        .consensus-col-ar {
+            font-size: 1.02rem;
+            color: #0f172a;
+            width: 48%;
+        }
+        .consensus-col-tr {
+            color: #475569;
+            line-height: 1.75;
+        }
+        .consensus-actions {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            margin: 0;
+        }
+        .consensus-toggle-btn,
+        .consensus-view-btn {
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #1e293b;
+            border-radius: 10px;
+            font-family: inherit;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .consensus-toggle-btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+        .consensus-toggle-btn:hover,
+        .consensus-view-btn:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+        .consensus-view-btn.is-active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #93c5fd;
+        }
+        .consensus-members-panel {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px dashed #cbd5e1;
+        }
+        .consensus-members-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .consensus-members-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #334155;
+        }
+        .consensus-view-switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .consensus-member-header {
+            min-width: 180px;
+            color: #334155;
+            line-height: 1.7;
+        }
+        .consensus-member-hid {
+            display: inline-block;
+            font-weight: 700;
+            color: #1d4ed8;
+            margin-bottom: 6px;
+        }
+        .consensus-member-text {
+            line-height: 1.9;
+            color: #0f172a;
+        }
+        .consensus-aligned-text {
+            line-height: 2;
+            color: #0f172a;
+            word-break: break-word;
+        }
+        .consensus-alignment-rows-table {
+            table-layout: fixed;
+        }
+        .consensus-row-index {
+            width: 72px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .consensus-members-table--segments {
+            table-layout: fixed;
+        }
+        .consensus-members-table--segments th,
+        .consensus-members-table--segments td {
+            min-width: 220px;
+            width: 220px;
+        }
+        .consensus-members-table--segments th:first-child,
+        .consensus-members-table--segments td:first-child {
+            min-width: 260px;
+            width: 260px;
+        }
+        .consensus-members-table--segments th:nth-child(2),
+        .consensus-members-table--segments td:nth-child(2) {
+            min-width: 260px;
+            width: 260px;
+        }
+        .consensus-row-cell {
+            line-height: 1.9;
+            word-break: break-word;
+        }
+        .alignment-gap {
+            display: inline-block;
+            min-width: 0.9em;
+            padding: 0 0.2em;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: #94a3b8;
+            text-align: center;
+        }
+        .consensus-inline-label {
+            display: inline-block;
+            margin-left: 8px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .consensus-load-more-wrap {
+            text-align: center;
+            margin: 20px 0;
+        }
         #hadith-error-log {
             position: fixed;
             bottom: 0;
@@ -413,13 +715,72 @@
             const HADITH_CONTENT_URL = 'https://hadith.ai/get_hadith_content/get_hadith';
             const QURAN_VERSE_URL = 'https://api.quran.com/api/v4/verses/by_key';
             const HADITH_PAGE_SIZE = 10;
+            const CONSENSUS_PAGE_SIZE = 10;
             const HADITH_FETCH_TIMEOUT_MS = 12000;
-            var allHadithIds = [];
+            const CONSENSUS_AYAH_MAP_URL = 'https://raw.githubusercontent.com/csquranics/quran-hadith-data/main/consensus/aye_hadith_ref.json';
+            const CONSENSUS_TRANSLATE_INDEX_URL = 'https://raw.githubusercontent.com/csquranics/quran-hadith-data/main/translate/translate.json';
+            const CONSENSUS_TRANSLATE_DETAIL_BASE_URL = 'https://raw.githubusercontent.com/csquranics/quran-hadith-data/main/translate/';
+            const CONSENSUS_MEMBER_DETAIL_BASE_URL = 'https://raw.githubusercontent.com/csquranics/quran-hadith-data/main/consensus/';
+            const HADITH_SOURCE_STORAGE_KEY = 'hadith-source';
+            const HADITH_SOURCE_HADITH_AI = 'hadith-ai';
+            const HADITH_SOURCE_CONSENSUS = 'consensus';
+            const HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE = 'consensus-translate-table';
+
+            var state = {
+                verse: null,
+                allHadithIds: [],
+                source: getStoredHadithSource(),
+                exportOption: HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE,
+                exportStatus: '',
+                exportStatusType: '',
+                exportInProgress: false,
+                hadithVisibleCount: HADITH_PAGE_SIZE,
+                hadithCards: {},
+                indexesPromise: null,
+                consensusAyahMap: null,
+                consensusTranslateById: null,
+                consensusTranslateOrder: [],
+                consensusMatchedSetIds: [],
+                consensusVisibleCount: CONSENSUS_PAGE_SIZE,
+                consensusTranslateDetails: {},
+                consensusMemberDetails: {},
+                consensusTranslatePromises: {},
+                consensusMemberPromises: {},
+                consensusOpen: {},
+                consensusHadithView: {},
+                consensusLoading: false,
+                consensusError: '',
+                eventsBound: false
+            };
+
+            function localizedLanguageName(language) {
+                return language === 'ar' ? 'عربی' : language === 'en' ? 'انگلیسی' : language === 'fa' ? 'فارسی' : language;
+            }
 
             function hadithLog(service, msg, data) {
                 var prefix = '[hadith-service ' + service + '] ';
                 if (data !== undefined) console.log(prefix + msg, data);
                 else console.log(prefix + msg);
+            }
+
+            function normalizeHadithSource(value) {
+                return value === HADITH_SOURCE_CONSENSUS ? HADITH_SOURCE_CONSENSUS : HADITH_SOURCE_HADITH_AI;
+            }
+
+            function getStoredHadithSource() {
+                try {
+                    return normalizeHadithSource(window.localStorage.getItem(HADITH_SOURCE_STORAGE_KEY));
+                } catch (err) {
+                    return HADITH_SOURCE_HADITH_AI;
+                }
+            }
+
+            function storeHadithSource(value) {
+                var normalized = normalizeHadithSource(value);
+                try {
+                    window.localStorage.setItem(HADITH_SOURCE_STORAGE_KEY, normalized);
+                } catch (err) {}
+                state.source = normalized;
             }
             var YASIR_PATHS = [];
             (function() {
@@ -463,7 +824,8 @@
                 if (!suraNum) return null;
 
                 return {
-                    href: `/yasir.html?s=${suraNum}&a=${ayahNum}`,
+                    // href: `/yasir.html?s=${suraNum}&a=${ayahNum}`,
+                    href: `/simple.html?s=${suraNum}&a=${ayahNum}`,
                     sura: suraNum,
                     ayah: ayahNum
                 };
@@ -472,6 +834,14 @@
             function processHadithText(html) {
                 if (html == null) return '';
                 if (typeof html !== 'string') html = String(html);
+                const currentParams = getParams();
+                function appendLegacyColorText(el, text, color) {
+                    var fontEl = document.createElement('font');
+                    fontEl.setAttribute('color', color);
+                    fontEl.textContent = text || '';
+                    el.textContent = '';
+                    el.appendChild(fontEl);
+                }
 
 
                 // Convert [SurahX] patterns to <footnote> if there is no HTML
@@ -488,12 +858,20 @@
                     // console.log("quranic_text:", node.textContent)
                     const span = doc.createElement('span');
                     span.className = 'hadith-quranic';
+                    span.style.background = 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)';
+                    span.style.color = '#1d4ed8';
+                    span.style.padding = '1px 3px';
+                    span.style.borderRadius = '4px';
+                    span.style.border = '1px solid rgba(59, 130, 246, 0.3)';
+                    span.style.fontWeight = '600';
+                    var quranicText = '';
                     if (node.textContent.startsWith("«") && node.textContent.endsWith("»")) {
-                        span.textContent = "«" + node.textContent.substr(1, node.textContent.length-2).trim() + "»";
+                        quranicText = "«" + node.textContent.substr(1, node.textContent.length-2).trim() + "»";
                         // span.textContent = node.textContent || '';
                     } else {
-                        span.textContent = node.textContent || '';
+                        quranicText = node.textContent || '';
                     }
+                    appendLegacyColorText(span, quranicText, '#1d4ed8');
                     node.replaceWith(span);
                 });
 
@@ -501,6 +879,7 @@
                     const fnInner = (node.textContent || '').trim();
                     const bracketContent = fnInner.replace(/^\[|\]$/g, '').trim();
                     const link = footnoteToYasirLink(bracketContent);
+                    const isCurrentAyah = !!(link && Number(link.sura) === Number(currentParams.s) && Number(link.ayah) === Number(currentParams.a));
 
                     let el;
                     if (link) {
@@ -513,7 +892,32 @@
                         el.className = 'hadith-footnote';
                     }
 
-                    el.textContent = fnInner;
+                    el.style.background = '#eff6ff';
+                    el.style.color = '#1d4ed8';
+                    el.style.padding = '1px 2px';
+                    el.style.borderRadius = '3px';
+                    el.style.border = '1px solid #93c5fd';
+                    appendLegacyColorText(el, fnInner, '#1d4ed8');
+                    if (isCurrentAyah) {
+                        el.classList.add('hadith-footnote-current');
+                        el.style.background = '#fed7aa';
+                        el.style.color = '#9a3412';
+                        el.style.border = '1px solid #fb923c';
+                        el.style.fontWeight = '700';
+                        appendLegacyColorText(el, fnInner, '#9a3412');
+                        let prev = node.previousSibling;
+                        while (prev && prev.nodeType === Node.TEXT_NODE && /^[\s\u00A0]+$/.test(prev.nodeValue || '')) {
+                            prev = prev.previousSibling;
+                        }
+                        if (prev && prev.nodeType === Node.ELEMENT_NODE && prev.classList && prev.classList.contains('hadith-quranic')) {
+                            prev.classList.add('hadith-quranic-current');
+                            prev.style.background = 'linear-gradient(135deg, #fef3c7 0%, #fdba74 100%)';
+                            prev.style.color = '#9a3412';
+                            prev.style.border = '1px solid rgba(234, 88, 12, 0.36)';
+                            prev.style.fontWeight = '700';
+                            appendLegacyColorText(prev, prev.textContent || '', '#9a3412');
+                        }
+                    }
                     node.replaceWith(el);
                 });
 
@@ -545,6 +949,11 @@
                 var x = Number(n);
                 if (!Number.isFinite(x)) return '';
                 return String(x).replace(/[0-9]/g, function(d) { return String.fromCharCode(0x06F0 + parseInt(d, 10)); });
+            }
+            function fmtEn(n) {
+                return String(n == null ? '' : n).replace(/[\u06F0-\u06F9]/g, function(ch) {
+                    return String(ch.charCodeAt(0) - 0x06F0);
+                });
             }
             function getSuraName(num) {
                 return (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[num]) ? SURA_NAMES[num] : ('سوره ' + num);
@@ -581,6 +990,11 @@
                 show(content, '<div class="error">' + escapeHtml(msg) + '</div>');
             }
 
+            async function fetchJson(url, errMsg) {
+                var res = await fetch(url);
+                if (!res.ok) throw new Error(errMsg || 'خطا در دریافت داده');
+                return res.json();
+            }
 
             async function fetchVerse(sura, ayah) {
                 var url = QURAN_VERSE_URL + '/' + sura + ':' + ayah + '?translations=135&fields=text_uthmani&words=true&word_fields=v1_page,code_v1,text_uthmani';
@@ -792,6 +1206,538 @@
                 return html;
             }
 
+            function buildConsensusSegmentMarkup(segment) {
+                if (!segment) return '';
+                var columns = Array.isArray(segment.segment_columns) ? segment.segment_columns : [];
+                if (!columns.length) {
+                    return processHadithText(segment.source_hadith_segment || segment.hadith_segment || '');
+                }
+                var pairedTags = {};
+                for (var i = 0; i < columns.length; i++) {
+                    var item = columns[i];
+                    if (!item || !item.tag_name) continue;
+                    if (!pairedTags[item.tag_name]) pairedTags[item.tag_name] = { open: 0, close: 0 };
+                    if (item.kind === 'tag_open') pairedTags[item.tag_name].open++;
+                    if (item.kind === 'tag_close') pairedTags[item.tag_name].close++;
+                }
+                var parts = [];
+                for (var j = 0; j < columns.length; j++) {
+                    var col = columns[j] || {};
+                    if ((col.kind === 'tag_open' || col.kind === 'tag_close') && col.tag_name) {
+                        var pair = pairedTags[col.tag_name];
+                        if (pair && pair.open > 0 && pair.close > 0) {
+                            parts.push(col.kind === 'tag_open' ? '<' + col.tag_name + '>' : '</' + col.tag_name + '>');
+                        }
+                        continue;
+                    }
+                    var text = col.display || col.token || '';
+                    if (text) parts.push(escapeHtml(text));
+                }
+                if (!parts.length) {
+                    return processHadithText(segment.source_hadith_segment || segment.hadith_segment || '');
+                }
+                return processHadithText(parts.join(' '));
+            }
+
+            function tokenizeAlignedBody(text) {
+                if (!text) return [];
+                var tokens = String(text).trim().split(/\s+/);
+                var mode = null;
+                var cells = [];
+                for (var i = 0; i < tokens.length; i++) {
+                    var token = tokens[i];
+                    if (token === 'TAG_OPEN:quranic_text') {
+                        mode = 'quranic_text';
+                        continue;
+                    }
+                    if (token === 'TAG_CLOSE:quranic_text') {
+                        mode = null;
+                        continue;
+                    }
+                    if (token === 'TAG_OPEN:footnote') {
+                        mode = 'footnote';
+                        continue;
+                    }
+                    if (token === 'TAG_CLOSE:footnote') {
+                        mode = null;
+                        continue;
+                    }
+                    if (!mode && token === '-') {
+                        cells.push('<span class="alignment-gap">-</span>');
+                        continue;
+                    }
+                    var safe = escapeHtml(token);
+                    if (mode === 'quranic_text') {
+                        cells.push(processHadithText('<quranic_text>' + safe + '</quranic_text>'));
+                    } else if (mode === 'footnote') {
+                        cells.push(processHadithText('<footnote>[' + safe + ']</footnote>'));
+                    } else {
+                        cells.push(safe);
+                    }
+                }
+                return cells;
+            }
+
+            function parseAlignedGrid(text) {
+                if (!text) return [];
+                var tokens = String(text).trim().split(/\s+/);
+                var cells = [];
+                for (var i = 0; i < tokens.length; i++) {
+                    var token = tokens[i];
+                    if (token.indexOf('TAG_OPEN:') === 0) {
+                        cells.push({ type: 'tag_open', tag: token.slice('TAG_OPEN:'.length) });
+                        continue;
+                    }
+                    if (token.indexOf('TAG_CLOSE:') === 0) {
+                        cells.push({ type: 'tag_close', tag: token.slice('TAG_CLOSE:'.length) });
+                        continue;
+                    }
+                    if (token === '-') {
+                        cells.push({ type: 'gap', text: '-' });
+                        continue;
+                    }
+                    cells.push({ type: 'word', text: token });
+                }
+                return cells;
+            }
+
+            function buildMarkupFromAlignedCells(cells) {
+                if (!Array.isArray(cells) || !cells.length) return '';
+                var pairedTags = {};
+                for (var i = 0; i < cells.length; i++) {
+                    var cell = cells[i];
+                    if (!cell || !cell.tag) continue;
+                    if (!pairedTags[cell.tag]) pairedTags[cell.tag] = { open: 0, close: 0 };
+                    if (cell.type === 'tag_open') pairedTags[cell.tag].open++;
+                    if (cell.type === 'tag_close') pairedTags[cell.tag].close++;
+                }
+                var parts = [];
+                for (var j = 0; j < cells.length; j++) {
+                    var item = cells[j];
+                    if (!item) continue;
+                    if (item.type === 'tag_open' || item.type === 'tag_close') {
+                        var pair = pairedTags[item.tag];
+                        if (!pair || pair.open < 1 || pair.close < 1) continue;
+                        parts.push(item.type === 'tag_open' ? '<' + item.tag + '>' : '</' + item.tag + '>');
+                        continue;
+                    }
+                    if (item.type === 'gap') {
+                        parts.push('<span class="alignment-gap">-</span>');
+                        continue;
+                    }
+                    if (item.text) parts.push(escapeHtml(item.text));
+                }
+                return processHadithText(parts.join(' '));
+            }
+
+            function renderSingleAlignmentCell(cell) {
+                if (!cell) return '';
+                if (cell.type === 'gap') return '<span class="alignment-gap">-</span>';
+                if (cell.type === 'tag_open') return escapeHtml('<' + cell.tag + '>');
+                if (cell.type === 'tag_close') return escapeHtml('</' + cell.tag + '>');
+                return escapeHtml(cell.text || '');
+            }
+
+            function getConsensusTokenGrid(detail) {
+                if (!detail || !Array.isArray(detail.body_consensus_columns)) return [];
+                var cols = detail.body_consensus_columns;
+                var result = [];
+                for (var i = 0; i < cols.length; i++) {
+                    var col = cols[i] || {};
+                    if (col.kind === 'tag_open') {
+                        result.push({ type: 'tag_open', tag: col.tag_name || col.display || '' });
+                    } else if (col.kind === 'tag_close') {
+                        result.push({ type: 'tag_close', tag: col.tag_name || col.display || '' });
+                    } else {
+                        result.push({ type: 'word', text: col.display || col.token || '' });
+                    }
+                }
+                return result;
+            }
+
+            function getSegmentBoundaries(translateDetail) {
+                var segments = translateDetail && Array.isArray(translateDetail.segments) ? translateDetail.segments : [];
+                var boundaries = [];
+                var start = 0;
+                for (var i = 0; i < segments.length; i++) {
+                    var cols = Array.isArray(segments[i].segment_columns) ? segments[i].segment_columns : [];
+                    boundaries.push({ start: start, end: start + cols.length });
+                    start += cols.length;
+                }
+                return boundaries;
+            }
+
+            function splitAlignedCellsBySegments(cells, boundaries) {
+                var out = [];
+                for (var i = 0; i < boundaries.length; i++) {
+                    var boundary = boundaries[i];
+                    out.push(cells.slice(boundary.start, boundary.end));
+                }
+                return out;
+            }
+
+            function buildHadithMenuHtml() {
+                var source = state.source;
+                var hadithAiChecked = source === HADITH_SOURCE_HADITH_AI ? ' checked' : '';
+                var consensusChecked = source === HADITH_SOURCE_CONSENSUS ? ' checked' : '';
+                var exportDisabled = state.exportInProgress ? ' disabled' : '';
+                var exportStatusClass = state.exportStatusType === 'error' ? ' hadith-export-status is-error' : ' hadith-export-status';
+                var html = '';
+                html += '<div class="hadith-links-title">نحوه نمایش</div>';
+                html += '<div class="hadith-links-grid">';
+                html += '<a class="hadith-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>';
+                html += '<a class="hadith-link" href="search.html" title="ابزار جستجو">جستجو</a>';
+                html += '<a class="hadith-link" href="simple.html" title="رفتن به نمایش">نمایش</a>';
+                html += '<a class="hadith-link" href="stat.html" title="آمار سوره">آمار سوره</a>';
+                html += '<a class="hadith-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>';
+                html += '<a class="hadith-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>';
+                html += '</div>';
+                html += '<div class="hadith-settings-section">';
+                html += '<div class="hadith-links-title">منبع حدیث</div>';
+                html += '<label class="hadith-source-option"><input type="radio" name="hadith-source" value="' + HADITH_SOURCE_HADITH_AI + '"' + hadithAiChecked + '>اولیه</label>';
+                html += '<label class="hadith-source-option"><input type="radio" name="hadith-source" value="' + HADITH_SOURCE_CONSENSUS + '"' + consensusChecked + '>بازسازی شده</label>';
+                html += '</div>';
+                html += '<div class="hadith-settings-section">';
+                html += '<div class="hadith-links-title">خروجی</div>';
+                html += '<div class="hadith-settings-row">';
+                html += '<label class="hadith-settings-label" for="hadith-export-select">نوع فایل</label>';
+                html += '<select id="hadith-export-select" class="hadith-settings-select"' + exportDisabled + '>';
+                html += '<option value="' + HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE + '"' + (state.exportOption === HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE ? ' selected' : '') + '>جدول اجماع + ترجمه</option>';
+                html += '</select>';
+                html += '</div>';
+                html += '<button type="button" class="hadith-export-btn" id="hadith-export-btn"' + exportDisabled + '>' + (state.exportInProgress ? 'در حال آماده‌سازی...' : 'دریافت فایل') + '</button>';
+                html += '<div class="hadith-export-note">این خروجی مجموعه‌های اجماعی همین آیه را به صورت جدول قابل باز شدن در Word دانلود می‌کند.</div>';
+                if (state.exportStatus) {
+                    html += '<div class="' + exportStatusClass + '">' + escapeHtml(state.exportStatus) + '</div>';
+                }
+                html += '</div>';
+                return html;
+            }
+
+            function buildAyahSectionHtml(verse) {
+                var s = getParams().s, a = getParams().a;
+                var html = '';
+                if (!verse) return html;
+                var useQCF = verse.words && verse.words.length > 0;
+                var arabicHtml = useQCF ? buildAyahWithQCF(verse) : escapeHtml(verse.text_uthmani || verse.text || '');
+                var tr = (verse.translations && verse.translations[0]) ? verse.translations[0].text : '';
+                var maxA = getMaxAyahForSura(s);
+                html += '<section class="ayah-section">';
+                html += '<div class="ayah-header-wrap">';
+                html += '<div class="ayah-meta">';
+                html += '<span class="sura-name-click" data-sura="' + s + '" role="button" tabindex="0">' + escapeHtml(getSuraName(s)) + '</span>';
+                html += '<span class="ayah-nav-wrap">';
+                html += '<button type="button" class="ayah-nav-btn" data-dir="prev" aria-label="آیه قبل"' + (a <= 1 ? ' disabled' : '') + '>\u2039</button>';
+                html += '<span> آیه ' + fmtFa(a) + ' </span>';
+                html += '<button type="button" class="ayah-nav-btn" data-dir="next" aria-label="آیه بعد"' + (a >= maxA ? ' disabled' : '') + '>\u203A</button>';
+                html += '</span></div>';
+                html += '<div class="hadith-menu-wrap">';
+                html += '<button type="button" class="hadith-menu-btn" aria-label="منو">\u2630</button>';
+                html += '<div class="hadith-links-menu" id="hadith-links-menu">';
+                html += buildHadithMenuHtml();
+                html += '</div></div></div>';
+                if (arabicHtml) {
+                    html += '<div class="ayah-arabic-label">متن عربی</div>';
+                    html += '<div class="ayah-text' + (useQCF ? ' ayah-text-qcf' : '') + '">' + arabicHtml + '</div>';
+                }
+                if (tr) {
+                    html += '<div class="ayah-translation-label">ترجمه</div>';
+                    html += '<div class="ayah-translation">' + escapeHtml(tr) + '</div>';
+                }
+                html += '</section>';
+                return html;
+            }
+
+            function getVisibleHadithIds() {
+                return state.allHadithIds.slice(0, Math.min(state.hadithVisibleCount, state.allHadithIds.length));
+            }
+
+            function renderHadithCardById(hid) {
+                var entry = state.hadithCards[String(hid)];
+                if (!entry || entry.status === 'loading') {
+                    return '<article class="hadith-card hadith-card--loading" data-hid="' + escapeHtml(String(hid)) + '">' +
+                        '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div></article>';
+                }
+                if (entry.status === 'error') {
+                    return '<article class="hadith-card hadith-card--error" data-hid="' + escapeHtml(String(hid)) + '">' +
+                        '<div class="hadith-card-error">' + escapeHtml(entry.error || 'خطا در بارگذاری') + '</div>' +
+                        '<button type="button" class="hadith-retry-btn" data-hid="' + escapeHtml(String(hid)) + '">بارگذاری مجدد</button></article>';
+                }
+                return '<article class="hadith-card" data-hid="' + escapeHtml(String(hid)) + '">' + renderHadith(entry.data) + '</article>';
+            }
+
+            function renderHadithAiSectionHtml() {
+                var html = '';
+                if (state.allHadithIds.length > 0) {
+                    var visibleIds = getVisibleHadithIds();
+                    html += '<h2 class="hadith-section-title">احادیث مرتبط (' + fmtFa(state.allHadithIds.length) + ')</h2>';
+                    html += '<div id="hadith-list">';
+                    for (var i = 0; i < visibleIds.length; i++) {
+                        html += renderHadithCardById(visibleIds[i]);
+                    }
+                    html += '<div id="hadith-load-more-wrap">';
+                    if (visibleIds.length < state.allHadithIds.length) {
+                        html += '<button type="button" class="hadith-load-more-btn">بارگذاری ۱۰ حدیث بعد</button>';
+                    }
+                    html += '</div></div>';
+                } else {
+                    html += '<p class="loading">احادیثی برای این آیه یافت نشد.</p>';
+                }
+                return html;
+            }
+
+            function buildConsensusSegmentTable(detail) {
+                if (!detail || !Array.isArray(detail.segments) || detail.segments.length === 0) {
+                    return '<div class="consensus-card-empty">بخش‌بندی این مجموعه در دسترس نیست.</div>';
+                }
+                var rows = [];
+                for (var i = 0; i < detail.segments.length; i++) {
+                    var segment = detail.segments[i] || {};
+                    rows.push(
+                        '<tr><td class="consensus-col-ar">' + buildConsensusSegmentMarkup(segment) +
+                        '</td><td class="consensus-col-tr">' + escapeHtml(segment.translation_segment || '') + '</td></tr>'
+                    );
+                }
+                return '<table class="consensus-segment-table"><thead><tr><th>متن اجماعی</th><th>ترجمه</th></tr></thead><tbody>' + rows.join('') + '</tbody></table>';
+            }
+
+            function renderAlignedText(text) {
+                if (!text) return '';
+                var tokens = String(text).trim().split(/\s+/);
+                var mode = null;
+                var buffer = [];
+                var parts = [];
+
+                function flushBuffer() {
+                    if (buffer.length === 0) return;
+                    var content = escapeHtml(buffer.join(' '));
+                    if (mode === 'quranic_text') {
+                        parts.push('<quranic_text>' + content + '</quranic_text>');
+                    } else if (mode === 'footnote') {
+                        parts.push('<footnote>[' + content + ']</footnote>');
+                    } else {
+                        parts.push(content);
+                    }
+                    buffer = [];
+                }
+
+                for (var i = 0; i < tokens.length; i++) {
+                    var token = tokens[i];
+                    if (token === 'TAG_OPEN:quranic_text') {
+                        flushBuffer();
+                        mode = 'quranic_text';
+                        continue;
+                    }
+                    if (token === 'TAG_CLOSE:quranic_text') {
+                        flushBuffer();
+                        mode = null;
+                        continue;
+                    }
+                    if (token === 'TAG_OPEN:footnote') {
+                        flushBuffer();
+                        mode = 'footnote';
+                        continue;
+                    }
+                    if (token === 'TAG_CLOSE:footnote') {
+                        flushBuffer();
+                        mode = null;
+                        continue;
+                    }
+                    if (!mode && token === '-') {
+                        flushBuffer();
+                        parts.push('<span class="alignment-gap">-</span>');
+                        continue;
+                    }
+                    buffer.push(token);
+                }
+                flushBuffer();
+                return processHadithText(parts.join(' '));
+            }
+
+            function buildConsensusMembersTable(setId) {
+                var translateDetail = state.consensusTranslateDetails[setId];
+                var detail = state.consensusMemberDetails[setId];
+                if (!detail || !translateDetail) {
+                    return '<div class="consensus-card-loading">در حال بارگذاری احادیث این مجموعه...</div>';
+                }
+                if (!Array.isArray(detail.members) || detail.members.length === 0) {
+                    return '<div class="consensus-card-empty">حدیثی برای این مجموعه پیدا نشد.</div>';
+                }
+                var view = state.consensusHadithView[setId] || 'segment-grid';
+                if (view === 'segment-grid') return buildConsensusSegmentAlignmentTable(detail, translateDetail);
+                if (view === 'token-grid') return buildConsensusTokenAlignmentTable(detail);
+                if (view === 'aligned-list') return buildConsensusAlignedHadithList(detail);
+                return buildConsensusSimpleHadithList(detail);
+            }
+
+            function buildConsensusSegmentAlignmentTable(detail, translateDetail) {
+                var members = detail.members || [];
+                var boundaries = getSegmentBoundaries(translateDetail);
+                var memberSlices = [];
+                for (var i = 0; i < members.length; i++) {
+                    memberSlices.push(splitAlignedCellsBySegments(parseAlignedGrid(members[i].aligned_body || ''), boundaries));
+                }
+                var headerCells = [
+                    '<th>متن اجماعی</th>',
+                    '<th>ترجمه</th>'
+                ];
+                for (var headerIdx = 0; headerIdx < members.length; headerIdx++) {
+                    headerCells.push('<th>روایت ' + fmtFa(headerIdx + 1) + '</th>');
+                }
+                var rows = [];
+                for (var segIdx = 0; segIdx < boundaries.length; segIdx++) {
+                    var segment = translateDetail.segments[segIdx] || {};
+                    var row = [
+                        '<tr>',
+                        '<td class="consensus-col-ar">' + buildConsensusSegmentMarkup(segment) + '</td>',
+                        '<td class="consensus-col-tr">' + escapeHtml(segment.translation_segment || '') + '</td>'
+                    ];
+                    for (var memberIdx = 0; memberIdx < memberSlices.length; memberIdx++) {
+                        row.push('<td class="consensus-row-cell">' + buildMarkupFromAlignedCells(memberSlices[memberIdx][segIdx] || []) + '</td>');
+                    }
+                    row.push('</tr>');
+                    rows.push(row.join(''));
+                }
+                return '<div class="consensus-table-scroll"><table class="consensus-members-table consensus-members-table--segments"><thead><tr>' + headerCells.join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>';
+            }
+
+            function buildConsensusTokenAlignmentTable(detail) {
+                var members = detail.members || [];
+                var consensusCells = getConsensusTokenGrid(detail);
+                var memberCells = [];
+                for (var i = 0; i < members.length; i++) {
+                    memberCells.push(parseAlignedGrid(members[i].aligned_body || ''));
+                }
+                var maxRows = consensusCells.length;
+                var headCells = ['<th class="consensus-row-index">ردیف</th>', '<th>اجماع</th>'];
+                for (var j = 0; j < members.length; j++) {
+                    headCells.push('<th>روایت ' + fmtFa(j + 1) + '</th>');
+                }
+                var bodyRows = [];
+                for (var rowIdx = 0; rowIdx < maxRows; rowIdx++) {
+                    var rowParts = ['<tr><td class="consensus-row-index">' + fmtFa(rowIdx + 1) + '</td>'];
+                    rowParts.push('<td class="consensus-row-cell">' + renderSingleAlignmentCell(consensusCells[rowIdx]) + '</td>');
+                    for (var memberIdx = 0; memberIdx < memberCells.length; memberIdx++) {
+                        rowParts.push('<td class="consensus-row-cell">' + renderSingleAlignmentCell(memberCells[memberIdx][rowIdx]) + '</td>');
+                    }
+                    rowParts.push('</tr>');
+                    bodyRows.push(rowParts.join(''));
+                }
+                return '<div class="consensus-table-scroll"><table class="consensus-members-table consensus-alignment-rows-table"><thead><tr>' + headCells.join('') + '</tr></thead><tbody>' + bodyRows.join('') + '</tbody></table></div>';
+            }
+
+            function buildConsensusAlignedHadithList(detail) {
+                var members = detail.members || [];
+                var cards = [];
+                for (var i = 0; i < members.length; i++) {
+                    var member = members[i] || {};
+                    cards.push(
+                        '<article class="hadith-card">' +
+                        '<div class="consensus-member-header"><span class="consensus-inline-label">روایت ' + fmtFa(i + 1) + '</span><div>' + processHadithText(member.header_text || '') + '</div></div>' +
+                        '<div class="consensus-aligned-text">' + renderAlignedText(member.aligned_body || '') + '</div>' +
+                        (member.translation ? '<div class="hadith-translation">' + escapeHtml(member.translation) + '</div>' : '') +
+                        '</article>'
+                    );
+                }
+                return cards.join('');
+            }
+
+            function buildConsensusSimpleHadithList(detail) {
+                var members = detail.members || [];
+                var cards = [];
+                for (var i = 0; i < members.length; i++) {
+                    var member = members[i] || {};
+                    cards.push(
+                        '<article class="hadith-card">' +
+                        '<div class="consensus-member-header"><span class="consensus-inline-label">روایت ' + fmtFa(i + 1) + '</span><div>' + processHadithText(member.header_text || '') + '</div></div>' +
+                        '<div class="consensus-member-text">' + processHadithText(member.body_text || '') + '</div>' +
+                        (member.translation ? '<div class="hadith-translation">' + escapeHtml(member.translation) + '</div>' : '') +
+                        '</article>'
+                    );
+                }
+                return cards.join('');
+            }
+
+            function renderConsensusCard(setId, orderIndex) {
+                var summary = state.consensusTranslateById && state.consensusTranslateById[setId];
+                var detail = state.consensusTranslateDetails[setId];
+                var isOpen = !!state.consensusOpen[setId];
+                var view = state.consensusHadithView[setId] || 'segment-grid';
+                var metaParts = [];
+                if (summary && summary.member_count != null) metaParts.push(fmtFa(summary.member_count) + ' حدیث');
+                if (summary && summary.segment_count != null) metaParts.push(fmtFa(summary.segment_count) + ' بخش');
+                if (summary && summary.translation_available_count != null) metaParts.push(fmtFa(summary.translation_available_count) + ' ترجمه');
+                if (summary && summary.translation_source_hid != null) metaParts.push('شماره حدیث: ' + escapeHtml(fmtFa(summary.translation_source_hid)));
+                if (detail && detail.translation_language) metaParts.push('زبان ترجمه: ' + escapeHtml(localizedLanguageName(detail.translation_language)));
+                if (detail && detail.translation_source) {
+                    if (detail.translation_source.coverage != null) metaParts.push('پوشش: ' + escapeHtml(fmtFa(Number(detail.translation_source.coverage).toFixed(2))));
+                    if (detail.translation_source.match_ratio != null) metaParts.push('تطبیق: ' + escapeHtml(fmtFa(Number(detail.translation_source.match_ratio).toFixed(2))));
+                    if (detail.translation_source.translation_word_count != null) metaParts.push(fmtFa(detail.translation_source.translation_word_count) + ' واژه ترجمه');
+                }
+                var html = '<article class="consensus-card" data-set-id="' + escapeHtml(setId) + '">';
+                // html += '<h3 class="consensus-card-title">مجموعه روایی ' + fmtFa(orderIndex + 1) + '</h3>';
+                html += '<div class="consensus-card-meta">' + metaParts.join(' | ') + '</div>';
+                if (summary && summary.body_consensus_preview) {
+                    html += '<div class="consensus-card-headerline">' + escapeHtml(summary.body_consensus_preview) + '</div>';
+                }
+                if (detail) {
+                    html += buildConsensusSegmentTable(detail);
+                } else {
+                    html += '<div class="consensus-card-loading">در حال بارگذاری متن اجماعی و ترجمه...</div>';
+                }
+                html += '<div class="consensus-actions">';
+                html += '<button type="button" class="consensus-toggle-btn" data-set-id="' + escapeHtml(setId) + '" title="' + (isOpen ? 'بستن احادیث این مجموعه' : 'نمایش احادیث این مجموعه') + '" aria-label="' + (isOpen ? 'بستن احادیث این مجموعه' : 'نمایش احادیث این مجموعه') + '">' + (isOpen ? '−' : '+') + '</button>';
+                html += '</div>';
+                if (isOpen) {
+                    html += '<div class="consensus-members-panel">';
+                    html += '<div class="consensus-members-header">';
+                    html += '<div class="consensus-members-title">احادیث این مجموعه</div>';
+                    html += '<div class="consensus-view-switch">';
+                    html += '<button type="button" class="consensus-view-btn' + (view === 'segment-grid' ? ' is-active' : '') + '" data-set-id="' + escapeHtml(setId) + '" data-view="segment-grid">هم‌ردیفی قطعه‌ها</button>';
+                    html += '<button type="button" class="consensus-view-btn' + (view === 'token-grid' ? ' is-active' : '') + '" data-set-id="' + escapeHtml(setId) + '" data-view="token-grid">هم‌ردیفی واژه‌ها</button>';
+                    html += '<button type="button" class="consensus-view-btn' + (view === 'aligned-list' ? ' is-active' : '') + '" data-set-id="' + escapeHtml(setId) + '" data-view="aligned-list">هم‌ردیفی احادیث</button>';
+                    html += '<button type="button" class="consensus-view-btn' + (view === 'simple-list' ? ' is-active' : '') + '" data-set-id="' + escapeHtml(setId) + '" data-view="simple-list">حدیث‌ها</button>';
+                    html += '</div></div>';
+                    html += buildConsensusMembersTable(setId);
+                    html += '</div>';
+                }
+                html += '</article>';
+                return html;
+            }
+
+            function renderConsensusSectionHtml() {
+                if (state.consensusLoading && state.consensusMatchedSetIds.length === 0) {
+                    return '<div class="loading">در حال بارگذاری مجموعه‌های اجماعی...</div>';
+                }
+                if (state.consensusError) {
+                    return '<div class="error">' + escapeHtml(state.consensusError) + '</div>';
+                }
+                if (!state.consensusMatchedSetIds.length) {
+                    return '<p class="loading">مجموعه اجماعیِ دارای ترجمه برای این آیه پیدا نشد.</p>';
+                }
+                var visibleCount = Math.min(state.consensusVisibleCount, state.consensusMatchedSetIds.length);
+                var html = '<h2 class="hadith-section-title">مجموعه‌های اجماعی دارای ترجمه (' + fmtFa(state.consensusMatchedSetIds.length) + ')</h2>';
+                html += '<div id="consensus-list">';
+                for (var i = 0; i < visibleCount; i++) {
+                    html += renderConsensusCard(state.consensusMatchedSetIds[i], i);
+                }
+                html += '<div class="consensus-load-more-wrap">';
+                if (visibleCount < state.consensusMatchedSetIds.length) {
+                    html += '<button type="button" class="hadith-load-more-btn consensus-load-more-btn">بارگذاری ۱۰ مجموعه بعد</button>';
+                }
+                html += '</div></div>';
+                return html;
+            }
+
+            function renderPage() {
+                var params = getParams();
+                var title = document.getElementById('page-title');
+                title.textContent = 'احادیث مرتبط با آیه — ' + getSuraName(params.s) + '، آیه ' + params.a;
+                var html = buildAyahSectionHtml(state.verse);
+                html += state.source === HADITH_SOURCE_CONSENSUS ? renderConsensusSectionHtml() : renderHadithAiSectionHtml();
+                show(document.getElementById('content'), html);
+            }
+
             function getCardByHid(hid) {
                 var list = document.getElementById('hadith-list');
                 if (!list) return null;
@@ -824,87 +1770,20 @@
                     '<button type="button" class="hadith-retry-btn" data-hid="' + escapeHtml(String(hid)) + '">بارگذاری مجدد</button>';
             }
 
-            function renderVerseAndPlaceholders(verse, hadithIds) {
-                var s = getParams().s, a = getParams().a;
-                var title = document.getElementById('page-title');
-                title.textContent = 'احادیث مرتبط با آیه — ' + getSuraName(s) + '، آیه ' + a;
-
-                var html = '';
-                if (verse) {
-                    var useQCF = verse.words && verse.words.length > 0;
-                    var arabicHtml = '';
-                    if (useQCF) arabicHtml = buildAyahWithQCF(verse);
-                    else arabicHtml = escapeHtml(verse.text_uthmani || verse.text || '');
-                    var tr = (verse.translations && verse.translations[0]) ? verse.translations[0].text : '';
-                    var maxA = getMaxAyahForSura(s);
-                    html += '<section class="ayah-section">';
-                    html += '<div class="ayah-header-wrap">';
-                    html += '<div class="ayah-meta">';
-                    html += '<span class="sura-name-click" data-sura="' + s + '" role="button" tabindex="0">' + escapeHtml(getSuraName(s)) + '</span>';
-                    html += '<span class="ayah-nav-wrap">';
-                    html += '<button type="button" class="ayah-nav-btn" data-dir="prev" aria-label="آیه قبل"' + (a <= 1 ? ' disabled' : '') + '>\u2039</button>';
-                    html += '<span> آیه ' + fmtFa(a) + ' </span>';
-                    html += '<button type="button" class="ayah-nav-btn" data-dir="next" aria-label="آیه بعد"' + (a >= maxA ? ' disabled' : '') + '>\u203A</button>';
-                    html += '</span></div>';
-                    html += '<div class="hadith-menu-wrap">';
-                    html += '<button type="button" class="hadith-menu-btn" aria-label="منو">\u2630</button>';
-                    html += '<div class="hadith-links-menu" id="hadith-links-menu">';
-                    html += '<div class="hadith-links-title">نحوه نمایش</div>';
-                    html += '<div class="hadith-links-grid">';
-                    html += '<a class="hadith-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>';
-                    html += '<a class="hadith-link" href="search.html" title="ابزار جستجو">جستجو</a>';
-                    html += '<a class="hadith-link" href="simple.html" title="رفتن به نمایش">نمایش</a>';
-                    html += '<a class="hadith-link" href="stat.html" title="آمار سوره">آمار سوره</a>';
-                    html += '<a class="hadith-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>';
-                    html += '<a class="hadith-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>';
-                    html += '</div>';
-                    html += '</div></div></div>';
-                    if (arabicHtml) {
-                        html += '<div class="ayah-arabic-label">متن عربی</div>';
-                        html += '<div class="ayah-text' + (useQCF ? ' ayah-text-qcf' : '') + '">' + arabicHtml + '</div>';
-                    }
-                    if (tr) {
-                        html += '<div class="ayah-translation-label">ترجمه</div>';
-                        html += '<div class="ayah-translation">' + escapeHtml(tr) + '</div>';
-                    }
-                    html += '</section>';
-                }
-
-                if (hadithIds.length > 0) {
-                    var initialCount = Math.min(HADITH_PAGE_SIZE, hadithIds.length);
-                    html += '<h2 class="hadith-section-title">احادیث مرتبط (' + fmtFa(hadithIds.length) + ')</h2>';
-                    html += '<div id="hadith-list">';
-                    for (var hi = 0; hi < initialCount; hi++) {
-                        var id = hadithIds[hi];
-                        html += '<article class="hadith-card hadith-card--loading" data-hid="' + escapeHtml(String(id)) + '">';
-                        html += '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
-                        html += '</article>';
-                    }
-                    html += '<div id="hadith-load-more-wrap">';
-                    if (hadithIds.length > HADITH_PAGE_SIZE) {
-                        html += '<button type="button" class="hadith-load-more-btn">بارگذاری ۱۰ حدیث بعد</button>';
-                    }
-                    html += '</div></div>';
-                } else {
-                    html += '<p class="loading">احادیثی برای این آیه یافت نشد.</p>';
-                }
-
-                show(document.getElementById('content'), html);
-            }
-
             function onRetryClick(e) {
                 var btn = e.target;
                 if (!btn.classList.contains('hadith-retry-btn')) return;
                 var hid = btn.getAttribute('data-hid');
                 if (!hid) return;
-                var card = getCardByHid(hid);
-                if (!card) return;
-                setCardLoading(card);
+                state.hadithCards[String(hid)] = { status: 'loading' };
+                renderPage();
                 fetchSingleHadith(hid).then(function(h) {
-                    setCardContent(card, renderHadith(h));
+                    state.hadithCards[String(hid)] = { status: 'loaded', data: h };
+                    if (state.source === HADITH_SOURCE_HADITH_AI) renderPage();
                 }).catch(function(err) {
                     console.error('[hadith-service get_hadith] retry hid=' + hid, err);
-                    setCardError(card, hid, err.message || 'خطا در بارگذاری');
+                    state.hadithCards[String(hid)] = { status: 'error', error: err.message || 'خطا در بارگذاری' };
+                    if (state.source === HADITH_SOURCE_HADITH_AI) renderPage();
                 });
             }
 
@@ -944,40 +1823,321 @@
                     return;
                 }
                 var loadMoreBtn = target.closest && target.closest('.hadith-load-more-btn');
-                if (loadMoreBtn && !loadMoreBtn.disabled && allHadithIds.length > 0) {
-                    var list = document.getElementById('hadith-list');
-                    var wrap = document.getElementById('hadith-load-more-wrap');
-                    if (!list || !wrap) return;
-                    var currentCount = list.querySelectorAll('.hadith-card').length;
-                    if (currentCount >= allHadithIds.length) return;
-                    var nextCount = Math.min(HADITH_PAGE_SIZE, allHadithIds.length - currentCount);
-                    for (var i = 0; i < nextCount; i++) {
-                        var id = allHadithIds[currentCount + i];
-                        var article = document.createElement('article');
-                        article.className = 'hadith-card hadith-card--loading';
-                        article.setAttribute('data-hid', String(id));
-                        article.innerHTML = '<div class="hadith-card-placeholder"><span class="hadith-card-spinner"></span> در حال بارگذاری حدیث...</div>';
-                        list.insertBefore(article, wrap);
+                if (loadMoreBtn && !loadMoreBtn.disabled && loadMoreBtn.classList.contains('consensus-load-more-btn')) {
+                    var currentVisibleConsensus = Math.min(state.consensusVisibleCount, state.consensusMatchedSetIds.length);
+                    state.consensusVisibleCount = Math.min(state.consensusVisibleCount + CONSENSUS_PAGE_SIZE, state.consensusMatchedSetIds.length);
+                    renderPage();
+                    loadConsensusTranslateDetailsInRange(currentVisibleConsensus, state.consensusVisibleCount);
+                    return;
+                }
+                if (loadMoreBtn && !loadMoreBtn.disabled && state.allHadithIds.length > 0) {
+                    var currentVisibleHadith = Math.min(state.hadithVisibleCount, state.allHadithIds.length);
+                    state.hadithVisibleCount = Math.min(state.hadithVisibleCount + HADITH_PAGE_SIZE, state.allHadithIds.length);
+                    renderPage();
+                    loadHadithsInRange(currentVisibleHadith, state.hadithVisibleCount);
+                    return;
+                }
+                var consensusToggleBtn = target.closest && target.closest('.consensus-toggle-btn');
+                if (consensusToggleBtn) {
+                    var setId = consensusToggleBtn.getAttribute('data-set-id');
+                    if (!setId) return;
+                    state.consensusOpen[setId] = !state.consensusOpen[setId];
+                    renderPage();
+                    if (state.consensusOpen[setId]) {
+                        ensureConsensusMemberDetail(setId).then(function() {
+                            if (state.source === HADITH_SOURCE_CONSENSUS) renderPage();
+                        }).catch(function(err) {
+                            console.error('[consensus members] failed for', setId, err);
+                            state.consensusError = err.message || 'خطا در بارگذاری احادیث مجموعه';
+                            if (state.source === HADITH_SOURCE_CONSENSUS) renderPage();
+                        });
                     }
-                    if (currentCount + nextCount >= allHadithIds.length) loadMoreBtn.style.display = 'none';
-                    else loadMoreBtn.textContent = 'بارگذاری ۱۰ حدیث بعد';
-                    loadHadithsInRange(currentCount, currentCount + nextCount);
+                    return;
+                }
+                var consensusViewBtn = target.closest && target.closest('.consensus-view-btn');
+                if (consensusViewBtn) {
+                    var viewSetId = consensusViewBtn.getAttribute('data-set-id');
+                    var nextView = consensusViewBtn.getAttribute('data-view');
+                    if (!viewSetId || !nextView) return;
+                    state.consensusHadithView[viewSetId] = nextView;
+                    renderPage();
+                    return;
+                }
+                var exportBtn = target.closest && target.closest('#hadith-export-btn');
+                if (exportBtn) {
+                    handleExport();
+                }
+            }
+
+            function onContentChange(e) {
+                var target = e.target;
+                if (!target) return;
+                if (target.name === 'hadith-source') {
+                    activateSource(target.value);
+                    return;
+                }
+                if (target.id === 'hadith-export-select') {
+                    state.exportOption = target.value || HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE;
                 }
             }
 
             async function loadHadithsInRange(startIdx, endIdx) {
-                for (var i = startIdx; i < endIdx && i < allHadithIds.length; i++) {
-                    var id = allHadithIds[i];
-                    var card = getCardByHid(id);
-                    if (!card || !card.classList.contains('hadith-card--loading')) continue;
+                for (var i = startIdx; i < endIdx && i < state.allHadithIds.length; i++) {
+                    var id = state.allHadithIds[i];
+                    var key = String(id);
+                    if (state.hadithCards[key] && state.hadithCards[key].status === 'loaded') continue;
+                    state.hadithCards[key] = { status: 'loading' };
+                    if (state.source === HADITH_SOURCE_HADITH_AI) renderPage();
                     try {
                         var h = await fetchSingleHadith(id);
-                        setCardContent(card, renderHadith(h));
+                        state.hadithCards[key] = { status: 'loaded', data: h };
                     } catch (err) {
                         console.error('[hadith-service get_hadith] hid=' + id, err);
-                        setCardError(card, id, err.message || 'خطا در بارگذاری');
+                        state.hadithCards[key] = { status: 'error', error: err.message || 'خطا در بارگذاری' };
                     }
+                    if (state.source === HADITH_SOURCE_HADITH_AI) renderPage();
                     await new Promise(function(r) { setTimeout(r, 0); });
+                }
+            }
+
+            async function ensureConsensusIndexes() {
+                if (state.indexesPromise) return state.indexesPromise;
+                state.indexesPromise = Promise.all([
+                    fetchJson(CONSENSUS_AYAH_MAP_URL, 'خطا در دریافت نگاشت آیه به حدیث'),
+                    fetchJson(CONSENSUS_TRANSLATE_INDEX_URL, 'خطا در دریافت فهرست ترجمه‌های اجماعی')
+                ]).then(function(results) {
+                    var ayahMap = results[0] || {};
+                    var translate = results[1] || {};
+                    var translateById = {};
+                    var translateOrder = [];
+                    var items = Array.isArray(translate.items) ? translate.items : [];
+                    for (var k = 0; k < items.length; k++) {
+                        var item = items[k];
+                        if (!item || !item.consensus_set_id) continue;
+                        translateById[item.consensus_set_id] = item;
+                        translateOrder.push(item.consensus_set_id);
+                    }
+                    state.consensusAyahMap = ayahMap;
+                    state.consensusTranslateById = translateById;
+                    state.consensusTranslateOrder = translateOrder;
+                });
+                return state.indexesPromise;
+            }
+
+            async function prepareConsensusForCurrentAyah() {
+                var params = getParams();
+                var key = params.s + ':' + params.a;
+                state.consensusLoading = true;
+                state.consensusError = '';
+                state.consensusMatchedSetIds = [];
+                state.consensusVisibleCount = CONSENSUS_PAGE_SIZE;
+                renderPage();
+                await ensureConsensusIndexes();
+                var ayahEntry = state.consensusAyahMap && state.consensusAyahMap[key];
+                var hadithIds = ayahEntry && Array.isArray(ayahEntry.hadith_ids) ? ayahEntry.hadith_ids : [];
+                var matchedSetIds = new Set();
+                var hadithIdSet = new Set();
+                for (var i = 0; i < hadithIds.length; i++) hadithIdSet.add(String(hadithIds[i]));
+                for (var j = 0; j < state.consensusTranslateOrder.length; j++) {
+                    var setId = state.consensusTranslateOrder[j];
+                    var summary = state.consensusTranslateById[setId];
+                    if (!summary || Number(summary.translation_available_count || 0) <= 0) continue;
+                    if (summary.translation_source_hid && hadithIdSet.has(String(summary.translation_source_hid))) {
+                        matchedSetIds.add(setId);
+                    }
+                }
+                var ordered = [];
+                for (var k = 0; k < state.consensusTranslateOrder.length; k++) {
+                    var orderedSetId = state.consensusTranslateOrder[k];
+                    if (matchedSetIds.has(orderedSetId)) ordered.push(orderedSetId);
+                }
+                state.consensusMatchedSetIds = ordered;
+                state.consensusVisibleCount = CONSENSUS_PAGE_SIZE;
+                state.consensusLoading = false;
+                renderPage();
+                await loadConsensusTranslateDetailsInRange(0, Math.min(state.consensusVisibleCount, state.consensusMatchedSetIds.length));
+            }
+
+            async function ensureConsensusTranslateDetail(setId) {
+                if (state.consensusTranslateDetails[setId]) return state.consensusTranslateDetails[setId];
+                if (!state.consensusTranslatePromises[setId]) {
+                    var summary = state.consensusTranslateById[setId];
+                    if (!summary || !summary.detail_file) throw new Error('فایل ترجمه این مجموعه پیدا نشد');
+                    state.consensusTranslatePromises[setId] = fetchJson(CONSENSUS_TRANSLATE_DETAIL_BASE_URL + summary.detail_file, 'خطا در دریافت متن اجماعی').then(function(detail) {
+                        state.consensusTranslateDetails[setId] = detail;
+                        return detail;
+                    }).finally(function() {
+                        delete state.consensusTranslatePromises[setId];
+                    });
+                }
+                return state.consensusTranslatePromises[setId];
+            }
+
+            async function ensureConsensusMemberDetail(setId) {
+                if (state.consensusMemberDetails[setId]) return state.consensusMemberDetails[setId];
+                if (!state.consensusMemberPromises[setId]) {
+                    state.consensusMemberPromises[setId] = fetchJson(CONSENSUS_MEMBER_DETAIL_BASE_URL + 'h/' + setId + '.json', 'خطا در دریافت احادیث مجموعه').then(function(detail) {
+                        state.consensusMemberDetails[setId] = detail;
+                        return detail;
+                    }).finally(function() {
+                        delete state.consensusMemberPromises[setId];
+                    });
+                }
+                return state.consensusMemberPromises[setId];
+            }
+
+            async function ensureConsensusDataForExport() {
+                await ensureConsensusIndexes();
+                if (!state.consensusMatchedSetIds.length && !state.consensusLoading) {
+                    await prepareConsensusForCurrentAyah();
+                }
+                if (!state.consensusMatchedSetIds.length) return [];
+                for (var i = 0; i < state.consensusMatchedSetIds.length; i++) {
+                    await ensureConsensusTranslateDetail(state.consensusMatchedSetIds[i]);
+                }
+                return state.consensusMatchedSetIds.slice();
+            }
+
+            function buildWordDocumentHtml(title, bodyHtml) {
+                return '<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><title>' + escapeHtml(title) + '</title>' +
+                    '<style>' +
+                    'body{font-family:"B Lotus","Noto Naskh Arabic","Tahoma",serif;color:#1f2937;direction:rtl;margin:24px;line-height:1.7;}' +
+                    'h1{font-size:20pt;margin:0 0 8px;color:#0f172a;}' +
+                    '.doc-meta{margin:0 0 18px;color:#475569;font-size:11pt;}' +
+                    '.export-card{margin:0 0 28px;padding:16px 18px;border:1px solid #cbd5e1;border-radius:12px;page-break-inside:avoid;}' +
+                    '.export-card-title{font-size:15pt;font-weight:700;margin:0 0 8px;color:#1e3a8a;}' +
+                    '.export-card-meta{margin:0 0 12px;color:#475569;font-size:10.5pt;}' +
+                    '.export-preview{margin:0 0 14px;font-size:12pt;color:#0f172a;}' +
+                    'table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:8px;}' +
+                    'th,td{border:1px solid #cbd5e1;padding:8px 10px;vertical-align:top;text-align:right;word-wrap:break-word;}' +
+                    'th{background:#e2e8f0;font-weight:700;}' +
+                    '.col-ar{width:56%;}.col-tr{width:44%;}' +
+                    '.hadith-quranic{color:#14532d;font-weight:700;}' +
+                    '.hadith-quranic-current{color:#9a3412;background:#fed7aa;}' +
+                    '.hadith-footnote{color:#1d4ed8;text-decoration:none;}' +
+                    '.hadith-footnote-current{color:#9a3412;font-weight:700;}' +
+                    '</style></head><body>' + bodyHtml + '</body></html>';
+            }
+
+            function buildConsensusTranslateTableExportHtml(setIds) {
+                var params = getParams();
+                var title = 'احادیث اجماعی و ترجمه - ' + getSuraName(params.s) + ' - آیه ' + fmtFa(params.a);
+                var bodyParts = [
+                    '<h1>' + escapeHtml(title) + '</h1>',
+                    '<div class="doc-meta">سوره ' + escapeHtml(getSuraName(params.s)) + ' | آیه ' + escapeHtml(fmtFa(params.a)) + ' | تعداد مجموعه‌ها: ' + escapeHtml(fmtFa(setIds.length)) + '</div>'
+                ];
+                for (var i = 0; i < setIds.length; i++) {
+                    var setId = setIds[i];
+                    var summary = state.consensusTranslateById && state.consensusTranslateById[setId];
+                    var detail = state.consensusTranslateDetails[setId];
+                    if (!detail) continue;
+                    var metaParts = [];
+                    if (summary && summary.member_count != null) metaParts.push(fmtFa(summary.member_count) + ' حدیث');
+                    if (summary && summary.segment_count != null) metaParts.push(fmtFa(summary.segment_count) + ' بخش');
+                    if (detail.translation_language) metaParts.push('زبان ترجمه: ' + localizedLanguageName(detail.translation_language));
+                    bodyParts.push('<section class="export-card">');
+                    bodyParts.push('<div class="export-card-title">مجموعه ' + escapeHtml(fmtFa(i + 1)) + '</div>');
+                    if (metaParts.length) bodyParts.push('<div class="export-card-meta">' + escapeHtml(metaParts.join(' | ')) + '</div>');
+                    if (summary && summary.body_consensus_preview) {
+                        bodyParts.push('<div class="export-preview">' + escapeHtml(summary.body_consensus_preview) + '</div>');
+                    }
+                    bodyParts.push('<table><thead><tr><th class="col-ar">متن اجماعی</th><th class="col-tr">ترجمه</th></tr></thead><tbody>');
+                    var segments = Array.isArray(detail.segments) ? detail.segments : [];
+                    for (var segIdx = 0; segIdx < segments.length; segIdx++) {
+                        var segment = segments[segIdx] || {};
+                        bodyParts.push('<tr><td class="col-ar">' + buildConsensusSegmentMarkup(segment) + '</td><td class="col-tr">' + escapeHtml(segment.translation_segment || '') + '</td></tr>');
+                    }
+                    bodyParts.push('</tbody></table></section>');
+                }
+                return buildWordDocumentHtml(title, bodyParts.join(''));
+            }
+
+            function triggerWordDownload(filename, html) {
+                var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+                var url = URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+            }
+
+            async function handleExport() {
+                if (state.exportInProgress) return;
+                state.exportStatus = '';
+                state.exportStatusType = '';
+                state.exportInProgress = true;
+                renderPage();
+                try {
+                    if (state.exportOption !== HADITH_EXPORT_OPTION_CONSENSUS_TRANSLATE_TABLE) {
+                        throw new Error('نوع خروجی پشتیبانی نمی‌شود');
+                    }
+                    var setIds = await ensureConsensusDataForExport();
+                    if (!setIds.length) {
+                        throw new Error('برای این آیه مجموعه اجماعیِ دارای ترجمه پیدا نشد');
+                    }
+                    var params = getParams();
+                    var filename = 'hadith-consensus-translate-s' + fmtEn(params.s) + '-a' + fmtEn(params.a) + '.doc';
+                    triggerWordDownload(filename, buildConsensusTranslateTableExportHtml(setIds));
+                    state.exportStatus = 'فایل Word با ' + fmtFa(setIds.length) + ' جدول آماده و دانلود شد.';
+                    state.exportStatusType = 'success';
+                } catch (err) {
+                    console.error('[hadith-export] failed', err);
+                    state.exportStatus = err && err.message ? err.message : 'خروجی گرفتن با خطا روبه‌رو شد.';
+                    state.exportStatusType = 'error';
+                } finally {
+                    state.exportInProgress = false;
+                    renderPage();
+                }
+            }
+
+            async function loadConsensusTranslateDetailsInRange(startIdx, endIdx) {
+                for (var i = startIdx; i < endIdx && i < state.consensusMatchedSetIds.length; i++) {
+                    var setId = state.consensusMatchedSetIds[i];
+                    if (state.consensusTranslateDetails[setId]) continue;
+                    try {
+                        await ensureConsensusTranslateDetail(setId);
+                    } catch (err) {
+                        console.error('[consensus translate] failed for', setId, err);
+                        state.consensusError = err.message || 'خطا در بارگذاری مجموعه‌های اجماعی';
+                    }
+                    if (state.source === HADITH_SOURCE_CONSENSUS) renderPage();
+                    await new Promise(function(r) { setTimeout(r, 0); });
+                }
+            }
+
+            function bindEvents() {
+                if (state.eventsBound) return;
+                state.eventsBound = true;
+                var content = document.getElementById('content');
+                content.addEventListener('click', onContentClick);
+                content.addEventListener('change', onContentChange);
+                document.addEventListener('click', function(e) {
+                    if (e.target.closest && e.target.closest('.hadith-menu-wrap')) return;
+                    var m = document.getElementById('hadith-links-menu');
+                    if (m) m.classList.remove('open');
+                });
+            }
+
+            async function activateSource(source) {
+                storeHadithSource(source);
+                renderPage();
+                if (state.source === HADITH_SOURCE_CONSENSUS) {
+                    try {
+                        await prepareConsensusForCurrentAyah();
+                    } catch (err) {
+                        console.error('[consensus] activation failed', err);
+                        state.consensusLoading = false;
+                        state.consensusError = err.message || 'خطا در بارگذاری داده‌های اجماعی';
+                        renderPage();
+                    }
+                } else {
+                    renderPage();
+                    if (state.allHadithIds.length > 0) {
+                        await loadHadithsInRange(0, Math.min(state.hadithVisibleCount, state.allHadithIds.length));
+                    }
                 }
             }
 
@@ -992,19 +2152,12 @@
                 try {
                     var verse = await fetchVerse(s, a);
                     var hadithIds = await fetchHadithIds(s, a);
-                    allHadithIds = hadithIds;
-                    renderVerseAndPlaceholders(verse, hadithIds);
-                    document.getElementById('content').addEventListener('click', onContentClick);
-                    document.addEventListener('click', function(e) {
-                        if (e.target.closest && e.target.closest('.hadith-menu-wrap')) return;
-                        var m = document.getElementById('hadith-links-menu');
-                        if (m) m.classList.remove('open');
-                    });
-
-                    if (hadithIds.length > 0) {
-                        var initialCount = Math.min(HADITH_PAGE_SIZE, hadithIds.length);
-                        loadHadithsInRange(0, initialCount);
-                    }
+                    state.verse = verse;
+                    state.allHadithIds = hadithIds;
+                    state.hadithVisibleCount = HADITH_PAGE_SIZE;
+                    bindEvents();
+                    renderPage();
+                    await activateSource(state.source);
                 } catch (err) {
                     console.error('[hadith-service] run() failed:', err);
                     showError(err.message || 'خطایی رخ داد.', err);

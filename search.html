@@ -409,6 +409,12 @@
             padding: 0;
             border-radius: 0;
             box-shadow: none;
+            position: relative;
+            overflow: visible;
+        }
+
+        .results-box.items-panel-collapsed {
+            gap: 0;
         }
         
         .results-content-column {
@@ -419,18 +425,91 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
             min-height: 200px;
         }
+
+        .items-panel-shell {
+            position: sticky;
+            width: 240px;
+            flex: 0 0 240px;
+            transition: width 0.22s ease, flex-basis 0.22s ease;
+            overflow: visible;
+            top: 10px;
+            align-self: flex-start;
+        }
+
+        .items-panel-shell.collapsed {
+            width: 0;
+            flex-basis: 0;
+        }
         
         .items-panel {
             width: 240px;
-            flex-shrink: 0;
             background: white;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
             max-height: 80vh;
             overflow-y: auto;
-            position: sticky;
-            top: 10px;
+            position: relative;
+            transition: opacity 0.18s ease, transform 0.22s ease;
+        }
+
+        .items-panel-shell.collapsed .items-panel {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(12px);
+        }
+
+        .items-panel-toggle {
+            position: absolute;
+            top: 18px;
+            left: -18px;
+            width: 18px;
+            height: 52px;
+            padding: 0;
+            border: 1px solid #d8dee8;
+            border-right: none;
+            background: linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%);
+            color: #5f6b7a;
+            font-size: 0;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+            z-index: 3;
+            border-radius: 12px 0 0 12px;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+        }
+
+        .results-box:hover .items-panel-toggle,
+        .items-panel-toggle:focus-visible,
+        .items-panel-shell.collapsed .items-panel-toggle {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .items-panel-toggle::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            transform: rotate(-45deg);
+            margin-right: -2px;
+        }
+
+        .items-panel-toggle:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #eef4fb 100%);
+            color: #2b6cb0;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.18);
+        }
+
+        .items-panel-toggle[aria-pressed="true"]::before {
+            transform: rotate(135deg);
+            margin-right: 2px;
         }
         
         .items-panel-title {
@@ -759,6 +838,77 @@
             display: inline;
             line-height: var(--ayah-line-height);
             font-size: var(--ayah-font-size);
+        }
+        .result-word {
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        #word-hover-tooltip {
+            position: absolute;
+            z-index: 1200;
+            display: none;
+            pointer-events: none;
+            max-width: 280px;
+            max-height: min(60vh, 420px);
+            overflow-y: auto;
+            background: #ffffff;
+            color: #1f2c3d;
+            border: 1px solid #cfd9e6;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.98rem;
+            line-height: 1.35;
+            box-shadow: 0 8px 24px rgba(22,34,49,0.16);
+            direction: rtl;
+            text-align: right;
+            white-space: normal;
+        }
+        #word-hover-tooltip .morph-tooltip-line {
+            font-size: 0.9em;
+            opacity: 0.95;
+            font-weight: bold;
+        }
+        #word-hover-tooltip .morph-tooltip-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        #word-hover-tooltip .morph-tooltip-links {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+        #word-hover-tooltip .verse-toggle {
+            border: none;
+            background: transparent;
+            color: #6b7a90;
+            padding: 0;
+            margin: 0;
+            cursor: pointer;
+            font: inherit;
+            line-height: 1;
+            flex: 0 0 auto;
+        }
+        #word-hover-tooltip .verse-toggle:hover {
+            color: #334155;
+        }
+        #word-hover-tooltip .verse-translation {
+            display: none;
+            margin-top: 4px;
+            border-top: 1px solid rgba(31,44,61,0.12);
+            padding-top: 4px;
+            font-size: 0.9em;
+        }
+        #word-hover-tooltip .verse-translation.expanded {
+            display: block;
+        }
+        #word-hover-tooltip a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        #word-hover-tooltip a:hover {
+            text-decoration: underline;
         }
         
         .result-ref {
@@ -1532,6 +1682,10 @@
                             <span>انتقال به حافظه</span>
                             <span style="margin-right:auto; font-size:11px; color:#888;">نتایج + توضیحات</span>
                         </div>
+                        <div class="copy-menu-item" id="copy-search-link">
+                            <span>پیوند این جستجو</span>
+                            <span style="margin-right:auto; font-size:11px; color:#888;">نشانی با تنظیمات فعلی</span>
+                        </div>
                     </div>
                 </div>
                 <button class="search-btn embed-add-btn" id="embed-add-btn" type="button" title="افزودن این جستجو به لیست انتخاب‌شده" style="display: none;">افزودن</button>
@@ -1559,6 +1713,13 @@
                             <select id="highlight-mode-select">
                                 <option value="background">پس‌زمینه</option>
                                 <option value="text">رنگ متن</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label>پیوند آیه:</label>
+                            <select id="ayah-link-target-select">
+                                <option value="yasir">یسیر</option>
+                                <option value="simple">نمایش</option>
                             </select>
                         </div>
                         <div class="settings-item">
@@ -1602,8 +1763,11 @@
             <div class="results-content-column">
                 <div id="results-content"></div>
             </div>
-            <div class="items-panel" id="items-panel">
-                <div id="items-panel-content"></div>
+            <div class="items-panel-shell" id="items-panel-shell">
+                <button type="button" class="items-panel-toggle" id="items-panel-toggle" aria-pressed="false" title="بستن فهرست صیغه‌ها">▶</button>
+                <div class="items-panel" id="items-panel">
+                    <div id="items-panel-content"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1629,6 +1793,8 @@
 
         // Data structures
         const morphologyData = {}; // {sura: {ayah: {wordIndex: {root, lemma, text}}}}
+        const SEARCH_WORD_TRANSLATION_LANGUAGE = 'fa';
+        const SEARCH_VERSE_TRANSLATION_RESOURCE_ID = 135;
         const fmtFa = window.SearchShared.fmtFa;
         const normalizeDigitsToAscii = window.SearchShared.normalizeDigitsToAscii;
         const parseDistanceFromValue = window.SearchShared.parseDistanceFromValue;
@@ -1654,7 +1820,11 @@
         let rootSimilarityMap = {}; // {root: {count, related: [{root, similarity, count, ...}]}}
         const ROOT_SIMILARITY_STORAGE_KEY = 'searchRootSimilaritySource';
         const ROOT_SIMILARITY_THRESHOLD_STORAGE_KEY = 'searchRootSimilarityThreshold';
+        const AYAH_LINK_TARGET_STORAGE_KEY = 'searchAyahLinkTarget';
+        const SEARCH_STATE_PARAM = 'state';
+        const ITEMS_PANEL_COLLAPSED_STORAGE_KEY = 'searchItemsPanelCollapsed';
         let dataLoaded = false;
+        let autoSearchSuspendDepth = 0;
         
         // Selected search items
         const selectedItems = []; // [{type: 'text'|'root', value: string, checked: boolean}]
@@ -1709,6 +1879,15 @@
             const data = rootLemData[root];
             if (!data) return;
             data.allSelected = data.lems.length > 0 && data.lems.every(l => l.selected);
+        }
+
+        function withAutoSearchSuspended(callback) {
+            autoSearchSuspendDepth++;
+            try {
+                return callback();
+            } finally {
+                autoSearchSuspendDepth = Math.max(0, autoSearchSuspendDepth - 1);
+            }
         }
         
         // Initialize LEM data for a root (preserves selection state on refresh)
@@ -2206,6 +2385,7 @@
 
         let __autoUpdateTimer = null;
         function requestAutoSearch(delayMs = 120) {
+            if (autoSearchSuspendDepth > 0) return;
             if (!isAutoUpdateEnabled()) return;
             if (selectedItems.length === 0) return;
             if (__autoUpdateTimer) clearTimeout(__autoUpdateTimer);
@@ -2246,6 +2426,16 @@
         const qcfWordData = {}; // {sura: {ayah: {wordIndex: {page, code_v1}}}}
         const loadedQCFPages = new Set();
         let qcfDataLoaded = {};
+        const wordTooltipVerseCache = new Map();
+        let pinnedWordForTooltip = null;
+        let wordTooltipLeaveBound = false;
+        let wordTooltipVerseExpanded = false;
+        const wordHoverTooltip = (() => {
+            const el = document.createElement('div');
+            el.id = 'word-hover-tooltip';
+            document.body.appendChild(el);
+            return el;
+        })();
         
         // SURA_NAMES loaded from js/sura-data.js
         // Buckwalter conversion loaded from js/buckwalter.js
@@ -2308,15 +2498,21 @@
             if (!wordData) {
                 // Fallback to normal text
                 const text = morphologyData[sura]?.[ayah]?.[wordIndex]?.text || '';
-                return highlightClass ? `<span class="${highlightClass}">${text}</span>` : text;
+                return buildSearchResultWordHTML(sura, ayah, wordIndex, escapeHtml(text), highlightClass);
             }
             
             // Load the page font if not loaded
             loadQCFPageFont(wordData.page);
             
             const paddedPage = String(wordData.page).padStart(3, '0');
-            const classes = `qcf-word${highlightClass ? ' ' + highlightClass : ''}`;
-            return `<span class="${classes}" style="font-family: 'QCF_P${paddedPage}', serif;">${wordData.code}</span>`;
+            return buildSearchResultWordHTML(
+                sura,
+                ayah,
+                wordIndex,
+                wordData.code,
+                `qcf-word${highlightClass ? ' ' + highlightClass : ''}`,
+                `font-family: 'QCF_P${paddedPage}', serif;`
+            );
         }
         
         // Load morphology data
@@ -3539,6 +3735,212 @@
             return lines.join('\n');
         }
 
+        function encodeBase64UrlUtf8(str) {
+            const bytes = new TextEncoder().encode(String(str));
+            let binary = '';
+            bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+        }
+
+        function decodeBase64UrlUtf8(str) {
+            const normalized = String(str || '').replace(/-/g, '+').replace(/_/g, '/');
+            const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+            const binary = atob(padded);
+            const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+            return new TextDecoder().decode(bytes);
+        }
+
+        function serializeRootLemmaSelection(root) {
+            const data = rootLemData[root] || initRootLemData(root, true);
+            if (!data || !Array.isArray(data.lems)) return undefined;
+            const selected = data.lems.filter(lem => lem.selected).map(lem => lem.lem);
+            return selected.length === data.lems.length ? 'all' : selected;
+        }
+
+        function serializeSimilarRootSelection(root) {
+            const data = similarRootData[root] || initSimilarRootData(root, true);
+            if (!data || !Array.isArray(data.relatedRoots)) return undefined;
+            const serialized = {};
+            data.relatedRoots.forEach(entry => {
+                const selected = entry.lems.filter(lem => lem.selected).map(lem => lem.lem);
+                serialized[entry.root] = selected.length === entry.lems.length ? 'all' : selected;
+            });
+            return serialized;
+        }
+
+        function buildSearchStatePayload() {
+            return {
+                v: 1,
+                distance: getDistanceValueClamped(),
+                crossSura: document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true',
+                suras: allSurasSelected ? 'all' : Array.from(selectedSuras).sort((a, b) => a - b),
+                items: selectedItems.map((item, index) => {
+                    const entry = {
+                        type: item.type,
+                        value: item.value
+                    };
+                    if ((item.display || item.value) !== item.value) entry.display = item.display;
+                    if (itemCheckedState[index] === false) entry.checked = false;
+                    if (item.type === 'root') {
+                        const lems = serializeRootLemmaSelection(item.value);
+                        if (lems !== undefined) entry.lems = lems;
+                    } else if (item.type === 'similar-root') {
+                        const related = serializeSimilarRootSelection(item.value);
+                        if (related !== undefined) entry.related = related;
+                    }
+                    return entry;
+                })
+            };
+        }
+
+        function encodeSearchStatePayload(payload) {
+            return encodeBase64UrlUtf8(JSON.stringify(payload));
+        }
+
+        function decodeSearchStatePayload(encoded) {
+            try {
+                const parsed = JSON.parse(decodeBase64UrlUtf8(encoded));
+                return parsed && typeof parsed === 'object' ? parsed : null;
+            } catch (err) {
+                console.warn('Could not decode search state from URL', err);
+                return null;
+            }
+        }
+
+        function applyRootLemmaSelection(root, selection) {
+            const data = initRootLemData(root, true);
+            if (!data || !Array.isArray(data.lems)) return false;
+            if (selection === 'all' || selection === true || selection == null) {
+                data.lems.forEach(lem => { lem.selected = true; });
+            } else if (Array.isArray(selection)) {
+                const selectedSet = new Set(selection.map(lem => String(lem)));
+                data.lems.forEach(lem => { lem.selected = selectedSet.has(lem.lem); });
+            }
+            syncRootLemSelectionState(root);
+            return data.lems.some(lem => lem.selected);
+        }
+
+        function applySimilarRootSelection(root, selectionMap) {
+            const data = initSimilarRootData(root, true);
+            if (!data || !Array.isArray(data.relatedRoots)) return false;
+            data.relatedRoots.forEach(entry => {
+                const selection = selectionMap && Object.prototype.hasOwnProperty.call(selectionMap, entry.root)
+                    ? selectionMap[entry.root]
+                    : 'all';
+                if (selection === 'all' || selection === true || selection == null) {
+                    entry.lems.forEach(lem => { lem.selected = true; });
+                } else if (Array.isArray(selection)) {
+                    const selectedSet = new Set(selection.map(lem => String(lem)));
+                    entry.lems.forEach(lem => { lem.selected = selectedSet.has(lem.lem); });
+                }
+            });
+            syncSimilarRootSelectionState(root);
+            return data.relatedRoots.some(entry => entry.lems.some(lem => lem.selected));
+        }
+
+        function applySearchStatePayload(state) {
+            if (!state || !Array.isArray(state.items)) return false;
+            return withAutoSearchSuspended(() => {
+                selectedItems.length = 0;
+                itemCheckedState.length = 0;
+                Object.keys(rootLemData).forEach(key => delete rootLemData[key]);
+                Object.keys(rootExpandedState).forEach(key => delete rootExpandedState[key]);
+                Object.keys(similarRootData).forEach(key => delete similarRootData[key]);
+                Object.keys(similarRootSelectionState).forEach(key => delete similarRootSelectionState[key]);
+                Object.keys(similarRootExpandedState).forEach(key => delete similarRootExpandedState[key]);
+                Object.keys(similarRootChildExpandedState).forEach(key => delete similarRootChildExpandedState[key]);
+                highlightedItem = null;
+
+                if (state.suras === 'all' || !Array.isArray(state.suras)) {
+                    allSurasSelected = true;
+                    selectedSuras.clear();
+                } else {
+                    allSurasSelected = false;
+                    selectedSuras.clear();
+                    state.suras
+                        .map(num => parseInt(num, 10))
+                        .filter(num => num >= 1 && num <= 114)
+                        .forEach(num => selectedSuras.add(num));
+                }
+
+                if (Number.isFinite(Number(state.distance))) {
+                    setDistanceValueClamped(Number(state.distance));
+                }
+                const crossSuraToggle = document.getElementById('cross-sura-toggle');
+                if (crossSuraToggle) {
+                    const isCrossSura = state.crossSura === true;
+                    crossSuraToggle.setAttribute('aria-pressed', isCrossSura ? 'true' : 'false');
+                    localStorage.setItem('searchCrossSura', isCrossSura ? 'true' : 'false');
+                }
+
+                state.items.forEach(item => {
+                    addSelectedItem(item.type, item.value, item.display || item.value);
+                    const index = selectedItems.length - 1;
+                    if (index < 0) return;
+
+                    let computedChecked = item.checked !== false;
+                    if (item.type === 'root') {
+                        const hasAny = applyRootLemmaSelection(item.value, item.lems);
+                        computedChecked = item.checked === false ? false : hasAny;
+                    } else if (item.type === 'similar-root') {
+                        const hasAny = applySimilarRootSelection(item.value, item.related);
+                        computedChecked = item.checked === false ? false : hasAny;
+                    }
+                    itemCheckedState[index] = computedChecked;
+                });
+
+                updateSelectedItemsUI();
+                buildItemsPanel();
+                return true;
+            });
+        }
+
+        function buildCurrentSearchUrl() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('root');
+            url.searchParams.delete('lem');
+            url.searchParams.delete('sure');
+            url.searchParams.set(SEARCH_STATE_PARAM, encodeSearchStatePayload(buildSearchStatePayload()));
+            return url.toString();
+        }
+
+        function syncItemsPanelToggle() {
+            const shell = document.getElementById('items-panel-shell');
+            const resultsBox = document.getElementById('results-box');
+            const toggle = document.getElementById('items-panel-toggle');
+            if (!shell || !resultsBox || !toggle) return;
+            const collapsed = shell.classList.contains('collapsed');
+            resultsBox.classList.toggle('items-panel-collapsed', collapsed);
+            toggle.setAttribute('aria-pressed', collapsed ? 'true' : 'false');
+            toggle.textContent = collapsed ? '◀' : '▶';
+            toggle.title = collapsed ? 'باز کردن فهرست صیغه‌ها' : 'بستن فهرست صیغه‌ها';
+        }
+
+        function setItemsPanelCollapsed(collapsed) {
+            const shell = document.getElementById('items-panel-shell');
+            if (!shell) return;
+            shell.classList.toggle('collapsed', !!collapsed);
+            localStorage.setItem(ITEMS_PANEL_COLLAPSED_STORAGE_KEY, collapsed ? 'true' : 'false');
+            syncItemsPanelToggle();
+        }
+
+        function getAyahLinkTargetPage() {
+            const saved = localStorage.getItem(AYAH_LINK_TARGET_STORAGE_KEY);
+            return saved === 'yasir' ? 'yasir.html' : 'simple.html';
+        }
+
+        function getAyahLinkTargetLabel() {
+            const saved = localStorage.getItem(AYAH_LINK_TARGET_STORAGE_KEY);
+            return saved === 'yasir' ? 'یسیر' : 'نمایش';
+        }
+
+        function buildAyahTargetHref(sura, ayah = null) {
+            const url = new URL(getAyahLinkTargetPage(), window.location.href);
+            url.searchParams.set('s', String(sura));
+            if (ayah != null) url.searchParams.set('a', String(ayah));
+            return url.toString();
+        }
+
         function buildCopyPayloadText() {
             const groups = Array.isArray(lastRenderedGroups) ? lastRenderedGroups : [];
             if (groups.length === 0) {
@@ -3574,6 +3976,150 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+        function escapeAttr(str) {
+            return escapeHtml(str);
+        }
+        function getWordMorphology(verseKey, position) {
+            if (!verseKey || !position) return null;
+            const parts = String(verseKey).split(':');
+            const sura = parseInt(parts[0], 10);
+            const ayah = parseInt(parts[1], 10);
+            if (!sura || !ayah) return null;
+            return morphologyData[sura]?.[ayah]?.[position] || null;
+        }
+        function getWordTranslation(word) {
+            if (!word) return '';
+            if (typeof word.translation === 'string') return word.translation;
+            if (word.translation && typeof word.translation.text === 'string') return word.translation.text;
+            if (word.word_translation && typeof word.word_translation.text === 'string') return word.word_translation.text;
+            return '';
+        }
+        function getVerseTranslationText(verse) {
+            if (!verse || !Array.isArray(verse.translations)) return '';
+            for (const tr of verse.translations) {
+                if (tr && tr.resource_id === SEARCH_VERSE_TRANSLATION_RESOURCE_ID && tr.text) return tr.text;
+            }
+            return '';
+        }
+        function buildSearchResultWordHTML(sura, ayah, wordIndex, text, className = '', inlineStyle = '') {
+            const classes = `result-word${className ? ' ' + className : ''}`;
+            const attrs = [
+                `class="${classes}"`,
+                `data-verse-key="${escapeAttr(`${sura}:${ayah}`)}"`,
+                `data-word-position="${escapeAttr(String(wordIndex))}"`
+            ];
+            if (inlineStyle) attrs.push(`style="${escapeAttr(inlineStyle)}"`);
+            return `<span ${attrs.join(' ')}>${text}</span>`;
+        }
+        function buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma) {
+            let content = wordTranslation ? escapeHtml(wordTranslation) : '';
+            const morphParts = [];
+            if (root) morphParts.push('ریشه: <a href="search.html?root=' + encodeURIComponent(root) + '">' + escapeHtml(root) + '</a>');
+            if (lemma) morphParts.push('صیغه: <a href="search.html?lem=' + encodeURIComponent(lemma) + '">' + escapeHtml(lemma) + '</a>');
+            if (morphParts.length > 0) {
+                let toggleHtml = '';
+                if (verseTranslation) {
+                    toggleHtml = '<button type="button" class="verse-toggle" aria-expanded="' + (wordTooltipVerseExpanded ? 'true' : 'false') + '" title="نمایش ترجمه آیه">▾</button>';
+                }
+                const morphLine = '<div class="morph-tooltip-row"><span class="morph-tooltip-line morph-tooltip-links">' + morphParts.join(' &nbsp;|&nbsp; ') + '</span>' + toggleHtml + '</div>';
+                content = content ? (content + morphLine) : morphLine;
+            }
+            if (verseTranslation) {
+                const versePart = '<div class="verse-translation' + (wordTooltipVerseExpanded ? ' expanded' : '') + '">' + escapeHtml(verseTranslation) + '</div>';
+                content = content ? (content + versePart) : versePart;
+            }
+            return content;
+        }
+        function hideWordHoverTooltip() {
+            if (!wordHoverTooltip) return;
+            wordHoverTooltip.style.display = 'none';
+            wordHoverTooltip.textContent = '';
+            wordHoverTooltip.style.pointerEvents = 'none';
+            pinnedWordForTooltip = null;
+            wordTooltipVerseExpanded = false;
+        }
+        function showWordHoverTooltip(contentHtml, anchorEl) {
+            if (!wordHoverTooltip || !anchorEl || !contentHtml) return;
+            wordHoverTooltip.innerHTML = contentHtml;
+            wordHoverTooltip.style.display = 'block';
+            const anchorRect = anchorEl.getBoundingClientRect();
+            const anchorCenter = anchorRect.left + anchorRect.width / 2;
+            const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+            const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+            const scrollX = window.scrollX || window.pageXOffset || 0;
+            const scrollY = window.scrollY || window.pageYOffset || 0;
+            const rect = wordHoverTooltip.getBoundingClientRect();
+            const left = Math.max(8 + rect.width / 2, Math.min(vw - 8 - rect.width / 2, anchorCenter));
+            const tooltipLeft = left - rect.width / 2;
+            let top = anchorRect.top - rect.height;
+            if (top < 8) {
+                top = Math.min(vh - rect.height - 8, anchorRect.bottom);
+            }
+            top = Math.max(8, Math.min(vh - rect.height - 8, top));
+            wordHoverTooltip.style.left = (tooltipLeft + scrollX) + 'px';
+            wordHoverTooltip.style.top = (top + scrollY) + 'px';
+            wordHoverTooltip.style.pointerEvents = 'auto';
+            pinnedWordForTooltip = anchorEl;
+        }
+        async function loadVerseTooltipData(verseKey) {
+            if (!verseKey) return null;
+            if (!wordTooltipVerseCache.has(verseKey)) {
+                const promise = fetch(
+                    'https://api.quran.com/api/v4/verses/by_key/' + encodeURIComponent(verseKey) +
+                    '?words=true&word_fields=translation&language=' + encodeURIComponent(SEARCH_WORD_TRANSLATION_LANGUAGE) +
+                    '&translations=' + SEARCH_VERSE_TRANSLATION_RESOURCE_ID
+                )
+                    .then(res => res.ok ? res.json() : null)
+                    .then(data => data && data.verse ? data.verse : null)
+                    .catch(() => null);
+                wordTooltipVerseCache.set(verseKey, promise);
+            }
+            return await wordTooltipVerseCache.get(verseKey);
+        }
+        function bindWordTooltipInteractions() {
+            if (wordTooltipLeaveBound || !wordHoverTooltip) return;
+            wordTooltipLeaveBound = true;
+            wordHoverTooltip.addEventListener('click', function(e) {
+                const toggle = e.target && e.target.closest ? e.target.closest('.verse-toggle') : null;
+                if (!toggle) return;
+                e.preventDefault();
+                e.stopPropagation();
+                wordTooltipVerseExpanded = !wordTooltipVerseExpanded;
+                const verseEl = wordHoverTooltip.querySelector('.verse-translation');
+                if (verseEl) verseEl.classList.toggle('expanded', wordTooltipVerseExpanded);
+                toggle.setAttribute('aria-expanded', wordTooltipVerseExpanded ? 'true' : 'false');
+            });
+            wordHoverTooltip.addEventListener('mouseleave', function(e) {
+                if (!pinnedWordForTooltip) return;
+                if (e.relatedTarget && pinnedWordForTooltip.contains(e.relatedTarget)) return;
+                hideWordHoverTooltip();
+            });
+            document.addEventListener('click', function(e) {
+                if (!pinnedWordForTooltip) return;
+                const wordEl = e.target && e.target.closest ? e.target.closest('.result-word') : null;
+                if (wordEl) return;
+                if (wordHoverTooltip.contains(e.target)) return;
+                hideWordHoverTooltip();
+            });
+        }
+        async function handleResultWordClick(wordEl) {
+            if (!wordEl) return;
+            const verseKey = wordEl.getAttribute('data-verse-key') || '';
+            const position = parseInt(wordEl.getAttribute('data-word-position') || '0', 10);
+            if (!verseKey || !position) return;
+            const morph = getWordMorphology(verseKey, position);
+            const root = morph?.root || '';
+            const lemma = morph?.lemma || '';
+            wordTooltipVerseExpanded = false;
+            showWordHoverTooltip(buildWordTooltipContent('', '', root, lemma), wordEl);
+            const verse = await loadVerseTooltipData(verseKey);
+            if (pinnedWordForTooltip !== wordEl) return;
+            const word = Array.isArray(verse?.words) ? verse.words[position - 1] : null;
+            const wordTranslation = getWordTranslation(word);
+            const verseTranslation = getVerseTranslationText(verse);
+            const content = buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma);
+            if (content) showWordHoverTooltip(content, wordEl);
         }
 
         function buildHighlightedAyahHTML(sura, ayah, highlightMatchesForGroup) {
@@ -4115,7 +4661,7 @@
                         `</tr></thead><tbody>`;
                     for (let r = 0; r < sortedRows.length; r++) {
                         const row = sortedRows[r];
-                        html += `<tr><td><a class="stats-sura-link num-hindi" href="yasir.html?s=${row.sura}" title="باز کردن سوره در یسیر">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
+                        html += `<tr><td><a class="stats-sura-link num-hindi" href="${escapeAttr(buildAyahTargetHref(row.sura))}" title="باز کردن سوره در ${escapeAttr(getAyahLinkTargetLabel())}">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
                         html += `<td class="num-hindi stats-sura-count" data-sura="${row.sura}" role="button" tabindex="0" title="تعداد بازه‌ها با همهٔ موارد، پیش از ادغام (ممکن است با بازه‌های ادغام‌شده در نتایج جستجو متفاوت باشد). کلیک: فیلتر به این سوره و نمایش نتایج">${fmtFa(row.count)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('freq', row).replace(/"/g, '&quot;')}">${fmtFaPercent(row.relInSura)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('ratio', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.ratio, 3)}</td>`;
@@ -4266,14 +4812,14 @@
                     const viewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                     if (viewMode === 'rows') {
                         html += `<div class="ayah-row">`;
-                        html += `<a class="ayah-ref-leading num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a> `;
+                        html += `<a class="ayah-ref-leading num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" title="باز کردن در ${escapeAttr(getAyahLinkTargetLabel())}">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a> `;
                         html += `<span class="result-ayah">${highlightedText}</span>`;
                         html += `</div>`;
                     } else {
                         html += `<span class="result-ayah">`;
                         html += highlightedText;
                         html += ` `;
-                        html += `<a class="result-ref num-hindi" href="yasir.html?s=${group.sura}&a=${ayah}" title="باز کردن در یسیر">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a>`;
+                        html += `<a class="result-ref num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" title="باز کردن در ${escapeAttr(getAyahLinkTargetLabel())}">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a>`;
                         html += `</span> `;
                     }
                 }
@@ -4299,6 +4845,13 @@
             if (!resultsContent.dataset.regionControlsBound) {
                 resultsContent.dataset.regionControlsBound = '1';
                 resultsContent.addEventListener('click', (e) => {
+                    const wordEl = e.target.closest('.result-word');
+                    if (wordEl) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleResultWordClick(wordEl);
+                        return;
+                    }
                     const btn = e.target.closest('.region-btn');
                     if (!btn) return;
                     e.preventDefault();
@@ -4310,7 +4863,21 @@
                         applyRegionAction(groupKey, action);
                     }
                 });
+                resultsContent.addEventListener('mouseout', (e) => {
+                    const from = e.target && e.target.closest ? e.target.closest('.result-word') : null;
+                    if (!from) return;
+                    const to = e.relatedTarget;
+                    if (pinnedWordForTooltip && from === pinnedWordForTooltip && wordHoverTooltip.contains(to)) return;
+                    if (pinnedWordForTooltip && from === pinnedWordForTooltip && !wordHoverTooltip.contains(to)) {
+                        hideWordHoverTooltip();
+                    }
+                });
+                resultsContent.addEventListener('mouseleave', (e) => {
+                    if (e.relatedTarget && wordHoverTooltip.contains(e.relatedTarget)) return;
+                    hideWordHoverTooltip();
+                });
             }
+            bindWordTooltipInteractions();
         }
         
         function highlightMatches(text, sura, ayah, matches) {
@@ -4333,13 +4900,13 @@
                     if (useQCF) {
                         highlightedWords.push(getQCFWordHTML(sura, ayah, idx, highlightClass));
                     } else {
-                        highlightedWords.push(`<span class="${highlightClass}">${word}</span>`);
+                        highlightedWords.push(buildSearchResultWordHTML(sura, ayah, idx, escapeHtml(word), highlightClass));
                     }
                 } else {
                     if (useQCF) {
                         highlightedWords.push(getQCFWordHTML(sura, ayah, idx));
                     } else {
-                        highlightedWords.push(word);
+                        highlightedWords.push(buildSearchResultWordHTML(sura, ayah, idx, escapeHtml(word)));
                     }
                 }
             }
@@ -4413,7 +4980,7 @@
             itemCheckedState.splice(index, 1);
             if (removedItem?.type === 'root') {
                 delete rootLemData[removedItem.value];
-                delete itemExpandedState[removedItem.value];
+                delete rootExpandedState[removedItem.value];
             } else if (removedItem?.type === 'similar-root') {
                 delete similarRootData[removedItem.value];
                 delete similarRootExpandedState[removedItem.value];
@@ -4481,34 +5048,49 @@
             // Load data, then apply URL params (e.g. from desktop tooltip links)
             Promise.all([loadMorphologyData(), loadSimilarityData()]).then(() => {
                 const params = new URLSearchParams(window.location.search);
+                const state = params.get(SEARCH_STATE_PARAM);
                 const root = params.get('root');
                 const lem = params.get('lem');
                 const sure = params.get('sure');
-                if (sure && /^\d+$/.test(sure)) {
-                    const suraNum = parseInt(sure, 10);
-                    if (suraNum >= 1 && suraNum <= 114) {
-                        allSurasSelected = false;
-                        selectedSuras.clear();
-                        selectedSuras.add(suraNum);
+                if (state) {
+                    const decodedState = decodeSearchStatePayload(state);
+                    if (decodedState) {
+                        applySearchStatePayload(decodedState);
                         buildSuraFilterList();
                         updateSuraFilterLabel();
+                        updateDistanceDisplay();
+                        if (selectedItems.length > 0) triggerSearch();
+                    } else {
+                        console.warn('Falling back to legacy URL params because search state could not be restored.');
                     }
                 }
-                if (root && root.trim()) {
-                    // stat.html sends root in Buckwalter (e.g. qwl); convert to Arabic for rootToWordsMap lookup
-                    const rootTrimmed = root.trim();
-                    const rootArabic = (typeof convertBuckwalterToArabic === 'function') ? convertBuckwalterToArabic(rootTrimmed) : rootTrimmed;
-                    addSelectedItem('root', rootArabic, rootArabic);
-                }
-                if (lem && lem.trim()) addSelectedItem('text', lem.trim(), lem.trim());
-                if (root || lem || sure) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('root');
-                    url.searchParams.delete('lem');
-                    url.searchParams.delete('sure');
-                    if (url.searchParams.toString()) url.search = '?' + url.searchParams.toString();
-                    else url.search = '';
-                    window.history.replaceState({}, '', url.toString());
+                if (!state || selectedItems.length === 0) {
+                    if (sure && /^\d+$/.test(sure)) {
+                        const suraNum = parseInt(sure, 10);
+                        if (suraNum >= 1 && suraNum <= 114) {
+                            allSurasSelected = false;
+                            selectedSuras.clear();
+                            selectedSuras.add(suraNum);
+                            buildSuraFilterList();
+                            updateSuraFilterLabel();
+                        }
+                    }
+                    if (root && root.trim()) {
+                        // stat.html sends root in Buckwalter (e.g. qwl); convert to Arabic for rootToWordsMap lookup
+                        const rootTrimmed = root.trim();
+                        const rootArabic = (typeof convertBuckwalterToArabic === 'function') ? convertBuckwalterToArabic(rootTrimmed) : rootTrimmed;
+                        addSelectedItem('root', rootArabic, rootArabic);
+                    }
+                    if (lem && lem.trim()) addSelectedItem('text', lem.trim(), lem.trim());
+                    if (root || lem || sure) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('root');
+                        url.searchParams.delete('lem');
+                        url.searchParams.delete('sure');
+                        if (url.searchParams.toString()) url.search = '?' + url.searchParams.toString();
+                        else url.search = '';
+                        window.history.replaceState({}, '', url.toString());
+                    }
                 }
             });
 
@@ -4714,6 +5296,17 @@
             const copyBtn = document.getElementById('copy-btn');
             const copyMenu = document.getElementById('copy-menu');
             const copyResults = document.getElementById('copy-results');
+            const copySearchLink = document.getElementById('copy-search-link');
+
+            setItemsPanelCollapsed(localStorage.getItem(ITEMS_PANEL_COLLAPSED_STORAGE_KEY) === 'true');
+            const itemsPanelToggle = document.getElementById('items-panel-toggle');
+            if (itemsPanelToggle) {
+                itemsPanelToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const shell = document.getElementById('items-panel-shell');
+                    setItemsPanelCollapsed(!shell?.classList.contains('collapsed'));
+                });
+            }
 
             copyBtn.addEventListener('click', (e) => {
                 if (copyBtn.disabled) return;
@@ -4728,6 +5321,18 @@
                 await copyToClipboard({ text: payloadText, html: payloadHtml });
                 copyMenu.classList.remove('visible');
             });
+
+            if (copySearchLink) {
+                copySearchLink.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const url = buildCurrentSearchUrl();
+                    await copyToClipboard({
+                        text: url,
+                        html: `<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>`
+                    });
+                    copyMenu.classList.remove('visible');
+                });
+            }
 
             // View toggle (regions / stats-table / stats-chart) - load initial state and sync button
             const viewResultsToggle = document.getElementById('view-results-toggle');
@@ -4904,6 +5509,7 @@
             const fontSelect = document.getElementById('font-select');
             const viewModeSelect = document.getElementById('view-mode-select');
             const highlightModeSelect = document.getElementById('highlight-mode-select');
+            const ayahLinkTargetSelect = document.getElementById('ayah-link-target-select');
             const rootSimilaritySelect = document.getElementById('root-similarity-select');
             const rootSimilarityThresholdInput = document.getElementById('root-similarity-threshold');
             const applySettings = document.getElementById('apply-settings');
@@ -4968,10 +5574,12 @@
             // Load saved view/highlight preferences
             const savedViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
             const savedHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+            const savedAyahLinkTarget = localStorage.getItem(AYAH_LINK_TARGET_STORAGE_KEY) === 'yasir' ? 'yasir' : 'simple';
             const savedRootSimilarity = getRootSimilaritySource();
             const savedRootSimilarityThreshold = getRootSimilarityThreshold();
             viewModeSelect.value = savedViewMode;
             highlightModeSelect.value = savedHighlightMode;
+            if (ayahLinkTargetSelect) ayahLinkTargetSelect.value = savedAyahLinkTarget;
             if (rootSimilaritySelect) rootSimilaritySelect.value = savedRootSimilarity;
             if (rootSimilarityThresholdInput) rootSimilarityThresholdInput.value = savedRootSimilarityThreshold.toFixed(2);
             
@@ -5014,18 +5622,21 @@
                 const currentFont = localStorage.getItem('quranFont') || 'local';
                 const newViewMode = viewModeSelect.value;
                 const newHighlightMode = highlightModeSelect.value;
+                const newAyahLinkTarget = ayahLinkTargetSelect ? ayahLinkTargetSelect.value : 'simple';
                 const newRootSimilarity = rootSimilaritySelect ? rootSimilaritySelect.value : 'similarity';
                 const newRootSimilarityThreshold = rootSimilarityThresholdInput
                     ? Math.max(0, Math.min(1, parseFloat(rootSimilarityThresholdInput.value || '0.20') || 0.20))
                     : 0.20;
                 const currentViewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                 const currentHighlightMode = localStorage.getItem('searchHighlightMode') || 'background';
+                const currentAyahLinkTarget = localStorage.getItem(AYAH_LINK_TARGET_STORAGE_KEY) === 'yasir' ? 'yasir' : 'simple';
                 const currentRootSimilarity = getRootSimilaritySource();
                 const currentRootSimilarityThreshold = getRootSimilarityThreshold();
 
                 // Persist view/highlight settings
                 if (newViewMode !== currentViewMode) localStorage.setItem('searchViewMode', newViewMode);
                 if (newHighlightMode !== currentHighlightMode) localStorage.setItem('searchHighlightMode', newHighlightMode);
+                if (newAyahLinkTarget !== currentAyahLinkTarget) localStorage.setItem(AYAH_LINK_TARGET_STORAGE_KEY, newAyahLinkTarget);
                 if (newRootSimilarity !== currentRootSimilarity) localStorage.setItem(ROOT_SIMILARITY_STORAGE_KEY, newRootSimilarity);
                 if (newRootSimilarityThreshold !== currentRootSimilarityThreshold) {
                     localStorage.setItem(ROOT_SIMILARITY_THRESHOLD_STORAGE_KEY, newRootSimilarityThreshold.toFixed(2));
