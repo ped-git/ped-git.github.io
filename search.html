@@ -4015,8 +4015,8 @@
         function buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma) {
             let content = wordTranslation ? escapeHtml(wordTranslation) : '';
             const morphParts = [];
-            if (root) morphParts.push('ریشه: <a href="search.html?root=' + encodeURIComponent(root) + '">' + escapeHtml(root) + '</a>');
-            if (lemma) morphParts.push('صیغه: <a href="search.html?lem=' + encodeURIComponent(lemma) + '">' + escapeHtml(lemma) + '</a>');
+            if (root) morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '">' + escapeHtml(root) + '</a>');
+            if (lemma) morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '">' + escapeHtml(lemma) + '</a>');
             if (morphParts.length > 0) {
                 let toggleHtml = '';
                 if (verseTranslation) {
