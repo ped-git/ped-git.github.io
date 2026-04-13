@@ -145,7 +145,7 @@ speech[gray]::before {
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 81mm;
+  width: 80mm;
   text-indent: 0mm;
 }
 
@@ -157,6 +157,14 @@ speech[gray]::before {
   margin-top: 0mm;
   width: 158mm;
   text-indent: 0mm;
+}
+
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
+
+.highlight2 {
+  color:  rgb(205, 100, 100);
 }
 
 .ordinary-near {
@@ -251,6 +259,15 @@ speech[gray]::before {
   margin-left: 0mm;
   text-align: justify;
   text-indent: -6.5mm;
+}
+
+.zero-margin6 {
+  margin-top: 0mm;
+  margin-right: 4mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -4mm;
 }
 
 .boxed {
