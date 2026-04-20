@@ -7,14 +7,14 @@ speech {
 
 speech[open]::before {
   content: "«";
-  position: relative;
-  top: 1.5mm;
+  display: inline;
+  vertical-align: -1.5mm;
 }
 
 speech[close]::before {
   content: "»";
-  position: relative;
-  top: 1.5mm;
+  display: inline;
+  vertical-align: -1.5mm;
 }
 
 speech[underline]::before {
@@ -318,6 +318,16 @@ speech[gray]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-gradient-far {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0px; ;
+}
+
 .boxed.underline-solidgreen {
   border-bottom: 1px solid rgb(190, 210, 190);
   border-left: 0;
@@ -402,6 +412,15 @@ speech[gray]::before {
   padding: 3px 0px; ;
 }
 
+.boxed.underline-blackdashed-up {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: -3mm 0px; ;
+  margin-top: 3mm;
+}
+
 .boxed.underline-blackdotted {
   border-bottom: 1px dotted rgb(100, 100, 100);
   border-left: 0;
@@ -420,6 +439,14 @@ speech[gray]::before {
 
 .boxed.underline-blackdotted2 {
   border-bottom: 2px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdotted3 {
+  border-bottom: 2px dotted rgb(200, 200, 200);
   border-left: 0;
   border-right: 0;
   border-top: 0;
