@@ -171,6 +171,14 @@ speech[gray]::before {
   color:  rgb(220, 0, 200);
 }
 
+.backhighlight1 {
+  text-shadow: 0.0mm 0.0mm 2.0mm rgba(70, 175, 70, 1.0);
+}
+
+.backhighlight2 {
+  text-shadow: 0.0mm 0.0mm 2.0mm rgba(205, 100, 100, 1.0);
+}
+
 .ordinary-near {
   margin-top: 0mm;
   margin-right: 10mm;
