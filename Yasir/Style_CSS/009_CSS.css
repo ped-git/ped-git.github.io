@@ -167,6 +167,10 @@ speech[gray]::before {
   color:  rgb(205, 100, 100);
 }
 
+.highlight15 {
+  color:  rgb(220, 0, 200);
+}
+
 .ordinary-near {
   margin-top: 0mm;
   margin-right: 10mm;
