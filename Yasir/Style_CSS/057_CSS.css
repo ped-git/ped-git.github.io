@@ -231,6 +231,14 @@ speech[gray]::before {
   border-top: 0;
 }
 
+.boxed.underline-solidgreen-far {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
 .boxed.underline-blue {
   border-bottom: 1px dashed rgb(70, 70, 220);
   border-left: 0;
@@ -250,6 +258,14 @@ speech[gray]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+}
+
+.boxed.underline-solidred-far {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
 }
 
 .boxed.underline-black-1 {
