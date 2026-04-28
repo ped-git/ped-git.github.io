@@ -179,7 +179,7 @@ speech[gray]::before {
 
 .boxed {
   border: 1px solid rgb(150, 150, 150);
-  padding: 1px 0.529166mm; ;
+  padding: 0.1mm 0.53mm; ;
 }
 
 .boxed.square {
@@ -346,6 +346,14 @@ speech[gray]::before {
   border-right: 0;
   border-top: 0;
   padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed3 {
+  border-bottom: 2px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0px; ;
 }
 
 .boxed.underline-blackdashed-far {
