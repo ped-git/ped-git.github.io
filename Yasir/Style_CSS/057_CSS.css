@@ -206,6 +206,15 @@ speech[gray]::before {
   border-top: 0;
 }
 
+.boxed.underline-gradient1 {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
 .boxed.underline-gradientsym {
   width: 100%;
   border-bottom: 1px solid;
@@ -364,6 +373,17 @@ speech[gray]::before {
 
 .boxed.underline-blackdotted3 {
   border-bottom: 2px dotted rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-wavy {
+  text-decoration: underline wavy rgb(150, 150, 150);
+  text-underline-offset: 9px;
+  text-decoration-thickness: 1px;
+  border-bottom: 0;
   border-left: 0;
   border-right: 0;
   border-top: 0;
