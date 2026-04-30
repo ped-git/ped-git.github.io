@@ -318,6 +318,16 @@ speech[gray]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-gradient1 {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-gradient-far {
   border-bottom: 1px solid;
   border-image: linear-gradient(to left, black, white);
@@ -418,6 +428,14 @@ speech[gray]::before {
 
 .boxed.underline-blackdashed2 {
   border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed3 {
+  border-bottom: 2px dashed rgb(200, 200, 200);
   border-left: 0;
   border-right: 0;
   border-top: 0;
