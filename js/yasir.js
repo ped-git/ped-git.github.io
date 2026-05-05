@@ -958,29 +958,37 @@
         });
     }
 
+    function normalizeDigits(text) {
+        if (!text) return '';
+        const withEastern = text.replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+        const withArabicIndic = withEastern.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+        return withArabicIndic.replace(/٫/g, '.').replace(/٬/g, '');
+    }
+
     function parseNumericValue(text) {
         if (!text) return 0;
-        const normalized = text.replace(/[^0-9.\-]/g, '');
+        const normalized = normalizeDigits(text).replace(/[^0-9.\-]/g, '');
         const value = parseFloat(normalized);
         return Number.isFinite(value) ? value : 0;
     }
 
     function getRootMetric(sectionId, rootDiv) {
         const title = rootDiv.getAttribute('title') || '';
+        const normalizedTitle = normalizeDigits(title);
         if (sectionId === 'top-roots-section-content') {
             const countText = rootDiv.querySelector('span:last-child')?.textContent || '';
             return parseNumericValue(countText);
         }
         if (sectionId === 'selective-roots-section-content') {
-            const match = title.match(/نسبت:\s*([0-9.]+)/);
+            const match = normalizedTitle.match(/نسبت:\s*([0-9.]+)/);
             return match ? parseNumericValue(match[1]) : 0;
         }
         if (sectionId === 'high-kl-roots-section-content') {
-            const match = title.match(/KL:\s*([0-9.]+)/);
+            const match = normalizedTitle.match(/KL:\s*([0-9.]+)/);
             return match ? parseNumericValue(match[1]) : 0;
         }
         if (sectionId === 'n2n-roots-section-content') {
-            const match = title.match(/m:\s*([0-9.]+)/);
+            const match = normalizedTitle.match(/m:\s*([0-9.]+)/);
             return match ? parseNumericValue(match[1]) : 0;
         }
         return 0;

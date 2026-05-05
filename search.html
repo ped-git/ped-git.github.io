@@ -21,6 +21,7 @@
         
         * {
             box-sizing: border-box;
+            font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
         }
         
         body {
@@ -144,7 +145,7 @@
 
         /* Digits are produced via Intl.NumberFormat('fa-IR'); keep the normal UI font */
         .num-hindi {
-            font-family: "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
             font-size: calc(1em * var(--ui-font-scale));
         }
 
@@ -156,7 +157,7 @@
             font-size: calc(13px * var(--ui-font-scale));
             text-align: center;
             /* Ensure the visible glyph uses Shabnam */
-            font-family: "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-family: "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
             outline: none;
             appearance: textfield;
             -moz-appearance: textfield;
@@ -510,6 +511,18 @@
         .items-panel-toggle[aria-pressed="true"]::before {
             transform: rotate(135deg);
             margin-right: 2px;
+        }
+
+        .selected-row .items-panel-toggle {
+            position: static;
+            top: auto;
+            left: auto;
+            width: 30px;
+            height: 30px;
+            border-right: 1px solid #d8dee8;
+            border-radius: 6px;
+            opacity: 1;
+            pointer-events: auto;
         }
         
         .items-panel-title {
@@ -1748,6 +1761,7 @@
             </div>
             
             <div class="selected-row">
+                <button type="button" class="items-panel-toggle" id="items-panel-toggle" aria-pressed="false" title="بستن فهرست صیغه‌ها">▶</button>
                 <div class="selected-items" id="selected-items">
                     <span class="empty-hint">موردی انتخاب نشده. واژه یا ریشه‌ای را جستجو و انتخاب کنید.</span>
                 </div>
@@ -1759,17 +1773,16 @@
             </div>
         </div>
         
-        <div class="results-box" id="results-box" style="display: none;">
-            <div class="results-content-column">
-                <div id="results-content"></div>
-            </div>
-            <div class="items-panel-shell" id="items-panel-shell">
-                <button type="button" class="items-panel-toggle" id="items-panel-toggle" aria-pressed="false" title="بستن فهرست صیغه‌ها">▶</button>
-                <div class="items-panel" id="items-panel">
-                    <div id="items-panel-content"></div>
+            <div class="results-box" id="results-box" style="display: none;">
+                <div class="results-content-column">
+                    <div id="results-content"></div>
+                </div>
+                <div class="items-panel-shell" id="items-panel-shell">
+                    <div class="items-panel" id="items-panel">
+                        <div id="items-panel-content"></div>
+                    </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <script src="js/buckwalter.js"></script>
@@ -3096,6 +3109,12 @@
             
             const distance = getDistanceValueClamped(); // max allowed ayah distance window
             const crossSura = document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true'; // if true, distance can cross sura boundaries
+            const debugSearch = true;
+
+            function formatPos(pos) {
+                const sa = getSuraAyahFromPosition(pos);
+                return `${sa.sura}:${sa.ayah}`;
+            }
             
             // Check if we're in focus mode (single item/lem highlighted)
             if (highlightedItem) {
@@ -3188,6 +3207,7 @@
             const intervals = [];
             const combinedStartAyahBySura = {}; // {sura -> set of start ayahs}
             const combinedStartDebug = [];
+            const candidateDebug = [];
 
             function hasAnyInRange(sortedArr, lo, hi) {
                 if (!sortedArr || sortedArr.length === 0) return false;
@@ -3216,10 +3236,18 @@
             for (let ci = 0; ci < startCandidates.length; ci++) {
                 const cPos = startCandidates[ci];
                 let ok = true;
+                const candidateChecks = [];
                 for (let ii = 0; ii < M.length; ii++) {
                     const cPosSA = getSuraAyahFromPosition(cPos);
                     const maxPos = crossSura ? 1e5 : suraMaxPos(cPosSA.sura); // 1e5 is just a big number to ensure we don't exceed the sura boundary
-                    const found = hasAnyInRange(M[ii], cPos, Math.min(cPos + distance, maxPos));
+                    const inRangePositions = collectInRange(M[ii], cPos, Math.min(cPos + distance, maxPos));
+                    const found = inRangePositions.length > 0;
+                    candidateChecks.push({
+                        itemIndex: checkedIndices[ii],
+                        item: selectedItems[checkedIndices[ii]] ? `${selectedItems[checkedIndices[ii]].type}:${selectedItems[checkedIndices[ii]].value}` : `item:${checkedIndices[ii]}`,
+                        found,
+                        inRange: inRangePositions.map(p => formatPos(p))
+                    });
                     if (!found) { ok = false; break; }
                     // const inRangeValues = collectInRange(M[ii], cPos, Math.min(cPos + distance, maxPos))
                     //     .map(p => { const s = getSuraAyahFromPosition(p); return `${s.sura}:${s.ayah}`; });
@@ -3229,6 +3257,11 @@
                     //     inRange: inRangeValues
                     // });
                 }
+                candidateDebug.push({
+                    start: formatPos(cPos),
+                    ok,
+                    checks: candidateChecks
+                });
                 if (ok) {
                     const { sura, ayah } = getSuraAyahFromPosition(cPos);
                     if (!combinedStartAyahBySura[sura]) combinedStartAyahBySura[sura] = new Set();
@@ -3259,9 +3292,25 @@
                     });
                 }
             }
+
+            if (debugSearch) {
+                console.groupCollapsed('[search-debug] candidate checks');
+                console.log(candidateDebug);
+                console.groupEnd();
+            }
             
             // Step 4: Sort intervals by starting point
             intervals.sort((a, b) => a.startPos - b.startPos);
+
+            if (debugSearch) {
+                console.groupCollapsed('[search-debug] blocks (intervals)');
+                console.log(intervals.map(interval => ({
+                    start: formatPos(interval.startPos),
+                    end: formatPos(interval.endPos),
+                    matchCount: interval.matches.length
+                })));
+                console.groupEnd();
+            }
             
             // Step 5: Merge overlapping intervals
             const mergedIntervals = [];
@@ -3271,7 +3320,7 @@
                 } else {
                     const last = mergedIntervals[mergedIntervals.length - 1];
                     // Check if intervals overlap or are adjacent
-                    if (interval.startPos <= last.endPos + 1) {
+                    if (interval.startPos <= last.endPos) {
                         // Merge
                         last.endPos = Math.max(last.endPos, interval.endPos);
                         // Add matches avoiding duplicates
@@ -3287,6 +3336,16 @@
                         mergedIntervals.push(interval);
                     }
                 }
+            }
+
+            if (debugSearch) {
+                console.groupCollapsed('[search-debug] merged blocks');
+                console.log(mergedIntervals.map(interval => ({
+                    start: formatPos(interval.startPos),
+                    end: formatPos(interval.endPos),
+                    matchCount: interval.matches.length
+                })));
+                console.groupEnd();
             }
             
             // Step 6: Convert intervals to result format (groups with sura, startAyah, endAyah)
@@ -3327,11 +3386,38 @@
         const STATS_ALPHA = window.SearchShared.STATS_ALPHA;
         let statsUniverseCache = null;
         let searchResultsView = localStorage.getItem(SEARCH_RESULTS_VIEW_STORAGE_KEY) || 'regions';
-        let statsMatchMode = localStorage.getItem('searchStatsMatchMode') || 'any';
+        const STATS_MATCH_MODES = ['separated', 'any-total', 'all'];
+        const statsMatchModeLabels = {
+            separated: 'مجزا',
+            'any-total': 'هر کدام',
+            all: 'همه'
+        };
+        const statsMatchModeTitles = {
+            separated: 'جدا: آمار جداگانه هر مورد',
+            'any-total': 'هر کدام: مجموع تعداد تطابق‌های همه موارد (x+y+...)',
+            all: 'همه: تعداد آیات شروع که همه موارد در فاصله دارند'
+        };
+        let statsMatchMode = localStorage.getItem('searchStatsMatchMode') || 'separated';
+        if (statsMatchMode === 'any') statsMatchMode = 'separated';
+        if (!STATS_MATCH_MODES.includes(statsMatchMode)) statsMatchMode = 'separated';
         let statsSortKey = localStorage.getItem('searchStatsSortKey') || 'sura';
         let statsSortDir = localStorage.getItem('searchStatsSortDir') || 'asc';
         let lastRenderedStats = [];
         let lastCombinedSearchMeta = { bySura: {}, startsBySura: {}, startDebug: [], totalCS: 0, eligible: false };
+
+        function getStatsMatchLabel() {
+            return statsMatchModeLabels[statsMatchMode] || 'separated';
+        }
+
+        function getStatsMatchTitle() {
+            return statsMatchModeTitles[statsMatchMode] || '';
+        }
+
+        function nextStatsMatchMode() {
+            const idx = STATS_MATCH_MODES.indexOf(statsMatchMode);
+            const nextIdx = idx >= 0 ? (idx + 1) % STATS_MATCH_MODES.length : 0;
+            statsMatchMode = STATS_MATCH_MODES[nextIdx];
+        }
 
         function ensureStatsUniverseCache() {
             if (statsUniverseCache) return statsUniverseCache;
@@ -3349,6 +3435,36 @@
             return window.SearchShared.computePerSuraMetrics(cSura, cAll, NSura, totalTokens, vocabularySize);
         }
 
+        function computeSectionCounts(item, matches, focusedLem) {
+            const countsBySura = {};
+            let totalMatchCount = 0;
+            if (!matches || !matches.length) return { countsBySura, totalMatchCount };
+            const isPhraseText = item?.type === 'text' && matches.some(m => m.phraseOccurrence !== undefined);
+            if (isPhraseText) {
+                const seenOccs = new Set();
+                for (const m of matches) {
+                    const oc = m.phraseOccurrence;
+                    if (oc === undefined) continue;
+                    if (seenOccs.has(oc)) continue;
+                    seenOccs.add(oc);
+                    countsBySura[m.sura] = (countsBySura[m.sura] || 0) + 1;
+                }
+                totalMatchCount = seenOccs.size;
+            } else {
+                totalMatchCount = matches.length;
+                for (const m of matches) {
+                    countsBySura[m.sura] = (countsBySura[m.sura] || 0) + 1;
+                }
+            }
+            return { countsBySura, totalMatchCount };
+        }
+
+        function getTotalAyahCount() {
+            let nTotalAyah = 0;
+            for (const sk of Object.keys(morphologyData)) nTotalAyah += Object.keys(morphologyData[sk] || {}).length;
+            return Math.max(1, nTotalAyah || 1);
+        }
+
         function performItemSuraStatsSearch(statsInput, combinedData, statsMatchMode) {
             if (!statsInput || !statsInput.sections) return [];
 
@@ -3359,9 +3475,7 @@
                 const bySura = combinedData.bySura || {};
                 const totalCS = Object.values(bySura).reduce((a, b) => a + b, 0);
                 const suras = Object.keys(bySura).map(Number).sort((a, b) => a - b);
-                let nTotalAyah = 0;
-                for (const sk of Object.keys(morphologyData)) nTotalAyah += Object.keys(morphologyData[sk] || {}).length;
-                if (nTotalAyah <= 0) nTotalAyah = 1;
+                const nTotalAyah = getTotalAyahCount();
                 const rows = suras.map(sura => {
                     const cSura = bySura[sura] || 0;
                     const nSura = Math.max(1, Object.keys(morphologyData[sura] || {}).length);
@@ -3379,6 +3493,37 @@
                 return [{ item: { type: 'text', display: 'ترکیبی (همه موارد)' }, itemIndex: 0, totalMatches: totalCS, rows, focusedLem: null }];
             }
 
+            if (statsMatchMode === 'any-total' && checkedCount > 1 && !highlightedItem) {
+                const nTotalAyah = getTotalAyahCount();
+                const countsBySura = {};
+                let totalMatchCount = 0;
+                for (let i = 0; i < statsInput.sections.length; i++) {
+                    const { item, matches, focusedLem } = statsInput.sections[i];
+                    if (!item || !matches || !matches.length) continue;
+                    const counts = computeSectionCounts(item, matches, focusedLem);
+                    totalMatchCount += counts.totalMatchCount;
+                    for (const s of Object.keys(counts.countsBySura)) {
+                        countsBySura[s] = (countsBySura[s] || 0) + counts.countsBySura[s];
+                    }
+                }
+                const suras = Object.keys(countsBySura).map(Number).sort((a, b) => a - b);
+                const rows = suras.map(sura => {
+                    const cSura = countsBySura[sura] || 0;
+                    const nSura = Math.max(1, Object.keys(morphologyData[sura] || {}).length);
+                    const metrics = computePerSuraMetrics(cSura, totalMatchCount, nSura, nTotalAyah, 1);
+                    return {
+                        sura,
+                        count: cSura,
+                        relInSura: metrics.relInSura,
+                        ratio: metrics.ratio,
+                        kl: metrics.kl,
+                        m: metrics.m,
+                        detail: { cSura, cAll: totalMatchCount, nSura, nTotal: nTotalAyah, v: 1, alpha: STATS_ALPHA, pSura: metrics.pSura, pElse: metrics.pElse }
+                    };
+                });
+                return [{ item: { type: 'text', display: 'مجموع (همه موارد)' }, itemIndex: 0, totalMatches: totalMatchCount, rows, focusedLem: null }];
+            }
+
             const sections = [];
             for (let i = 0; i < statsInput.sections.length; i++) {
                 const { item, itemIndex, matches, focusedLem } = statsInput.sections[i];
@@ -3391,31 +3536,13 @@
 
                 const effectiveType = focusedLem ? 'lemma' : item.type;
                 const universe = resolveStatsUniverse(effectiveType);
-                const countsBySura = {};
-                let totalMatchCount;
-                const isPhraseText = item.type === 'text' && matches.some(m => m.phraseOccurrence !== undefined);
-                if (isPhraseText) {
-                    const seenOccs = new Set();
-                    for (const m of matches) {
-                        const oc = m.phraseOccurrence;
-                        if (oc === undefined) continue;
-                        if (seenOccs.has(oc)) continue;
-                        seenOccs.add(oc);
-                        countsBySura[m.sura] = (countsBySura[m.sura] || 0) + 1;
-                    }
-                    totalMatchCount = seenOccs.size;
-                } else {
-                    totalMatchCount = matches.length;
-                    for (const m of matches) {
-                        countsBySura[m.sura] = (countsBySura[m.sura] || 0) + 1;
-                    }
-                }
+                const counts = computeSectionCounts(item, matches, focusedLem);
 
-                const suras = Object.keys(countsBySura).map(Number).sort((a, b) => a - b);
+                const suras = Object.keys(counts.countsBySura).map(Number).sort((a, b) => a - b);
                 const rows = suras.map(sura => {
-                    const cSura = countsBySura[sura] || 0;
+                    const cSura = counts.countsBySura[sura] || 0;
                     const N_s = universe.tokensBySura[sura] || 1;
-                    const metrics = computePerSuraMetrics(cSura, totalMatchCount, N_s, universe.totalTokens, universe.vocabularySize);
+                    const metrics = computePerSuraMetrics(cSura, counts.totalMatchCount, N_s, universe.totalTokens, universe.vocabularySize);
                     return {
                         sura,
                         count: cSura,
@@ -3425,7 +3552,7 @@
                         m: metrics.m,
                         detail: {
                             cSura,
-                            cAll: totalMatchCount,
+                            cAll: counts.totalMatchCount,
                             nSura: N_s,
                             nTotal: universe.totalTokens,
                             v: universe.vocabularySize,
@@ -3435,7 +3562,7 @@
                         }
                     };
                 });
-                sections.push({ item, itemIndex, totalMatches: totalMatchCount, rows, focusedLem });
+                sections.push({ item, itemIndex, totalMatches: counts.totalMatchCount, rows, focusedLem });
             }
             return sections;
         }
@@ -4484,7 +4611,7 @@
             let html = '';
             html += `<div class="stats-panel-toolbar">`;
             html += `<span class="stats-found-suras num-hindi">${fmtFa(foundSuraCount)} سوره</span>`;
-            html += `<button type="button" class="stats-match-toggle" id="stats-match-toggle" aria-pressed="${statsMatchMode === 'all' ? 'true' : 'false'}" title="همه: تعداد آیات شروع که همه موارد در فاصله دارند؛ هر کدام: آمار جداگانه هر مورد"><span class="stats-match-dot" aria-hidden="true"></span>${statsMatchMode === 'all' ? 'همه' : 'هر کدام'}</button>`;
+            html += `<button type="button" class="stats-match-toggle" id="stats-match-toggle" aria-pressed="${statsMatchMode === 'all' ? 'true' : 'false'}" title="${escapeAttr(getStatsMatchTitle())}"><span class="stats-match-dot" aria-hidden="true"></span>${getStatsMatchLabel()}</button>`;
             html += statsSortControlsHtml();
             html += `</div>`;
 
@@ -4633,7 +4760,7 @@
             let html = '';
             html += `<div class="stats-panel-toolbar">`;
             html += `<span class="stats-found-suras num-hindi">${fmtFa(foundSuraCount)} سوره</span>`;
-            html += `<button type="button" class="stats-match-toggle" id="stats-match-toggle" aria-pressed="${statsMatchMode === 'all' ? 'true' : 'false'}" title="همه: تعداد آیات شروع که همه موارد در فاصله دارند؛ هر کدام: آمار جداگانه هر مورد"><span class="stats-match-dot" aria-hidden="true"></span>${statsMatchMode === 'all' ? 'همه' : 'هر کدام'}</button>`;
+            html += `<button type="button" class="stats-match-toggle" id="stats-match-toggle" aria-pressed="${statsMatchMode === 'all' ? 'true' : 'false'}" title="${escapeAttr(getStatsMatchTitle())}"><span class="stats-match-dot" aria-hidden="true"></span>${getStatsMatchLabel()}</button>`;
             html += statsSortControlsHtml();
             html += `</div>`;
             const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
@@ -4643,14 +4770,21 @@
                 const colorIndex = (sec.itemIndex ?? i) % 8;
                 const itemLabel = escapeHtml(sec.focusedLem ? `${item.value} ← ${sec.focusedLem}` : (item.display || item.value || ''));
                 const typeLabel = typeLabels[sec.focusedLem ? 'lemma' : item.type] || 'مورد';
-                const matchesTitle = statsMatchMode === 'all' && sec.item?.display === 'ترکیبی (همه موارد)'
+                const matchesTitle = (statsMatchMode === 'all' && sec.item?.display === 'ترکیبی (همه موارد)')
                     ? 'تعداد آیات شروع که همه موارد در فاصلهٔ مجاز دارند'
-                    : 'تعداد کل تطابق‌های این مورد در جستجو';
+                    : (statsMatchMode === 'any-total')
+                        ? 'مجموع تطابق‌های همهٔ موارد در جستجو'
+                        : 'تعداد کل تطابق‌های این مورد در جستجو';
                 html += `<div class="item-stats-card"><div class="item-stats-header"><span class="item-stats-dot" style="background: var(--color-${colorIndex});"></span><span class="item-stats-title">${itemLabel}</span><span class="item-stats-type">${typeLabel}</span><span class="item-stats-total num-hindi" title="${matchesTitle}">${fmtFa(sec.totalMatches || 0)} تطابق</span></div>`;
                 if (!sec.rows || sec.rows.length === 0) {
                     html += `<div class="no-results">در سوره‌های انتخاب‌شده موردی یافت نشد</div>`;
                 } else {
                     const sortedRows = sortStatsRows(sec.rows);
+                    const countCellTitle = (statsMatchMode === 'all' && sec.item?.display === 'ترکیبی (همه موارد)')
+                        ? 'تعداد بازه‌ها با همهٔ موارد، پیش از ادغام (ممکن است با بازه‌های ادغام‌شده در نتایج جستجو متفاوت باشد). کلیک: فیلتر به این سوره و نمایش نتایج'
+                        : (statsMatchMode === 'any-total')
+                            ? 'مجموع تطابق‌های همهٔ موارد در این سوره. کلیک: فیلتر به این سوره و نمایش نتایج'
+                            : 'تعداد تطابق‌های این مورد در این سوره. کلیک: فیلتر به این سوره و نمایش نتایج';
                     html += `<table class="item-stats-table"><thead><tr>` +
                         `<th data-sort-key="sura" role="button" tabindex="0" title="مرتب‌سازی بر اساس سوره">سوره${sortIndicatorFor('sura')}</th>` +
                         `<th data-sort-key="count" role="button" tabindex="0" title="مرتب‌سازی بر اساس تعداد">تعداد${sortIndicatorFor('count')}</th>` +
@@ -4662,7 +4796,7 @@
                     for (let r = 0; r < sortedRows.length; r++) {
                         const row = sortedRows[r];
                         html += `<tr><td><a class="stats-sura-link num-hindi" href="${escapeAttr(buildAyahTargetHref(row.sura))}" title="باز کردن سوره در ${escapeAttr(getAyahLinkTargetLabel())}">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
-                        html += `<td class="num-hindi stats-sura-count" data-sura="${row.sura}" role="button" tabindex="0" title="تعداد بازه‌ها با همهٔ موارد، پیش از ادغام (ممکن است با بازه‌های ادغام‌شده در نتایج جستجو متفاوت باشد). کلیک: فیلتر به این سوره و نمایش نتایج">${fmtFa(row.count)}</td>`;
+                        html += `<td class="num-hindi stats-sura-count" data-sura="${row.sura}" role="button" tabindex="0" title="${countCellTitle}">${fmtFa(row.count)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('freq', row).replace(/"/g, '&quot;')}">${fmtFaPercent(row.relInSura)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('ratio', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.ratio, 3)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('kl', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.kl, 4)}</td>`;
@@ -5406,7 +5540,7 @@
                     if (!toggle) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    statsMatchMode = (statsMatchMode === 'any') ? 'all' : 'any';
+                    nextStatsMatchMode();
                     localStorage.setItem('searchStatsMatchMode', statsMatchMode);
                     if (searchResultsView !== 'regions') renderResults(lastRenderedGroups || []);
                 });

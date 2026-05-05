@@ -212,6 +212,22 @@
             padding: 3rem;
             color: var(--muted);
         }
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .main-content {
+                order: 1;
+            }
+            .root-detail-column {
+                order: 2;
+                width: 100%;
+                position: static;
+            }
+            .root-detail-column .root-detail-placeholder {
+                margin-top: 1rem;
+            }
+        }
         .error {
             background: #fef2f2;
             color: #b91c1c;

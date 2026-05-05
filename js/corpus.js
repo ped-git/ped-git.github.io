@@ -63,6 +63,7 @@
 
     const morphologyData = {};
     const rootToWordsMap = {};
+    const lemmaToWordsMap = {};
     const wordTextsMap = {};
     const wordSegments = {};
     const lines = String(text || '').split('\n');
@@ -125,6 +126,15 @@
         if (!exists) rootToWordsMap[root].push(locationInfo);
       }
 
+      if (lemma) {
+        if (!lemmaToWordsMap[lemma]) lemmaToWordsMap[lemma] = [];
+        const lemmaLoc = filterSura === null ? { sura, ayah, wordIndex } : { ayah, wordIndex };
+        const hasLemma = lemmaToWordsMap[lemma].some((entry) =>
+          entry.ayah === ayah && entry.wordIndex === wordIndex && (filterSura !== null || entry.sura === sura)
+        );
+        if (!hasLemma) lemmaToWordsMap[lemma].push(lemmaLoc);
+      }
+
       if (includeWordTextsMap) {
         const normalizedWord = normalizeArabic(arabicWord);
         if (normalizedWord.length > 1) {
@@ -134,7 +144,7 @@
       }
     }
 
-    return { morphologyData, rootToWordsMap, wordTextsMap };
+    return { morphologyData, rootToWordsMap, lemmaToWordsMap, wordTextsMap };
   }
 
   function loadMorphologyData(options = {}) {

@@ -74,7 +74,196 @@
             padding: 12px 16px 72px;
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 56px);
+            min-height: calc(100vh - 5px);
+        }
+        .main.simple-minimap-shell {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            padding: 8px 12px 72px;
+            min-height: calc(100vh - 5px);
+            height: calc(100vh - 5px);
+            /* overflow: hidden; */
+        }
+        /* Continuous + minimap: ~75% text / 25% sidebar (minimap width tracks line width ratio) */
+        #simple-continuous-minimap-layout {
+            display: grid;
+            grid-template-columns: minmax(0, max-content) minmax(160px, 22vw);
+            gap: 0;
+            align-items: stretch;
+            justify-content: center;
+            width: 100%;
+            flex: 1 1 auto;
+            min-height: 0;
+            height: 100%;
+            direction: rtl;
+        }
+        #simple-minimap-main {
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        #simple-minimap-text-root {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: auto;
+        }
+        #simple-minimap-text-root .sura-container {
+            width: max-content;
+            max-width: none;
+            margin: 0;
+        }
+        #simple-minimap-text-root .sura-scroll {
+            max-height: none;
+            height: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        #simple-minimap-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+            min-height: 0;
+            max-height: calc(100vh - 56px - 16px);
+            font-family: 'Sahel', system-ui, sans-serif;
+            font-size: 11px;
+            direction: rtl;
+        }
+        #morphology-combined-panel {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #morphology-minimap {
+            flex: 1 1 50% !important;
+            min-height: 120px !important;
+            height: auto !important;
+            max-height: 50% !important;
+        }
+        #highlighted-roots-panel {
+            flex: 1 1 50% !important;
+            min-height: 120px !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+        #simple-minimap-settings-bar {
+            flex: 0 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid rgba(44, 62, 80, 0.15);
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        #simple-minimap-settings-bar button,
+        #simple-minimap-settings-bar select {
+            font: inherit;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+            background: #fff;
+            cursor: pointer;
+            color: #1f2937;
+        }
+        #simple-minimap-settings-bar .mm-icon-btn {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 14px;
+        }
+        #simple-minimap-settings-bar .mm-icon-btn.active {
+            background: #2c3e50;
+            color: #fff;
+            border-color: #2c3e50;
+        }
+        #simple-minimap-settings-bar .mm-menu {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            inset-inline-start: 0;
+            min-width: 120px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(44, 62, 80, 0.18);
+            border-radius: 8px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            padding: 4px;
+            display: none;
+            z-index: 9999;
+        }
+        #simple-minimap-settings-bar .mm-menu.open {
+            display: block;
+        }
+        #simple-minimap-settings-bar .mm-menu button {
+            width: 100%;
+            justify-content: flex-start;
+            padding: 4px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+        }
+        #simple-minimap-settings-bar .mm-menu .mm-range-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 4px;
+            font-size: 10px;
+            color: #334155;
+        }
+        #simple-minimap-settings-bar .mm-menu input[type="range"] {
+            flex: 1 1 auto;
+            accent-color: #2c3e50;
+        }
+        #simple-minimap-settings-bar .mm-menu .mm-range-value {
+            min-width: 34px;
+            text-align: end;
+            font-feature-settings: "tnum";
+        }
+        #simple-minimap-settings-bar .mm-menu button.active {
+            background: #2c3e50;
+            color: #fff;
+            border-color: #2c3e50;
+        }
+        #simple-minimap-settings-bar .mm-menu button.danger {
+            border-color: rgba(220, 38, 38, 0.5);
+            color: #b91c1c;
+        }
+        #simple-minimap-settings-bar .mm-menu button.danger.active {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
+        }
+        #simple-minimap-settings-bar .mm-menu-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        #simple-minimap-sidebar.minimap-only #highlighted-roots-panel {
+            display: none !important;
+        }
+        #simple-minimap-sidebar.minimap-only #morphology-minimap {
+            flex: 1 1 auto !important;
+            height: 100% !important;
+            max-height: none !important;
+        }
+        #simple-minimap-settings-bar button.active {
+            background: #2c3e50;
+            color: #fff;
+            border-color: #2c3e50;
+        }
+        #word-hover-tooltip a.morph-shift-hint {
+            cursor: pointer;
         }
         #bottom-ribbon {
             position: fixed;
@@ -90,7 +279,7 @@
             background: rgba(245,243,239,0.95);
             border-top: 1px solid rgba(44,62,80,0.12);
             box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
-            z-index: 50;
+            z-index: 10000;
             backdrop-filter: blur(2px);
         }
         #settings-wrap {
@@ -107,7 +296,7 @@
         #search-controls {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 0;
             width: min(100%, 560px);
             direction: rtl;
         }
@@ -140,6 +329,7 @@
         #simple-search-input {
             flex: 1 1 auto;
             min-width: 0;
+            max-width: 200px;
             height: 36px;
             border: 1px solid #c9d2dd;
             border-radius: 8px;
@@ -160,15 +350,15 @@
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
         }
         .search-action-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border: 1px solid #c9d2dd;
-            border-radius: 8px;
+            border-radius: 6px;
             background: #ffffff;
             color: #2c3e50;
             cursor: pointer;
             font: inherit;
-            font-size: 1rem;
+            font-size: 0.75rem;
             line-height: 1;
             display: inline-flex;
             align-items: center;
@@ -176,6 +366,7 @@
             padding: 0;
             flex: 0 0 auto;
             vertical-align: middle;
+            margin: 0 2px 0 2px;
         }
         .search-action-btn > span,
         .search-action-btn > svg {
@@ -193,9 +384,41 @@
             cursor: default;
             background: #f8fafc;
         }
+        .search-nav-stack {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .search-nav-stack .search-action-btn {
+            width: 16px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0;
+        }
+        .search-nav-stack .search-action-btn + .search-action-btn {
+            border-top: none;
+        }
+        .search-scope-stack {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 16px;
+            min-width: 16px;
+            height: 32px;
+        }
+        .search-scope-stack .search-toggle-btn {
+            width: 16px;
+            min-width: 16px;
+            height: 16px;
+            padding: 0;
+            border-radius: 6px;
+        }
+        .search-scope-stack .search-scope-slot {
+            flex: 1 1 auto;
+        }
         .search-toggle-btn {
-            width: 36px;
-            min-width: 36px;
+            width: 32px;
+            min-width: 32px;
             padding: 0;
         }
         .search-toggle-btn.active {
@@ -1117,8 +1340,8 @@
                     </select>
                 </label>
                 <h3>چیدمان آیه</h3>
-                <label><input type="radio" name="layout" value="ayah-line" checked>یک آیه در هر خط</label>
-                <label><input type="radio" name="layout" value="flow">متن پیوسته</label>
+                <label><input type="radio" name="layout" value="ayah-line">یک آیه در هر خط</label>
+                <label><input type="radio" name="layout" value="flow" checked>متن پیوسته</label>
                 <h3>حالت صفحه</h3>
                 <label class="settings-row-select">
                     <select id="page-mode" aria-label="حالت صفحه">
@@ -1126,6 +1349,7 @@
                         <option value="two-pages">دو صفحه</option>
                         <option value="one-page-translation">یک صفحه + ترجمه</option>
                         <option value="continuous">پیوسته (سوره)</option>
+                        <option value="continuous-minimap">پیوسته + نقشه</option>
                         <option value="double-continuous">پیوسته دوتایی</option>
                     </select>
                 </label>
@@ -1153,12 +1377,15 @@
         </div>
         <div id="search-wrap">
             <div id="search-controls">
-                <button type="button" id="search-prev-btn" class="search-action-btn" aria-label="نتیجه قبلی"><span>→</span></button>
-                <button type="button" id="search-next-btn" class="search-action-btn" aria-label="نتیجه بعدی"><span>←</span></button>
+                <div class="search-nav-stack" aria-label="جابه‌جایی نتایج">
+                    <button type="button" id="search-prev-btn" class="search-action-btn" aria-label="نتیجه قبلی"><span>→</span></button>
+                    <button type="button" id="search-next-btn" class="search-action-btn" aria-label="نتیجه بعدی"><span>←</span></button>
+                </div>
                 <input type="text" id="simple-search-input" placeholder="جستجو در همین صفحه و صفحه‌های بعد" aria-label="جستجو در صفحه‌های قرآن">
-                <button type="button" id="search-sura-scope-btn" class="search-action-btn search-toggle-btn" aria-label="Search in this sura" title="Search in this sura" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.75"></circle><circle cx="10" cy="10" r="5.5" fill="currentColor"></circle></svg></button>
-                <button type="button" id="search-ok-btn" class="search-action-btn" aria-label="تایید جستجو"><span>✓</span></button>
-                <button type="button" id="search-cancel-btn" class="search-action-btn" aria-label="لغو جستجو"><span>✕</span></button>
+                <div class="search-scope-stack" aria-label="جستجو در سوره">
+                    <button type="button" id="search-sura-scope-btn" class="search-action-btn search-toggle-btn" aria-label="Search in this sura" title="Search in this sura" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.75"></circle><circle cx="10" cy="10" r="5.5" fill="currentColor"></circle></svg></button>
+                    <div class="search-scope-slot" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
         <div id="busy-indicator" aria-hidden="true"></div>
@@ -1180,6 +1407,7 @@
     <script>
 (function() {
     const TOTAL_PAGES = 604;
+    const SIMPLE_MINIMAP_WIDTH_RATIO = 0.25;
     const loadedQCFPages = new Set();
     const QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
     const SURAH_NAMES_FONT_FAMILY = 'surahnames';
@@ -1268,6 +1496,7 @@
     const searchOkBtn = document.getElementById('search-ok-btn');
     const searchCancelBtn = document.getElementById('search-cancel-btn');
     const searchSuraScopeBtn = document.getElementById('search-sura-scope-btn');
+    const searchWrapEl = document.getElementById('search-wrap');
     var fitPageContentRaf = 0;
     let bismillahVerseCache = null;
     var renderBusyActive = false;
@@ -1283,12 +1512,14 @@
         draftOriginMode: null,
         draftOriginSura: null,
         draftOriginSearchSura: null,
+        draftOriginScrollTop: null,
         previewPage: null,
         activeMatchIndex: -1,
         pendingMatchDirection: 1,
         requestId: 0,
         hasMatch: false,
-        controller: null
+        controller: null,
+        restoreScrollTop: null
     };
     function updateBusyIndicator() {
         if (!busyIndicatorEl) return;
@@ -1767,10 +1998,19 @@
     function captureDraftOriginIfNeeded() {
         if (searchState.draftOriginMode != null) return;
         var st = getMode();
+        var scrollEl = main ? main.querySelector('.sura-scroll') : null;
         searchState.draftOriginMode = st.mode;
         searchState.draftOriginSura = st.mode === 'sura' ? st.sura : null;
         searchState.draftOriginPage = st.mode === 'sura' ? (getCurrentContinuousPage() || 1) : pageForCurrentMode(st.page);
         searchState.draftOriginSearchSura = getSearchScopeSura();
+        searchState.draftOriginScrollTop = (st.mode === 'sura' && scrollEl) ? scrollEl.scrollTop : null;
+    }
+    function clearDraftOrigin() {
+        searchState.draftOriginPage = null;
+        searchState.draftOriginMode = null;
+        searchState.draftOriginSura = null;
+        searchState.draftOriginSearchSura = null;
+        searchState.draftOriginScrollTop = null;
     }
     async function jumpBetweenSearchResults(direction) {
         var terms = parseSearchTerms(simpleSearchInput ? simpleSearchInput.value : '');
@@ -1863,6 +2103,7 @@
         searchState.draftOriginMode = null;
         searchState.draftOriginSura = null;
         searchState.draftOriginSearchSura = null;
+        searchState.draftOriginScrollTop = null;
         searchState.previewPage = null;
         searchState.hasMatch = !!searchState.activeTerms.length;
         if (searchState.activeMatchIndex < 0) searchState.activeMatchIndex = 0;
@@ -1873,23 +2114,28 @@
     function cancelSearchPreview() {
         searchState.requestId++;
         cancelInFlightSearch();
-        var restoreQuery = searchState.committedQuery || '';
-        var restoreTerms = (searchState.committedTerms || []).slice();
+        var restoreQuery = '';
+        var restoreTerms = [];
         var restorePage = searchState.draftOriginPage;
         var restoreMode = searchState.draftOriginMode;
         var restoreSura = searchState.draftOriginSura;
+        var restoreScrollTop = searchState.draftOriginScrollTop;
         searchState.activeTerms = restoreTerms;
+        searchState.committedQuery = '';
+        searchState.committedTerms = [];
         searchState.draftOriginPage = null;
         searchState.draftOriginMode = null;
         searchState.draftOriginSura = null;
         searchState.draftOriginSearchSura = null;
+        searchState.draftOriginScrollTop = null;
         searchState.previewPage = null;
-        searchState.hasMatch = !!restoreTerms.length;
-        searchState.activeMatchIndex = restoreTerms.length ? 0 : -1;
+        searchState.hasMatch = false;
+        searchState.activeMatchIndex = -1;
         if (simpleSearchInput) simpleSearchInput.value = restoreQuery;
         setSearchNotFound(false);
         updateSearchButtons();
         if (restorePage != null && restoreMode === 'sura') {
+            searchState.restoreScrollTop = restoreScrollTop;
             setSetting('page_mode', 'continuous');
             setUrl('sura', restorePage, restoreSura || 1);
             render();
@@ -1900,7 +2146,7 @@
             render();
             return;
         }
-        applySearchHighlights(main);
+        clearSearchHighlights(main);
     }
     async function handleSearchInputChange() {
         if (!simpleSearchInput) return;
@@ -1920,12 +2166,15 @@
                 var backPage = searchState.draftOriginPage;
                 var backMode = searchState.draftOriginMode;
                 var backSura = searchState.draftOriginSura;
+                var backScrollTop = searchState.draftOriginScrollTop;
                 searchState.draftOriginPage = null;
                 searchState.draftOriginMode = null;
                 searchState.draftOriginSura = null;
                 searchState.draftOriginSearchSura = null;
+                searchState.draftOriginScrollTop = null;
                 updateSearchButtons();
                 if (backMode === 'sura') {
+                    searchState.restoreScrollTop = backScrollTop;
                     setSetting('page_mode', 'continuous');
                     setUrl('sura', backPage || 1, backSura || 1);
                 } else {
@@ -2091,11 +2340,15 @@
     }
 
     function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
-    function getPageMode() { return getSetting('page_mode', 'double-continuous'); }
+    function continuousMinimapMode() { return getPageMode() === 'continuous-minimap'; }
+    function getPageMode() { return getSetting('page_mode', 'continuous'); }
     function twoPageMode() { return getPageMode() === 'two-pages'; }
     function onePageTranslationMode() { return getPageMode() === 'one-page-translation'; }
     function doubleContinuousMode() { return getPageMode() === 'double-continuous'; }
-    function suraViewMode() { return getPageMode() === 'continuous' || getPageMode() === 'double-continuous'; }
+    function suraViewMode() {
+        var m = getPageMode();
+        return m === 'continuous' || m === 'double-continuous' || m === 'continuous-minimap';
+    }
     function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
     function getVerseTranslationParam() {
         var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
@@ -2227,7 +2480,7 @@
     }
 
     function layoutAyahPerLine() {
-        return getSetting('layout', 'ayah-line') === 'ayah-line';
+        return getSetting('layout', 'flow') === 'ayah-line';
     }
     function getAyahNumberFromVerseKey(verseKey) {
         var m = String(verseKey || '').match(/^\d+:(\d+)$/);
@@ -2374,7 +2627,9 @@
         var vKey = verseKey || '';
         var isEnd = w && w.char_type_name === 'end';
         var tr = getWordTranslationWithNote(w);
-        var baseClass = 'qword' + (isEnd ? ' ayah-end' : '');
+        var mm = continuousMinimapMode();
+        var morphExtra = mm ? ' morph-word' : '';
+        var baseClass = 'qword' + (isEnd ? ' ayah-end' : '') + morphExtra;
         var pad = (isEnd && !useQCFFont) ? ' ' : '';
         var verseTrAttr = (verseTranslation && verseTranslation.length > 0) ? ' data-verse-translation="' + escapeAttr(verseTranslation) + '"' : '';
         var copyText = (w.text_uthmani || w.text || '').trim();
@@ -2382,16 +2637,19 @@
         var searchTextAttr = copyText ? ' data-search-text="' + escapeAttr(copyText) + '"' : '';
         var syntheticBismillahAttr = (w && w.synthetic_bismillah) ? ' data-synthetic-bismillah="1"' : '';
         var pos = (w.position != null) ? w.position : 0;
+        var vk = vKey.match(/^(\d+):(\d+)$/);
+        var morphAyahIndex = mm && vk && vk[2]
+            ? (' data-ayah="' + escapeAttr(vk[2]) + '" data-word-index="' + escapeAttr(String(pos)) + '"')
+            : '';
         if (useQCFFont) {
             var page = w.v1_page || pageNum;
             loadQCFPageFont(page);
             var padded = String(page).padStart(3, '0');
             var glyph = (w.code_v1 || w.text || '').replace(/\s/g, '');
-            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
+            return pad + '<span class="qcf-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + morphAyahIndex + ' style="font-family:\'QCF_P' + padded + '\',serif;">' + glyph + '</span>' + pad;
         }
         var plain = w.text_uthmani || w.text || '';
-        // if (plain === 'أُو۟لَـٰٓئِكَ') plain = 'أُو۟★لَـٰٓئِكَ';
-        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + '>' + escapeHtml(plain) + '</span>' + pad;
+        return pad + '<span class="plain-word ' + baseClass + '" data-verse-key="' + escapeAttr(vKey) + '" data-word-translation="' + escapeAttr(tr) + '" data-word-position="' + escapeAttr(String(pos)) + '"' + verseTrAttr + copyAttr + searchTextAttr + syntheticBismillahAttr + morphAyahIndex + '>' + escapeHtml(plain) + '</span>' + pad;
     }
     function buildVerseText(verse, useQCFFont) {
         if (!verse.words || verse.words.length === 0) return '';
@@ -2777,6 +3035,13 @@
                 fitSinglePageContent(content);
             }
         }
+        if (continuousMinimapMode()) {
+            requestAnimationFrame(function() {
+                var mm = document.getElementById('morphology-minimap');
+                if (mm && typeof mm.forceRelayout === 'function') mm.forceRelayout();
+                if (mm && typeof mm._desktopUpdateHighlight === 'function') mm._desktopUpdateHighlight();
+            });
+        }
     }
     function scheduleFitAllPageContents() {
         if (fitPageContentRaf) cancelAnimationFrame(fitPageContentRaf);
@@ -2831,11 +3096,12 @@
         var content = (text && text.length > 0) ? escapeHtml(text) : '';
         if (root || lemma) {
             var morphParts = [];
+            var mm = continuousMinimapMode();
             if (root && root.length > 0) {
-                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '">' + escapeHtml(root) + '</a>');
+                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف ریشه از نقشه' : '') + '">' + escapeHtml(root) + '</a>');
             }
             if (lemma && lemma.length > 0) {
-                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '">' + escapeHtml(lemma) + '</a>');
+                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف شکل واژه (lemma) از نقشه' : '') + '">' + escapeHtml(lemma) + '</a>');
             }
             if (morphParts.length > 0) {
                 var toggleHtml = '';
@@ -2947,6 +3213,28 @@
         if (!wordTooltipLeaveBound && wordHoverTooltip) {
             wordTooltipLeaveBound = true;
             wordHoverTooltip.addEventListener('click', function(e) {
+                var selA = e.target.closest && e.target.closest('a.morph-shift-hint[href*="search.html"]');
+                if (selA && e.shiftKey && continuousMinimapMode() && typeof window.simpleMorphToggleFromTooltip === 'function') {
+                    try {
+                        var url = selA.href ? new URL(selA.href, window.location.origin) : null;
+                        if (url) {
+                            var rk = url.searchParams.get('root');
+                            var lk = url.searchParams.get('lem');
+                            if (rk) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.simpleMorphToggleFromTooltip('root', rk);
+                                return;
+                            }
+                            if (lk) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.simpleMorphToggleFromTooltip('lem', lk);
+                                return;
+                            }
+                        }
+                    } catch (err1) {}
+                }
                 var toggle = e.target && e.target.closest ? e.target.closest('.verse-toggle') : null;
                 if (!toggle) return;
                 e.preventDefault();
@@ -3654,6 +3942,296 @@
         // if (barPages && barPages.children.length === 0) buildProgressBars(progressInlineWrap);
     }
 
+    function teardownSimpleMinimapRuntime() {
+        delete window.__simpleRefreshImportantSectionsMode;
+        ['morphology-hover-script-simple', 'simple-minimap-charts-script', 'chartjs-lib-simple'].forEach(function(id) {
+            var s = document.getElementById(id);
+            if (s) s.remove();
+        });
+        delete window.__SIMPLE_MINIMAP_HOST__;
+        delete window.__DESKTOP_HOST__;
+        delete window.__SIMPLE_HIDE_SELECTED_PANEL__;
+        delete window._morphologyHoverListenersAttached;
+        if (window._simpleMinimapSidebarObserver) {
+            try { window._simpleMinimapSidebarObserver.disconnect(); } catch (e) {}
+            delete window._simpleMinimapSidebarObserver;
+        }
+        try {
+            if (window.SimpleMinimapCharts) window.SimpleMinimapCharts.destroyAllCharts();
+        } catch (eRm) {}
+    }
+
+    function getSimpleMinimapImportantMode() {
+        var m = getSetting('minimap_important_display', 'numbers');
+        if (m !== 'chart' && m !== 'numbers' && m !== 'off') return 'numbers';
+        return m;
+    }
+
+    function loadScriptById(src, id) {
+        return new Promise(function(resolve) {
+            var existing = document.getElementById(id);
+            if (existing) {
+                if (existing.getAttribute('data-loaded') === '1') {
+                    resolve();
+                    return;
+                }
+                existing.addEventListener('load', function() { resolve(); });
+                existing.addEventListener('error', function() { resolve(); });
+                return;
+            }
+            var script = document.createElement('script');
+            script.id = id;
+            script.src = src;
+            script.async = true;
+            script.onload = function() {
+                script.setAttribute('data-loaded', '1');
+                resolve();
+            };
+            script.onerror = function() { resolve(); };
+            document.head.appendChild(script);
+        });
+    }
+
+    function scheduleSimpleMinimapBootstrap(suraNumber) {
+        window.__DESKTOP_HOST__ = true;
+        window.__SIMPLE_MINIMAP_HOST__ = true;
+        window.sureNumber = suraNumber;
+        window.__SIMPLE_HIDE_SELECTED_ON_MINIMAP__ = (getSetting('minimap_hide_selected_minimap', '0') === '1');
+        window.__SIMPLE_HIDE_SELECTED_PANEL__ = (getSetting('minimap_hide_selected_panel', '0') === '1');
+        var sidebar = document.getElementById('simple-minimap-sidebar');
+        if (sidebar) sidebar.classList.toggle('minimap-only', window.__SIMPLE_HIDE_SELECTED_PANEL__ === true);
+
+        var run = function() {
+            var imp = getSimpleMinimapImportantMode();
+            var p = Promise.resolve();
+            if (imp === 'chart') {
+                p = p.then(function() {
+                    return loadScriptById('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'chartjs-lib-simple');
+                });
+            }
+            p = p.then(function() {
+                return loadScriptById('js/simple-minimap-charts.js', 'simple-minimap-charts-script');
+            });
+            p = p.then(function() {
+                return new Promise(function(resolve) {
+                    var oldScript = document.getElementById('morphology-hover-script-simple');
+                    if (oldScript) {
+                        delete window._morphologyHoverListenersAttached;
+                        oldScript.remove();
+                    }
+                    var script = document.createElement('script');
+                    script.id = 'morphology-hover-script-simple';
+                    script.src = 'Yasir/morphology-hover.js?v=4';
+                    script.onload = function() { resolve(); };
+                    script.onerror = function() { resolve(); };
+                    document.body.appendChild(script);
+                });
+            });
+            p.then(function() {
+                requestAnimationFrame(function() {
+                    if (typeof window.morphologyMinimapInit === 'function') {
+                        window.morphologyMinimapInit(suraNumber);
+                    }
+                    window.__simpleRefreshImportantSectionsMode = function() {
+                        if (window.SimpleMinimapCharts) {
+                            window.SimpleMinimapCharts.applyImportantSectionsMode(getSimpleMinimapImportantMode());
+                        }
+                    };
+                    wireSimpleMinimapSettingsBar();
+                    window.__simpleRefreshImportantSectionsMode();
+                    requestAnimationFrame(function() {
+                        var mm = document.getElementById('morphology-minimap');
+                        if (mm && typeof mm.forceRelayout === 'function') mm.forceRelayout();
+                        if (mm && typeof mm._desktopUpdateHighlight === 'function') mm._desktopUpdateHighlight();
+                    });
+                });
+            });
+        };
+
+        requestAnimationFrame(function() {
+            requestAnimationFrame(run);
+        });
+    }
+
+    function updateSimpleMinimapSidebarWidth() {
+        var layout = document.getElementById('simple-continuous-minimap-layout');
+        if (!layout) return;
+        var textRoot = document.getElementById('simple-minimap-text-root');
+        var sidebar = document.getElementById('simple-minimap-sidebar');
+        if (!textRoot || !sidebar) return;
+        var textContainer = textRoot.querySelector('.sura-container') || textRoot;
+        var textWidth = textContainer.getBoundingClientRect().width || 0;
+        if (!textWidth) return;
+        var storedRatio = parseFloat(getSetting('minimap_width_ratio', ''));
+        var ratio = (storedRatio && isFinite(storedRatio)) ? storedRatio
+            : ((typeof SIMPLE_MINIMAP_WIDTH_RATIO === 'number' && SIMPLE_MINIMAP_WIDTH_RATIO > 0)
+                ? SIMPLE_MINIMAP_WIDTH_RATIO
+                : 0.25);
+        var target = Math.round(textWidth * ratio);
+        sidebar.style.width = target + 'px';
+        sidebar.style.minWidth = target + 'px';
+        sidebar.style.maxWidth = target + 'px';
+        var minimap = document.getElementById('morphology-minimap');
+        if (minimap && typeof minimap.forceRelayout === 'function') {
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    minimap.forceRelayout();
+                    if (typeof minimap._desktopUpdateHighlight === 'function') {
+                        minimap._desktopUpdateHighlight();
+                    }
+                });
+            });
+        }
+    }
+
+    function ensureSimpleMinimapSidebarObserver() {
+        if (window._simpleMinimapSidebarObserver) return;
+        var textRoot = document.getElementById('simple-minimap-text-root');
+        if (!textRoot || !window.ResizeObserver) return;
+        var ro = new ResizeObserver(function() {
+            updateSimpleMinimapSidebarWidth();
+        });
+        var target = textRoot.querySelector('.sura-container') || textRoot;
+        ro.observe(target);
+        window._simpleMinimapSidebarObserver = ro;
+    }
+
+    function wireSimpleMinimapSettingsBar() {
+        var bar = document.getElementById('simple-minimap-settings-bar');
+        if (!bar || bar._simpleMinimapWired) return;
+        bar._simpleMinimapWired = true;
+        var impBtn = document.getElementById('simple-mm-imp-btn');
+        var impMenu = document.getElementById('simple-mm-imp-menu');
+        var minimapBtn = document.getElementById('simple-mm-minimap-btn');
+        var minimapMenu = document.getElementById('simple-mm-minimap-menu');
+        var widthRange = document.getElementById('simple-mm-width-range');
+        var widthValue = document.getElementById('simple-mm-width-value');
+
+        function closeMenus(except) {
+            [impMenu, minimapMenu].forEach(function(menu) {
+                if (!menu) return;
+                if (menu === except) return;
+                menu.classList.remove('open');
+                if (menu === impMenu && impBtn) impBtn.setAttribute('aria-expanded', 'false');
+                if (menu === minimapMenu && minimapBtn) minimapBtn.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        if (impBtn && impMenu) {
+            impBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var open = impMenu.classList.toggle('open');
+                impBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open) closeMenus(impMenu);
+            });
+            impMenu.addEventListener('click', function(e) {
+                var item = e.target.closest && e.target.closest('button[data-mm-imp]');
+                if (!item) return;
+                var mode = item.getAttribute('data-mm-imp');
+                if (mode === 'hide-selected') {
+                    setSetting('minimap_hide_selected_panel', '1');
+                    window.__SIMPLE_HIDE_SELECTED_PANEL__ = true;
+                    var sidebar = document.getElementById('simple-minimap-sidebar');
+                    if (sidebar) sidebar.classList.add('minimap-only');
+                    if (typeof window.simpleMinimapRefreshSelectedRootsPanel === 'function') {
+                        window.simpleMinimapRefreshSelectedRootsPanel();
+                    }
+                    impMenu.classList.remove('open');
+                    impBtn.setAttribute('aria-expanded', 'false');
+                    updateImpMenuState();
+                    return;
+                }
+                setSetting('minimap_hide_selected_panel', '0');
+                window.__SIMPLE_HIDE_SELECTED_PANEL__ = false;
+                var sidebar = document.getElementById('simple-minimap-sidebar');
+                if (sidebar) sidebar.classList.remove('minimap-only');
+                setSetting('minimap_important_display', mode);
+                if (mode === 'chart' && !window.Chart) {
+                    loadScriptById('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'chartjs-lib-simple').then(function() {
+                        if (window.__simpleRefreshImportantSectionsMode) window.__simpleRefreshImportantSectionsMode();
+                    });
+                } else if (window.__simpleRefreshImportantSectionsMode) {
+                    window.__simpleRefreshImportantSectionsMode();
+                }
+                if (typeof window.simpleMinimapRefreshSelectedRootsPanel === 'function') {
+                    window.simpleMinimapRefreshSelectedRootsPanel();
+                }
+                impMenu.classList.remove('open');
+                impBtn.setAttribute('aria-expanded', 'false');
+                updateImpMenuState();
+            });
+        }
+
+        if (minimapBtn && minimapMenu) {
+            minimapBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var open = minimapMenu.classList.toggle('open');
+                minimapBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open) closeMenus(minimapMenu);
+            });
+            minimapMenu.addEventListener('click', function(e) {
+                var item = e.target.closest && e.target.closest('button[data-mm-minimap]');
+                if (!item) return;
+                var val = item.getAttribute('data-mm-minimap') || 'show-selected';
+                var hide = val === 'hide-selected';
+                setSetting('minimap_hide_selected_minimap', hide ? '1' : '0');
+                window.__SIMPLE_HIDE_SELECTED_ON_MINIMAP__ = hide;
+                if (typeof window.simpleMinimapRefreshHighlightApplication === 'function') {
+                    window.simpleMinimapRefreshHighlightApplication();
+                }
+                minimapMenu.classList.remove('open');
+                minimapBtn.setAttribute('aria-expanded', 'false');
+                setActiveMinimapOption(val);
+            });
+        }
+        if (widthRange) {
+            widthRange.addEventListener('input', function() {
+                var val = parseFloat(widthRange.value || '');
+                if (!isFinite(val)) return;
+                setSetting('minimap_width_ratio', String(val));
+                if (widthValue) widthValue.textContent = val.toFixed(2) + '×';
+                updateSimpleMinimapSidebarWidth();
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!bar.contains(e.target)) closeMenus();
+        });
+
+        function updateImpMenuState() {
+            if (!impMenu) return;
+            var hideSelectedPanel = getSetting('minimap_hide_selected_panel', '0') === '1';
+            var mode = getSimpleMinimapImportantMode();
+            impMenu.querySelectorAll('button[data-mm-imp]').forEach(function(btn) {
+                var key = btn.getAttribute('data-mm-imp');
+                if (key === 'hide-selected') {
+                    btn.classList.toggle('active', hideSelectedPanel);
+                } else {
+                    btn.classList.toggle('active', !hideSelectedPanel && key === mode);
+                }
+            });
+            if (impBtn) impBtn.classList.toggle('active', hideSelectedPanel || mode !== 'off');
+            var sidebar = document.getElementById('simple-minimap-sidebar');
+            if (sidebar) sidebar.classList.toggle('minimap-only', hideSelectedPanel);
+        }
+
+        function setActiveMinimapOption(val) {
+            if (!minimapMenu) return;
+            minimapMenu.querySelectorAll('button[data-mm-minimap]').forEach(function(btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-mm-minimap') === val);
+            });
+            if (minimapBtn) minimapBtn.classList.toggle('active', val === 'hide-selected');
+        }
+
+        updateImpMenuState();
+        var hideSelected = getSetting('minimap_hide_selected_minimap', '0') === '1';
+        setActiveMinimapOption(hideSelected ? 'hide-selected' : 'show-selected');
+        var initRatio = parseFloat(getSetting('minimap_width_ratio', ''));
+        if (!(initRatio && isFinite(initRatio))) initRatio = SIMPLE_MINIMAP_WIDTH_RATIO;
+        if (widthRange) widthRange.value = String(initRatio);
+        if (widthValue) widthValue.textContent = initRatio.toFixed(2) + '×';
+    }
+
     function renderSuraMode(suraNumber, pageBlocks) {
         const useQCFFont = useQCF();
         const container = document.createElement('div');
@@ -3686,8 +4264,59 @@
             scroll.appendChild(div);
         }
         container.appendChild(scroll);
+        main.classList.remove('simple-minimap-shell');
         main.innerHTML = '';
-        main.appendChild(container);
+        if (continuousMinimapMode()) {
+            main.classList.add('simple-minimap-shell');
+            var layout = document.createElement('div');
+            layout.id = 'simple-continuous-minimap-layout';
+            var leftCol = document.createElement('div');
+            leftCol.id = 'simple-minimap-main';
+            var textRoot = document.createElement('div');
+            textRoot.id = 'simple-minimap-text-root';
+            var sidebar = document.createElement('aside');
+            sidebar.id = 'simple-minimap-sidebar';
+            var combined = document.createElement('div');
+            combined.id = 'morphology-combined-panel';
+            var settingsBar = document.createElement('div');
+            settingsBar.id = 'simple-minimap-settings-bar';
+            settingsBar.innerHTML =
+                '<span class="mm-menu-wrap">' +
+                '<button type="button" class="mm-icon-btn" id="simple-mm-imp-btn" title="ریشه\u200cهای مهم" aria-haspopup="true" aria-expanded="false">📊</button>' +
+                '<div class="mm-menu" id="simple-mm-imp-menu" role="menu">' +
+                '<button type="button" data-mm-imp="numbers" role="menuitem">اعداد</button>' +
+                '<button type="button" data-mm-imp="chart" role="menuitem">نمودار</button>' +
+                '<button type="button" data-mm-imp="off" role="menuitem">پنهان</button>' +
+                '<button type="button" data-mm-imp="hide-selected" class="danger" role="menuitem">پنهان ریشه\u200cهای انتخابی</button>' +
+                '</div>' +
+                '</span>' +
+                '<span class="mm-menu-wrap">' +
+                '<button type="button" class="mm-icon-btn" id="simple-mm-minimap-btn" title="نقشه" aria-haspopup="true" aria-expanded="false">▦</button>' +
+                '<div class="mm-menu" id="simple-mm-minimap-menu" role="menu">' +
+                '<button type="button" data-mm-minimap="show-selected" role="menuitem">نمایش رنگ انتخابی</button>' +
+                '<button type="button" data-mm-minimap="hide-selected" role="menuitem">پنهان رنگ انتخابی</button>' +
+                '<div class="mm-range-row" title="نسبت پهنا (۱/۱۰ تا ۱ برابر متن)">' +
+                '<input type="range" id="simple-mm-width-range" min="0.1" max="1" step="0.05" value="0.25" aria-label="نسبت پهنا">' +
+                '<span class="mm-range-value" id="simple-mm-width-value">0.25×</span>' +
+                '</div>' +
+                '</div>' +
+                '</span>';
+            sidebar.appendChild(combined);
+            sidebar.appendChild(settingsBar);
+            textRoot.appendChild(container);
+            leftCol.appendChild(textRoot);
+            layout.appendChild(leftCol);
+            layout.appendChild(sidebar);
+            main.appendChild(layout);
+            scheduleSimpleMinimapBootstrap(suraNumber);
+            requestAnimationFrame(function() {
+                updateSimpleMinimapSidebarWidth();
+                ensureSimpleMinimapSidebarObserver();
+            });
+        } else {
+            teardownSimpleMinimapRuntime();
+            main.appendChild(container);
+        }
         function syncSuraLocation(keepAyah) {
             var currentPage = getCurrentContinuousPage() || ((pageBlocks[0] && pageBlocks[0].pageNumber) ? pageBlocks[0].pageNumber : 1);
             setUrl('sura', currentPage, suraNumber, keepAyah ? getAyahFromUrl() : null);
@@ -3698,6 +4327,16 @@
                 syncSuraLocation(false);
             });
         }, { passive: true });
+        if (searchState.restoreScrollTop != null) {
+            var restoreTop = searchState.restoreScrollTop;
+            searchState.restoreScrollTop = null;
+            scroll.scrollTop = restoreTop;
+            requestAnimationFrame(function() {
+                scroll.scrollTop = restoreTop;
+                syncSuraLocation(true);
+            });
+            return;
+        }
         if (searchState.previewPage != null) {
             var targetBlock = container.querySelector('.sura-page-block[data-page-number="' + String(searchState.previewPage) + '"]');
             if (targetBlock && typeof targetBlock.scrollIntoView === 'function') {
@@ -3765,43 +4404,74 @@
         return { pageNumber: pageNum, verses: data.verses || [] };
     }
 
-    async function fetchSuraByPage(suraNumber) {
-        const lang = getTranslationLanguage();
-        const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam() + '&per_page=300');
-        if (!res.ok) throw new Error('خطا در دریافت سوره');
-        const data = await res.json();
-        const verses = data.verses || [];
-        const byPage = new Map();
-        for (const v of verses) {
-            const words = v.words || [];
-            if (!words.length) {
-                const page = v.page_number || 1;
-                if (!byPage.has(page)) byPage.set(page, []);
-                byPage.get(page).push(v);
-                continue;
-            }
-            const verseWordsByPage = new Map();
-            for (const w of words) {
-                const wordPage = w.v1_page || v.page_number || 1;
-                if (!verseWordsByPage.has(wordPage)) verseWordsByPage.set(wordPage, []);
-                verseWordsByPage.get(wordPage).push(w);
-            }
-            for (const [page, pageWords] of verseWordsByPage.entries()) {
-                if (!byPage.has(page)) byPage.set(page, []);
-                byPage.get(page).push(Object.assign({}, v, {
-                    page_number: page,
-                    words: pageWords
-                }));
-            }
+    async function fetchSuraByPageFallback(suraNumber) {
+        if (!chaptersCache || !chaptersCache.length) {
+            await fetchChapters();
         }
-        const sortedPages = [...byPage.keys()].sort((a, b) => a - b);
-        return sortedPages.map(function(p) {
-            return { pageNumber: p, verses: byPage.get(p) };
+        var chapter = chaptersCache && chaptersCache.find ? chaptersCache.find(function(c) { return c.id === suraNumber; }) : null;
+        if (!chapter || !chapter.pages || !chapter.pages.length) {
+            throw new Error('خطا در دریافت سوره');
+        }
+        var startPage = chapter.pages[0] || 1;
+        var endPage = chapter.pages[1] || startPage;
+        var pageNums = [];
+        for (var p = startPage; p <= endPage; p++) pageNums.push(p);
+        var pageResults = await Promise.all(pageNums.map(function(pageNum) {
+            return fetchPage(pageNum);
+        }));
+        return pageResults.map(function(pageData) {
+            var verses = (pageData.verses || []).filter(function(v) {
+                return !!(v && v.verse_key && v.verse_key.indexOf(String(suraNumber) + ':') === 0);
+            });
+            return { pageNumber: pageData.pageNumber, verses: verses };
+        }).filter(function(pageData) {
+            return pageData.verses && pageData.verses.length > 0;
         });
+    }
+
+    async function fetchSuraByPage(suraNumber) {
+        try {
+            const lang = getTranslationLanguage();
+            const res = await fetch('https://api.quran.com/api/v4/verses/by_chapter/' + suraNumber + '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation&language=' + encodeURIComponent(lang) + getVerseTranslationParam() + '&per_page=300');
+            if (!res.ok) throw new Error('خطا در دریافت سوره');
+            const data = await res.json();
+            const verses = data.verses || [];
+            const byPage = new Map();
+            for (const v of verses) {
+                const words = v.words || [];
+                if (!words.length) {
+                    const page = v.page_number || 1;
+                    if (!byPage.has(page)) byPage.set(page, []);
+                    byPage.get(page).push(v);
+                    continue;
+                }
+                const verseWordsByPage = new Map();
+                for (const w of words) {
+                    const wordPage = w.v1_page || v.page_number || 1;
+                    if (!verseWordsByPage.has(wordPage)) verseWordsByPage.set(wordPage, []);
+                    verseWordsByPage.get(wordPage).push(w);
+                }
+                for (const [page, pageWords] of verseWordsByPage.entries()) {
+                    if (!byPage.has(page)) byPage.set(page, []);
+                    byPage.get(page).push(Object.assign({}, v, {
+                        page_number: page,
+                        words: pageWords
+                    }));
+                }
+            }
+            const sortedPages = [...byPage.keys()].sort((a, b) => a - b);
+            return sortedPages.map(function(p) {
+                return { pageNumber: p, verses: byPage.get(p) };
+            });
+        } catch (err) {
+            console.warn('fetchSuraByPage: by_chapter failed, falling back to by_page', err);
+            return await fetchSuraByPageFallback(suraNumber);
+        }
     }
 
     function render() {
         const { mode, page, sura } = getMode();
+        if (main) main.classList.remove('simple-minimap-shell');
         if (loadingEl) loadingEl.style.display = 'none';
 
         if (mode === 'page') {
@@ -3875,10 +4545,10 @@
         if (pageModeEl) {
         pageModeEl.addEventListener('change', async function() {
             var val = this.value;
-            if (val !== 'one-page' && val !== 'two-pages' && val !== 'one-page-translation' && val !== 'continuous' && val !== 'double-continuous') return;
+            if (val !== 'one-page' && val !== 'two-pages' && val !== 'one-page-translation' && val !== 'continuous' && val !== 'continuous-minimap' && val !== 'double-continuous') return;
             setSetting('page_mode', val);
             var st = getMode();
-            if ((val === 'continuous' || val === 'double-continuous') && st.mode === 'page') {
+            if ((val === 'continuous' || val === 'continuous-minimap' || val === 'double-continuous') && st.mode === 'page') {
                 var range = getVisiblePageRange(st.page);
                 var inspectPage = range.startPage;
                 var targetSura = 1;
@@ -3949,6 +4619,9 @@
         simpleSearchInput.addEventListener('input', function() {
             handleSearchInputChange();
         });
+        simpleSearchInput.addEventListener('blur', function() {
+            if (!simpleSearchInput.value) clearDraftOrigin();
+        });
         simpleSearchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -3988,6 +4661,12 @@
             handleSearchInputChange();
         });
     }
+    document.addEventListener('click', function(e) {
+        if (!searchWrapEl) return;
+        if (!searchWrapEl.contains(e.target)) {
+            clearDraftOrigin();
+        }
+    });
 
     function pageToOdd(pageNum) {
         var p = parseInt(pageNum, 10);
@@ -4171,15 +4850,15 @@
     });
 
     var savedFont = getSetting('font', 'qurancom');
-    var savedLayout = getSetting('layout', 'ayah-line');
+    var savedLayout = getSetting('layout', 'flow');
     var savedPageMode = getSetting('page_mode', '');
     if (!savedPageMode) {
         if (getSetting('sura-view', '0') === '1') savedPageMode = 'continuous';
         else if (getSetting('two-page', '0') === '1') savedPageMode = 'two-pages';
-        else savedPageMode = 'double-continuous';
+        else savedPageMode = 'continuous';
     }
-    if (savedPageMode !== 'one-page' && savedPageMode !== 'two-pages' && savedPageMode !== 'one-page-translation' && savedPageMode !== 'continuous' && savedPageMode !== 'double-continuous') {
-        savedPageMode = 'double-continuous';
+    if (savedPageMode !== 'one-page' && savedPageMode !== 'two-pages' && savedPageMode !== 'one-page-translation' && savedPageMode !== 'continuous' && savedPageMode !== 'continuous-minimap' && savedPageMode !== 'double-continuous') {
+        savedPageMode = 'continuous';
     }
     var savedTranslationLang = getSetting('translation_language', 'fa');
     var savedCopyAyahStyle = getCopyAyahStyle();

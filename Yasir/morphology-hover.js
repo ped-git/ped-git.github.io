@@ -6,6 +6,17 @@ const morphologyData = {};
     'use strict';
 
     const IS_DESKTOP_HOST = !!window.__DESKTOP_HOST__;
+    const IS_SIMPLE_MINIMAP_HOST = !!window.__SIMPLE_MINIMAP_HOST__;
+    const LEMMA_HIGHLIGHT_PREFIX = '__lemma__:';
+
+    /** Words to highlight on main text + minimap for a user-selected token (root or lemma). */
+    function getWordsForHighlightKey(highlightKey) {
+        if (typeof highlightKey === 'string' && highlightKey.startsWith(LEMMA_HIGHLIGHT_PREFIX)) {
+            const lem = highlightKey.slice(LEMMA_HIGHLIGHT_PREFIX.length);
+            return lemmaToWordsMap[lem] || [];
+        }
+        return rootToWordsMap[highlightKey] || [];
+    }
     function faNum(n) {
         return (typeof Intl !== 'undefined' && Intl.NumberFormat)
             ? new Intl.NumberFormat('fa-IR').format(Number(n))
@@ -71,6 +82,8 @@ const morphologyData = {};
     
     // Root to words map: {root: [{ayah, wordIndex}, ...]}
     const rootToWordsMap = {};
+    // Lemma → word positions for this surah (filled from corpus lemmaToWordsMap)
+    let lemmaToWordsMap = {};
     
     // Highlighted roots: {root: {colorIndex, color}}
     const highlightedRoots = {};
@@ -347,11 +360,15 @@ const morphologyData = {};
             });
             Object.keys(morphologyData).forEach(key => delete morphologyData[key]);
             Object.keys(rootToWordsMap).forEach(key => delete rootToWordsMap[key]);
+            lemmaToWordsMap = {};
             const suraData = dataset.morphologyData[sureNumber] || {};
             Object.keys(suraData).forEach(ayah => {
                 morphologyData[ayah] = suraData[ayah];
             });
             Object.assign(rootToWordsMap, dataset.rootToWordsMap || {});
+            lemmaToWordsMap = dataset.lemmaToWordsMap && typeof dataset.lemmaToWordsMap === 'object'
+                ? Object.assign({}, dataset.lemmaToWordsMap)
+                : {};
 
             dataLoaded = true;
             console.log('Morphology data loaded for Surah ' + sureNumber);
@@ -583,6 +600,8 @@ const morphologyData = {};
 
     // Wrap words in spans with ayah and word index attributes
     function wrapWordsInSpans() {
+        if (IS_SIMPLE_MINIMAP_HOST) return;
+
         // State object to track current ayah and word index across the entire document
         // This ensures word counting continues correctly even when ayahs span multiple containers
         const state = {
@@ -625,6 +644,39 @@ const morphologyData = {};
             }
         }
         return parseInt(numStr) || null;
+    }
+
+    function getAyahEndRectForMinimap(ayah) {
+        if (!ayah) return null;
+        const root = IS_SIMPLE_MINIMAP_HOST
+            ? document.getElementById('simple-minimap-text-root')
+            : (document.querySelector('sure') || (IS_DESKTOP_HOST ? document.getElementById('content') : document.body));
+        if (!root || !root.querySelectorAll) return null;
+        const matches = root.querySelectorAll('.qword.ayah-end[data-verse-key$=":' + String(ayah) + '"]');
+        if (!matches || !matches.length) return null;
+        const target = matches[matches.length - 1];
+        const rect = target.getBoundingClientRect();
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            const scrollHost = getSimpleScrollHost(root);
+            if (!scrollHost) return null;
+            const hostRect = scrollHost.getBoundingClientRect();
+            const sx = scrollHost.scrollLeft || 0;
+            const sy = scrollHost.scrollTop || 0;
+            return {
+                top: rect.top - hostRect.top + sy,
+                left: rect.left - hostRect.left + sx,
+                width: rect.width,
+                height: rect.height
+            };
+        }
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+        const scrollX = window.scrollX || window.pageXOffset || 0;
+        return {
+            top: rect.top + scrollY,
+            left: rect.left + scrollX,
+            width: rect.width,
+            height: rect.height
+        };
     }
 
     // Highlight all spans with the same ayah and word index
@@ -817,6 +869,9 @@ const morphologyData = {};
 
     // Add event listeners to word spans
     function attachHoverListeners() {
+        if (window._morphologyHoverListenersAttached) return;
+        window._morphologyHoverListenersAttached = true;
+
         // Use event delegation for better performance
         // On desktop: tooltip shows on click only; on standalone: tooltip shows on hover
         if (!IS_DESKTOP_HOST) {
@@ -855,6 +910,9 @@ const morphologyData = {};
         // Click handler: on desktop show tooltip (no root toggle); on standalone toggle root
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('morph-word')) {
+                if (IS_SIMPLE_MINIMAP_HOST && e.target.closest && e.target.closest('#simple-minimap-text-root')) {
+                    return;
+                }
                 const ayah = parseInt(e.target.getAttribute('data-ayah'));
                 const wordIndex = parseInt(e.target.getAttribute('data-word-index'));
                 if (!ayah || !wordIndex) return;
@@ -1018,11 +1076,12 @@ const morphologyData = {};
         }).join('');
     }
     
-    // Apply highlight color to all words with a given root
-    function applyRootHighlight(root, color) {
-        const words = rootToWordsMap[root] || [];
+    // Apply highlight color to all words for a highlighted key (Arabic root, or lemma key with LEMMA_HIGHLIGHT_PREFIX)
+    function applyRootHighlight(highlightKey, color) {
+        const words = getWordsForHighlightKey(highlightKey);
         // Create high-contrast version for minimap (against gray #ccc background)
         const contrastColor = increaseContrast(color, '#cccccc');
+        const hideSelMinimap = typeof window !== 'undefined' && window.__SIMPLE_HIDE_SELECTED_ON_MINIMAP__ === true;
         
         words.forEach(({ ayah, wordIndex }) => {
             // Highlight main text words
@@ -1034,6 +1093,7 @@ const morphologyData = {};
                 span.classList.add('root-highlighted');
             });
             
+            if (hideSelMinimap) return;
             // Highlight minimap word boxes with darker color
             const minimapWords = document.querySelectorAll(
                 `.minimap-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
@@ -1045,9 +1105,10 @@ const morphologyData = {};
         });
     }
     
-    // Remove highlight from all words with a given root
-    function removeRootHighlightFromWords(root) {
-        const words = rootToWordsMap[root] || [];
+    // Remove highlight from all words with a given key
+    function removeRootHighlightFromWords(highlightKey) {
+        const words = getWordsForHighlightKey(highlightKey);
+        const hideSelMinimap = typeof window !== 'undefined' && window.__SIMPLE_HIDE_SELECTED_ON_MINIMAP__ === true;
         words.forEach(({ ayah, wordIndex }) => {
             // Remove highlight from main text words
             const wordSpans = document.querySelectorAll(
@@ -1058,6 +1119,7 @@ const morphologyData = {};
                 span.classList.remove('root-highlighted');
             });
             
+            if (hideSelMinimap) return;
             // Remove highlight from minimap word boxes
             const minimapWords = document.querySelectorAll(
                 `.minimap-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
@@ -1226,7 +1288,7 @@ const morphologyData = {};
         // Check if panel already exists
         let panel = document.getElementById('highlighted-roots-panel');
         if (panel) return panel;
-        
+
         // Calculate position - in desktop mode, it's inside wrapper; in mobile mode, it's standalone
         const surahHeader = getSurahHeader();
         let topPosition = 420;
@@ -1294,9 +1356,9 @@ const morphologyData = {};
         return panel;
     }
     
-    // Find all words with a given root, sorted in RTL order (by ayah and wordIndex)
+    // Find all words for a highlight key (root or lemma-prefixed), sorted by ayah then wordIndex
     function findAllWordsWithRoot(root) {
-        const words = rootToWordsMap[root] || [];
+        const words = getWordsForHighlightKey(root);
         
         // Sort by ayah first, then by wordIndex (RTL order - as they appear in text)
         const sortedWords = [...words].sort((a, b) => {
@@ -1309,9 +1371,9 @@ const morphologyData = {};
         return sortedWords;
     }
     
-    // Find visible words with a given root in the viewport
+    // Find visible words with a given highlight key in the viewport
     function findVisibleWordsWithRoot(root) {
-        const words = rootToWordsMap[root] || [];
+        const words = getWordsForHighlightKey(root);
         const visibleWords = [];
         
         // Get viewport dimensions
@@ -1393,10 +1455,15 @@ const morphologyData = {};
                 mobileContentWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
             } else {
                 const desktopWrapper = document.getElementById('desktop-content-wrapper');
+                const simpleScroll = document.querySelector('#simple-minimap-main .sura-scroll');
                 if (desktopWrapper) {
                     const wrapperRect = desktopWrapper.getBoundingClientRect();
                     const relativeTop = rect.top - wrapperRect.top + desktopWrapper.scrollTop;
                     desktopWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
+                } else if (simpleScroll) {
+                    const wrapperRect = simpleScroll.getBoundingClientRect();
+                    const relativeTop = rect.top - wrapperRect.top + simpleScroll.scrollTop;
+                    simpleScroll.scrollTo({ top: relativeTop, behavior: 'smooth' });
                 } else {
                     // Normal mode, scroll window
                     const scrollY = window.scrollY || window.pageYOffset;
@@ -1776,6 +1843,25 @@ const morphologyData = {};
         content.innerHTML = '';
         
         // Section 1: Selected roots
+        const hideSelectedPanel = IS_SIMPLE_MINIMAP_HOST && typeof window !== 'undefined' && window.__SIMPLE_HIDE_SELECTED_PANEL__ === true;
+        const rootPanel = document.getElementById('highlighted-roots-panel');
+        const minimapPanel = document.getElementById('morphology-minimap');
+        if (hideSelectedPanel) {
+            if (rootPanel) rootPanel.style.display = 'none';
+            if (minimapPanel) {
+                minimapPanel.style.flex = '1 1 100%';
+                minimapPanel.style.height = '100%';
+                minimapPanel.style.maxHeight = 'none';
+            }
+            return;
+        } else {
+            if (rootPanel) rootPanel.style.removeProperty('display');
+            if (minimapPanel) {
+                minimapPanel.style.removeProperty('flex');
+                minimapPanel.style.removeProperty('height');
+                minimapPanel.style.removeProperty('max-height');
+            }
+        }
         const selectedSection = document.createElement('div');
         selectedSection.style.cssText = 'margin-bottom: 8px;';
         
@@ -1835,7 +1921,7 @@ const morphologyData = {};
         } else if (roots.length > 0) {
             roots.forEach(root => {
                 const { colorIndex, color } = highlightedRoots[root];
-                const wordCount = rootToWordsMap[root] ? rootToWordsMap[root].length : 0;
+                const wordCount = getWordsForHighlightKey(root).length;
                 const isBeingSearched = currentSearchedRoot === root;
                 
                 const rootDiv = document.createElement('div');
@@ -1880,7 +1966,10 @@ const morphologyData = {};
                 // });
 
                 const rootText = document.createElement('span');
-                rootText.textContent = convertBuckwalterToArabic(root);
+                const displayArabic = root.startsWith(LEMMA_HIGHLIGHT_PREFIX)
+                    ? root.slice(LEMMA_HIGHLIGHT_PREFIX.length)
+                    : convertBuckwalterToArabic(root);
+                rootText.textContent = displayArabic;
                 rootText.style.cssText = 'font-weight: bold;';
                 
                 const countText = document.createElement('span');
@@ -1922,7 +2011,9 @@ const morphologyData = {};
         });
         
         selectedSection.appendChild(selectedContent);
-        content.appendChild(selectedSection);
+        if (!hideSelectedPanel) {
+            content.appendChild(selectedSection);
+        }
         
         // Section 2: Top roots (if data is loaded)
         if (currentSuraTopRoots) {
@@ -1946,6 +2037,13 @@ const morphologyData = {};
         if (currentSuraN2NRoots) {
             const n2nRootsSection = createRootListSection('n2n-roots-section', 'ریشه‌های N2N', currentSuraN2NRoots, 'n2_N_roots');
             content.appendChild(n2nRootsSection);
+        }
+
+        if (IS_SIMPLE_MINIMAP_HOST && window.SimpleMinimapCharts && typeof window.SimpleMinimapCharts.notifySelectionChanged === 'function') {
+            try { window.SimpleMinimapCharts.notifySelectionChanged(); } catch (e) { /* ignore */ }
+        }
+        if (IS_SIMPLE_MINIMAP_HOST && typeof window.__simpleRefreshImportantSectionsMode === 'function') {
+            try { window.__simpleRefreshImportantSectionsMode(); } catch (e) { /* ignore */ }
         }
     }
     
@@ -2158,6 +2256,11 @@ const morphologyData = {};
     
     // Get the first div (surah header)
     function getSurahHeader() {
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            const scoped = document.querySelector('#simple-minimap-text-root .sura-title');
+            if (scoped) return scoped;
+        }
+        
         // Try to find by id first (for backward compatibility)
         let header = document.getElementById('header');
         if (header) return header;
@@ -2477,6 +2580,8 @@ const morphologyData = {};
     
     // Make sura header clickable
     function makeSuraHeaderClickable() {
+        if (IS_SIMPLE_MINIMAP_HOST) return;
+
         const header = getSurahHeader();
         if (!header) return;
         
@@ -2515,6 +2620,8 @@ const morphologyData = {};
 
     // Create toggle button and add it to the first div
     function createToggleButton() {
+        if (IS_SIMPLE_MINIMAP_HOST) return;
+
         const surahHeader = getSurahHeader();
         if (!surahHeader) return;
         
@@ -3189,7 +3296,7 @@ const morphologyData = {};
         // In mobile mode, use the available height from bottom row; otherwise use default
         const scaleY = Math.max(0.3, (availableHeightForScaling - 20) / contentHeight); // max-height minus some padding
         const scaleX = availableWidth / contentWidth; // Scale to fit in content area
-        const scaleFactor = Math.min(scaleX, scaleY); // Use smaller scale to ensure fit
+        const scaleFactor = IS_SIMPLE_MINIMAP_HOST ? scaleX : Math.min(scaleX, scaleY); // Simple host fills width
 
         const _c = document.createElement("canvas");
         const _ctx = _c.getContext("2d");
@@ -3228,19 +3335,28 @@ const morphologyData = {};
                         }
                         // console.log('ayeNumberFontSize: ', ayeNumberFontSize);
                     }
-                    const fontSize = ayeNumberFontSize;
+                    let fontSize = ayeNumberFontSize;
+                    if (String(ayahText).length >= 3) {
+                        fontSize = Math.max(1, Math.round(fontSize * 0.6));
+                    }
                     const [measuredWidth, measuredHeight] = textWidthPx(ayahText, { fontSize: fontSize, fontFamily: "Arial", fontWeight: "bold", fontStyle: "normal" });
 
-                    const top = (wordRect.top - minTop) * scaleFactor;
-                    let left = (wordRect.left - minLeft) * scaleFactor - measuredWidth;
-                    let width = measuredWidth;
+                    const ayahRect = getAyahEndRectForMinimap(wordRect.ayah);
+                    const topSource = ayahRect ? ayahRect.top : wordRect.top;
+                    const leftSource = ayahRect ? ayahRect.left : wordRect.left;
+                    const widthSource = ayahRect ? ayahRect.width : 0;
+                    const heightSource = ayahRect ? ayahRect.height : wordRect.height;
+                    const top = (topSource - minTop) * scaleFactor;
+                    let left = (leftSource - minLeft) * scaleFactor - (ayahRect ? 0 : measuredWidth);
+                    let width = ayahRect ? Math.max(1, widthSource * scaleFactor) : measuredWidth;
                     
+                    const scaledHeight = Math.max(1, heightSource * scaleFactor);
                     ayahDiv.style.top = top + 'px';
                     ayahDiv.style.left = (left + extraSpace) + 'px';
                     ayahDiv.style.width = width + 'px';
-                    ayahDiv.style.height = height + 'px';
-                    ayahDiv.style.lineHeight = height + 'px';
-                    ayahDiv.style.fontSize = fontSize + 'px';
+                    ayahDiv.style.height = scaledHeight + 'px';
+                    ayahDiv.style.lineHeight = scaledHeight + 'px';
+                    ayahDiv.style.fontSize = Math.min(fontSize, scaledHeight) + 'px';
                 }
             }
 
@@ -3249,10 +3365,10 @@ const morphologyData = {};
                 `.minimap-word[data-ayah="${wordRect.ayah}"][data-word-index="${wordRect.wordIndex}"]:not([data-is-ayah-number])`
             );
             wordDivs.forEach((wordDiv) => {
-                const top = (wordRect.top - minTop) * scaleFactor;
+                let top = (wordRect.top - minTop) * scaleFactor;
                 let left = (wordRect.left - minLeft) * scaleFactor;
                 let width = Math.max(1, wordRect.width * scaleFactor);
-                const height = Math.max(1, wordRect.height * scaleFactor);
+                let height = Math.max(1, wordRect.height * scaleFactor);
                 
                 // Ensure words don't exceed the minimapContent width
                 const maxRight = availableWidth;
@@ -3260,6 +3376,14 @@ const morphologyData = {};
                     width = Math.max(1, maxRight - left);
                 }
                 
+                const shrinkFactor = 0.8;
+                const shrunkWidth = Math.max(1, width * shrinkFactor);
+                const shrunkHeight = Math.max(1, height * shrinkFactor);
+                left += (width - shrunkWidth) / 2;
+                top += (height - shrunkHeight) / 2;
+                width = shrunkWidth;
+                height = shrunkHeight;
+
                 wordDiv.style.top = top + 'px';
                 wordDiv.style.left = (left + extraSpace) + 'px';
                 wordDiv.style.width = width + 'px';
@@ -3281,7 +3405,79 @@ const morphologyData = {};
         // updateVisibleHighlight();
     }
 
+    function getSimpleScrollHost(root) {
+        if (!root) return null;
+        const inner = root.querySelector('.sura-scroll');
+        if (inner && inner.scrollHeight > inner.clientHeight + 1) return inner;
+        return root;
+    }
+
     function calculateWordRects() {
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            const sureElement = document.getElementById('simple-minimap-text-root');
+            if (!sureElement) return [];
+            const scrollHost = getSimpleScrollHost(sureElement);
+            if (!scrollHost) return [];
+            
+            const hostRect = scrollHost.getBoundingClientRect();
+            const sx = scrollHost.scrollLeft;
+            const sy = scrollHost.scrollTop;
+
+            const wordNodes = sureElement.querySelectorAll('.qword:not(.ayah-end)');
+            const wordRects = [];
+            let currentLineTop = null;
+            
+            wordNodes.forEach((word, index) => {
+                const rect = word.getBoundingClientRect();
+                const wordTop = rect.top - hostRect.top + sy;
+                const wordBottom = rect.bottom - hostRect.top + sy;
+                
+                let wordAyah = parseInt(word.getAttribute('data-ayah'), 10);
+                let wordIndex = word.getAttribute('data-word-index');
+                if (!Number.isFinite(wordAyah)) {
+                    const vKey = word.getAttribute('data-verse-key') || '';
+                    const vk = vKey.match(/^\d+:(\d+)$/);
+                    if (vk) wordAyah = parseInt(vk[1], 10);
+                }
+                if (!wordIndex) {
+                    const pos = word.getAttribute('data-word-position');
+                    if (pos) wordIndex = String(pos);
+                }
+                if (!Number.isFinite(wordAyah) || !wordIndex) return;
+                const vKey = word.getAttribute('data-verse-key') || '';
+                const isSyntheticBismillah = word.getAttribute('data-synthetic-bismillah') === '1';
+                const isForeignBismillah = isSyntheticBismillah || (vKey === '1:1' && Number(window.sureNumber) !== 1);
+                if (isForeignBismillah) {
+                    wordIndex = `b${wordIndex}`;
+                }
+                
+                let lineBreak = false;
+                if (currentLineTop === null) {
+                    currentLineTop = wordTop;
+                } else if (Math.abs(wordTop - currentLineTop) > rect.height * 0.5) {
+                    lineBreak = true;
+                    currentLineTop = wordTop;
+                } else {
+                    lineBreak = false;
+                }
+
+                wordRects.push({
+                    element: word,
+                    top: wordTop,
+                    bottom: wordBottom,
+                    left: rect.left - hostRect.left + sx,
+                    right: rect.right - hostRect.left + sx,
+                    height: rect.height,
+                    width: rect.width,
+                    lineBreak: lineBreak,
+                    index,
+                    ayah: wordAyah,
+                    wordIndex,
+                });
+            });
+            return wordRects;
+        }
+
         // Try to find sure element, fallback to body
         let sureElement = document.querySelector('sure');
         if (!sureElement) {
@@ -3366,6 +3562,20 @@ const morphologyData = {};
         // Only create wrapper in desktop mode
         if (isMobileMode) return null;
         
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            const preset = document.getElementById('morphology-combined-panel');
+            if (preset) {
+                preset.style.position = 'relative';
+                preset.style.display = 'flex';
+                preset.style.flexDirection = 'column';
+                preset.style.flex = '1 1 auto';
+                preset.style.minHeight = '0';
+                preset.style.overflow = 'hidden';
+                preset.style.width = '100%';
+                return preset;
+            }
+        }
+
         let wrapper = document.getElementById('morphology-combined-panel');
         if (wrapper) return wrapper;
         
@@ -3435,7 +3645,7 @@ const morphologyData = {};
             wasRootPanelVisible = existingRootPanel.style.display !== 'none' && existingRootPanel.style.display !== '';
         }
         // Remove wrapper if it exists (will be recreated)
-        if (existingWrapper && !isMobileMode) {
+        if (existingWrapper && !isMobileMode && !IS_SIMPLE_MINIMAP_HOST) {
             existingWrapper.remove();
         }
 
@@ -3488,7 +3698,7 @@ const morphologyData = {};
             border: 1px solid #aaa;
             border-radius: 4px;
             padding: 6px;
-            z-index: 9999;
+            z-index: 100;
             overflow-y: auto;
             overflow-x: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
@@ -3498,6 +3708,11 @@ const morphologyData = {};
             box-sizing: border-box;
             display: block;
         `;
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            minimap.style.width = '100%';
+            minimap.style.maxWidth = '100%';
+            minimap.style.flex = '1 1 auto';
+        }
 
         // Create minimap content container
         const minimapContent = document.createElement('div');
@@ -3558,7 +3773,7 @@ const morphologyData = {};
         // Calculate scale factors to fit in minimap
         const scaleY = Math.max(0.3, (400 - 20) / contentHeight); // max-height minus some padding
         const scaleX = availableWidth / contentWidth; // Scale to fit in content area
-        const scaleFactor = Math.min(scaleX, scaleY); // Use smaller scale to ensure fit
+        const scaleFactor = IS_SIMPLE_MINIMAP_HOST ? scaleX : Math.min(scaleX, scaleY); // Simple host fills width
 
         const _c = document.createElement("canvas");
         const _ctx = _c.getContext("2d");
@@ -3586,26 +3801,36 @@ const morphologyData = {};
                 wordDiv.setAttribute('data-is-ayah-number', 'true');
                 wordDiv.setAttribute('data-index', wordRect.index);
 
-                // Calculate position and size based on wordRect
-                const top = (wordRect.top - minTop) * scaleFactor;
-                let left = (wordRect.left - minLeft) * scaleFactor - measuredWidth;
-                let width = measuredWidth;
-                const height = Math.max(1, wordRect.height * scaleFactor);
+                const ayahRect = getAyahEndRectForMinimap(wordRect.ayah);
+                const topSource = ayahRect ? ayahRect.top : wordRect.top;
+                const leftSource = ayahRect ? ayahRect.left : wordRect.left;
+                const widthSource = ayahRect ? ayahRect.width : 0;
+                const heightSource = ayahRect ? ayahRect.height : wordRect.height;
                 
+                // Calculate position and size based on wordRect or ayah-end rect
+                const top = (topSource - minTop) * scaleFactor;
+                let left = (leftSource - minLeft) * scaleFactor - (ayahRect ? 0 : measuredWidth);
+                let width = ayahRect ? Math.max(1, widthSource * scaleFactor) : measuredWidth;
+                const height = Math.max(1, heightSource * scaleFactor);
+                
+                let ayahFontSize = Math.min(fontSize, height);
+                if (String(ayahText).length >= 3) {
+                    ayahFontSize = Math.max(1, Math.round(ayahFontSize * 0.6));
+                }
                 wordDiv.style.cssText = `
                     position: absolute;
                     top: ${top}px;
                     left: ${left+extraSpace}px;
                     width: ${width}px;
                     height: ${height}px;
-                    font-size: ${fontSize}px;
+                    font-size: ${ayahFontSize}px;
                     font-family: "Arial", sans-serif;
                     font-style: normal;
                     font-weight: bold;
                     background: rgba(0, 200, 200, 0.5);
                     z-index: 5;
                     text-align: center;
-                    line-height: ${Math.max(1, wordRect.height * scaleFactor)}px;
+                    line-height: ${height}px;
                     direction: rtl;
                     overflow: hidden;
                     white-space: nowrap;
@@ -3622,16 +3847,24 @@ const morphologyData = {};
             wordDiv.className = 'minimap-word';
             
             // Calculate position and size based on wordRect
-            const top = (wordRect.top - minTop) * scaleFactor;
+            let top = (wordRect.top - minTop) * scaleFactor;
             let left = (wordRect.left - minLeft) * scaleFactor;
             let width = Math.max(1, wordRect.width * scaleFactor);
-            const height = Math.max(1, wordRect.height * scaleFactor);
+            let height = Math.max(1, wordRect.height * scaleFactor);
             
             // Ensure words don't exceed the minimapContent width
             const maxRight = availableWidth;
             if (left + width > maxRight) {
                 width = Math.max(1, maxRight - left);
             }
+            
+            const shrinkFactor = 0.8;
+            const shrunkWidth = Math.max(1, width * shrinkFactor);
+            const shrunkHeight = Math.max(1, height * shrinkFactor);
+            left += (width - shrunkWidth) / 2;
+            top += (height - shrunkHeight) / 2;
+            width = shrunkWidth;
+            height = shrunkHeight;
             
             wordDiv.style.cssText = `
                 position: absolute;
@@ -3864,6 +4097,25 @@ const morphologyData = {};
             // Therefore: docY = minTop + (minimapY / scaleFactor)
             const targetScrollTop = currentMinTop + (clickY / currentScaleFactor);
             
+            // In simple minimap host, center inside the local scroll container
+            if (IS_SIMPLE_MINIMAP_HOST) {
+                const textRoot = document.getElementById('simple-minimap-text-root');
+                const scrollHost = getSimpleScrollHost(textRoot)
+                    || document.querySelector('#simple-minimap-main .sura-scroll')
+                    || textRoot;
+                if (scrollHost) {
+                    const viewportHeight = scrollHost.clientHeight || 0;
+                    const centeredScrollTop = targetScrollTop - (viewportHeight / 2);
+                    const nextTop = Math.max(0, centeredScrollTop);
+                    if (typeof scrollHost.scrollTo === 'function') {
+                        scrollHost.scrollTo({ top: nextTop, behavior: 'smooth' });
+                    } else {
+                        scrollHost.scrollTop = nextTop;
+                    }
+                    return;
+                }
+            }
+
             // In mobile mode, scroll the content wrapper; otherwise scroll the window
             if (isMobileMode && mobileContentWrapper) {
                 // Center the viewport on the clicked position
@@ -3913,6 +4165,62 @@ const morphologyData = {};
         minimap.updateHighlight = updateVisibleHighlight;
         // Expose a relayout hook so desktop.js can force recomputation after its own layout settles
         minimap.forceRelayout = recomputeMinimapGeometry;
+    }
+
+    /**
+     * Keeps minimap viewport highlight aligned when the Quran scroll container is `.sura-scroll`
+     * (simple.html continuous + minimap mode). Mirrors desktop `yasir.js` minimap sync.
+     */
+    function attachSimpleDesktopMinimapSync() {
+        const minimap = document.getElementById('morphology-minimap');
+        const visibleHighlight = document.getElementById('minimap-visible-highlight');
+        const textRoot = document.getElementById('simple-minimap-text-root');
+        const scrollEl = getSimpleScrollHost(textRoot);
+        if (!minimap || !visibleHighlight || !scrollEl || !textRoot) return false;
+
+        const update = () => {
+            const minTop = minimap._minTop;
+            const contentHeight = minimap._contentHeight;
+            const contentWidth = minimap._contentWidth;
+            const extraSpace = minimap._extraSpace || 5;
+            const scaleFactor = minimap._scaleFactor || 1;
+            if (minTop == null || !contentHeight || !contentWidth) return;
+
+            const firstWord = textRoot.querySelector('.qword:not(.ayah-end)') || textRoot.querySelector('.morph-word');
+            if (!firstWord) return;
+
+            const scrollHostRect = scrollEl.getBoundingClientRect();
+            const firstRect = firstWord.getBoundingClientRect();
+            const minTopLive = firstRect.top - scrollHostRect.top + scrollEl.scrollTop;
+            const minTopUsed = Number.isFinite(minTopLive) ? minTopLive : minTop;
+            const scaledHeight = contentHeight * scaleFactor;
+            const viewportHeight = scrollEl.clientHeight || 0;
+            const scrollTop = scrollEl.scrollTop;
+            const viewportBottom = scrollTop + viewportHeight;
+
+            const visibleTop = Math.max(0, (scrollTop - minTopUsed) * scaleFactor);
+            const visibleBottom = Math.min(scaledHeight, (viewportBottom - minTopUsed) * scaleFactor);
+            const visibleHeight = Math.max(10, visibleBottom - visibleTop);
+
+            const minimapContent = minimap.querySelector('#minimap-content');
+            const minimapRect = minimap.getBoundingClientRect();
+            const contentRect = minimapContent ? minimapContent.getBoundingClientRect() : minimapRect;
+            const contentLeft = Math.max(0, contentRect.left - minimapRect.left);
+            const scaledWidth = contentWidth * scaleFactor;
+            const contentWidthPx = Math.max(0, contentRect.width);
+            const visibleWidth = contentWidthPx > 0 ? contentWidthPx : Math.max(0, scaledWidth - extraSpace);
+
+            visibleHighlight.style.top = `${visibleTop}px`;
+            visibleHighlight.style.left = `${contentLeft}px`;
+            visibleHighlight.style.width = `${visibleWidth}px`;
+            visibleHighlight.style.height = `${visibleHeight}px`;
+        };
+
+        scrollEl.addEventListener('scroll', () => window.requestAnimationFrame(update), { passive: true });
+        window.addEventListener('resize', update, { passive: true });
+        update();
+        minimap._desktopUpdateHighlight = update;
+        return true;
     }
 
     // Add CSS for word hover effect and minimap
@@ -4001,6 +4309,10 @@ const morphologyData = {};
         // setTimeout(() => {
             createMinimap();
         // }, 100);
+        
+        if (IS_SIMPLE_MINIMAP_HOST) {
+            attachSimpleDesktopMinimapSync();
+        }
         
         // Then load morphology data and add it to words
         loadMorphologyData(sureNumber).then(() => {
@@ -4147,14 +4459,40 @@ const morphologyData = {};
         });
     }
 
-    // Run when DOM is loaded
-    // sureNumber: from window (desktop) or inline script (standalone), else from path e.g. /Yasir/036_... -> 36
-    const sureNum = window.sureNumber != null ? window.sureNumber : (parseInt((window.location.pathname || '').match(/(\d+)_/)?.[1], 10) || 1);
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            init(sureNum);
+    // Run when DOM is loaded (skipped for simple.html — it calls `morphologyMinimapInit(sura)` manually)
+    const sureNumFallback = window.sureNumber != null ? window.sureNumber : (parseInt((window.location.pathname || '').match(/(\d+)_/)?.[1], 10) || 1);
+    window.morphologyMinimapInit = function(suraOptional) {
+        const n = Number(suraOptional != null ? suraOptional : sureNumFallback);
+        init(Number.isFinite(n) && n >= 1 ? n : 1);
+    };
+    window.simpleMorphToggleFromTooltip = function(kind, arabicToken) {
+        if (!arabicToken) return;
+        if (kind === 'lem') {
+            toggleRootHighlight(LEMMA_HIGHLIGHT_PREFIX + arabicToken);
+        } else {
+            toggleRootHighlight(arabicToken);
+        }
+    };
+    window.simpleMinimapRefreshHighlightApplication = function() {
+        Object.keys(highlightedRoots).forEach(function(k) {
+            const info = highlightedRoots[k];
+            if (!info || !info.color) return;
+            removeRootHighlightFromWords(k);
+            applyRootHighlight(k, info.color);
         });
-    } else {
-        init(sureNum);
+    };
+    window.simpleMinimapRefreshSelectedRootsPanel = function() {
+        updateHighlightedRootsPanel();
+    };
+
+    if (!IS_SIMPLE_MINIMAP_HOST) {
+        const sureNum = sureNumFallback;
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                init(sureNum);
+            });
+        } else {
+            init(sureNum);
+        }
     }
 })();
