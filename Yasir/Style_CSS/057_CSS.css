@@ -462,6 +462,10 @@ speech[gray]::before {
   color:  rgb(205, 100, 100);
 }
 
+.highlight4 {
+  color:  rgb(155, 50, 50);
+}
+
 .highlight6 {
   color:  goldenrod;
 }
