@@ -1,3 +1,48 @@
+speech {
+  font-size: 10mm;
+  display: inline;
+  color: inherit;
+  text-decoration: none;
+}
+
+speech[open]::before {
+  content: "«";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[close]::before {
+  content: "»";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[underline]::before {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0mm;
+}
+
+speech[green]::before {
+  color: rgb(70,175,70);
+}
+
+speech[red]::before {
+  color: rgb(205,100,100);
+}
+
+speech[blue]::before {
+  color: rgb(70, 70, 220);
+}
+
+speech[gray]::before {
+  color: rgb(150, 150, 150);
+}
+
+speech[black]::before {
+  color: rgb(100, 100, 100);
+}
+
 .vertical-line-1 {
   border-left: 0.3mm solid black;
   height: 100%;
@@ -76,7 +121,7 @@
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 189.5mm;
+  width: 183mm;
 }
 
 .inner-paragraph-continue {
@@ -115,6 +160,15 @@
   text-indent: -5mm;
 }
 
+.small-bullet-far {
+  margin-top: 0mm;
+  margin-right: 15mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -5mm;
+}
+
 .big-bullet-near {
   margin-top: 0mm;
   margin-right: 16.5mm;
@@ -142,13 +196,160 @@
   text-indent: 0mm;
 }
 
-.zero-margin-bullet {
+.zero-margin.far {
+  margin-bottom: 4.5mm;
+}
+
+.zero-margin2 {
   margin-top: 0mm;
-  margin-right: 5mm;
+  margin-right: 6.5mm;
   margin-bottom: 0mm;
   margin-left: 0mm;
   text-align: justify;
-  text-indent: -5mm;
+  text-indent: -6.5mm;
+}
+
+.zero-margin6 {
+  margin-top: -1mm;
+  margin-right: 4mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -4mm;
+}
+
+.boxed {
+  border: 1px solid rgb(150, 150, 150);
+  padding: 1px 0.53mm; ;
+}
+
+.boxed.underline-black-1 {
+  border-bottom: 1px solid rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-3 {
+  border-bottom: 1px solid rgb(220, 220, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-far {
+  border-bottom: 1px solid rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradient1 {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to right, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed2 {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed-far {
+  border-bottom: 1px dashed rgb(150, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm;
+}
+
+.boxed.underline-blackdotted {
+  border-bottom: 1px dotted rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
+.boxed.underline-gradientgreen {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(100, 180, 100), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-gradientred {
+  border-bottom: 2px solid;
+  border-image: linear-gradient(to left, rgb(220, 150, 150), white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
+
+.highlight2 {
+  color:  rgb(205, 100, 100);
 }
 
 @media print {
