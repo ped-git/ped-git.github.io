@@ -111,8 +111,8 @@ speech[black]::before {
   display: inline-block;
   vertical-align: top;
   text-align: justify;
-  margin-top: 0mm;
-  width: 145mm;
+  margin-top: -1.5mm;
+  width: 183mm;
   text-indent: 0mm;
 }
 
@@ -202,11 +202,11 @@ speech[black]::before {
 
 .zero-margin2 {
   margin-top: 0mm;
-  margin-right: 6.5mm;
+  margin-right: 4mm;
   margin-bottom: 0mm;
   margin-left: 0mm;
   text-align: justify;
-  text-indent: -6.5mm;
+  text-indent: -4mm;
 }
 
 .zero-margin6 {
@@ -312,10 +312,26 @@ speech[black]::before {
   border-left: 0;
   border-right: 0;
   border-top: 0;
+  padding: 0px 0mm; ;
+}
+
+.boxed.underline-solidgreen-far {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
   padding: 3px 0mm; ;
 }
 
 .boxed.underline-solidred {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0mm; ;
+}
+
+.boxed.underline-solidred-far {
   border-bottom: 1px solid rgb(240, 170, 170);
   border-left: 0;
   border-right: 0;
