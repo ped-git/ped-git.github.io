@@ -7,6 +7,13 @@ const morphologyData = {};
 
     const IS_DESKTOP_HOST = !!window.__DESKTOP_HOST__;
     const IS_SIMPLE_MINIMAP_HOST = !!window.__SIMPLE_MINIMAP_HOST__;
+    function morphHoverVerboseLog() {
+        try {
+            return typeof window !== 'undefined' && window.__DEBUG_MORPH_HOVER__ === true;
+        } catch (e) {
+            return false;
+        }
+    }
     const LEMMA_HIGHLIGHT_PREFIX = '__lemma__:';
 
     /** Words to highlight on main text + minimap for a user-selected token (root or lemma). */
@@ -371,7 +378,9 @@ const morphologyData = {};
                 : {};
 
             dataLoaded = true;
-            console.log('Morphology data loaded for Surah ' + sureNumber);
+            if (morphHoverVerboseLog()) {
+                console.log('Morphology data loaded for Surah ' + sureNumber);
+            }
         } catch (error) {
             console.error('Error loading morphology data:', error);
         }
@@ -621,7 +630,7 @@ const morphologyData = {};
         var root = document.querySelector('sure');
         if (!root && IS_DESKTOP_HOST) root = document.getElementById('content');
         processNodeRecursive(root, state);
-        if (typeof console !== 'undefined' && console.log) {
+        if (morphHoverVerboseLog() && typeof console !== 'undefined' && console.log) {
             var n = document.querySelectorAll ? document.querySelectorAll('.morph-word').length : 0;
             console.log('[morph-hover] wrapWordsInSpans done, root=' + (root ? root.tagName || root.id || 'el' : 'null') + ', morph-word count: ' + n);
         }
@@ -877,7 +886,7 @@ const morphologyData = {};
         if (!IS_DESKTOP_HOST) {
             document.addEventListener('mouseover', function(e) {
                 if (e.target.classList.contains('morph-word')) {
-                    if (typeof console !== 'undefined' && console.log && !window._morphHoverFirst) {
+                    if (morphHoverVerboseLog() && typeof console !== 'undefined' && console.log && !window._morphHoverFirst) {
                         window._morphHoverFirst = true;
                         console.log('[morph-hover] first word hover');
                     }
@@ -4073,14 +4082,10 @@ const morphologyData = {};
             
             // Get click position relative to minimapContent
             // Account for minimap container's scroll position if it's scrollable
-            const minimapScrollTop = minimap.scrollTop || 0;
             const rect = minimapContent.getBoundingClientRect();
-            const minimapRect = minimap.getBoundingClientRect();
-            
-            // Calculate click position relative to minimapContent's top-left corner
-            // Account for minimap's internal scroll
-            const clickX = e.clientX - minimapRect.left - 6; // Subtract container padding (6px)
-            const clickY = (e.clientY - minimapRect.top - 6) + minimapScrollTop; // Add minimap scroll offset, subtract padding
+            // Coordinates in minimapContent space (padding / border / RTL-safe; works when horizontal padding is 0)
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
             
             // Use stored values from minimap object
             const currentScaleFactor = minimap._scaleFactor || scaleFactor;
@@ -4273,7 +4278,9 @@ const morphologyData = {};
 
     // Initialize when DOM is ready
     function init(sureNumber) {
-        if (typeof console !== 'undefined' && console.log) console.log('[morph-hover] init sura', sureNumber);
+        if (morphHoverVerboseLog() && typeof console !== 'undefined' && console.log) {
+            console.log('[morph-hover] init sura', sureNumber);
+        }
         addStyles();
         if (IS_DESKTOP_HOST && !window._searchEmbedMessageListenerAdded) {
             window._searchEmbedMessageListenerAdded = true;
@@ -4288,7 +4295,7 @@ const morphologyData = {};
             };
             window.addEventListener('message', function(e) {
                 if (e.data && e.data.type === 'addSearchItem' && e.data.display != null) {
-                    if (typeof console !== 'undefined' && console.log) {
+                    if (morphHoverVerboseLog() && typeof console !== 'undefined' && console.log) {
                         console.log('[morph-hover] addSearchItem received, regions:', Array.isArray(e.data.regions) ? e.data.regions.length : 0);
                     }
                     addSearchItemToSelected(e.data);

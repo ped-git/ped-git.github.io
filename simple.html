@@ -2,7 +2,7 @@
 <html lang="fa-IR" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>قرآن - نمایش</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <style>
@@ -85,13 +85,14 @@
             height: calc(100vh - 5px);
             /* overflow: hidden; */
         }
-        /* Continuous + minimap: ~75% text / 25% sidebar (minimap width tracks line width ratio) */
+        /* Reading column fills all horizontal space left of sidebar; sidebar width stays JS-controlled */
+        /* Second column floor must stay in sync with SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX in script */
         #simple-continuous-minimap-layout {
             display: grid;
-            grid-template-columns: minmax(0, max-content) minmax(160px, 22vw);
+            grid-template-columns: minmax(0, 1fr) minmax(160px, auto);
             gap: 0;
             align-items: stretch;
-            justify-content: center;
+            justify-content: start;
             width: 100%;
             flex: 1 1 auto;
             min-height: 0;
@@ -111,9 +112,10 @@
             overflow: auto;
         }
         #simple-minimap-text-root .sura-container {
-            width: max-content;
-            max-width: none;
+            width: 100%;
+            max-width: 100%;
             margin: 0;
+            box-sizing: border-box;
         }
         #simple-minimap-text-root .sura-scroll {
             max-height: none;
@@ -256,6 +258,36 @@
             flex: 1 1 auto !important;
             height: 100% !important;
             max-height: none !important;
+        }
+        /* Narrow view: edge-to-edge text + minimap — toggled via html.simple-minimap-compact (breakpoint from JS) */
+        html.simple-minimap-compact .main.simple-minimap-shell {
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+        }
+        html.simple-minimap-compact #simple-continuous-minimap-layout {
+            justify-content: stretch;
+            width: 100%;
+        }
+        html.simple-minimap-compact #simple-minimap-sidebar {
+            max-height: calc(100dvh - 56px - 8px);
+            max-height: calc(100vh - 56px - 8px);
+        }
+        html.simple-minimap-compact #simple-minimap-sidebar #morphology-minimap {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        html.simple-minimap-compact #simple-minimap-settings-bar {
+            padding-left: 0;
+            padding-right: 0;
+            border-radius: 0;
+        }
+        html.simple-minimap-compact #bottom-ribbon {
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+        }
+        html.simple-minimap-compact #search-wrap {
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
         }
         #simple-minimap-settings-bar button.active {
             background: #2c3e50;
@@ -1406,12 +1438,33 @@
     <script src="js/corpus.js"></script>
     <script>
 (function() {
+    try {
+        var sp = new URLSearchParams(window.location.search || '');
+        if (sp.get('mmdebug') === '1' || sp.get('debugMinimapLayout') === '1') {
+            window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__ = true;
+        }
+        if (typeof location !== 'undefined' && location.hash && /mmdebug/i.test(location.hash)) {
+            window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__ = true;
+        }
+    } catch (eSp) {}
+    if (typeof window !== 'undefined' && window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__) {
+        console.info('[simple-minimap] Layout debug ON (?mmdebug=1). Logs: [simple-minimap:layout] for sidebar/geometry. Optional: set window.__DEBUG_SIMPLE_MINIMAP_RESIZE__ = true for every [simple-minimap:resize]. Compact hook logs only when html.simple-minimap-compact toggles.');
+    }
+
     const TOTAL_PAGES = 604;
     const SIMPLE_MINIMAP_WIDTH_RATIO = 0.25;
+    /** Matches #simple-continuous-minimap-layout second column `minmax(160px, …)`. */
+    const SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX = 160;
+    /** Minimum acceptable width for the reading column (used only to compute compact breakpoint). */
+    const SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX = 240;
+    /** Horizontal padding of `.main.simple-minimap-shell` when not compact (12px + 12px). */
+    const SIMPLE_MINIMAP_SHELL_PAD_X = 24;
     const loadedQCFPages = new Set();
     const QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
     const SURAH_NAMES_FONT_FAMILY = 'surahnames';
-    const DEBUG_PAGE_FIT = true;
+    const DEBUG_PAGE_FIT = false;
+    const DEBUG_COPY_SELECTION = false;
+    const DEBUG_RIBBON_JUZ = false;
     let surahNamesFontLoaded = false;
     const main = document.getElementById('main');
     const loadingEl = document.getElementById('loading');
@@ -3364,20 +3417,22 @@
             && lastWordPosition === verseStats.lastTextWordPosition;
         var selectionEndsAtAyahMarker = lastWord.classList.contains('ayah-end') && selectionReachesAyahEnd(range, lastWord);
         var endsPartial = !(selectionEndsAtLastTextWord || selectionEndsAtAyahMarker || selectedAllTextWordsInLastAyah);
-        console.log('[copy-debug]', {
-            verseKey: lastGroup.verseKey,
-            lastSelectedWord: (lastWord.getAttribute('data-copy-text') || lastWord.textContent || '').trim(),
-            lastSelectedWordPosition: lastWordPosition,
-            ayahEndPosition: verseStats.ayahEndPosition,
-            lastTextWordPosition: verseStats.lastTextWordPosition,
-            totalTextWords: verseStats.totalTextWords,
-            isLastSelectedWordAyahEnd: lastWord.classList.contains('ayah-end'),
-            selectionReachesLastSelectedWordEnd: selectionReachesAyahEnd(range, lastWord),
-            selectionEndsAtLastTextWord: selectionEndsAtLastTextWord,
-            selectedAllTextWordsInLastAyah: selectedAllTextWordsInLastAyah,
-            selectionReachesAyahEnd: !endsPartial,
-            copiedWordsInLastAyah: lastGroup.words.length
-        });
+        if (DEBUG_COPY_SELECTION) {
+            console.log('[copy-debug]', {
+                verseKey: lastGroup.verseKey,
+                lastSelectedWord: (lastWord.getAttribute('data-copy-text') || lastWord.textContent || '').trim(),
+                lastSelectedWordPosition: lastWordPosition,
+                ayahEndPosition: verseStats.ayahEndPosition,
+                lastTextWordPosition: verseStats.lastTextWordPosition,
+                totalTextWords: verseStats.totalTextWords,
+                isLastSelectedWordAyahEnd: lastWord.classList.contains('ayah-end'),
+                selectionReachesLastSelectedWordEnd: selectionReachesAyahEnd(range, lastWord),
+                selectionEndsAtLastTextWord: selectionEndsAtLastTextWord,
+                selectedAllTextWordsInLastAyah: selectedAllTextWordsInLastAyah,
+                selectionReachesAyahEnd: !endsPartial,
+                copiedWordsInLastAyah: lastGroup.words.length
+            });
+        }
         var useContextualDots = copyMode === 'contextual';
         var lines = [];
         for (var g = 0; g < groups.length; g++) {
@@ -3777,7 +3832,9 @@
             }
             var startPage = j === 1 ? 1 : JUZ_PAGE_ENDS[j - 2] + 1;
             var endPage = JUZ_PAGE_ENDS[j - 1];
-            console.log('[Ribbon] Juz highlight: juz=' + j + ', pages ' + startPage + '–' + endPage + ', left(px)=' + juzLeftPx + ', width(px)=' + juzWidthPx);
+            if (DEBUG_RIBBON_JUZ) {
+                console.log('[Ribbon] Juz highlight: juz=' + j + ', pages ' + startPage + '–' + endPage + ', left(px)=' + juzLeftPx + ', width(px)=' + juzWidthPx);
+            }
             progressTooltip.innerHTML = 'جزء ' + fmtFa(j) + '<br>ص ' + fmtFa(startPage) + ' – ' + fmtFa(endPage);
             progressTooltip.classList.add('visible');
             progressTooltip.style.transform = 'translate(-50%, -100%)';
@@ -3956,6 +4013,14 @@
             try { window._simpleMinimapSidebarObserver.disconnect(); } catch (e) {}
             delete window._simpleMinimapSidebarObserver;
         }
+        if (_simpleMinimapSidebarWidthRafId) {
+            try { cancelAnimationFrame(_simpleMinimapSidebarWidthRafId); } catch (eRaf) {}
+            _simpleMinimapSidebarWidthRafId = 0;
+        }
+        _simpleMinimapRelayoutGeneration = 0;
+        _lastSidebarWidthDebugKey = '';
+        _lastLoggedCompactDebugState = null;
+        teardownSimpleMinimapCompactListeners();
         try {
             if (window.SimpleMinimapCharts) window.SimpleMinimapCharts.destroyAllCharts();
         } catch (eRm) {}
@@ -4053,15 +4118,341 @@
         });
     }
 
+    /** Set `window.__DEBUG_SIMPLE_MINIMAP_RESIZE__ = true` for a line on every window resize (verbose). */
+    function simpleMinimapResizeProbeEnabled() {
+        try {
+            return window.__DEBUG_SIMPLE_MINIMAP_RESIZE__ === true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /** Set `window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__ = true` then reload or resize. Logs ratios plus geometryRTLAndOverlap (RTL column sides, overlap vs gap, slack inside reading pane, z-index, mushaf line widths). */
+    function simpleMinimapLayoutDebugEnabled() {
+        try {
+            return window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__ === true;
+        } catch (e) {
+            return false;
+        }
+    }
+    var _simpleMinimapLayoutLogDedupe = '';
+    function logSimpleMinimapLayout(payload, skipDedupe) {
+        if (!simpleMinimapLayoutDebugEnabled()) return;
+        if (!skipDedupe) {
+            var key;
+            try {
+                key = JSON.stringify(payload);
+            } catch (err) {
+                key = String(Date.now());
+            }
+            if (key === _simpleMinimapLayoutLogDedupe) return;
+            _simpleMinimapLayoutLogDedupe = key;
+        }
+        console.log('[simple-minimap:layout]', payload);
+    }
+
+    /** Every window resize while debug is on — confirms the flag and whether minimap layout is active (full logs only then). */
+    (function attachSimpleMinimapResizeProbe() {
+        window.addEventListener('resize', function() {
+            if (!simpleMinimapLayoutDebugEnabled() || !simpleMinimapResizeProbeEnabled()) return;
+            var m = document.getElementById('main');
+            var active = !!(m && m.classList.contains('simple-minimap-shell'));
+            console.log('[simple-minimap:resize]', {
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                continuousMinimapActive: active,
+                hint: active
+                    ? 'ResizeObserver should fire → [simple-minimap:layout] if geometry changed.'
+                    : 'Open a sura with continuous + minimap mode for sidebar-width / geometry logs.'
+            });
+        }, { passive: true });
+    })();
+
+    /**
+     * Explains empty band beside minimap vs text feeling “under” it: RTL grid edges, overlap, inner slack, stacking.
+     */
+    function collectSimpleMinimapLayoutGeometry(layout, textRoot, sidebar, textContainer, mainCol, minimapEl, mainElShell) {
+        function snap(el) {
+            if (!el || typeof el.getBoundingClientRect !== 'function') return null;
+            var r = el.getBoundingClientRect();
+            return {
+                left: Math.round(r.left * 100) / 100,
+                right: Math.round(r.right * 100) / 100,
+                top: Math.round(r.top * 100) / 100,
+                width: Math.round(r.width * 100) / 100,
+                height: Math.round(r.height * 100) / 100
+            };
+        }
+        function zRead(el) {
+            if (!el) return null;
+            try {
+                var z = window.getComputedStyle(el).zIndex;
+                return z === 'auto' ? 'auto' : z;
+            } catch (e) {
+                return null;
+            }
+        }
+        var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+        var layoutR = snap(layout);
+        var mainR = snap(mainCol);
+        var sideR = snap(sidebar);
+        var textRootR = snap(textRoot);
+        var suraR = snap(textContainer);
+        var mmR = minimapEl ? snap(minimapEl) : null;
+        var firstPc = textContainer && textContainer.querySelector ? textContainer.querySelector('.page-content') : null;
+        var pcR = firstPc ? snap(firstPc) : null;
+        var shellR = mainElShell ? snap(mainElShell) : null;
+        var dirLayout = '';
+        try {
+            dirLayout = window.getComputedStyle(layout).direction || '';
+        } catch (e1) {}
+        var dirDoc = '';
+        try {
+            dirDoc = window.getComputedStyle(document.documentElement).direction || '';
+        } catch (e2) {}
+
+        var overlapX = 0;
+        var gapBetweenRectsPx = 0;
+        if (mainR && sideR) {
+            var ix = Math.min(mainR.right, sideR.right) - Math.max(mainR.left, sideR.left);
+            if (ix > 0.5) overlapX = Math.round(ix * 100) / 100;
+            else if (ix < -0.5) gapBetweenRectsPx = Math.round((-ix) * 100) / 100;
+        }
+
+        var shellPadLeft = 0;
+        var shellPadRight = 0;
+        if (mainElShell) {
+            try {
+                var cs = window.getComputedStyle(mainElShell);
+                shellPadLeft = parseFloat(cs.paddingLeft) || 0;
+                shellPadRight = parseFloat(cs.paddingRight) || 0;
+            } catch (e3) {}
+        }
+        var shellContentInnerLeft = shellR ? shellR.left + shellPadLeft : null;
+        var sidebarDistanceFromShellContentLeftPx = sideR && shellContentInnerLeft != null
+            ? Math.round((sideR.left - shellContentInnerLeft) * 100) / 100
+            : null;
+
+        var textRootClientW = textRoot ? textRoot.clientWidth || 0 : 0;
+        var slackSuraVsTextRootPx = suraR && textRootClientW
+            ? Math.round((textRootClientW - suraR.width) * 100) / 100
+            : null;
+        var slackPageContentVsTextRootPx = pcR && textRootClientW
+            ? Math.round((textRootClientW - pcR.width) * 100) / 100
+            : null;
+
+        var mushafSample = { linesChecked: 0, maxLineScrollWidthPx: 0, maxLineClientWidthPx: 0, anyLineOverflowsWidth: false };
+        if (textContainer && textContainer.querySelectorAll) {
+            var lines = textContainer.querySelectorAll('.mushaf-line');
+            var lim = Math.min(lines.length, 50);
+            mushafSample.linesChecked = lim;
+            for (var li = 0; li < lim; li++) {
+                var ln = lines[li];
+                var sw = ln.scrollWidth || 0;
+                var cw = ln.clientWidth || 0;
+                if (sw > mushafSample.maxLineScrollWidthPx) mushafSample.maxLineScrollWidthPx = Math.round(sw * 100) / 100;
+                if (cw > mushafSample.maxLineClientWidthPx) mushafSample.maxLineClientWidthPx = Math.round(cw * 100) / 100;
+                if (sw > cw + 2) mushafSample.anyLineOverflowsWidth = true;
+            }
+        }
+
+        var whichColumnIsVisuallyLeft = '';
+        if (mainR && sideR) {
+            if (sideR.left < mainR.left - 1) whichColumnIsVisuallyLeft = 'sidebar (#simple-minimap-sidebar) is left; main text column is right (typical RTL grid)';
+            else if (mainR.left < sideR.left - 1) whichColumnIsVisuallyLeft = 'main is left of sidebar (unexpected for rtl grid — check DOM/order)';
+            else whichColumnIsVisuallyLeft = 'columns overlap or aligned — see overlapPx';
+        }
+
+        return {
+            documentDirection: dirDoc,
+            layoutDirection: dirLayout,
+            rtlGridNote: 'With direction:rtl on #simple-continuous-minimap-layout, grid column 1 (1fr) is inline-start (right side of row); column 2 is minimap (left side). Empty space on the far visual left is often shell padding + grid alignment, not unused grid track.',
+            whichColumnIsVisuallyLeft: whichColumnIsVisuallyLeft,
+            viewport: {
+                innerWidthPx: vw,
+                distanceViewportLeftEdgeToSidebarLeftPx: sideR ? Math.round(sideR.left * 100) / 100 : null,
+                distanceMainRightEdgeToViewportRightPx: mainR ? Math.round((vw - mainR.right) * 100) / 100 : null,
+                distanceViewportLeftEdgeToLayoutLeftPx: layoutR ? Math.round(layoutR.left * 100) / 100 : null,
+                distanceLayoutRightEdgeToViewportRightPx: layoutR ? Math.round((vw - layoutR.right) * 100) / 100 : null
+            },
+            rectsViewport: {
+                '#simple-continuous-minimap-layout': layoutR,
+                '#simple-minimap-main': mainR,
+                '#simple-minimap-sidebar': sideR,
+                '#simple-minimap-text-root': textRootR,
+                measuredForRatio: suraR,
+                '.page-content:first': pcR,
+                '#morphology-minimap': mmR,
+                '#main.shell': shellR
+            },
+            columns: {
+                horizontalOverlapMainVsSidebarPx: overlapX,
+                gapBetweenMainAndSidebarRectsPx: gapBetweenRectsPx,
+                ifOverlapExplain: overlapX > 0.5 ? 'Main and sidebar rects overlap horizontally — text can draw underneath minimap (stacking/z-index) or subpixel measurement.' : null,
+                ifGapExplain: gapBetweenRectsPx > 0.5 ? 'Gap between column rects (unexpected if grid has gap:0).' : null
+            },
+            shellPadding: {
+                shellPaddingLeftPx: Math.round(shellPadLeft * 100) / 100,
+                shellPaddingRightPx: Math.round(shellPadRight * 100) / 100,
+                sidebarLeftMinusShellContentOriginPx: sidebarDistanceFromShellContentLeftPx,
+                note: 'If layout fills #main, sidebarDistanceFromShellContentOriginPx should be ~0. Large value means extra inset before minimap.'
+            },
+            readingPaneInnerSlack: {
+                textRootClientWidthPx: Math.round(textRootClientW * 100) / 100,
+                suraContainerRectWidthPx: suraR ? suraR.width : null,
+                slackTextRootMinusSuraRectPx: slackSuraVsTextRootPx,
+                firstPageContentRectWidthPx: pcR ? pcR.width : null,
+                slackTextRootMinusFirstPageContentPx: slackPageContentVsTextRootPx,
+                explainSlack: slackPageContentVsTextRootPx != null && slackPageContentVsTextRootPx > 4
+                    ? 'Page block is narrower than text-root: lines wrap inside a band; minimap column still uses full grid cell — looks like text sits “under” minimap visually.'
+                    : (slackSuraVsTextRootPx != null && slackSuraVsTextRootPx > 4 ? '.sura-container narrower than text-root scroll viewport.' : null)
+            },
+            mushafLinesSample: mushafSample,
+            stackingContext: {
+                zIndexSimpleMinimapMain: zRead(mainCol),
+                zIndexSimpleMinimapTextRoot: zRead(textRoot),
+                zIndexSidebar: zRead(sidebar),
+                zIndexMorphologyMinimap: minimapEl ? zRead(minimapEl) : null,
+                note: 'If sidebar/minimap stacks above text without reserving width, overlap looks like text behind minimap.'
+            }
+        };
+    }
+
+    /** Ratio clamped like the settings slider (0.1–1); used for compact breakpoint only. */
+    function getSimpleMinimapStoredRatioClamped() {
+        var storedRatio = parseFloat(getSetting('minimap_width_ratio', ''));
+        var ratio = (storedRatio && isFinite(storedRatio)) ? storedRatio
+            : ((typeof SIMPLE_MINIMAP_WIDTH_RATIO === 'number' && SIMPLE_MINIMAP_WIDTH_RATIO > 0)
+                ? SIMPLE_MINIMAP_WIDTH_RATIO
+                : 0.25);
+        return Math.max(0.1, Math.min(1, ratio));
+    }
+
+    /**
+     * Viewport width at or below which we use compact (edge) layout for continuous + minimap.
+     * Shell padding + minimum text column + max(grid sidebar floor, textMin × width ratio).
+     */
+    function getSimpleMinimapCompactBreakpointPx() {
+        var ratio = getSimpleMinimapStoredRatioClamped();
+        var textMin = SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX;
+        var sidebarMin = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(textMin * ratio));
+        return SIMPLE_MINIMAP_SHELL_PAD_X + textMin + sidebarMin;
+    }
+
+    function updateSimpleMinimapCompactLayout() {
+        var mainEl = document.getElementById('main');
+        if (!mainEl || !mainEl.classList.contains('simple-minimap-shell')) {
+            document.documentElement.classList.remove('simple-minimap-compact');
+            return;
+        }
+        var bp = getSimpleMinimapCompactBreakpointPx();
+        var w = window.innerWidth || document.documentElement.clientWidth || 0;
+        document.documentElement.classList.toggle('simple-minimap-compact', w <= bp);
+    }
+
+    var _lastLoggedCompactDebugState = null;
+    var _simpleMinimapCompactDebugRaf = 0;
+    /** Compact breakpoint log only when `html.simple-minimap-compact` toggles (reduces resize spam). */
+    function logSimpleMinimapCompactBreakpointIfDebug() {
+        if (!simpleMinimapLayoutDebugEnabled()) return;
+        if (_simpleMinimapCompactDebugRaf) return;
+        _simpleMinimapCompactDebugRaf = requestAnimationFrame(function() {
+            _simpleMinimapCompactDebugRaf = 0;
+            var mainShell = document.getElementById('main');
+            if (!mainShell || !mainShell.classList.contains('simple-minimap-shell')) return;
+            var compactNow = document.documentElement.classList.contains('simple-minimap-compact');
+            if (_lastLoggedCompactDebugState !== null && _lastLoggedCompactDebugState === compactNow) return;
+            _lastLoggedCompactDebugState = compactNow;
+            var w = window.innerWidth || document.documentElement.clientWidth || 0;
+            var bp = getSimpleMinimapCompactBreakpointPx();
+            var rc = getSimpleMinimapStoredRatioClamped();
+            var sm = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX * rc));
+            logSimpleMinimapLayout({
+                phase: 'compact-state-changed',
+                viewportInnerWidthPx: w,
+                compactLayoutActive: compactNow,
+                compactBreakpointPx: bp,
+                compactBreakpointHow: {
+                    shellHorizontalPadPx: SIMPLE_MINIMAP_SHELL_PAD_X,
+                    assumedMinTextColumnPx: SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX,
+                    widthRatioClamped01: rc,
+                    minimapColumnFloorPx: SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX,
+                    effectiveMinimapColumnPx: sm,
+                    sumPx: SIMPLE_MINIMAP_SHELL_PAD_X + SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX + sm,
+                    note: 'compact when viewportInnerWidthPx <= compactBreakpointPx'
+                }
+            });
+        });
+    }
+
+    function ensureSimpleMinimapCompactListeners() {
+        if (window._simpleMinimapCompactListeners) return;
+        window._simpleMinimapCompactListeners = true;
+        var handler = function() {
+            updateSimpleMinimapCompactLayout();
+            logSimpleMinimapCompactBreakpointIfDebug();
+        };
+        window.addEventListener('resize', handler, { passive: true });
+        window.addEventListener('orientationchange', handler, { passive: true });
+        window._simpleMinimapCompactResizeHandler = handler;
+    }
+
+    function teardownSimpleMinimapCompactListeners() {
+        if (!window._simpleMinimapCompactListeners) return;
+        var handler = window._simpleMinimapCompactResizeHandler;
+        if (handler) {
+            window.removeEventListener('resize', handler);
+            window.removeEventListener('orientationchange', handler);
+        }
+        delete window._simpleMinimapCompactResizeHandler;
+        delete window._simpleMinimapCompactListeners;
+        document.documentElement.classList.remove('simple-minimap-compact');
+    }
+
+    /** Coalesce multiple triggers (initial rAF + ResizeObserver same frame) into one layout pass. */
+    var _simpleMinimapSidebarWidthRafId = 0;
+    /** Latest flush wins: stale double-rAF minimap relayout + after-log are skipped. */
+    var _simpleMinimapRelayoutGeneration = 0;
+    var _lastSidebarWidthDebugKey = '';
     function updateSimpleMinimapSidebarWidth() {
+        if (_simpleMinimapSidebarWidthRafId) return;
+        _simpleMinimapSidebarWidthRafId = requestAnimationFrame(function() {
+            _simpleMinimapSidebarWidthRafId = 0;
+            flushSimpleMinimapSidebarWidth();
+        });
+    }
+
+    function flushSimpleMinimapSidebarWidth() {
         var layout = document.getElementById('simple-continuous-minimap-layout');
-        if (!layout) return;
+        if (!layout) {
+            if (simpleMinimapLayoutDebugEnabled()) {
+                logSimpleMinimapLayout({ phase: 'sidebar-width-skip', reason: 'no #simple-continuous-minimap-layout' });
+            }
+            updateSimpleMinimapCompactLayout();
+            return;
+        }
         var textRoot = document.getElementById('simple-minimap-text-root');
         var sidebar = document.getElementById('simple-minimap-sidebar');
-        if (!textRoot || !sidebar) return;
+        if (!textRoot || !sidebar) {
+            if (simpleMinimapLayoutDebugEnabled()) {
+                logSimpleMinimapLayout({ phase: 'sidebar-width-skip', reason: 'missing text-root or sidebar' });
+            }
+            updateSimpleMinimapCompactLayout();
+            return;
+        }
         var textContainer = textRoot.querySelector('.sura-container') || textRoot;
         var textWidth = textContainer.getBoundingClientRect().width || 0;
-        if (!textWidth) return;
+        if (!textWidth) {
+            if (simpleMinimapLayoutDebugEnabled()) {
+                logSimpleMinimapLayout({
+                    phase: 'sidebar-width-skip',
+                    reason: 'reading width is 0 (measure later)',
+                    textContainerSelectorGuess: textRoot.querySelector('.sura-container') ? '.sura-container' : '#simple-minimap-text-root'
+                });
+            }
+            updateSimpleMinimapCompactLayout();
+            return;
+        }
         var storedRatio = parseFloat(getSetting('minimap_width_ratio', ''));
         var ratio = (storedRatio && isFinite(storedRatio)) ? storedRatio
             : ((typeof SIMPLE_MINIMAP_WIDTH_RATIO === 'number' && SIMPLE_MINIMAP_WIDTH_RATIO > 0)
@@ -4072,15 +4463,100 @@
         sidebar.style.minWidth = target + 'px';
         sidebar.style.maxWidth = target + 'px';
         var minimap = document.getElementById('morphology-minimap');
+        var scheduleGeomAfterRelayout = simpleMinimapLayoutDebugEnabled();
         if (minimap && typeof minimap.forceRelayout === 'function') {
+            var relayoutGen = ++_simpleMinimapRelayoutGeneration;
             requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
+                    if (relayoutGen !== _simpleMinimapRelayoutGeneration) return;
                     minimap.forceRelayout();
                     if (typeof minimap._desktopUpdateHighlight === 'function') {
                         minimap._desktopUpdateHighlight();
                     }
+                    if (scheduleGeomAfterRelayout && relayoutGen === _simpleMinimapRelayoutGeneration) {
+                        var layout2 = document.getElementById('simple-continuous-minimap-layout');
+                        var tr = document.getElementById('simple-minimap-text-root');
+                        var sb = document.getElementById('simple-minimap-sidebar');
+                        var tc = tr ? (tr.querySelector('.sura-container') || tr) : null;
+                        var mc = document.getElementById('simple-minimap-main');
+                        var mm = document.getElementById('morphology-minimap');
+                        var shell = document.getElementById('main');
+                        if (layout2 && tr && sb && tc) {
+                            var geoAfter = collectSimpleMinimapLayoutGeometry(layout2, tr, sb, tc, mc, mm, shell);
+                            logSimpleMinimapLayout({
+                                phase: 'sidebar-width-after-minimap-relayout',
+                                geometryRTLAndOverlap: geoAfter,
+                                note: 'Measured after minimap.forceRelayout — compare overlap/gaps to sync pass.'
+                            }, true);
+                        }
+                    }
                 });
             });
+        }
+        updateSimpleMinimapCompactLayout();
+        if (simpleMinimapLayoutDebugEnabled()) {
+            var mainCol = document.getElementById('simple-minimap-main');
+            var mainElShell = document.getElementById('main');
+            var rc = getSimpleMinimapStoredRatioClamped();
+            var sm = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX * rc));
+            var bp = SIMPLE_MINIMAP_SHELL_PAD_X + SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX + sm;
+            var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+            var layoutW = layout.getBoundingClientRect().width || 0;
+            var mainW = mainCol ? mainCol.getBoundingClientRect().width : 0;
+            var sideW = sidebar.getBoundingClientRect().width || 0;
+            var dbgKey = vw + '|' + target + '|' + Math.round(textWidth);
+            if (dbgKey !== _lastSidebarWidthDebugKey) {
+                _lastSidebarWidthDebugKey = dbgKey;
+                var geo = collectSimpleMinimapLayoutGeometry(layout, textRoot, sidebar, textContainer, mainCol, minimap, mainElShell);
+                logSimpleMinimapLayout({
+                    phase: 'sidebar-width',
+                    viewportInnerWidthPx: vw,
+                    grid: {
+                        layoutInnerWidthPx: layoutW,
+                        mainColumnRectWidthPx: mainW,
+                        sidebarRectWidthPx: sideW,
+                        mainPlusSidebarPx: Math.round(mainW + sideW),
+                        unallocatedInLayoutPx: Math.round(layoutW - mainW - sideW),
+                        note: '#simple-continuous-minimap-layout uses columns 1fr + auto; reading column should take remainder'
+                    },
+                    readingColumnForRatio: {
+                        measuredElement: textContainer.classList && textContainer.classList.contains('sura-container') ? '.sura-container' : '#simple-minimap-text-root',
+                        getBoundingClientRectWidthPx: textWidth,
+                        textRootClientWidthPx: textRoot.clientWidth || 0,
+                        explain: 'minimap sidebar target = round(readingColumnForRatio.getBoundingClientRectWidthPx × widthRatio)'
+                    },
+                    minimapSidebar: {
+                        storedRatioRaw: storedRatio,
+                        ratioUsedForWidth: ratio,
+                        widthRatioSliderClamped: rc,
+                        formula: 'round(' + textWidth + ' * ' + ratio + ') -> ' + target,
+                        appliedStyleWidthPx: target
+                    },
+                    compact: {
+                        active: document.documentElement.classList.contains('simple-minimap-compact'),
+                        breakpointPx: bp,
+                        shellHorizontalPadPx: SIMPLE_MINIMAP_SHELL_PAD_X,
+                        assumedMinTextColumnPx: SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX,
+                        effectiveMinimapColumnInFormulaPx: sm
+                    },
+                    shell: mainElShell ? {
+                        horizontalPadCssPx: SIMPLE_MINIMAP_SHELL_PAD_X,
+                        clientWidthPx: mainElShell.clientWidth || 0,
+                        computedPaddingLeftRight: (function(el) {
+                            try {
+                                var cs = window.getComputedStyle(el);
+                                return {
+                                    paddingLeft: cs.paddingLeft,
+                                    paddingRight: cs.paddingRight
+                                };
+                            } catch (e) {
+                                return null;
+                            }
+                        })(mainElShell)
+                    } : null,
+                    geometryRTLAndOverlap: geo
+                });
+            }
         }
     }
 
@@ -4312,6 +4788,7 @@
             requestAnimationFrame(function() {
                 updateSimpleMinimapSidebarWidth();
                 ensureSimpleMinimapSidebarObserver();
+                ensureSimpleMinimapCompactListeners();
             });
         } else {
             teardownSimpleMinimapRuntime();
@@ -4472,6 +4949,8 @@
     function render() {
         const { mode, page, sura } = getMode();
         if (main) main.classList.remove('simple-minimap-shell');
+        document.documentElement.classList.remove('simple-minimap-compact');
+        teardownSimpleMinimapCompactListeners();
         if (loadingEl) loadingEl.style.display = 'none';
 
         if (mode === 'page') {
