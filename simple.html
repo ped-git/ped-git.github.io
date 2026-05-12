@@ -8,18 +8,23 @@
     <style>
         :root {
             --font-size-jumbo: 2rem;
-            --page-text-size: 1.2rem;
-            --page-text-size-qcf: 1.30rem;
-            --page-text-size-two-page: 0.88rem;
-            --page-text-size-qcf-two-page: 0.94rem;
-            --page-card-width: 312px;
-            --page-card-single-width: 360px;
+            --main-font-size-value: 1.2;
+            --translation-font-size-value: 0.95;
+            --page-text-size: calc(var(--main-font-size-value) * 1rem);
+            --page-text-size-qcf: calc(var(--main-font-size-value) * 1.08 * 1rem);
+            --translation-text-size: calc(var(--translation-font-size-value) * 1rem);
+            --layout-single-column-width: 360px;
+            --layout-paired-column-width: 312px;
+            --layout-continuous-column-width: 380px;
+            --layout-double-continuous-column-width: 820px;
+            --layout-minimap-text-column-width: 380px;
+            --layout-minimap-sidebar-width: 180px;
             --page-content-pad-y: 10px;
             --page-content-pad-x: 10px;
-            --page-content-pad-y-two-page: 4px;
-            --page-content-pad-x-two-page: 3px;
+            --page-content-pad-y-paired: 4px;
+            --page-content-pad-x-paired: 3px;
             --page-content-pad-bottom-extra: 1em;
-            --paired-page-gap: 16px;
+            --layout-column-gap: 16px;
         }
         @font-face {
             font-family: 'BLotus';
@@ -67,8 +72,10 @@
             min-height: 100vh;
             padding-bottom: 0;
         }
+        input, select, button {
+            font-family: 'Sahel', 'BLotus', 'Traditional Arabic', system-ui, sans-serif;
+        }
         .main {
-            max-width: 960px;
             width: 100%;
             margin: 0 auto;
             padding: 12px 16px 72px;
@@ -85,15 +92,18 @@
             height: calc(100vh - 5px);
             /* overflow: hidden; */
         }
-        /* Reading column fills all horizontal space left of sidebar; sidebar width stays JS-controlled */
-        /* Second column floor must stay in sync with SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX in script */
+        /* Reading column and minimap column are explicitly sized and centered as one unit. */
         #simple-continuous-minimap-layout {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(160px, auto);
-            gap: 0;
+            grid-template-columns:
+                minmax(0, var(--layout-minimap-text-column-width))
+                minmax(0, var(--layout-minimap-sidebar-width));
+            gap: var(--layout-column-gap);
             align-items: stretch;
-            justify-content: start;
-            width: 100%;
+            justify-content: center;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
             flex: 1 1 auto;
             min-height: 0;
             height: 100%;
@@ -258,36 +268,6 @@
             flex: 1 1 auto !important;
             height: 100% !important;
             max-height: none !important;
-        }
-        /* Narrow view: edge-to-edge text + minimap — toggled via html.simple-minimap-compact (breakpoint from JS) */
-        html.simple-minimap-compact .main.simple-minimap-shell {
-            padding-left: env(safe-area-inset-left, 0px);
-            padding-right: env(safe-area-inset-right, 0px);
-        }
-        html.simple-minimap-compact #simple-continuous-minimap-layout {
-            justify-content: stretch;
-            width: 100%;
-        }
-        html.simple-minimap-compact #simple-minimap-sidebar {
-            max-height: calc(100dvh - 56px - 8px);
-            max-height: calc(100vh - 56px - 8px);
-        }
-        html.simple-minimap-compact #simple-minimap-sidebar #morphology-minimap {
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-        }
-        html.simple-minimap-compact #simple-minimap-settings-bar {
-            padding-left: 0;
-            padding-right: 0;
-            border-radius: 0;
-        }
-        html.simple-minimap-compact #bottom-ribbon {
-            padding-left: env(safe-area-inset-left, 0px);
-            padding-right: env(safe-area-inset-right, 0px);
-        }
-        html.simple-minimap-compact #search-wrap {
-            padding-left: env(safe-area-inset-left, 0px);
-            padding-right: env(safe-area-inset-right, 0px);
         }
         #simple-minimap-settings-bar button.active {
             background: #2c3e50;
@@ -512,10 +492,45 @@
             margin: 0;
             flex-shrink: 0;
         }
-        #settings-menu .settings-row-select {
-            display: block;
-            margin-bottom: 4px;
+        #settings-menu .settings-row-inline {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(120px, 1.2fr);
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 0.92rem;
         }
+        #settings-menu .settings-row-inline > span:first-child {
+            white-space: nowrap;
+        }
+        #settings-menu .settings-row-select {
+            display: contents;
+        }
+        #settings-menu .settings-row-range {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(92px, 1.2fr) auto;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+        #settings-menu input[type="range"] {
+            width: 100%;
+            accent-color: #3b82f6;
+        }
+        #settings-menu .settings-range-value {
+            min-width: 3.25em;
+            text-align: left;
+            direction: ltr;
+            font-variant-numeric: tabular-nums;
+            color: #0f172a;
+        }
+        #settings-menu #font-select,
+        #settings-menu #layout-select,
+        #settings-menu #root-tooltip-mode,
+        #settings-menu #lemma-tooltip-mode,
         #settings-menu #translation-language,
         #settings-menu #page-mode,
         #settings-menu #copy-ayah-style {
@@ -530,6 +545,10 @@
             font-family: inherit;
             direction: rtl;
         }
+        #settings-menu #font-select:focus,
+        #settings-menu #layout-select:focus,
+        #settings-menu #root-tooltip-mode:focus,
+        #settings-menu #lemma-tooltip-mode:focus,
         #settings-menu #translation-language:focus,
         #settings-menu #page-mode:focus,
         #settings-menu #copy-ayah-style:focus {
@@ -537,6 +556,10 @@
             border-color: rgba(59, 130, 246, 0.5);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
+        #settings-menu #font-select option,
+        #settings-menu #layout-select option,
+        #settings-menu #root-tooltip-mode option,
+        #settings-menu #lemma-tooltip-mode option,
         #settings-menu #translation-language option,
         #settings-menu #page-mode option,
         #settings-menu #copy-ayah-style option {
@@ -606,48 +629,31 @@
         }
         .bottom-nav-btn:hover { background: #f4f7fb; }
         .page-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
+            display: grid;
+            gap: var(--layout-column-gap);
             justify-content: center;
-            align-items: center;
+            align-items: start;
             flex: 1;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0 auto;
+            grid-template-columns: minmax(0, var(--layout-single-column-width));
         }
         .page-card {
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             overflow: hidden;
-            width: min(100%, var(--page-card-width));
+            width: 100%;
             max-width: 100%;
-            flex: 0 1 min(100%, var(--page-card-width));
-            min-width: 200px;
+            min-width: 0;
         }
         .page-card.single {
-            width: min(100%, var(--page-card-single-width));
-            flex: 0 1 min(100%, var(--page-card-single-width));
-            min-width: 200px;
-            max-width: 100%;
+            width: 100%;
         }
         .page-container.two-pages,
         .page-container.page-with-translation {
-            flex-wrap: nowrap;
-            align-items: flex-start;
-            justify-content: center;
-            gap: var(--paired-page-gap);
-            --paired-card-width: calc((100% - var(--paired-page-gap)) / 2);
-        }
-        .page-container.two-pages {
-            --page-text-size-current: var(--page-text-size-two-page);
-            --page-text-size-qcf-current: var(--page-text-size-qcf-two-page);
-            --page-content-pad-y-current: var(--page-content-pad-y-two-page);
-            --page-content-pad-x-current: var(--page-content-pad-x-two-page);
-        }
-        .page-container.page-with-translation {
-            --page-text-size-current: var(--page-text-size-two-page);
-            --page-text-size-qcf-current: var(--page-text-size-qcf-two-page);
-            --page-content-pad-y-current: var(--page-content-pad-y-two-page);
-            --page-content-pad-x-current: var(--page-content-pad-x-two-page);
+            grid-template-columns: repeat(2, minmax(0, var(--layout-paired-column-width)));
         }
         .page-container:not(.two-pages):not(.page-with-translation) {
             --page-text-size-current: var(--page-text-size);
@@ -655,10 +661,15 @@
             --page-content-pad-y-current: var(--page-content-pad-y);
             --page-content-pad-x-current: var(--page-content-pad-x);
         }
+        .page-container.two-pages,
+        .page-container.page-with-translation {
+            --page-text-size-current: var(--page-text-size);
+            --page-text-size-qcf-current: var(--page-text-size-qcf);
+            --page-content-pad-y-current: var(--page-content-pad-y-paired);
+            --page-content-pad-x-current: var(--page-content-pad-x-paired);
+        }
         .page-container.two-pages .page-card,
         .page-container.page-with-translation .page-card {
-            width: var(--paired-card-width);
-            flex: 0 0 var(--paired-card-width);
             min-width: 0;
             min-height: 0;
             display: flex;
@@ -720,7 +731,8 @@
             font-size: var(--page-text-size-current, var(--page-text-size));
             direction: rtl;
             text-align: center;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         .page-content:not(.font-qcf) {
             font-family: 'QPC Uthmani Hafs', 'B Badr', 'BBadr', 'BLotus', 'KFGQPC Uthman Taha Naskh', serif;
@@ -731,7 +743,8 @@
         .page-content .ayah-fit {
             display: block;
             width: 100%;
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
             text-align: right;
         }
         .page-content .ayah-inline { margin-left: 0.25em; }
@@ -795,12 +808,11 @@
         .page-content .mushaf-line .qcf-word { display: inline; }
         .page-card.translation-card .page-content {
             font-family: 'Sahel', 'BLotus', system-ui, sans-serif;
-            font-size: 0.9rem;
+            font-size: var(--translation-text-size);
             line-height: 1.9;
             text-align: right;
             color: #243447;
             background: #fcfbf8;
-            font-size: 0.9em;
         }
         .page-card.translation-card .page-header {
             background: #f8f4ec;
@@ -872,11 +884,11 @@
         }
         .sura-container {
             width: 100%;
-            max-width: 380px;
+            max-width: var(--layout-continuous-column-width);
             margin: 0 auto;
         }
         .sura-container.sura-container-double-continuous {
-            max-width: 820px;
+            max-width: var(--layout-double-continuous-column-width);
         }
         .sura-title {
             text-align: center;
@@ -1217,140 +1229,6 @@
         }
         #sura-hadith-tooltip a { color: #2563eb; text-decoration: none; }
         #sura-hadith-tooltip a:hover { text-decoration: underline; }
-        @media (max-width: 700px) {
-            .page-card,
-            .page-card.single {
-                width: min(100%, var(--page-card-single-width));
-                flex: 0 1 var(--page-card-single-width);
-                min-width: 200px;
-            }
-            .page-container.two-pages,
-            .page-container.page-with-translation {
-                --paired-page-gap: 8px;
-            }
-            .page-container.two-pages .page-card,
-            .page-container.page-with-translation .page-card {
-                width: var(--paired-card-width);
-                flex: 0 0 var(--paired-card-width);
-                min-width: 0;
-            }
-        }
-        @media (max-width: 525px) {
-            :root {
-                --page-text-size: 1.02rem;
-                --page-text-size-qcf: 1.14rem;
-                --page-text-size-two-page: 0.84rem;
-                --page-text-size-qcf-two-page: 0.89rem;
-                --page-card-width: 300px;
-                --page-card-single-width: 320px;
-                --page-content-pad-y: 7px;
-                --page-content-pad-x: 6px;
-                --page-content-pad-y-two-page: 4px;
-                --page-content-pad-x-two-page: 3px;
-            }
-        }
-        @media (max-width: 500px) {
-            :root {
-                --page-text-size: 1.02rem;
-                --page-text-size-qcf: 1.14rem;
-                --page-text-size-two-page: 0.84rem;
-                --page-text-size-qcf-two-page: 0.89rem;
-                --page-card-width: 300px;
-                --page-card-single-width: 320px;
-                --page-content-pad-y: 7px;
-                --page-content-pad-x: 6px;
-                --page-content-pad-y-two-page: 4px;
-                --page-content-pad-x-two-page: 3px;
-            }
-        }
-        @media (max-width: 400px) {
-            :root {
-                --page-text-size: 1.02rem;
-                --page-text-size-qcf: 1.14rem;
-                --page-text-size-two-page: 0.78rem;
-                --page-text-size-qcf-two-page: 0.83rem;
-                --page-card-width: 286px;
-                --page-card-single-width: 320px;
-                --page-content-pad-y: 7px;
-                --page-content-pad-x: 6px;
-                --page-content-pad-y-two-page: 3px;
-                --page-content-pad-x-two-page: 2px;
-            }
-        }
-        @media (max-width: 350px) {
-            :root {
-                --page-text-size: 0.92rem;
-                --page-text-size-qcf: 1.01rem;
-                --page-text-size-two-page: 0.72rem;
-                --page-text-size-qcf-two-page: 0.76rem;
-                --page-card-width: 272px;
-                --page-card-single-width: 292px;
-                --page-content-pad-y: 6px;
-                --page-content-pad-x: 5px;
-                --page-content-pad-y-two-page: 2px;
-                --page-content-pad-x-two-page: 1px;
-            }
-        }
-        @media (max-width: 325px) {
-            :root {
-                --page-text-size: 0.86rem;
-                --page-text-size-qcf: 0.94rem;
-                --page-text-size-two-page: 0.66rem;
-                --page-text-size-qcf-two-page: 0.70rem;
-                --page-card-width: 260px;
-                --page-card-single-width: 276px;
-                --page-content-pad-y: 5px;
-                --page-content-pad-x: 4px;
-                --page-content-pad-y-two-page: 2px;
-                --page-content-pad-x-two-page: 1px;
-            }
-        }
-        @media (max-width: 300px) {
-            :root {
-                --page-text-size: 0.78rem;
-                --page-text-size-qcf: 0.80rem;
-                --page-text-size-two-page: 0.64rem;
-                --page-text-size-qcf-two-page: 0.66rem;
-                --page-card-width: 252px;
-                --page-card-single-width: 252px;
-                --page-content-pad-y: 4px;
-                --page-content-pad-x: 3px;
-                --page-content-pad-y-two-page: 1px;
-                --page-content-pad-x-two-page: 1px;
-            }
-        }
-        @media (max-width: 270px) {
-            :root {
-                --page-text-size: 0.72rem;
-                --page-text-size-qcf: 0.75rem;
-                --page-text-size-two-page: 0.58rem;
-                --page-text-size-qcf-two-page: 0.60rem;
-                --page-card-width: 236px;
-                --page-card-single-width: 236px;
-                --page-content-pad-y: 3px;
-                --page-content-pad-x: 2px;
-            }
-        }
-        @media (max-width: 250px) {
-            :root {
-                --page-text-size: 0.68rem;
-                --page-text-size-qcf: 0.75rem;
-                --page-card-width: 220px;
-                --page-card-single-width: 220px;
-                --page-content-pad-y: 2px;
-                --page-content-pad-x: 1px;
-            }
-        }
-        @media (max-width: 248px) {
-            :root {
-                --page-text-size: 0.62rem;
-                --page-text-size-qcf: 0.65rem;
-                --page-card-width: 200px;
-                --page-card-single-width: 200px;
-                --page-content-pad-y: 2px;
-                --page-content-pad-x: 1px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1361,39 +1239,85 @@
         <div id="settings-wrap">
             <button type="button" id="settings-btn" aria-label="تنظیمات">⚙</button>
             <div id="settings-menu" class="settings-menu">
-                <h3>فونت</h3>
-                <label><input type="radio" name="font" value="text">متن (فونت متنی)</label>
-                <label><input type="radio" name="font" value="qurancom" checked>فونت عثمان طه</label>
-                <h3>زبان ترجمه (واژه‌ها)</h3>
-                <label class="settings-row-select">
-                    <select id="translation-language" aria-label="زبان ترجمه واژه">
-                        <option value="fa">فارسی</option>
-                        <option value="en">English</option>
-                    </select>
+                <div class="settings-row-inline">
+                    <span>فونت</span>
+                    <label class="settings-row-select">
+                        <select id="font-select" aria-label="فونت">
+                            <option value="text">متن (فونت متنی)</option>
+                            <option value="qurancom" selected>فونت عثمان طه</option>
+                        </select>
+                    </label>
+                </div>
+                <label class="settings-row-range" for="main-font-size">
+                    <span>اندازه فونت متن</span>
+                    <input type="range" id="main-font-size" min="0.7" max="2.2" step="0.05" aria-label="اندازه فونت متن">
+                    <span class="settings-range-value" id="main-font-size-value">1.20rem</span>
                 </label>
-                <h3>چیدمان آیه</h3>
-                <label><input type="radio" name="layout" value="ayah-line">یک آیه در هر خط</label>
-                <label><input type="radio" name="layout" value="flow" checked>متن پیوسته</label>
-                <h3>حالت صفحه</h3>
-                <label class="settings-row-select">
-                    <select id="page-mode" aria-label="حالت صفحه">
-                        <option value="one-page">یک صفحه</option>
-                        <option value="two-pages">دو صفحه</option>
-                        <option value="one-page-translation">یک صفحه + ترجمه</option>
-                        <option value="continuous">پیوسته (سوره)</option>
-                        <option value="continuous-minimap">پیوسته + نقشه</option>
-                        <option value="double-continuous">پیوسته دوتایی</option>
-                    </select>
+                <label class="settings-row-range" for="translation-font-size">
+                    <span>اندازه فونت ترجمه</span>
+                    <input type="range" id="translation-font-size" min="0.6" max="1.8" step="0.05" aria-label="اندازه فونت ترجمه">
+                    <span class="settings-range-value" id="translation-font-size-value">0.95rem</span>
                 </label>
-                <h3>شماره آیه در کپی</h3>
-                <label class="settings-row-select">
-                    <select id="copy-ayah-style" aria-label="نحوه کپی شماره آیه">
-                        <option value="paren">(شماره‌آیه)</option>
-                        <option value="bracket">[شماره‌آیه]</option>
-                        <option value="sura-name">[نام‌سوره شماره‌آیه]</option>
-                        <option value="contextual">حالت هوشمند انتخاب</option>
-                    </select>
-                </label>
+                <div class="settings-row-inline">
+                    <span>زبان ترجمه</span>
+                    <label class="settings-row-select">
+                        <select id="translation-language" aria-label="زبان ترجمه واژه">
+                            <option value="fa">فارسی</option>
+                            <option value="en">English</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>چیدمان آیه</span>
+                    <label class="settings-row-select">
+                        <select id="layout-select" aria-label="چیدمان آیه">
+                            <option value="ayah-line">یک آیه در هر خط</option>
+                            <option value="flow" selected>متن پیوسته</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>نمایش ریشه</span>
+                    <label class="settings-row-select">
+                        <select id="root-tooltip-mode" aria-label="نمایش ریشه">
+                            <option value="root">ریشه</option>
+                            <option value="root-count">ریشه + تعداد</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>نمایش لِم</span>
+                    <label class="settings-row-select">
+                        <select id="lemma-tooltip-mode" aria-label="نمایش لم">
+                            <option value="lemma">لم</option>
+                            <option value="lemma-count">لم + تعداد</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>حالت صفحه</span>
+                    <label class="settings-row-select">
+                        <select id="page-mode" aria-label="حالت صفحه">
+                            <option value="one-page">یک صفحه</option>
+                            <option value="two-pages">دو صفحه</option>
+                            <option value="one-page-translation">یک صفحه + ترجمه</option>
+                            <option value="continuous">پیوسته (سوره)</option>
+                            <option value="continuous-minimap">پیوسته + نقشه</option>
+                            <option value="double-continuous">پیوسته دوتایی</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>شماره آیه در کپی</span>
+                    <label class="settings-row-select">
+                        <select id="copy-ayah-style" aria-label="نحوه کپی شماره آیه">
+                            <option value="paren">(شماره‌آیه)</option>
+                            <option value="bracket">[شماره‌آیه]</option>
+                            <option value="sura-name">[نام‌سوره شماره‌آیه]</option>
+                            <option value="contextual">حالت هوشمند انتخاب</option>
+                        </select>
+                    </label>
+                </div>
                 <div class="settings-section-links">
                     <div class="settings-title">نحوه نمایش</div>
                     <div class="settings-links-grid">
@@ -1448,21 +1372,14 @@
         }
     } catch (eSp) {}
     if (typeof window !== 'undefined' && window.__DEBUG_SIMPLE_MINIMAP_LAYOUT__) {
-        console.info('[simple-minimap] Layout debug ON (?mmdebug=1). Logs: [simple-minimap:layout] for sidebar/geometry. Optional: set window.__DEBUG_SIMPLE_MINIMAP_RESIZE__ = true for every [simple-minimap:resize]. Compact hook logs only when html.simple-minimap-compact toggles.');
+        console.info('[simple-minimap] Layout debug ON (?mmdebug=1). Logs: [simple-minimap:layout] for sidebar/geometry.');
     }
 
     const TOTAL_PAGES = 604;
     const SIMPLE_MINIMAP_WIDTH_RATIO = 0.25;
-    /** Matches #simple-continuous-minimap-layout second column `minmax(160px, …)`. */
-    const SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX = 160;
-    /** Minimum acceptable width for the reading column (used only to compute compact breakpoint). */
-    const SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX = 240;
-    /** Horizontal padding of `.main.simple-minimap-shell` when not compact (12px + 12px). */
-    const SIMPLE_MINIMAP_SHELL_PAD_X = 24;
     const loadedQCFPages = new Set();
     const QCF_CDN = 'https://verses.quran.foundation/fonts/quran/hafs/v1';
     const SURAH_NAMES_FONT_FAMILY = 'surahnames';
-    const DEBUG_PAGE_FIT = false;
     const DEBUG_COPY_SELECTION = false;
     const DEBUG_RIBBON_JUZ = false;
     let surahNamesFontLoaded = false;
@@ -1538,6 +1455,10 @@
     }
     const settingsBtn = document.getElementById('settings-btn');
     const settingsMenu = document.getElementById('settings-menu');
+    const mainFontSizeEl = document.getElementById('main-font-size');
+    const mainFontSizeValueEl = document.getElementById('main-font-size-value');
+    const translationFontSizeEl = document.getElementById('translation-font-size');
+    const translationFontSizeValueEl = document.getElementById('translation-font-size-value');
     const navPrevSuraBtn = document.getElementById('nav-prev-sura');
     const navPrevPageBtn = document.getElementById('nav-prev-page');
     const navNextPageBtn = document.getElementById('nav-next-page');
@@ -1550,7 +1471,6 @@
     const searchCancelBtn = document.getElementById('search-cancel-btn');
     const searchSuraScopeBtn = document.getElementById('search-sura-scope-btn');
     const searchWrapEl = document.getElementById('search-wrap');
-    var fitPageContentRaf = 0;
     let bismillahVerseCache = null;
     var renderBusyActive = false;
     var asyncBusyCount = 0;
@@ -1563,6 +1483,7 @@
         committedSura: null,
         draftOriginPage: null,
         draftOriginMode: null,
+        draftOriginPageMode: null,
         draftOriginSura: null,
         draftOriginSearchSura: null,
         draftOriginScrollTop: null,
@@ -1966,7 +1887,51 @@
         }
         return pageForCurrentMode(1);
     }
+    function getScopedSearchPages(scopeSura) {
+        if (scopeSura == null || !chaptersCache || !chaptersCache.length) return null;
+        for (var i = 0; i < chaptersCache.length; i++) {
+            var ch = chaptersCache[i];
+            if (!ch || ch.id !== scopeSura || !ch.pages || !ch.pages.length) continue;
+            var seen = {};
+            var pages = [];
+            for (var pi = 0; pi < ch.pages.length; pi++) {
+                var normalized = pageForCurrentMode(ch.pages[pi]);
+                if (!seen[normalized]) {
+                    seen[normalized] = true;
+                    pages.push(normalized);
+                }
+            }
+            pages.sort(function(a, b) { return a - b; });
+            return pages;
+        }
+        return null;
+    }
+    function rotateSearchPages(pages, startPage, direction) {
+        if (!pages || !pages.length) return [];
+        var normalizedStart = pageForCurrentMode(startPage);
+        var startIndex = pages.findIndex(function(p) { return p >= normalizedStart; });
+        if (startIndex < 0) startIndex = 0;
+        var out = [];
+        if (direction === -1) {
+            var prevIndex = -1;
+            for (var i = 0; i < pages.length; i++) {
+                if (pages[i] < normalizedStart) prevIndex = i;
+                else break;
+            }
+            if (prevIndex < 0) prevIndex = pages.length - 1;
+            for (var back = prevIndex; back >= 0; back--) out.push(pages[back]);
+            for (var wrapBack = pages.length - 1; wrapBack > prevIndex; wrapBack--) out.push(pages[wrapBack]);
+            return out;
+        }
+        for (var j = startIndex; j < pages.length; j++) out.push(pages[j]);
+        for (var k = 0; k < startIndex; k++) out.push(pages[k]);
+        return out;
+    }
     function getForwardSearchSequence(startPage, scopeSura) {
+        var scopedPages = getScopedSearchPages(scopeSura);
+        if (scopedPages && scopedPages.length) {
+            return rotateSearchPages(scopedPages, startPage, 1);
+        }
         var first = pageForCurrentMode(startPage);
         var unitStep = searchUsesTwoPageUnits() ? 2 : 1;
         var out = [];
@@ -1989,9 +1954,13 @@
         return out;
     }
     async function findSearchTargetPage(startPage, terms, requestId, direction, signal, scopeSura) {
+        if (scopeSura != null && (!chaptersCache || !chaptersCache.length)) {
+            try { await fetchChapters(); } catch (err) {}
+        }
+        var scopedPages = getScopedSearchPages(scopeSura);
         var sequence = (direction === 1)
             ? getForwardSearchSequence(startPage, scopeSura)
-            : getSpreadSequence(startPage, direction);
+            : (scopedPages && scopedPages.length ? rotateSearchPages(scopedPages, startPage, -1) : getSpreadSequence(startPage, direction));
         for (var i = 0; i < sequence.length; i++) {
             if (requestId !== searchState.requestId) return null;
             var spreadStart = sequence[i];
@@ -2053,6 +2022,7 @@
         var st = getMode();
         var scrollEl = main ? main.querySelector('.sura-scroll') : null;
         searchState.draftOriginMode = st.mode;
+        searchState.draftOriginPageMode = getPageMode();
         searchState.draftOriginSura = st.mode === 'sura' ? st.sura : null;
         searchState.draftOriginPage = st.mode === 'sura' ? (getCurrentContinuousPage() || 1) : pageForCurrentMode(st.page);
         searchState.draftOriginSearchSura = getSearchScopeSura();
@@ -2061,6 +2031,7 @@
     function clearDraftOrigin() {
         searchState.draftOriginPage = null;
         searchState.draftOriginMode = null;
+        searchState.draftOriginPageMode = null;
         searchState.draftOriginSura = null;
         searchState.draftOriginSearchSura = null;
         searchState.draftOriginScrollTop = null;
@@ -2138,7 +2109,7 @@
                 try { await fetchChapters(); } catch (err) {}
             }
             var ch = getChapterForPage(normalizedTarget);
-            setSetting('page_mode', 'continuous');
+            setSetting('page_mode', getPageMode());
             setUrl('sura', normalizedTarget, ch ? ch.id : 1);
         } else {
             setUrl('page', normalizedTarget, 1);
@@ -2154,6 +2125,7 @@
         searchState.committedPage = st.mode === 'sura' ? (getCurrentContinuousPage() || searchState.previewPage || 1) : pageForCurrentMode(st.page);
         searchState.draftOriginPage = null;
         searchState.draftOriginMode = null;
+        searchState.draftOriginPageMode = null;
         searchState.draftOriginSura = null;
         searchState.draftOriginSearchSura = null;
         searchState.draftOriginScrollTop = null;
@@ -2171,6 +2143,7 @@
         var restoreTerms = [];
         var restorePage = searchState.draftOriginPage;
         var restoreMode = searchState.draftOriginMode;
+        var restorePageMode = searchState.draftOriginPageMode;
         var restoreSura = searchState.draftOriginSura;
         var restoreScrollTop = searchState.draftOriginScrollTop;
         searchState.activeTerms = restoreTerms;
@@ -2178,6 +2151,7 @@
         searchState.committedTerms = [];
         searchState.draftOriginPage = null;
         searchState.draftOriginMode = null;
+        searchState.draftOriginPageMode = null;
         searchState.draftOriginSura = null;
         searchState.draftOriginSearchSura = null;
         searchState.draftOriginScrollTop = null;
@@ -2189,7 +2163,7 @@
         updateSearchButtons();
         if (restorePage != null && restoreMode === 'sura') {
             searchState.restoreScrollTop = restoreScrollTop;
-            setSetting('page_mode', 'continuous');
+            if (restorePageMode) setSetting('page_mode', restorePageMode);
             setUrl('sura', restorePage, restoreSura || 1);
             render();
             return;
@@ -2218,17 +2192,19 @@
             if (searchState.draftOriginPage != null) {
                 var backPage = searchState.draftOriginPage;
                 var backMode = searchState.draftOriginMode;
+                var backPageMode = searchState.draftOriginPageMode;
                 var backSura = searchState.draftOriginSura;
                 var backScrollTop = searchState.draftOriginScrollTop;
                 searchState.draftOriginPage = null;
                 searchState.draftOriginMode = null;
+                searchState.draftOriginPageMode = null;
                 searchState.draftOriginSura = null;
                 searchState.draftOriginSearchSura = null;
                 searchState.draftOriginScrollTop = null;
                 updateSearchButtons();
                 if (backMode === 'sura') {
                     searchState.restoreScrollTop = backScrollTop;
-                    setSetting('page_mode', 'continuous');
+                    if (backPageMode) setSetting('page_mode', backPageMode);
                     setUrl('sura', backPage || 1, backSura || 1);
                 } else {
                     setUrl('page', pageForCurrentMode(backPage), 1);
@@ -2392,6 +2368,83 @@
         try { localStorage.setItem('simple_' + key, value); } catch (e) {}
     }
 
+    const MODE_LAYOUT_CONFIG = {
+        'one-page': {
+            columnCount: 1,
+            contentClass: '',
+            cssVars: {
+                '--layout-single-column-width': '360px'
+            }
+        },
+        'two-pages': {
+            columnCount: 2,
+            contentClass: 'two-pages',
+            cssVars: {
+                '--layout-paired-column-width': '312px'
+            }
+        },
+        'one-page-translation': {
+            columnCount: 2,
+            contentClass: 'page-with-translation',
+            cssVars: {
+                '--layout-paired-column-width': '312px'
+            }
+        },
+        'continuous': {
+            columnCount: 1,
+            contentClass: '',
+            cssVars: {
+                '--layout-continuous-column-width': '380px'
+            }
+        },
+        'continuous-minimap': {
+            columnCount: 2,
+            contentClass: 'continuous-minimap',
+            cssVars: {
+                '--layout-minimap-text-column-width': '380px'
+            }
+        },
+        'double-continuous': {
+            columnCount: 1,
+            contentClass: 'double-continuous',
+            cssVars: {
+                '--layout-double-continuous-column-width': '820px'
+            }
+        }
+    };
+    const DEFAULT_MAIN_FONT_SIZE = 1.2;
+    const DEFAULT_TRANSLATION_FONT_SIZE = 0.95;
+
+    function clampNumber(value, min, max, fallback) {
+        var n = parseFloat(value);
+        if (!isFinite(n)) return fallback;
+        return Math.max(min, Math.min(max, n));
+    }
+    function getMainFontSizeSetting() {
+        return clampNumber(getSetting('main_font_size', String(DEFAULT_MAIN_FONT_SIZE)), 0.7, 2.2, DEFAULT_MAIN_FONT_SIZE);
+    }
+    function getTranslationFontSizeSetting() {
+        return clampNumber(getSetting('translation_font_size', String(DEFAULT_TRANSLATION_FONT_SIZE)), 0.6, 1.8, DEFAULT_TRANSLATION_FONT_SIZE);
+    }
+    function formatRemValue(value) {
+        return value.toFixed(2) + 'rem';
+    }
+    function applyTypographySettings() {
+        var root = document.documentElement;
+        root.style.setProperty('--main-font-size-value', String(getMainFontSizeSetting()));
+        root.style.setProperty('--translation-font-size-value', String(getTranslationFontSizeSetting()));
+    }
+    function getModeLayoutConfig(modeName) {
+        return MODE_LAYOUT_CONFIG[modeName] || MODE_LAYOUT_CONFIG['continuous'];
+    }
+    function applyModeLayoutCssVars(modeName) {
+        var config = getModeLayoutConfig(modeName);
+        var vars = config.cssVars || {};
+        Object.keys(vars).forEach(function(key) {
+            document.documentElement.style.setProperty(key, vars[key]);
+        });
+    }
+
     function useQCF() { return getSetting('font', 'qurancom') === 'qurancom'; }
     function continuousMinimapMode() { return getPageMode() === 'continuous-minimap'; }
     function getPageMode() { return getSetting('page_mode', 'continuous'); }
@@ -2403,6 +2456,14 @@
         return m === 'continuous' || m === 'double-continuous' || m === 'continuous-minimap';
     }
     function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
+    function getRootTooltipMode() {
+        var mode = getSetting('root_tooltip_mode', 'root');
+        return mode === 'root-count' ? 'root-count' : 'root';
+    }
+    function getLemmaTooltipMode() {
+        var mode = getSetting('lemma_tooltip_mode', 'lemma');
+        return mode === 'lemma-count' ? 'lemma-count' : 'lemma';
+    }
     function getVerseTranslationParam() {
         var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
         return (id != null) ? '&translations=' + id : '';
@@ -2681,17 +2742,18 @@
         var isEnd = w && w.char_type_name === 'end';
         var tr = getWordTranslationWithNote(w);
         var mm = continuousMinimapMode();
-        var morphExtra = mm ? ' morph-word' : '';
+        var isSyntheticBismillah = !!(w && w.synthetic_bismillah);
+        var morphExtra = (mm && !isSyntheticBismillah) ? ' morph-word' : '';
         var baseClass = 'qword' + (isEnd ? ' ayah-end' : '') + morphExtra;
         var pad = (isEnd && !useQCFFont) ? ' ' : '';
         var verseTrAttr = (verseTranslation && verseTranslation.length > 0) ? ' data-verse-translation="' + escapeAttr(verseTranslation) + '"' : '';
         var copyText = (w.text_uthmani || w.text || '').trim();
         var copyAttr = copyText ? ' data-copy-text="' + escapeAttr(copyText) + '"' : '';
         var searchTextAttr = copyText ? ' data-search-text="' + escapeAttr(copyText) + '"' : '';
-        var syntheticBismillahAttr = (w && w.synthetic_bismillah) ? ' data-synthetic-bismillah="1"' : '';
+        var syntheticBismillahAttr = isSyntheticBismillah ? ' data-synthetic-bismillah="1"' : '';
         var pos = (w.position != null) ? w.position : 0;
         var vk = vKey.match(/^(\d+):(\d+)$/);
-        var morphAyahIndex = mm && vk && vk[2]
+        var morphAyahIndex = mm && !isSyntheticBismillah && vk && vk[2]
             ? (' data-ayah="' + escapeAttr(vk[2]) + '" data-word-index="' + escapeAttr(String(pos)) + '"')
             : '';
         if (useQCFFont) {
@@ -2880,225 +2942,6 @@
         }
         container.innerHTML = '<div class="page-content-inner">' + html + '</div>';
         attachWordHoverInteractions(container);
-        scheduleFitAllPageContents();
-    }
-    function fitSinglePageContent(container) {
-        if (!container || !container.isConnected) return;
-        var inner = container.querySelector('.page-content-inner');
-        if (!inner) return;
-        var pageContainer = container.closest('.page-container');
-        var isTwoPage = !!(pageContainer && pageContainer.classList.contains('two-pages'));
-        var isTranslationPaired = !!(pageContainer && pageContainer.classList.contains('page-with-translation'));
-        var isDoubleContinuous = container.classList.contains('double-continuous-content');
-        var isPaired = isTwoPage || isTranslationPaired;
-        var pageCard = container.closest('.page-card');
-        var isLastPageCard = !pageCard || !pageCard.nextElementSibling || !pageCard.nextElementSibling.classList || !pageCard.nextElementSibling.classList.contains('page-card');
-        var pageNumMatch = pageCard && pageCard.className ? pageCard.className.match(/\bpage-(\d+)\b/) : null;
-        var suraPageBlock = container.closest('.sura-page-block');
-        var isLastSuraPageBlock = !suraPageBlock || !suraPageBlock.nextElementSibling || !suraPageBlock.nextElementSibling.classList || !suraPageBlock.nextElementSibling.classList.contains('sura-page-block');
-        var suraPageNumber = suraPageBlock ? parseInt(suraPageBlock.getAttribute('data-page-number') || '0', 10) : 0;
-        var pageNumCurrent = pageNumMatch ? parseInt(pageNumMatch[1], 10) : suraPageNumber;
-        var firstVerseEl = inner.querySelector('[data-verse-key]');
-        var firstVerseKey = firstVerseEl ? (firstVerseEl.getAttribute('data-verse-key') || '') : '';
-        var firstVerseMatch = firstVerseKey.match(/^(\d+):/);
-        var currentSuraNumber = firstVerseMatch ? parseInt(firstVerseMatch[1], 10) : 0;
-        var useDoubleContinuousCommonSizing = isDoubleContinuous && !!container.closest('.sura-scroll');
-        var shouldUseExtraBottom = suraPageBlock ? isLastSuraPageBlock : isLastPageCard;
-        inner.querySelectorAll('.mushaf-line, .ayah-inline, .translation-ayah').forEach(function(line) {
-            line.style.fontSize = '';
-            line.style.transform = '';
-            line.style.transformOrigin = '';
-            line.style.display = '';
-            line.style.width = '';
-            line.style.maxWidth = '';
-            line.style.whiteSpace = '';
-            line.style.height = '';
-            line.style.textAlign = '';
-            line.style.textAlignLast = '';
-        });
-        inner.querySelectorAll('.ayah-fit').forEach(function(wrap) {
-            wrap.style.height = '';
-        });
-        container.style.height = '';
-        container.style.fontSize = '';
-        container.style.padding = '';
-        if (isPaired || isDoubleContinuous) {
-            var rootStyle = getComputedStyle(document.documentElement);
-            var pageWidth = pageCard ? pageCard.getBoundingClientRect().width : (container.clientWidth || 0);
-            var baseWidth = parseFloat(rootStyle.getPropertyValue(isDoubleContinuous ? '--page-card-single-width' : '--page-card-width')) || 1;
-            var fontVar = container.classList.contains('font-qcf')
-                ? (isDoubleContinuous ? '--page-text-size-qcf' : '--page-text-size-qcf-two-page')
-                : (isDoubleContinuous ? '--page-text-size' : '--page-text-size-two-page');
-            var baseFont = parseFloat(rootStyle.getPropertyValue(fontVar)) || 1;
-            var basePadY = parseFloat(rootStyle.getPropertyValue(isDoubleContinuous ? '--page-content-pad-y' : '--page-content-pad-y-two-page')) || 0;
-            var basePadX = parseFloat(rootStyle.getPropertyValue(isDoubleContinuous ? '--page-content-pad-x' : '--page-content-pad-x-two-page')) || 0;
-            var extraBottom = shouldUseExtraBottom ? (rootStyle.getPropertyValue('--page-content-pad-bottom-extra').trim() || '1em') : '0px';
-            var scale = baseWidth > 0 ? (pageWidth / baseWidth) : 1;
-            var sharedDoubleContinuousRatioForFont = parseFloat(container.getAttribute('data-double-continuous-shared-ratio') || '');
-            if (!(isFinite(sharedDoubleContinuousRatioForFont) && sharedDoubleContinuousRatioForFont > 0)) {
-                sharedDoubleContinuousRatioForFont = 1;
-            }
-            if (isFinite(scale) && scale > 0) {
-                var effectiveFontScale = isDoubleContinuous ? sharedDoubleContinuousRatioForFont : 1;
-                container.style.fontSize = (baseFont * scale * effectiveFontScale).toFixed(4) + 'rem';
-                var padY = (basePadY * scale).toFixed(4) + 'px';
-                var padX = (basePadX * scale).toFixed(4) + 'px';
-                if (isLastPageCard) {
-                    container.style.padding = padY + ' ' + padX + ' calc(' + padY + ' + ' + extraBottom + ') ' + padX;
-                } else {
-                    container.style.padding = padY + ' ' + padX + ' calc(0px) ' + padX;
-                }
-            }
-        }
-        if (useDoubleContinuousCommonSizing) {
-            var doubleLines = Array.prototype.slice.call(inner.querySelectorAll('.mushaf-line.double-continuous-line'));
-            var sharedDoubleContinuousRatio = parseFloat(container.getAttribute('data-double-continuous-shared-ratio') || '');
-            var commonRatio = (isFinite(sharedDoubleContinuousRatio) && sharedDoubleContinuousRatio > 0) ? sharedDoubleContinuousRatio : 1;
-            var useSharedFontSizing = isFinite(sharedDoubleContinuousRatio) && sharedDoubleContinuousRatio > 0;
-            for (var dli = 0; dli < doubleLines.length; dli++) {
-                var dLine = doubleLines[dli];
-                dLine.style.display = 'block';
-                dLine.style.whiteSpace = 'nowrap';
-                dLine.style.transformOrigin = dLine.classList.contains('bismillah') ? 'center top' : 'right top';
-                if (dLine.classList.contains('double-continuous-single')) {
-                    dLine.style.textAlign = 'right';
-                    dLine.style.textAlignLast = 'auto';
-                }
-                if (useSharedFontSizing) continue;
-                var dNaturalWidth = dLine.scrollWidth || 0;
-                var dAvailableWidth = dLine.clientWidth || container.clientWidth || 0;
-                if (!dNaturalWidth || !dAvailableWidth) continue;
-                if (!(isFinite(sharedDoubleContinuousRatio) && sharedDoubleContinuousRatio > 0)) {
-                    commonRatio = Math.min(commonRatio, dAvailableWidth / dNaturalWidth);
-                }
-            }
-            if (!isFinite(commonRatio) || commonRatio <= 0) commonRatio = 1;
-            if (useSharedFontSizing) return;
-            for (var dli2 = 0; dli2 < doubleLines.length; dli2++) {
-                var outLine = doubleLines[dli2];
-                var outHeight = outLine.getBoundingClientRect().height || outLine.offsetHeight || 0;
-                if (outLine.classList.contains('double-continuous-single')) {
-                    outLine.style.textAlign = 'right';
-                    outLine.style.textAlignLast = 'auto';
-                }
-                if (commonRatio < 1) {
-                    outLine.style.transform = 'scale(' + commonRatio.toFixed(4) + ')';
-                    outLine.style.height = Math.max(1, Math.ceil(outHeight * commonRatio)) + 'px';
-                }
-            }
-        } else if (isPaired || isDoubleContinuous) {
-            inner.querySelectorAll('.mushaf-line').forEach(function(line) {
-                line.style.display = 'block';
-                line.style.whiteSpace = 'nowrap';
-                line.style.transformOrigin = line.classList.contains('bismillah') ? 'center top' : 'right top';
-                var naturalWidth = line.scrollWidth || 0;
-                var availableWidth = line.clientWidth || container.clientWidth || 0;
-                var naturalHeight = line.getBoundingClientRect().height || line.offsetHeight || 0;
-                if (!naturalWidth || !availableWidth || naturalWidth <= availableWidth) return;
-                var ratio = availableWidth / naturalWidth;
-                line.style.transform = 'scale(' + ratio.toFixed(4) + ')';
-                line.style.height = Math.max(1, Math.ceil(naturalHeight * ratio)) + 'px';
-            });
-        }
-        if (DEBUG_PAGE_FIT) logPageContentDebug(container);
-    }
-    function logPageContentDebug(container) {
-        if (!container || !container.isConnected) return;
-        var pageCard = container.closest('.page-card');
-        var pageContainer = container.closest('.page-container');
-        var lines = container.querySelectorAll('.mushaf-line, .ayah-inline, .translation-ayah');
-        var summary = {
-            viewportWidth: window.innerWidth || 0,
-            containerWidth: container.clientWidth || 0,
-            containerFontPx: parseFloat(window.getComputedStyle(container).fontSize || '0'),
-            pageMode: pageContainer && pageContainer.classList.contains('two-pages') ? 'two-pages'
-                : (pageContainer && pageContainer.classList.contains('page-with-translation') ? 'page-with-translation' : 'one-page'),
-            pageCardWidth: pageCard ? pageCard.getBoundingClientRect().width : 0,
-            containerHeight: container.getBoundingClientRect().height || 0,
-            containerScrollHeight: container.scrollHeight || 0,
-            overflowsY: (container.scrollHeight || 0) > Math.ceil(container.getBoundingClientRect().height || 0),
-            css: {
-                pageText: getComputedStyle(document.documentElement).getPropertyValue('--page-text-size').trim(),
-                pageTextQcf: getComputedStyle(document.documentElement).getPropertyValue('--page-text-size-qcf').trim(),
-                twoPageText: getComputedStyle(document.documentElement).getPropertyValue('--page-text-size-two-page').trim(),
-                twoPageTextQcf: getComputedStyle(document.documentElement).getPropertyValue('--page-text-size-qcf-two-page').trim(),
-                pageCardWidth: getComputedStyle(document.documentElement).getPropertyValue('--page-card-width').trim(),
-                pageCardSingleWidth: getComputedStyle(document.documentElement).getPropertyValue('--page-card-single-width').trim(),
-                padX: getComputedStyle(document.documentElement).getPropertyValue('--page-content-pad-x').trim(),
-                padY: getComputedStyle(document.documentElement).getPropertyValue('--page-content-pad-y').trim(),
-                twoPadX: getComputedStyle(document.documentElement).getPropertyValue('--page-content-pad-x-two-page').trim(),
-                twoPadY: getComputedStyle(document.documentElement).getPropertyValue('--page-content-pad-y-two-page').trim()
-            }
-        };
-        console.log('[page-debug:summary]', summary);
-        lines.forEach(function(line, index) {
-            var rect = line.getBoundingClientRect();
-            var broken = Math.ceil(line.scrollHeight) > Math.ceil(rect.height * 1.25);
-            var computed = window.getComputedStyle(line);
-            console.log('[page-debug:line]', {
-                index: index,
-                className: line.className,
-                sourceLines: line.getAttribute('data-source-lines') || '',
-                width: rect.width,
-                height: rect.height,
-                scrollWidth: line.scrollWidth,
-                scrollHeight: line.scrollHeight,
-                fontPx: parseFloat(computed.fontSize || '0'),
-                whiteSpace: computed.whiteSpace,
-                broken: broken,
-                textSample: (line.textContent || '').trim().slice(0, 80)
-            });
-        });
-    }
-    function fitAllPageContents() {
-        fitPageContentRaf = 0;
-        var contents = main ? main.querySelectorAll('.page-content') : [];
-        for (var i = 0; i < contents.length; i++) {
-            contents[i].removeAttribute('data-double-continuous-shared-ratio');
-            fitSinglePageContent(contents[i]);
-        }
-        var suraRatioCache = new Map();
-        for (var i2 = 0; i2 < contents.length; i2++) {
-            var content = contents[i2];
-            var suraScroll = content.closest('.sura-scroll');
-            if (!suraScroll || !content.classList.contains('double-continuous-content')) continue;
-            if (!suraRatioCache.has(suraScroll)) {
-                var ratio = 1;
-                var foundAny = false;
-                var scopedContents = suraScroll.querySelectorAll('.page-content.double-continuous-content');
-                for (var sci = 0; sci < scopedContents.length; sci++) {
-                    var scopedContainer = scopedContents[sci];
-                    var scopedLines = scopedContainer.querySelectorAll('.mushaf-line.double-continuous-line');
-                    for (var sli = 0; sli < scopedLines.length; sli++) {
-                        var scopedLine = scopedLines[sli];
-                        scopedLine.style.transform = '';
-                        scopedLine.style.height = '';
-                        var naturalWidth = scopedLine.scrollWidth || 0;
-                        var availableWidth = scopedLine.clientWidth || scopedContainer.clientWidth || 0;
-                        if (!naturalWidth || !availableWidth) continue;
-                        ratio = Math.min(ratio, availableWidth / naturalWidth);
-                        foundAny = true;
-                    }
-                }
-                suraRatioCache.set(suraScroll, foundAny && isFinite(ratio) && ratio > 0 ? ratio : null);
-            }
-            var sharedRatio = suraRatioCache.get(suraScroll);
-            if (sharedRatio && isFinite(sharedRatio) && sharedRatio > 0) {
-                content.setAttribute('data-double-continuous-shared-ratio', String(sharedRatio));
-                fitSinglePageContent(content);
-            }
-        }
-        if (continuousMinimapMode()) {
-            requestAnimationFrame(function() {
-                var mm = document.getElementById('morphology-minimap');
-                if (mm && typeof mm.forceRelayout === 'function') mm.forceRelayout();
-                if (mm && typeof mm._desktopUpdateHighlight === 'function') mm._desktopUpdateHighlight();
-            });
-        }
-    }
-    function scheduleFitAllPageContents() {
-        if (fitPageContentRaf) cancelAnimationFrame(fitPageContentRaf);
-        fitPageContentRaf = requestAnimationFrame(fitAllPageContents);
     }
     function renderTranslationPageContent(verses, container) {
         container.classList.add('translation-content');
@@ -3144,17 +2987,34 @@
         wordHoverTooltip.style.left = (tooltipLeft + scrollX) + 'px';
         wordHoverTooltip.style.top = (top + scrollY) + 'px';
     }
-    function showWordHoverTooltip(text, anchorEl, verseTranslation, root, lemma, isPinned) {
+    function getTooltipMorphLabel(token, count, mode) {
+        if (!token) return '';
+        if ((mode === 'root-count' || mode === 'lemma-count') && count > 0) {
+            return token + ' (' + fmtFa(count) + ')';
+        }
+        return token;
+    }
+    function getTooltipMorphCounts(root, lemma) {
+        if (typeof window.simpleMorphTooltipCounts !== 'function') {
+            return { rootCount: 0, lemmaCount: 0 };
+        }
+        try {
+            return window.simpleMorphTooltipCounts(root, lemma) || { rootCount: 0, lemmaCount: 0 };
+        } catch (err) {
+            return { rootCount: 0, lemmaCount: 0 };
+        }
+    }
+    function showWordHoverTooltip(text, anchorEl, verseTranslation, root, lemma, rootCount, lemmaCount, isPinned) {
         if (!wordHoverTooltip) return;
         var content = (text && text.length > 0) ? escapeHtml(text) : '';
         if (root || lemma) {
             var morphParts = [];
             var mm = continuousMinimapMode();
             if (root && root.length > 0) {
-                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف ریشه از نقشه' : '') + '">' + escapeHtml(root) + '</a>');
+                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف ریشه از نقشه' : '') + '">' + escapeHtml(getTooltipMorphLabel(root, rootCount, getRootTooltipMode())) + '</a>');
             }
             if (lemma && lemma.length > 0) {
-                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف شکل واژه (lemma) از نقشه' : '') + '">' + escapeHtml(lemma) + '</a>');
+                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف شکل واژه (lemma) از نقشه' : '') + '">' + escapeHtml(getTooltipMorphLabel(lemma, lemmaCount, getLemmaTooltipMode())) + '</a>');
             }
             if (morphParts.length > 0) {
                 var toggleHtml = '';
@@ -3335,9 +3195,10 @@
             var morph = pos ? getWordMorphology(vKey, pos) : null;
             var root = (morph && morph.root) ? morph.root : '';
             var lemma = (morph && morph.lemma) ? morph.lemma : '';
+            var counts = getTooltipMorphCounts(root, lemma);
             if (tr || verseTr || root || lemma) {
                 wordTooltipVerseExpanded = false;
-                showWordHoverTooltip(tr, wordEl, verseTr, root, lemma, true);
+                showWordHoverTooltip(tr, wordEl, verseTr, root, lemma, counts.rootCount || 0, counts.lemmaCount || 0, true);
             } else {
                 hideWordHoverTooltip();
             }
@@ -3876,10 +3737,14 @@
         const useQCFFont = useQCF();
         const twoPage = twoPageMode();
         const withTranslation = onePageTranslationMode();
+        const modeName = getPageMode();
+        const layoutConfig = getModeLayoutConfig(modeName);
         const pageContainer = document.createElement('div');
         pageContainer.className = 'page-container'
             + (twoPage && pages.length === 2 ? ' two-pages' : '')
             + (withTranslation ? ' page-with-translation' : '');
+        pageContainer.setAttribute('data-mode', modeName);
+        pageContainer.setAttribute('data-columns', String(layoutConfig.columnCount || 1));
         const pageList = [];
         for (let i = 0; i < pages.length; i++) pageList.push(pages[i]);
         for (let cardIndex = 0; cardIndex < pageList.length; cardIndex++) {
@@ -4001,26 +3866,13 @@
 
     function teardownSimpleMinimapRuntime() {
         delete window.__simpleRefreshImportantSectionsMode;
-        ['morphology-hover-script-simple', 'simple-minimap-charts-script', 'chartjs-lib-simple'].forEach(function(id) {
+        ['simple-minimap-charts-script', 'chartjs-lib-simple'].forEach(function(id) {
             var s = document.getElementById(id);
             if (s) s.remove();
         });
         delete window.__SIMPLE_MINIMAP_HOST__;
         delete window.__DESKTOP_HOST__;
         delete window.__SIMPLE_HIDE_SELECTED_PANEL__;
-        delete window._morphologyHoverListenersAttached;
-        if (window._simpleMinimapSidebarObserver) {
-            try { window._simpleMinimapSidebarObserver.disconnect(); } catch (e) {}
-            delete window._simpleMinimapSidebarObserver;
-        }
-        if (_simpleMinimapSidebarWidthRafId) {
-            try { cancelAnimationFrame(_simpleMinimapSidebarWidthRafId); } catch (eRaf) {}
-            _simpleMinimapSidebarWidthRafId = 0;
-        }
-        _simpleMinimapRelayoutGeneration = 0;
-        _lastSidebarWidthDebugKey = '';
-        _lastLoggedCompactDebugState = null;
-        teardownSimpleMinimapCompactListeners();
         try {
             if (window.SimpleMinimapCharts) window.SimpleMinimapCharts.destroyAllCharts();
         } catch (eRm) {}
@@ -4078,19 +3930,7 @@
                 return loadScriptById('js/simple-minimap-charts.js', 'simple-minimap-charts-script');
             });
             p = p.then(function() {
-                return new Promise(function(resolve) {
-                    var oldScript = document.getElementById('morphology-hover-script-simple');
-                    if (oldScript) {
-                        delete window._morphologyHoverListenersAttached;
-                        oldScript.remove();
-                    }
-                    var script = document.createElement('script');
-                    script.id = 'morphology-hover-script-simple';
-                    script.src = 'Yasir/morphology-hover.js?v=4';
-                    script.onload = function() { resolve(); };
-                    script.onerror = function() { resolve(); };
-                    document.body.appendChild(script);
-                });
+                return loadScriptById('Yasir/morphology-hover.js?v=5', 'morphology-hover-script-simple');
             });
             p.then(function() {
                 requestAnimationFrame(function() {
@@ -4318,7 +4158,6 @@
         };
     }
 
-    /** Ratio clamped like the settings slider (0.1–1); used for compact breakpoint only. */
     function getSimpleMinimapStoredRatioClamped() {
         var storedRatio = parseFloat(getSetting('minimap_width_ratio', ''));
         var ratio = (storedRatio && isFinite(storedRatio)) ? storedRatio
@@ -4328,248 +4167,47 @@
         return Math.max(0.1, Math.min(1, ratio));
     }
 
-    /**
-     * Viewport width at or below which we use compact (edge) layout for continuous + minimap.
-     * Shell padding + minimum text column + max(grid sidebar floor, textMin × width ratio).
-     */
-    function getSimpleMinimapCompactBreakpointPx() {
-        var ratio = getSimpleMinimapStoredRatioClamped();
-        var textMin = SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX;
-        var sidebarMin = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(textMin * ratio));
-        return SIMPLE_MINIMAP_SHELL_PAD_X + textMin + sidebarMin;
-    }
-
-    function updateSimpleMinimapCompactLayout() {
-        var mainEl = document.getElementById('main');
-        if (!mainEl || !mainEl.classList.contains('simple-minimap-shell')) {
-            document.documentElement.classList.remove('simple-minimap-compact');
-            return;
-        }
-        var bp = getSimpleMinimapCompactBreakpointPx();
-        var w = window.innerWidth || document.documentElement.clientWidth || 0;
-        document.documentElement.classList.toggle('simple-minimap-compact', w <= bp);
-    }
-
-    var _lastLoggedCompactDebugState = null;
-    var _simpleMinimapCompactDebugRaf = 0;
-    /** Compact breakpoint log only when `html.simple-minimap-compact` toggles (reduces resize spam). */
-    function logSimpleMinimapCompactBreakpointIfDebug() {
-        if (!simpleMinimapLayoutDebugEnabled()) return;
-        if (_simpleMinimapCompactDebugRaf) return;
-        _simpleMinimapCompactDebugRaf = requestAnimationFrame(function() {
-            _simpleMinimapCompactDebugRaf = 0;
-            var mainShell = document.getElementById('main');
-            if (!mainShell || !mainShell.classList.contains('simple-minimap-shell')) return;
-            var compactNow = document.documentElement.classList.contains('simple-minimap-compact');
-            if (_lastLoggedCompactDebugState !== null && _lastLoggedCompactDebugState === compactNow) return;
-            _lastLoggedCompactDebugState = compactNow;
-            var w = window.innerWidth || document.documentElement.clientWidth || 0;
-            var bp = getSimpleMinimapCompactBreakpointPx();
-            var rc = getSimpleMinimapStoredRatioClamped();
-            var sm = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX * rc));
-            logSimpleMinimapLayout({
-                phase: 'compact-state-changed',
-                viewportInnerWidthPx: w,
-                compactLayoutActive: compactNow,
-                compactBreakpointPx: bp,
-                compactBreakpointHow: {
-                    shellHorizontalPadPx: SIMPLE_MINIMAP_SHELL_PAD_X,
-                    assumedMinTextColumnPx: SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX,
-                    widthRatioClamped01: rc,
-                    minimapColumnFloorPx: SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX,
-                    effectiveMinimapColumnPx: sm,
-                    sumPx: SIMPLE_MINIMAP_SHELL_PAD_X + SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX + sm,
-                    note: 'compact when viewportInnerWidthPx <= compactBreakpointPx'
-                }
-            });
-        });
-    }
-
-    function ensureSimpleMinimapCompactListeners() {
-        if (window._simpleMinimapCompactListeners) return;
-        window._simpleMinimapCompactListeners = true;
-        var handler = function() {
-            updateSimpleMinimapCompactLayout();
-            logSimpleMinimapCompactBreakpointIfDebug();
-        };
-        window.addEventListener('resize', handler, { passive: true });
-        window.addEventListener('orientationchange', handler, { passive: true });
-        window._simpleMinimapCompactResizeHandler = handler;
-    }
-
-    function teardownSimpleMinimapCompactListeners() {
-        if (!window._simpleMinimapCompactListeners) return;
-        var handler = window._simpleMinimapCompactResizeHandler;
-        if (handler) {
-            window.removeEventListener('resize', handler);
-            window.removeEventListener('orientationchange', handler);
-        }
-        delete window._simpleMinimapCompactResizeHandler;
-        delete window._simpleMinimapCompactListeners;
-        document.documentElement.classList.remove('simple-minimap-compact');
-    }
-
-    /** Coalesce multiple triggers (initial rAF + ResizeObserver same frame) into one layout pass. */
-    var _simpleMinimapSidebarWidthRafId = 0;
-    /** Latest flush wins: stale double-rAF minimap relayout + after-log are skipped. */
-    var _simpleMinimapRelayoutGeneration = 0;
-    var _lastSidebarWidthDebugKey = '';
     function updateSimpleMinimapSidebarWidth() {
-        if (_simpleMinimapSidebarWidthRafId) return;
-        _simpleMinimapSidebarWidthRafId = requestAnimationFrame(function() {
-            _simpleMinimapSidebarWidthRafId = 0;
-            flushSimpleMinimapSidebarWidth();
-        });
-    }
-
-    function flushSimpleMinimapSidebarWidth() {
         var layout = document.getElementById('simple-continuous-minimap-layout');
-        if (!layout) {
-            if (simpleMinimapLayoutDebugEnabled()) {
-                logSimpleMinimapLayout({ phase: 'sidebar-width-skip', reason: 'no #simple-continuous-minimap-layout' });
-            }
-            updateSimpleMinimapCompactLayout();
-            return;
-        }
+        if (!layout) return;
+        var ratio = getSimpleMinimapStoredRatioClamped();
+        var mainCol = document.getElementById('simple-minimap-main');
         var textRoot = document.getElementById('simple-minimap-text-root');
-        var sidebar = document.getElementById('simple-minimap-sidebar');
-        if (!textRoot || !sidebar) {
-            if (simpleMinimapLayoutDebugEnabled()) {
-                logSimpleMinimapLayout({ phase: 'sidebar-width-skip', reason: 'missing text-root or sidebar' });
-            }
-            updateSimpleMinimapCompactLayout();
-            return;
+        var measuredTextWidth = 0;
+        if (mainCol) measuredTextWidth = mainCol.getBoundingClientRect().width || 0;
+        if (!measuredTextWidth && textRoot) measuredTextWidth = textRoot.getBoundingClientRect().width || 0;
+        if (!measuredTextWidth) {
+            measuredTextWidth = parseInt((getModeLayoutConfig('continuous-minimap').cssVars || {})['--layout-minimap-text-column-width'] || '380', 10) || 380;
         }
-        var textContainer = textRoot.querySelector('.sura-container') || textRoot;
-        var textWidth = textContainer.getBoundingClientRect().width || 0;
-        if (!textWidth) {
-            if (simpleMinimapLayoutDebugEnabled()) {
-                logSimpleMinimapLayout({
-                    phase: 'sidebar-width-skip',
-                    reason: 'reading width is 0 (measure later)',
-                    textContainerSelectorGuess: textRoot.querySelector('.sura-container') ? '.sura-container' : '#simple-minimap-text-root'
-                });
-            }
-            updateSimpleMinimapCompactLayout();
-            return;
-        }
-        var storedRatio = parseFloat(getSetting('minimap_width_ratio', ''));
-        var ratio = (storedRatio && isFinite(storedRatio)) ? storedRatio
-            : ((typeof SIMPLE_MINIMAP_WIDTH_RATIO === 'number' && SIMPLE_MINIMAP_WIDTH_RATIO > 0)
-                ? SIMPLE_MINIMAP_WIDTH_RATIO
-                : 0.25);
-        var target = Math.round(textWidth * ratio);
-        sidebar.style.width = target + 'px';
-        sidebar.style.minWidth = target + 'px';
-        sidebar.style.maxWidth = target + 'px';
+        var target = Math.max(1, Math.round(measuredTextWidth * ratio));
+        document.documentElement.style.setProperty('--layout-minimap-sidebar-width', target + 'px');
         var minimap = document.getElementById('morphology-minimap');
-        var scheduleGeomAfterRelayout = simpleMinimapLayoutDebugEnabled();
-        if (minimap && typeof minimap.forceRelayout === 'function') {
-            var relayoutGen = ++_simpleMinimapRelayoutGeneration;
-            requestAnimationFrame(function() {
-                requestAnimationFrame(function() {
-                    if (relayoutGen !== _simpleMinimapRelayoutGeneration) return;
-                    minimap.forceRelayout();
-                    if (typeof minimap._desktopUpdateHighlight === 'function') {
-                        minimap._desktopUpdateHighlight();
-                    }
-                    if (scheduleGeomAfterRelayout && relayoutGen === _simpleMinimapRelayoutGeneration) {
-                        var layout2 = document.getElementById('simple-continuous-minimap-layout');
-                        var tr = document.getElementById('simple-minimap-text-root');
-                        var sb = document.getElementById('simple-minimap-sidebar');
-                        var tc = tr ? (tr.querySelector('.sura-container') || tr) : null;
-                        var mc = document.getElementById('simple-minimap-main');
-                        var mm = document.getElementById('morphology-minimap');
-                        var shell = document.getElementById('main');
-                        if (layout2 && tr && sb && tc) {
-                            var geoAfter = collectSimpleMinimapLayoutGeometry(layout2, tr, sb, tc, mc, mm, shell);
-                            logSimpleMinimapLayout({
-                                phase: 'sidebar-width-after-minimap-relayout',
-                                geometryRTLAndOverlap: geoAfter,
-                                note: 'Measured after minimap.forceRelayout — compare overlap/gaps to sync pass.'
-                            }, true);
-                        }
-                    }
-                });
+        requestAnimationFrame(function() {
+            var correctedTextWidth = 0;
+            if (mainCol) correctedTextWidth = mainCol.getBoundingClientRect().width || 0;
+            if (!correctedTextWidth && textRoot) correctedTextWidth = textRoot.getBoundingClientRect().width || 0;
+            var correctedTarget = correctedTextWidth
+                ? Math.max(1, Math.round(correctedTextWidth * ratio))
+                : target;
+            if (correctedTarget !== target) {
+                document.documentElement.style.setProperty('--layout-minimap-sidebar-width', correctedTarget + 'px');
+            }
+            if (minimap && typeof minimap.forceRelayout === 'function') {
+                minimap.forceRelayout();
+                if (typeof minimap._desktopUpdateHighlight === 'function') {
+                    minimap._desktopUpdateHighlight();
+                }
+            }
+        });
+        if (simpleMinimapLayoutDebugEnabled()) {
+            logSimpleMinimapLayout({
+                phase: 'sidebar-width',
+                ratioUsedForWidth: ratio,
+                measuredTextWidthPx: measuredTextWidth,
+                appliedSidebarWidthPx: target,
+                note: 'Sidebar width follows the mode text column ratio.'
             });
         }
-        updateSimpleMinimapCompactLayout();
-        if (simpleMinimapLayoutDebugEnabled()) {
-            var mainCol = document.getElementById('simple-minimap-main');
-            var mainElShell = document.getElementById('main');
-            var rc = getSimpleMinimapStoredRatioClamped();
-            var sm = Math.max(SIMPLE_MINIMAP_GRID_SIDEBAR_MIN_PX, Math.round(SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX * rc));
-            var bp = SIMPLE_MINIMAP_SHELL_PAD_X + SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX + sm;
-            var vw = window.innerWidth || document.documentElement.clientWidth || 0;
-            var layoutW = layout.getBoundingClientRect().width || 0;
-            var mainW = mainCol ? mainCol.getBoundingClientRect().width : 0;
-            var sideW = sidebar.getBoundingClientRect().width || 0;
-            var dbgKey = vw + '|' + target + '|' + Math.round(textWidth);
-            if (dbgKey !== _lastSidebarWidthDebugKey) {
-                _lastSidebarWidthDebugKey = dbgKey;
-                var geo = collectSimpleMinimapLayoutGeometry(layout, textRoot, sidebar, textContainer, mainCol, minimap, mainElShell);
-                logSimpleMinimapLayout({
-                    phase: 'sidebar-width',
-                    viewportInnerWidthPx: vw,
-                    grid: {
-                        layoutInnerWidthPx: layoutW,
-                        mainColumnRectWidthPx: mainW,
-                        sidebarRectWidthPx: sideW,
-                        mainPlusSidebarPx: Math.round(mainW + sideW),
-                        unallocatedInLayoutPx: Math.round(layoutW - mainW - sideW),
-                        note: '#simple-continuous-minimap-layout uses columns 1fr + auto; reading column should take remainder'
-                    },
-                    readingColumnForRatio: {
-                        measuredElement: textContainer.classList && textContainer.classList.contains('sura-container') ? '.sura-container' : '#simple-minimap-text-root',
-                        getBoundingClientRectWidthPx: textWidth,
-                        textRootClientWidthPx: textRoot.clientWidth || 0,
-                        explain: 'minimap sidebar target = round(readingColumnForRatio.getBoundingClientRectWidthPx × widthRatio)'
-                    },
-                    minimapSidebar: {
-                        storedRatioRaw: storedRatio,
-                        ratioUsedForWidth: ratio,
-                        widthRatioSliderClamped: rc,
-                        formula: 'round(' + textWidth + ' * ' + ratio + ') -> ' + target,
-                        appliedStyleWidthPx: target
-                    },
-                    compact: {
-                        active: document.documentElement.classList.contains('simple-minimap-compact'),
-                        breakpointPx: bp,
-                        shellHorizontalPadPx: SIMPLE_MINIMAP_SHELL_PAD_X,
-                        assumedMinTextColumnPx: SIMPLE_MINIMAP_COMPACT_TEXT_MIN_PX,
-                        effectiveMinimapColumnInFormulaPx: sm
-                    },
-                    shell: mainElShell ? {
-                        horizontalPadCssPx: SIMPLE_MINIMAP_SHELL_PAD_X,
-                        clientWidthPx: mainElShell.clientWidth || 0,
-                        computedPaddingLeftRight: (function(el) {
-                            try {
-                                var cs = window.getComputedStyle(el);
-                                return {
-                                    paddingLeft: cs.paddingLeft,
-                                    paddingRight: cs.paddingRight
-                                };
-                            } catch (e) {
-                                return null;
-                            }
-                        })(mainElShell)
-                    } : null,
-                    geometryRTLAndOverlap: geo
-                });
-            }
-        }
-    }
-
-    function ensureSimpleMinimapSidebarObserver() {
-        if (window._simpleMinimapSidebarObserver) return;
-        var textRoot = document.getElementById('simple-minimap-text-root');
-        if (!textRoot || !window.ResizeObserver) return;
-        var ro = new ResizeObserver(function() {
-            updateSimpleMinimapSidebarWidth();
-        });
-        var target = textRoot.querySelector('.sura-container') || textRoot;
-        ro.observe(target);
-        window._simpleMinimapSidebarObserver = ro;
     }
 
     function wireSimpleMinimapSettingsBar() {
@@ -4710,8 +4348,12 @@
 
     function renderSuraMode(suraNumber, pageBlocks) {
         const useQCFFont = useQCF();
+        const modeName = getPageMode();
+        const layoutConfig = getModeLayoutConfig(modeName);
         const container = document.createElement('div');
         container.className = 'sura-container' + (doubleContinuousMode() ? ' sura-container-double-continuous' : '');
+        container.setAttribute('data-mode', modeName);
+        container.setAttribute('data-columns', String(layoutConfig.columnCount || 1));
         const title = document.createElement('div');
         title.className = 'sura-title sura-title-click';
         title.textContent = 'سوره ' + getSuraName(suraNumber);
@@ -4746,6 +4388,8 @@
             main.classList.add('simple-minimap-shell');
             var layout = document.createElement('div');
             layout.id = 'simple-continuous-minimap-layout';
+            layout.setAttribute('data-mode', modeName);
+            layout.setAttribute('data-columns', String(layoutConfig.columnCount || 2));
             var leftCol = document.createElement('div');
             leftCol.id = 'simple-minimap-main';
             var textRoot = document.createElement('div');
@@ -4787,8 +4431,6 @@
             scheduleSimpleMinimapBootstrap(suraNumber);
             requestAnimationFrame(function() {
                 updateSimpleMinimapSidebarWidth();
-                ensureSimpleMinimapSidebarObserver();
-                ensureSimpleMinimapCompactListeners();
             });
         } else {
             teardownSimpleMinimapRuntime();
@@ -4949,8 +4591,8 @@
     function render() {
         const { mode, page, sura } = getMode();
         if (main) main.classList.remove('simple-minimap-shell');
-        document.documentElement.classList.remove('simple-minimap-compact');
-        teardownSimpleMinimapCompactListeners();
+        applyTypographySettings();
+        applyModeLayoutCssVars(getPageMode());
         if (loadingEl) loadingEl.style.display = 'none';
 
         if (mode === 'page') {
@@ -5008,24 +4650,59 @@
         setError('حالت نامعتبر');
     }
 
-    document.querySelectorAll('input[name="font"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            setSetting('font', this.value);
+    var fontSelectEl = document.getElementById('font-select');
+    if (fontSelectEl) {
+        fontSelectEl.addEventListener('change', function() {
+            var val = this.value === 'text' ? 'text' : 'qurancom';
+            setSetting('font', val);
             render();
         });
-    });
-    document.querySelectorAll('input[name="layout"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            setSetting('layout', this.value);
+    }
+    var layoutSelectEl = document.getElementById('layout-select');
+    if (layoutSelectEl) {
+        layoutSelectEl.addEventListener('change', function() {
+            var val = this.value === 'ayah-line' ? 'ayah-line' : 'flow';
+            setSetting('layout', val);
             render();
         });
-    });
+    }
+    function syncFontSizeControls() {
+        var mainValue = getMainFontSizeSetting();
+        var translationValue = getTranslationFontSizeSetting();
+        if (mainFontSizeEl) mainFontSizeEl.value = String(mainValue);
+        if (mainFontSizeValueEl) mainFontSizeValueEl.textContent = formatRemValue(mainValue);
+        if (translationFontSizeEl) translationFontSizeEl.value = String(translationValue);
+        if (translationFontSizeValueEl) translationFontSizeValueEl.textContent = formatRemValue(translationValue);
+    }
+    if (mainFontSizeEl) {
+        mainFontSizeEl.addEventListener('input', function() {
+            var value = clampNumber(this.value, 0.7, 2.2, DEFAULT_MAIN_FONT_SIZE);
+            setSetting('main_font_size', String(value));
+            applyTypographySettings();
+            syncFontSizeControls();
+        });
+        mainFontSizeEl.addEventListener('change', function() {
+            render();
+        });
+    }
+    if (translationFontSizeEl) {
+        translationFontSizeEl.addEventListener('input', function() {
+            var value = clampNumber(this.value, 0.6, 1.8, DEFAULT_TRANSLATION_FONT_SIZE);
+            setSetting('translation_font_size', String(value));
+            applyTypographySettings();
+            syncFontSizeControls();
+        });
+        translationFontSizeEl.addEventListener('change', function() {
+            render();
+        });
+    }
     var pageModeEl = document.getElementById('page-mode');
         if (pageModeEl) {
         pageModeEl.addEventListener('change', async function() {
             var val = this.value;
             if (val !== 'one-page' && val !== 'two-pages' && val !== 'one-page-translation' && val !== 'continuous' && val !== 'continuous-minimap' && val !== 'double-continuous') return;
             setSetting('page_mode', val);
+            applyModeLayoutCssVars(val);
             var st = getMode();
             if ((val === 'continuous' || val === 'continuous-minimap' || val === 'double-continuous') && st.mode === 'page') {
                 var range = getVisiblePageRange(st.page);
@@ -5076,6 +4753,18 @@
     if (copyAyahStyleEl) {
         copyAyahStyleEl.addEventListener('change', function() {
             setSetting('copy_ayah_style', this.value);
+        });
+    }
+    var rootTooltipModeEl = document.getElementById('root-tooltip-mode');
+    if (rootTooltipModeEl) {
+        rootTooltipModeEl.addEventListener('change', function() {
+            setSetting('root_tooltip_mode', this.value === 'root-count' ? 'root-count' : 'root');
+        });
+    }
+    var lemmaTooltipModeEl = document.getElementById('lemma-tooltip-mode');
+    if (lemmaTooltipModeEl) {
+        lemmaTooltipModeEl.addEventListener('change', function() {
+            setSetting('lemma_tooltip_mode', this.value === 'lemma-count' ? 'lemma-count' : 'lemma');
         });
     }
     navPrevPageBtn.addEventListener('click', function() { 
@@ -5341,11 +5030,22 @@
     }
     var savedTranslationLang = getSetting('translation_language', 'fa');
     var savedCopyAyahStyle = getCopyAyahStyle();
-    document.querySelector('input[name="font"][value="' + savedFont + '"]') && (document.querySelector('input[name="font"][value="' + savedFont + '"]').checked = true);
-    document.querySelector('input[name="layout"][value="' + savedLayout + '"]') && (document.querySelector('input[name="layout"][value="' + savedLayout + '"]').checked = true);
+    var savedRootTooltipMode = getRootTooltipMode();
+    var savedLemmaTooltipMode = getLemmaTooltipMode();
+    if (document.getElementById('font-select')) {
+        document.getElementById('font-select').value = (savedFont === 'text' ? 'text' : 'qurancom');
+    }
+    if (document.getElementById('layout-select')) {
+        document.getElementById('layout-select').value = (savedLayout === 'ayah-line' ? 'ayah-line' : 'flow');
+    }
     if (document.getElementById('page-mode')) document.getElementById('page-mode').value = savedPageMode;
     if (document.getElementById('translation-language')) document.getElementById('translation-language').value = savedTranslationLang;
     if (document.getElementById('copy-ayah-style')) document.getElementById('copy-ayah-style').value = savedCopyAyahStyle;
+    if (document.getElementById('root-tooltip-mode')) document.getElementById('root-tooltip-mode').value = savedRootTooltipMode;
+    if (document.getElementById('lemma-tooltip-mode')) document.getElementById('lemma-tooltip-mode').value = savedLemmaTooltipMode;
+    applyTypographySettings();
+    applyModeLayoutCssVars(savedPageMode);
+    syncFontSizeControls();
     if (simpleSearchInput) simpleSearchInput.value = searchState.committedQuery;
     updateSearchScopeButton();
     updateSearchButtons();
@@ -5354,7 +5054,7 @@
         render();
     });
     window.addEventListener('resize', function() {
-        scheduleFitAllPageContents();
+        if (continuousMinimapMode()) updateSimpleMinimapSidebarWidth();
         if (currentWordTooltipAnchor) positionWordHoverTooltip(currentWordTooltipAnchor);
         if (currentAyahTooltipAnchor) positionAyahHadithTooltip(currentAyahTooltipAnchor);
     });

@@ -1428,15 +1428,50 @@ const morphologyData = {};
         return visibleWords;
     }
     
+    function getSelectionWordElements(ayah, wordIndex) {
+        const selector = `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"], .qword[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`;
+        return Array.from(document.querySelectorAll(selector)).filter(function(el) {
+            if (!el || !el.getBoundingClientRect) return false;
+            if (el.closest && (el.closest('#highlighted-roots-panel') || el.closest('#minimap-content'))) return false;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+        });
+    }
+
+    function scrollSelectedWordElementIntoView(el) {
+        if (!el || !el.getBoundingClientRect) return;
+        const rect = el.getBoundingClientRect();
+        if (isMobileMode && mobileContentWrapper) {
+            const wrapperRect = mobileContentWrapper.getBoundingClientRect();
+            const relativeTop = rect.top - wrapperRect.top + mobileContentWrapper.scrollTop;
+            mobileContentWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
+            return;
+        }
+        const desktopWrapper = document.getElementById('desktop-content-wrapper');
+        const simpleTextRoot = document.getElementById('simple-minimap-text-root');
+        const simpleScroll = getSimpleScrollHost(simpleTextRoot) || document.querySelector('#simple-minimap-main .sura-scroll');
+        if (desktopWrapper) {
+            const wrapperRect = desktopWrapper.getBoundingClientRect();
+            const relativeTop = rect.top - wrapperRect.top + desktopWrapper.scrollTop;
+            desktopWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
+        } else if (simpleScroll) {
+            const wrapperRect = simpleScroll.getBoundingClientRect();
+            const relativeTop = rect.top - wrapperRect.top + simpleScroll.scrollTop;
+            simpleScroll.scrollTo({ top: relativeTop, behavior: 'smooth' });
+        } else {
+            const scrollY = window.scrollY || window.pageYOffset;
+            const targetY = scrollY + rect.top;
+            window.scrollTo({ top: targetY, behavior: 'smooth' });
+        }
+    }
+
     // Select and highlight a word, scroll it to top
     function selectWord(ayah, wordIndex, root) {
         // Remove previous selection (if any)
         if (currentSelectedWord) {
             const prevAyah = currentSelectedWord.ayah;
             const prevWordIndex = currentSelectedWord.wordIndex;
-            const prevElements = document.querySelectorAll(
-                `.morph-word[data-ayah="${prevAyah}"][data-word-index="${prevWordIndex}"]`
-            );
+            const prevElements = getSelectionWordElements(prevAyah, prevWordIndex);
             prevElements.forEach(el => {
                 el.classList.remove('root-selected-word');
                 el.style.outline = '';
@@ -1446,41 +1481,15 @@ const morphologyData = {};
         // Add selection to current word
         currentSearchedRoot = root;
         currentSelectedWord = { ayah, wordIndex };
-        const wordElements = document.querySelectorAll(
-            `.morph-word[data-ayah="${ayah}"][data-word-index="${wordIndex}"]`
-        );
+        const wordElements = getSelectionWordElements(ayah, wordIndex);
         
         wordElements.forEach(el => {
             el.classList.add('root-selected-word');
             el.style.outline = '1px dotted red';
-            // el.style.borderRadius = '2px';
-            
-            // Scroll to top of viewport (handle mobile mode)
-            const rect = el.getBoundingClientRect();
-            if (isMobileMode && mobileContentWrapper) {
-                // In mobile mode, scroll the wrapper
-                const wrapperRect = mobileContentWrapper.getBoundingClientRect();
-                const relativeTop = rect.top - wrapperRect.top + mobileContentWrapper.scrollTop;
-                mobileContentWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
-            } else {
-                const desktopWrapper = document.getElementById('desktop-content-wrapper');
-                const simpleScroll = document.querySelector('#simple-minimap-main .sura-scroll');
-                if (desktopWrapper) {
-                    const wrapperRect = desktopWrapper.getBoundingClientRect();
-                    const relativeTop = rect.top - wrapperRect.top + desktopWrapper.scrollTop;
-                    desktopWrapper.scrollTo({ top: relativeTop, behavior: 'smooth' });
-                } else if (simpleScroll) {
-                    const wrapperRect = simpleScroll.getBoundingClientRect();
-                    const relativeTop = rect.top - wrapperRect.top + simpleScroll.scrollTop;
-                    simpleScroll.scrollTo({ top: relativeTop, behavior: 'smooth' });
-                } else {
-                    // Normal mode, scroll window
-                    const scrollY = window.scrollY || window.pageYOffset;
-                    const targetY = scrollY + rect.top;
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
-                }
-            }
         });
+        if (wordElements.length > 0) {
+            scrollSelectedWordElementIntoView(wordElements[0]);
+        }
         
         // Update panel to show which root is being searched
         updateHighlightedRootsPanel();
@@ -3332,7 +3341,7 @@ const morphologyData = {};
                 );
                 if (ayahDiv) {
                     const ayahText = String(wordRect.ayah);
-                    const height = Math.max(1, wordRect.height * scaleFactor);
+                    const height = Math.max(0.2, wordRect.height * scaleFactor);
                     
                     if (ayeNumberFontSize === null) {
                         ayeNumberFontSize = 8;
@@ -3355,11 +3364,18 @@ const morphologyData = {};
                     const leftSource = ayahRect ? ayahRect.left : wordRect.left;
                     const widthSource = ayahRect ? ayahRect.width : 0;
                     const heightSource = ayahRect ? ayahRect.height : wordRect.height;
-                    const top = (topSource - minTop) * scaleFactor;
+                    let top = (topSource - minTop) * scaleFactor;
                     let left = (leftSource - minLeft) * scaleFactor - (ayahRect ? 0 : measuredWidth);
-                    let width = ayahRect ? Math.max(1, widthSource * scaleFactor) : measuredWidth;
-                    
-                    const scaledHeight = Math.max(1, heightSource * scaleFactor);
+                    let width = ayahRect ? Math.max(0.2, widthSource * scaleFactor) : measuredWidth;
+                    let scaledHeight = Math.max(0.5, heightSource * scaleFactor);
+                    const ayahWidthShrinkFactor = 0.9;
+                    const ayahHeightShrinkFactor = 0.7;
+                    const shrunkWidth = Math.max(0.2, width * ayahWidthShrinkFactor);
+                    const shrunkHeight = Math.max(0.5, scaledHeight * ayahHeightShrinkFactor);
+                    left += (width - shrunkWidth) / 2;
+                    top += (scaledHeight - shrunkHeight) / 2;
+                    width = shrunkWidth;
+                    scaledHeight = shrunkHeight;
                     ayahDiv.style.top = top + 'px';
                     ayahDiv.style.left = (left + extraSpace) + 'px';
                     ayahDiv.style.width = width + 'px';
@@ -3376,18 +3392,19 @@ const morphologyData = {};
             wordDivs.forEach((wordDiv) => {
                 let top = (wordRect.top - minTop) * scaleFactor;
                 let left = (wordRect.left - minLeft) * scaleFactor;
-                let width = Math.max(1, wordRect.width * scaleFactor);
-                let height = Math.max(1, wordRect.height * scaleFactor);
+                let width = Math.max(0.2, wordRect.width * scaleFactor);
+                let height = Math.max(0.3, wordRect.height * scaleFactor);
                 
                 // Ensure words don't exceed the minimapContent width
                 const maxRight = availableWidth;
                 if (left + width > maxRight) {
-                    width = Math.max(1, maxRight - left);
+                    width = Math.max(0.2, maxRight - left);
                 }
-                
-                const shrinkFactor = 0.8;
-                const shrunkWidth = Math.max(1, width * shrinkFactor);
-                const shrunkHeight = Math.max(1, height * shrinkFactor);
+
+                const widthShrinkFactor = 0.9;
+                const heightShrinkFactor = 0.7;
+                const shrunkWidth = Math.max(0.2, width * widthShrinkFactor);
+                const shrunkHeight = Math.max(0.3, height * heightShrinkFactor);
                 left += (width - shrunkWidth) / 2;
                 top += (height - shrunkHeight) / 2;
                 width = shrunkWidth;
@@ -3817,10 +3834,18 @@ const morphologyData = {};
                 const heightSource = ayahRect ? ayahRect.height : wordRect.height;
                 
                 // Calculate position and size based on wordRect or ayah-end rect
-                const top = (topSource - minTop) * scaleFactor;
+                let top = (topSource - minTop) * scaleFactor;
                 let left = (leftSource - minLeft) * scaleFactor - (ayahRect ? 0 : measuredWidth);
-                let width = ayahRect ? Math.max(1, widthSource * scaleFactor) : measuredWidth;
-                const height = Math.max(1, heightSource * scaleFactor);
+                let width = ayahRect ? Math.max(0.2, widthSource * scaleFactor) : measuredWidth;
+                let height = Math.max(0.3, heightSource * scaleFactor);
+                const ayahWidthShrinkFactor = 0.9;
+                const ayahHeightShrinkFactor = 0.7;
+                const shrunkWidth = Math.max(0.2, width * ayahWidthShrinkFactor);
+                const shrunkHeight = Math.max(0.3, height * ayahHeightShrinkFactor);
+                left += (width - shrunkWidth) / 2;
+                top += (height - shrunkHeight) / 2;
+                width = shrunkWidth;
+                height = shrunkHeight;
                 
                 let ayahFontSize = Math.min(fontSize, height);
                 if (String(ayahText).length >= 3) {
@@ -3858,18 +3883,19 @@ const morphologyData = {};
             // Calculate position and size based on wordRect
             let top = (wordRect.top - minTop) * scaleFactor;
             let left = (wordRect.left - minLeft) * scaleFactor;
-            let width = Math.max(1, wordRect.width * scaleFactor);
-            let height = Math.max(1, wordRect.height * scaleFactor);
+                let width = Math.max(0.2, wordRect.width * scaleFactor);
+                let height = Math.max(0.3, wordRect.height * scaleFactor);
             
             // Ensure words don't exceed the minimapContent width
             const maxRight = availableWidth;
             if (left + width > maxRight) {
-                width = Math.max(1, maxRight - left);
+                width = Math.max(0.2, maxRight - left);
             }
-            
-            const shrinkFactor = 0.8;
-            const shrunkWidth = Math.max(1, width * shrinkFactor);
-            const shrunkHeight = Math.max(1, height * shrinkFactor);
+
+            const widthShrinkFactor = 0.9;
+            const heightShrinkFactor = 0.7;
+            const shrunkWidth = Math.max(0.2, width * widthShrinkFactor);
+            const shrunkHeight = Math.max(0.3, height * heightShrinkFactor);
             left += (width - shrunkWidth) / 2;
             top += (height - shrunkHeight) / 2;
             width = shrunkWidth;
@@ -4490,6 +4516,14 @@ const morphologyData = {};
     };
     window.simpleMinimapRefreshSelectedRootsPanel = function() {
         updateHighlightedRootsPanel();
+    };
+    window.simpleMorphTooltipCounts = function(root, lemma) {
+        const rootWords = root ? (rootToWordsMap[root] || []) : [];
+        const lemmaWords = lemma ? (lemmaToWordsMap[lemma] || []) : [];
+        return {
+            rootCount: rootWords.length || 0,
+            lemmaCount: lemmaWords.length || 0
+        };
     };
 
     if (!IS_SIMPLE_MINIMAP_HOST) {
