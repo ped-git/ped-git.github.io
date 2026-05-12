@@ -291,6 +291,14 @@ speech[black]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-blackdashed3 {
+  border-bottom: 2px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-blackdashed-far {
   border-bottom: 1px dashed rgb(150, 150, 150);
   border-left: 0;
@@ -366,6 +374,10 @@ speech[black]::before {
 
 .highlight2 {
   color:  rgb(205, 100, 100);
+}
+
+.highlight3 {
+  color:  rgb(50, 120, 220);
 }
 
 @media print {
