@@ -1894,8 +1894,17 @@
             if (!ch || ch.id !== scopeSura || !ch.pages || !ch.pages.length) continue;
             var seen = {};
             var pages = [];
-            for (var pi = 0; pi < ch.pages.length; pi++) {
-                var normalized = pageForCurrentMode(ch.pages[pi]);
+            var startPage = parseInt(ch.pages[0], 10);
+            var endPage = parseInt(ch.pages[ch.pages.length - 1], 10);
+            if (!Number.isFinite(startPage)) return null;
+            if (!Number.isFinite(endPage)) endPage = startPage;
+            if (endPage < startPage) {
+                var tmp = startPage;
+                startPage = endPage;
+                endPage = tmp;
+            }
+            for (var pageNum = startPage; pageNum <= endPage; pageNum++) {
+                var normalized = pageForCurrentMode(pageNum);
                 if (!seen[normalized]) {
                     seen[normalized] = true;
                     pages.push(normalized);
@@ -1905,6 +1914,12 @@
             return pages;
         }
         return null;
+    }
+    function pageBelongsToSura(pageNum, suraNum) {
+        var scopedPages = getScopedSearchPages(suraNum);
+        if (!scopedPages || !scopedPages.length) return false;
+        var normalizedPage = pageForCurrentMode(pageNum);
+        return scopedPages.indexOf(normalizedPage) !== -1;
     }
     function rotateSearchPages(pages, startPage, direction) {
         if (!pages || !pages.length) return [];
@@ -2042,6 +2057,7 @@
         captureDraftOriginIfNeeded();
         searchState.activeTerms = terms.slice();
         searchState.pendingMatchDirection = direction;
+        var modeState = getMode();
         var localGroups = getRenderedSearchGroups(main);
         if (localGroups.length) {
             var currentIndex = searchState.activeMatchIndex;
@@ -2050,6 +2066,14 @@
             if (nextIndex >= 0 && nextIndex < localGroups.length) {
                 searchState.activeMatchIndex = nextIndex;
                 applyActiveSearchMatch(main, direction);
+                setSearchNotFound(false);
+                updateSearchButtons();
+                return;
+            }
+            if (modeState.mode === 'sura') {
+                searchState.activeMatchIndex = direction === -1 ? (localGroups.length - 1) : 0;
+                applyActiveSearchMatch(main, direction);
+                searchState.hasMatch = true;
                 setSearchNotFound(false);
                 updateSearchButtons();
                 return;
@@ -2108,9 +2132,18 @@
             if (!chaptersCache || !chaptersCache.length) {
                 try { await fetchChapters(); } catch (err) {}
             }
-            var ch = getChapterForPage(normalizedTarget);
+            var targetSura = null;
+            var scopedSura = getSearchScopeSura();
+            if (scopedSura != null && pageBelongsToSura(normalizedTarget, scopedSura)) {
+                targetSura = scopedSura;
+            } else if (st.sura != null && pageBelongsToSura(normalizedTarget, st.sura)) {
+                targetSura = st.sura;
+            } else if (searchState.draftOriginSura != null && pageBelongsToSura(normalizedTarget, searchState.draftOriginSura)) {
+                targetSura = searchState.draftOriginSura;
+            }
+            var ch = targetSura == null ? getChapterForPage(normalizedTarget) : null;
             setSetting('page_mode', getPageMode());
-            setUrl('sura', normalizedTarget, ch ? ch.id : 1);
+            setUrl('sura', normalizedTarget, targetSura != null ? targetSura : (ch ? ch.id : 1));
         } else {
             setUrl('page', normalizedTarget, 1);
         }
@@ -2130,10 +2163,10 @@
         searchState.draftOriginSearchSura = null;
         searchState.draftOriginScrollTop = null;
         searchState.previewPage = null;
-        searchState.hasMatch = !!searchState.activeTerms.length;
+        searchState.hasMatch = !!(searchState.activeTerms.length && searchState.hasMatch);
         if (searchState.activeMatchIndex < 0) searchState.activeMatchIndex = 0;
         cancelInFlightSearch();
-        setSearchNotFound(false);
+        setSearchNotFound(!!searchState.activeTerms.length && !searchState.hasMatch);
         updateSearchButtons();
     }
     function cancelSearchPreview() {
@@ -4793,7 +4826,7 @@
         simpleSearchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                commitSearchPreview();
+                jumpBetweenSearchResults(1);
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 cancelSearchPreview();
