@@ -50,6 +50,20 @@ speech[black]::before {
   right: 7.4mm; ;
 }
 
+.vertical-line-red-1 {
+  border-left: 0.3mm solid rgb(205,100,100);
+  height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
+.vertical-line-green-1 {
+  border-left: 0.3mm solid rgb(70,175,70);
+  height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
 .vertical-line-2 {
   border-left: 0.3mm solid rgb(150, 150, 150);
   height: 100%;
@@ -75,6 +89,30 @@ speech[black]::before {
 
 .diamond-marker.bottom-1 {
   background-color: black;
+  bottom: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.top-red-1 {
+  background-color: rgb(205,100,100);
+  top: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.bottom-red-1 {
+  background-color: rgb(205,100,100);
+  bottom: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.top-green-1 {
+  background-color: rgb(70,175,70);
+  top: 0;
+  right: 7.0mm; ;
+}
+
+.diamond-marker.bottom-green-1 {
+  background-color: rgb(70,175,70);
   bottom: 0;
   right: 7.0mm; ;
 }
@@ -377,7 +415,15 @@ speech[black]::before {
 }
 
 .highlight3 {
+  color:  rgb(150, 150, 150);
+}
+
+.highlight4 {
   color:  rgb(50, 120, 220);
+}
+
+.backhighlight1 {
+  text-shadow: 0.53mm 0.53mm 1.06mm rgba(0, 0, 0, 0.5);
 }
 
 @media print {
