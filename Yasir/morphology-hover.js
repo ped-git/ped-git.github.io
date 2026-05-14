@@ -3250,7 +3250,7 @@ const morphologyData = {};
             viewportHeight = window.innerHeight;
             viewportBottom = scrollTop + viewportHeight;
         }
-        const extraSpace = minimap._extraSpace || 5;
+        const extraSpace = (minimap._extraSpace != null) ? minimap._extraSpace : 5;
         
         // Calculate visible area position in minimap using the current scale factor
         // The viewport shows content from scrollTop to viewportBottom
@@ -3279,7 +3279,7 @@ const morphologyData = {};
         const minLeft = minimap._minLeft;
         const contentWidth = minimap._contentWidth;
         const contentHeight = minimap._contentHeight;
-        const extraSpace = minimap._extraSpace || 5;
+        const extraSpace = (minimap._extraSpace != null) ? minimap._extraSpace : 5;
         
         // Calculate new scaling factors based on available width.
         // In desktop host mode, the minimap width is controlled by CSS, so read it.
@@ -3301,7 +3301,7 @@ const morphologyData = {};
         }
 
         const availableWidth = Math.max(0, minimapWindowWidth - containerPadding - extraSpace); // Content area width
-        
+
         // In mobile mode, also consider the available height for scaling
         let availableHeightForScaling = 400; // Default
         if (isMobileMode && minimap.parentElement && minimap.parentElement.id === 'mobile-bottom-row') {
@@ -3424,7 +3424,7 @@ const morphologyData = {};
         if (!IS_DESKTOP_HOST) {
             minimap.style.width = (minimapWindowWidth) + 'px';
         }
-        
+
         // Update stored values
         minimap._scaleFactor = scaleFactor;
         minimap._availableWidth = availableWidth;
@@ -3738,6 +3738,7 @@ const morphologyData = {};
             minimap.style.width = '100%';
             minimap.style.maxWidth = '100%';
             minimap.style.flex = '1 1 auto';
+            minimap.style.zIndex = 'auto';
         }
 
         // Create minimap content container
@@ -3751,7 +3752,7 @@ const morphologyData = {};
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: ${IS_SIMPLE_MINIMAP_HOST ? 'visible' : 'hidden'};
             cursor: pointer;
         `;
 
@@ -3761,20 +3762,23 @@ const morphologyData = {};
         // Note: This must be appended AFTER word divs so it appears on top, OR use higher z-index
         visibleHighlight = document.createElement('div');
         visibleHighlight.id = 'minimap-visible-highlight';
+        const _vhBg = IS_SIMPLE_MINIMAP_HOST ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.6)';
+        const _vhOpacity = IS_SIMPLE_MINIMAP_HOST ? 1 : 0.8;
         visibleHighlight.style.cssText = `
             position: absolute;
-            background: rgba(255, 255, 255, 0.6);
+            background: ${_vhBg};
             border: 1px solid #999;
             pointer-events: none;
             z-index: 2;
-            opacity: 0.8;
+            opacity: ${_vhOpacity};
         `;
 
         // Calculate scaling factors to create boxes
         const minimapWindowWidth = calculateWindowWidth();
         const containerPadding = 12; // 6px padding on each side
-        const extraSpace = 10;
+        const extraSpace = IS_SIMPLE_MINIMAP_HOST ? 0 : 10;
         const availableWidth = minimapWindowWidth - containerPadding - extraSpace; // Content area width
+
         
         // Calculate document dimensions
         const documentHeight = Math.max(
@@ -4213,7 +4217,7 @@ const morphologyData = {};
             const minTop = minimap._minTop;
             const contentHeight = minimap._contentHeight;
             const contentWidth = minimap._contentWidth;
-            const extraSpace = minimap._extraSpace || 5;
+            const extraSpace = (minimap._extraSpace != null) ? minimap._extraSpace : 5;
             const scaleFactor = minimap._scaleFactor || 1;
             if (minTop == null || !contentHeight || !contentWidth) return;
 
@@ -4234,17 +4238,17 @@ const morphologyData = {};
             const visibleHeight = Math.max(10, visibleBottom - visibleTop);
 
             const minimapContent = minimap.querySelector('#minimap-content');
-            const minimapRect = minimap.getBoundingClientRect();
-            const contentRect = minimapContent ? minimapContent.getBoundingClientRect() : minimapRect;
-            const contentLeft = Math.max(0, contentRect.left - minimapRect.left);
+            const contentRect = minimapContent ? minimapContent.getBoundingClientRect() : minimap.getBoundingClientRect();
             const scaledWidth = contentWidth * scaleFactor;
             const contentWidthPx = Math.max(0, contentRect.width);
             const visibleWidth = contentWidthPx > 0 ? contentWidthPx : Math.max(0, scaledWidth - extraSpace);
 
+            const _vhExpand = 3;
             visibleHighlight.style.top = `${visibleTop}px`;
-            visibleHighlight.style.left = `${contentLeft}px`;
-            visibleHighlight.style.width = `${visibleWidth}px`;
+            visibleHighlight.style.left = `${-_vhExpand}px`;
+            visibleHighlight.style.width = `${visibleWidth + (_vhExpand * 2)}px`;
             visibleHighlight.style.height = `${visibleHeight}px`;
+
         };
 
         scrollEl.addEventListener('scroll', () => window.requestAnimationFrame(update), { passive: true });

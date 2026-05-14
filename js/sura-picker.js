@@ -95,7 +95,7 @@
     var searchInputRef = null;
 
     var PICKER_CSS =
-        '#sura-picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}' +
+        '#sura-picker-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}' +
         '#sura-picker-overlay.visible{opacity:1;visibility:visible}' +
         '#sura-picker-modal{background:#fff;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.15);max-width:90vw;width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}' +
         '.sura-picker-header{padding:16px 20px;border-bottom:1px solid #e8e6e2;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}' +

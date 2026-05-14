@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>قرآن - نمایش</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --font-size-jumbo: 2rem;
@@ -12,19 +15,20 @@
             --translation-font-size-value: 0.95;
             --page-text-size: calc(var(--main-font-size-value) * 1rem);
             --page-text-size-qcf: calc(var(--main-font-size-value) * 1.08 * 1rem);
-            --translation-text-size: calc(var(--translation-font-size-value) * 1rem);
+            --translation-text-size: calc(var(--translation-font-size-value) * 0.9rem);
             --layout-single-column-width: 360px;
             --layout-paired-column-width: 312px;
             --layout-continuous-column-width: 380px;
             --layout-double-continuous-column-width: 820px;
             --layout-minimap-text-column-width: 380px;
             --layout-minimap-sidebar-width: 180px;
-            --page-content-pad-y: 10px;
+            --page-content-pad-y: 2px;
             --page-content-pad-x: 10px;
-            --page-content-pad-y-paired: 4px;
+            --page-content-pad-y-paired: 2px;
             --page-content-pad-x-paired: 3px;
-            --page-content-pad-bottom-extra: 1em;
+            --page-content-pad-bottom-extra: 0.6em;
             --layout-column-gap: 16px;
+            --page-card-margin: calc(30px * var(--main-font-size-value, 1.2) / 1.2);
         }
         @font-face {
             font-family: 'BLotus';
@@ -96,9 +100,9 @@
         #simple-continuous-minimap-layout {
             display: grid;
             grid-template-columns:
-                minmax(0, var(--layout-minimap-text-column-width))
+                max-content
                 minmax(0, var(--layout-minimap-sidebar-width));
-            gap: var(--layout-column-gap);
+            gap: 0;
             align-items: stretch;
             justify-content: center;
             width: fit-content;
@@ -120,6 +124,24 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow: auto;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+        }
+        #simple-minimap-text-root:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+        }
+        #simple-minimap-text-root::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #simple-minimap-text-root::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        #simple-minimap-text-root:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
         }
         #simple-minimap-text-root .sura-container {
             width: 100%;
@@ -132,6 +154,24 @@
             height: 100%;
             overflow: auto;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+        }
+        #simple-minimap-text-root .sura-scroll:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+        }
+        #simple-minimap-text-root .sura-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        #simple-minimap-text-root .sura-scroll::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        #simple-minimap-text-root .sura-scroll:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
         }
         #simple-minimap-sidebar {
             display: flex;
@@ -156,6 +196,20 @@
             min-height: 120px !important;
             height: auto !important;
             max-height: 50% !important;
+            padding: 5px !important;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
+        #morphology-minimap::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        #morphology-minimap::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+        #morphology-minimap::-webkit-scrollbar-track {
+            background: transparent;
         }
         #highlighted-roots-panel {
             flex: 1 1 50% !important;
@@ -388,6 +442,10 @@
             width: 20px;
             height: 20px;
         }
+        #search-sura-scope-btn > span {
+            font-size: 14px;
+            line-height: 1;
+        }
         .search-action-btn:hover {
             background: #f4f7fb;
         }
@@ -458,7 +516,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
             padding: 16px 20px;
-            min-width: 260px;
+            min-width: 300px;
             font-family: inherit;
             direction: rtl;
             text-align: right;
@@ -494,7 +552,7 @@
         }
         #settings-menu .settings-row-inline {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(120px, 1.2fr);
+            grid-template-columns: minmax(0, 1fr) 130px;
             gap: 10px;
             align-items: center;
             margin-bottom: 6px;
@@ -503,22 +561,45 @@
         }
         #settings-menu .settings-row-inline > span:first-child {
             white-space: nowrap;
+            font-size: 0.80rem;
         }
         #settings-menu .settings-row-select {
             display: contents;
         }
         #settings-menu .settings-row-range {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(92px, 1.2fr) auto;
-            gap: 8px;
+            grid-template-columns: minmax(0, 1fr) 130px;
+            gap: 10px;
             align-items: center;
             margin-bottom: 6px;
             color: #334155;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
+        }
+        #settings-menu .settings-row-range > span:first-child {
+            white-space: nowrap;
+            font-size: 0.80rem;
         }
         #settings-menu input[type="range"] {
             width: 100%;
             accent-color: #3b82f6;
+        }
+        #settings-menu .settings-row-range input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+            border-radius: 6px;
+            background: #fff;
+            color: #1f2937;
+            font-family: inherit;
+            font-size: 0.80rem;
+            text-align: center;
+            direction: ltr;
+            font-variant-numeric: tabular-nums;
+        }
+        #settings-menu .settings-row-range input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
         #settings-menu .settings-range-value {
             min-width: 3.25em;
@@ -527,16 +608,11 @@
             font-variant-numeric: tabular-nums;
             color: #0f172a;
         }
-        #settings-menu #font-select,
-        #settings-menu #layout-select,
-        #settings-menu #root-tooltip-mode,
-        #settings-menu #lemma-tooltip-mode,
-        #settings-menu #translation-language,
-        #settings-menu #page-mode,
-        #settings-menu #copy-ayah-style {
+        #settings-menu .settings-row-select select,
+        #settings-menu select.settings-menu-select {
             width: 100%;
             padding: 0px;
-            font-size: 0.95rem;
+            font-size: 0.80rem;
             border-radius: 10px;
             border: 1px solid rgba(15, 23, 42, 0.14);
             background: #fff;
@@ -545,24 +621,14 @@
             font-family: inherit;
             direction: rtl;
         }
-        #settings-menu #font-select:focus,
-        #settings-menu #layout-select:focus,
-        #settings-menu #root-tooltip-mode:focus,
-        #settings-menu #lemma-tooltip-mode:focus,
-        #settings-menu #translation-language:focus,
-        #settings-menu #page-mode:focus,
-        #settings-menu #copy-ayah-style:focus {
+        #settings-menu .settings-row-select select:focus,
+        #settings-menu select.settings-menu-select:focus {
             outline: none;
             border-color: rgba(59, 130, 246, 0.5);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
-        #settings-menu #font-select option,
-        #settings-menu #layout-select option,
-        #settings-menu #root-tooltip-mode option,
-        #settings-menu #lemma-tooltip-mode option,
-        #settings-menu #translation-language option,
-        #settings-menu #page-mode option,
-        #settings-menu #copy-ayah-style option {
+        #settings-menu .settings-row-select select option,
+        #settings-menu select.settings-menu-select option {
             padding: 0px;
             margin: 0px;
             font-size: 0.75rem;
@@ -579,6 +645,15 @@
             letter-spacing: 0.02em;
             color: #64748b;
             text-transform: uppercase;
+        }
+        #settings-menu .settings-section-divider {
+            margin: 10px 0 6px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #64748b;
         }
         #settings-menu .settings-links-grid {
             display: grid;
@@ -637,7 +712,13 @@
             width: fit-content;
             max-width: 100%;
             margin: 0 auto;
-            grid-template-columns: minmax(0, var(--layout-single-column-width));
+            grid-template-columns: max-content;
+        }
+        .page-container.two-pages,
+        .page-container.page-with-translation,
+        .page-container:not(.two-pages):not(.page-with-translation) {
+            align-items: center;
+            align-content: center;
         }
         .page-card {
             background: #fff;
@@ -651,15 +732,31 @@
         .page-card.single {
             width: 100%;
         }
-        .page-container.two-pages,
+        .page-container.two-pages {
+            grid-template-columns: repeat(2, max-content);
+        }
         .page-container.page-with-translation {
-            grid-template-columns: repeat(2, minmax(0, var(--layout-paired-column-width)));
+            grid-template-columns: max-content minmax(0, calc(var(--layout-single-column-width) * var(--main-font-size-value, 1)));
         }
         .page-container:not(.two-pages):not(.page-with-translation) {
             --page-text-size-current: var(--page-text-size);
             --page-text-size-qcf-current: var(--page-text-size-qcf);
             --page-content-pad-y-current: var(--page-content-pad-y);
             --page-content-pad-x-current: var(--page-content-pad-x);
+        }
+        .page-container:not(.two-pages):not(.page-with-translation) .page-card {
+            padding: 0 clamp(0px, calc((100vw - 392px) / 2), var(--page-card-margin));
+        }
+        .page-container:not(.two-pages):not(.page-with-translation) .page-card .page-content {
+            padding: var(--page-card-margin) 0;
+        }
+        .page-container.two-pages .page-card,
+        .page-container.page-with-translation .page-card {
+            padding: 0 var(--page-card-margin);
+        }
+        .page-container.two-pages .page-card .page-content,
+        .page-container.page-with-translation .page-card .page-content {
+            padding: var(--page-card-margin) 0;
         }
         .page-container.two-pages,
         .page-container.page-with-translation {
@@ -681,13 +778,19 @@
             min-height: 0;
         }
         .page-header {
-            padding: 10px 14px;
+            padding: 0;
             border-bottom: 1px solid #e8e6e2;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 4px;
+            min-width: 0;
+        }
+        .page-header > .sura-name,
+        .page-header > .page-meta {
+            min-width: 0;
+            white-space: nowrap;
         }
         .sura-name { font-weight: bold; font-size: 1rem; }
         .page-meta {
@@ -697,7 +800,7 @@
         .page-meta .page-num-input {
             width: 4em;
             min-width: 3.5em;
-            padding: 3px 8px;
+            /* padding: 3px 8px; */
             font-size: 1rem;
             font-size: inherit;
             /* font-weight: 600; */
@@ -773,6 +876,9 @@
         .page-content.font-qcf.layout-flow {
             text-align: center;
         }
+        .page-content.font-qcf.layout-flow {
+            padding: 0;
+        }
         .page-content.font-qcf.layout-ayah-line,
         .page-content.font-qcf.layout-ayah-line .ayah,
         .page-content.font-qcf.layout-ayah-line .ayah-inline {
@@ -807,9 +913,9 @@
         .page-card.page-2 .page-content.font-qcf .mushaf-line { text-align: center; }
         .page-content .mushaf-line .qcf-word { display: inline; }
         .page-card.translation-card .page-content {
-            font-family: 'Sahel', 'BLotus', system-ui, sans-serif;
+            font-family: 'Sahel', 'Vazirmatn', 'BLotus', system-ui, sans-serif;
             font-size: var(--translation-text-size);
-            line-height: 1.9;
+            line-height: 1.5;
             text-align: right;
             color: #243447;
             background: #fcfbf8;
@@ -842,6 +948,11 @@
         .page-content .qword.ayah-hovered {
             color: #2ca4ab;
         }
+        .translation-content .translation-ayah.ayah-hovered {
+            color: #2ca4ab;
+            /* background-color: rgba(44, 165, 171, 0.048); */
+            border-radius: 3px;
+        }
         .page-content .qword.search-match {
             border-radius: 0.25em;
             background-color: rgba(250, 204, 21, 0.38);
@@ -861,7 +972,7 @@
         .page-content .qword.search-match.search-match-active {
             box-shadow: inset 0 0 0 1.5px rgba(234, 179, 8, 0.9);
         }
-        .page-content .sura-name-in-page {
+        .sura-name-in-page {
             display: block;
             text-align: center;
             margin: 0;
@@ -870,30 +981,31 @@
             font-size: 1.4rem;
             color: #333;
         }
-        .page-content .sura-name-in-page.sura-name-qcf {
+        .sura-name-in-page.sura-name-qcf {
             font-family: surahnames, serif;
             font-size: 1.5em;
             color: #000;
             -webkit-font-smoothing: antialiased;
         }
-        .page-content .sura-name-in-page.sura-name-qcf .sura-name-icon {
+        .sura-name-in-page.sura-name-qcf .sura-name-icon {
             font-family: surahnames, serif;
         }
-        .page-content .sura-name-in-page:not(.sura-name-qcf) {
+        .sura-name-in-page:not(.sura-name-qcf) {
             font-family: 'QPC Uthmani Hafs', 'B Badr', 'BBadr', 'BLotus', 'KFGQPC Uthman Taha Naskh', serif;
         }
         .sura-container {
-            width: 100%;
-            max-width: var(--layout-continuous-column-width);
+            width: fit-content;
+            max-width: 100%;
             margin: 0 auto;
         }
         .sura-container.sura-container-double-continuous {
-            max-width: var(--layout-double-continuous-column-width);
+            width: fit-content;
+            max-width: min(100%, var(--layout-double-continuous-column-width));
         }
         .sura-title {
             text-align: center;
             font-size: 1.1rem;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
             margin-top: 0;
             color: #2c3e50;
             font-family: system-ui, sans-serif;
@@ -906,17 +1018,41 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             overflow-y: auto;
             max-height: calc(100vh - 120px);
-            padding: 12px 0;
+            padding: 2px 0 6px;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color 0.2s ease;
+        }
+        .sura-scroll:hover {
+            scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+        }
+        .sura-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .sura-scroll::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        .sura-scroll:hover::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.25);
         }
         .sura-container-double-continuous .sura-scroll {
-            padding: 8px 0;
+            padding: 2px 0 6px;
         }
-        .sura-page-block { padding: 12px 18px; min-width: 191px; }
+        .sura-page-block { padding: 6px var(--page-card-margin); min-width: 191px; }
+        .sura-page-block:first-child { padding-top: 0; }
+        #simple-minimap-text-root .sura-page-block {
+            padding-left: 0;
+            padding-right: 0;
+        }
         .sura-page-block + .sura-page-block { border-top: 1px solid #c4bfb4; min-width: 191px; }
         .sura-page-block.sura-page-block-double-continuous {
-            padding: 8px 4px;
+            padding: 3px 4px;
             min-width: 0;
         }
+        .sura-page-block.sura-page-block-double-continuous:first-child { padding-top: 0; }
         .sura-page-block.sura-page-block-double-continuous + .sura-page-block.sura-page-block-double-continuous {
             min-width: 0;
         }
@@ -1072,7 +1208,7 @@
         #progress-tooltip.visible { display: block; }
         #word-hover-tooltip {
             position: absolute;
-            z-index: 120;
+            z-index: 10000;
             display: none;
             pointer-events: none; /* set to auto when shown on click so mouse can move over it */
             width: max-content;
@@ -1240,6 +1376,19 @@
             <button type="button" id="settings-btn" aria-label="تنظیمات">⚙</button>
             <div id="settings-menu" class="settings-menu">
                 <div class="settings-row-inline">
+                    <span>حالت صفحه</span>
+                    <label class="settings-row-select">
+                        <select id="page-mode" aria-label="حالت صفحه">
+                            <option value="one-page">یک صفحه</option>
+                            <option value="two-pages">دو صفحه</option>
+                            <option value="one-page-translation">یک صفحه + ترجمه</option>
+                            <option value="continuous">پیوسته (سوره)</option>
+                            <option value="continuous-minimap">پیوسته + نقشه</option>
+                            <option value="double-continuous">پیوسته دوتایی</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
                     <span>فونت</span>
                     <label class="settings-row-select">
                         <select id="font-select" aria-label="فونت">
@@ -1250,13 +1399,7 @@
                 </div>
                 <label class="settings-row-range" for="main-font-size">
                     <span>اندازه فونت متن</span>
-                    <input type="range" id="main-font-size" min="0.7" max="2.2" step="0.05" aria-label="اندازه فونت متن">
-                    <span class="settings-range-value" id="main-font-size-value">1.20rem</span>
-                </label>
-                <label class="settings-row-range" for="translation-font-size">
-                    <span>اندازه فونت ترجمه</span>
-                    <input type="range" id="translation-font-size" min="0.6" max="1.8" step="0.05" aria-label="اندازه فونت ترجمه">
-                    <span class="settings-range-value" id="translation-font-size-value">0.95rem</span>
+                    <input type="number" id="main-font-size" min="0.3" max="2.2" step="0.05" inputmode="decimal" aria-label="اندازه فونت متن">
                 </label>
                 <div class="settings-row-inline">
                     <span>زبان ترجمه</span>
@@ -1280,8 +1423,9 @@
                     <span>نمایش ریشه</span>
                     <label class="settings-row-select">
                         <select id="root-tooltip-mode" aria-label="نمایش ریشه">
+                            <option value="root-count" selected>ریشه + تعداد</option>
                             <option value="root">ریشه</option>
-                            <option value="root-count">ریشه + تعداد</option>
+                            <option value="hidden">پنهان</option>
                         </select>
                     </label>
                 </div>
@@ -1289,37 +1433,58 @@
                     <span>نمایش لِم</span>
                     <label class="settings-row-select">
                         <select id="lemma-tooltip-mode" aria-label="نمایش لم">
+                            <option value="lemma-count" selected>لم + تعداد</option>
                             <option value="lemma">لم</option>
-                            <option value="lemma-count">لم + تعداد</option>
+                            <option value="hidden">پنهان</option>
                         </select>
                     </label>
                 </div>
                 <div class="settings-row-inline">
-                    <span>حالت صفحه</span>
+                    <span>آیه در روگرفت</span>
                     <label class="settings-row-select">
-                        <select id="page-mode" aria-label="حالت صفحه">
-                            <option value="one-page">یک صفحه</option>
-                            <option value="two-pages">دو صفحه</option>
-                            <option value="one-page-translation">یک صفحه + ترجمه</option>
-                            <option value="continuous">پیوسته (سوره)</option>
-                            <option value="continuous-minimap">پیوسته + نقشه</option>
-                            <option value="double-continuous">پیوسته دوتایی</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="settings-row-inline">
-                    <span>شماره آیه در کپی</span>
-                    <label class="settings-row-select">
-                        <select id="copy-ayah-style" aria-label="نحوه کپی شماره آیه">
+                        <select id="copy-ayah-style" aria-label="نحوه روگرفت شماره آیه">
                             <option value="paren">(شماره‌آیه)</option>
                             <option value="bracket">[شماره‌آیه]</option>
                             <option value="sura-name">[نام‌سوره شماره‌آیه]</option>
-                            <option value="contextual">حالت هوشمند انتخاب</option>
+                            <option value="contextual">با اطلاعات آیه</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-section-divider">نقشک</div>
+                <label class="settings-row-range" for="mm-width-ratio">
+                    <span>پهنای نقشک</span>
+                    <input type="number" id="mm-width-ratio" min="0.1" max="1" step="0.05" inputmode="decimal" aria-label="نسبت پهنای نقشه">
+                </label>
+                <div class="settings-row-inline">
+                    <span>ریشه‌های انتخابی</span>
+                    <label class="settings-row-select">
+                        <select id="mm-selected-panel" aria-label="نمایش پنل ریشه‌های انتخابی">
+                            <option value="show">نمایش</option>
+                            <option value="hide">پنهان</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>آمار ریشه‌ها</span>
+                    <label class="settings-row-select">
+                        <select id="mm-important-display" aria-label="نمایش ریشه‌های مهم">
+                            <option value="numbers">اعداد</option>
+                            <option value="chart">نمودار</option>
+                            <option value="off">پنهان</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>رنگ ریشه روی نقشه</span>
+                    <label class="settings-row-select">
+                        <select id="mm-color-map" aria-label="نمایش رنگ ریشه روی نقشه">
+                            <option value="show">نمایش</option>
+                            <option value="hide">پنهان</option>
                         </select>
                     </label>
                 </div>
                 <div class="settings-section-links">
-                    <div class="settings-title">نحوه نمایش</div>
+                    <div class="settings-title">برگه‌ها</div>
                     <div class="settings-links-grid">
                         <a id="go-desktop-link" class="desktop-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>
                         <a id="go-search-link" class="desktop-link" href="search.html" title="جستجو">جستجو</a>
@@ -1339,7 +1504,7 @@
                 </div>
                 <input type="text" id="simple-search-input" placeholder="جستجو در همین صفحه و صفحه‌های بعد" aria-label="جستجو در صفحه‌های قرآن">
                 <div class="search-scope-stack" aria-label="جستجو در سوره">
-                    <button type="button" id="search-sura-scope-btn" class="search-action-btn search-toggle-btn" aria-label="Search in this sura" title="Search in this sura" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.75"></circle><circle cx="10" cy="10" r="5.5" fill="currentColor"></circle></svg></button>
+                    <button type="button" id="search-sura-scope-btn" class="search-action-btn search-toggle-btn" aria-label="Search in this sura" title="Search in this sura" aria-pressed="true"><span aria-hidden="true">⟳</span></button>
                     <div class="search-scope-slot" aria-hidden="true"></div>
                 </div>
             </div>
@@ -1457,8 +1622,6 @@
     const settingsMenu = document.getElementById('settings-menu');
     const mainFontSizeEl = document.getElementById('main-font-size');
     const mainFontSizeValueEl = document.getElementById('main-font-size-value');
-    const translationFontSizeEl = document.getElementById('translation-font-size');
-    const translationFontSizeValueEl = document.getElementById('translation-font-size-value');
     const navPrevSuraBtn = document.getElementById('nav-prev-sura');
     const navPrevPageBtn = document.getElementById('nav-prev-page');
     const navNextPageBtn = document.getElementById('nav-next-page');
@@ -2446,7 +2609,6 @@
         }
     };
     const DEFAULT_MAIN_FONT_SIZE = 1.2;
-    const DEFAULT_TRANSLATION_FONT_SIZE = 0.95;
 
     function clampNumber(value, min, max, fallback) {
         var n = parseFloat(value);
@@ -2457,7 +2619,9 @@
         return clampNumber(getSetting('main_font_size', String(DEFAULT_MAIN_FONT_SIZE)), 0.7, 2.2, DEFAULT_MAIN_FONT_SIZE);
     }
     function getTranslationFontSizeSetting() {
-        return clampNumber(getSetting('translation_font_size', String(DEFAULT_TRANSLATION_FONT_SIZE)), 0.6, 1.8, DEFAULT_TRANSLATION_FONT_SIZE);
+        var main = getMainFontSizeSetting();
+        var qcfFactor = useQCF() ? 1.08 : 1;
+        return main * qcfFactor * 0.7;
     }
     function formatRemValue(value) {
         return value.toFixed(2) + 'rem';
@@ -2490,12 +2654,14 @@
     }
     function getTranslationLanguage() { return getSetting('translation_language', 'fa'); }
     function getRootTooltipMode() {
-        var mode = getSetting('root_tooltip_mode', 'root');
-        return mode === 'root-count' ? 'root-count' : 'root';
+        var mode = getSetting('root_tooltip_mode', 'root-count');
+        if (mode === 'root-count' || mode === 'root' || mode === 'hidden') return mode;
+        return 'root-count';
     }
     function getLemmaTooltipMode() {
-        var mode = getSetting('lemma_tooltip_mode', 'lemma');
-        return mode === 'lemma-count' ? 'lemma-count' : 'lemma';
+        var mode = getSetting('lemma_tooltip_mode', 'lemma-count');
+        if (mode === 'lemma-count' || mode === 'lemma' || mode === 'hidden') return mode;
+        return 'lemma-count';
     }
     function getVerseTranslationParam() {
         var id = VERSE_TRANSLATION_RESOURCE_IDS[getTranslationLanguage()];
@@ -2898,6 +3064,7 @@
         container.classList.toggle('font-qcf', useQCFFont);
         var ayahPerLine = layoutAyahPerLine();
         var isDoubleContinuous = doubleContinuousMode();
+        var suppressInPageSuraHeading = suraViewMode();
         container.classList.toggle('layout-ayah-line', ayahPerLine);
         container.classList.toggle('layout-flow', !ayahPerLine);
         container.classList.toggle('double-continuous-content', isDoubleContinuous);
@@ -2920,7 +3087,9 @@
                     }
                 }
                 if (showSuraNum && !surasNameShown[showSuraNum]) {
-                    html += buildSuraHeadingHtml(showSuraNum, useQCFFont);
+                    if (!suppressInPageSuraHeading) {
+                        html += buildSuraHeadingHtml(showSuraNum, useQCFFont);
+                    }
                     surasNameShown[showSuraNum] = true;
                 }
                 var verseText = buildVerseText(v, useQCFFont);
@@ -2948,7 +3117,9 @@
                     }
                 }
                 if (isBismillahOnly && nextSuraStart !== null && !surasNameShown[nextSuraStart]) {
-                    html += buildSuraHeadingHtml(nextSuraStart, useQCFFont);
+                    if (!suppressInPageSuraHeading) {
+                        html += buildSuraHeadingHtml(nextSuraStart, useQCFFont);
+                    }
                     surasNameShown[nextSuraStart] = true;
                 } else {
                     var mergedWords = pairLine ? line.words.concat(pairLine.words) : line.words;
@@ -2956,7 +3127,9 @@
                     for (var si = 0; si < surasStartingOnThisLine.length; si++) {
                         var suraNumStart = surasStartingOnThisLine[si];
                         if (surasNameShown[suraNumStart]) continue;
-                        html += buildSuraHeadingHtml(suraNumStart, useQCFFont);
+                        if (!suppressInPageSuraHeading) {
+                            html += buildSuraHeadingHtml(suraNumStart, useQCFFont);
+                        }
                         surasNameShown[suraNumStart] = true;
                     }
                 }
@@ -2988,7 +3161,7 @@
             if (!translation) continue;
             var ayahNum = getAyahNumberFromVerseKey(verse.verse_key);
             var numHtml = ayahNum != null ? '<span class="ayah-num">(' + escapeHtml(fmtFa(ayahNum)) + ')</span>' : '';
-            html += '<span class="translation-ayah">' + escapeHtml(translation) + (numHtml ? (' ' + numHtml) : '') + '</span>';
+            html += '<span class="translation-ayah" data-verse-key="' + escapeAttr(verse.verse_key) + '">' + escapeHtml(translation) + (numHtml ? (' ' + numHtml) : '') + '</span>';
         }
         container.innerHTML = html || '<div class="loading">ترجمه‌ای برای این صفحه پیدا نشد.</div>';
     }
@@ -3043,11 +3216,13 @@
         if (root || lemma) {
             var morphParts = [];
             var mm = continuousMinimapMode();
-            if (root && root.length > 0) {
-                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف ریشه از نقشه' : '') + '">' + escapeHtml(getTooltipMorphLabel(root, rootCount, getRootTooltipMode())) + '</a>');
+            var rootMode = getRootTooltipMode();
+            var lemmaMode = getLemmaTooltipMode();
+            if (root && root.length > 0 && rootMode !== 'hidden') {
+                morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'کلیک: افزودن/حذف ریشه از نقشه ـ Shift+کلیک: جستجو' : '') + '">' + escapeHtml(getTooltipMorphLabel(root, rootCount, rootMode)) + '</a>');
             }
-            if (lemma && lemma.length > 0) {
-                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'Shift+کلیک: افزودن/حذف شکل واژه (lemma) از نقشه' : '') + '">' + escapeHtml(getTooltipMorphLabel(lemma, lemmaCount, getLemmaTooltipMode())) + '</a>');
+            if (lemma && lemma.length > 0 && lemmaMode !== 'hidden') {
+                morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '" class="' + (mm ? 'morph-shift-hint' : '') + '" title="' + (mm ? 'کلیک: افزودن/حذف شکل واژه (lemma) از نقشه ـ Shift+کلیک: جستجو' : '') + '">' + escapeHtml(getTooltipMorphLabel(lemma, lemmaCount, lemmaMode)) + '</a>');
             }
             if (morphParts.length > 0) {
                 var toggleHtml = '';
@@ -3123,12 +3298,22 @@
         function clearHighlights() {
             if (activeWord) activeWord.classList.remove('word-hovered');
             container.querySelectorAll('.qword.ayah-hovered').forEach(function(el) { el.classList.remove('ayah-hovered'); });
+            var pc = container.closest('.page-container');
+            if (pc) {
+                pc.querySelectorAll('.translation-ayah.ayah-hovered').forEach(function(el) { el.classList.remove('ayah-hovered'); });
+            }
             activeWord = null;
         }
         function highlightAyah(verseKey) {
             var words = container.querySelectorAll('.qword');
             for (var i = 0; i < words.length; i++) {
                 if (words[i].getAttribute('data-verse-key') === verseKey) words[i].classList.add('ayah-hovered');
+            }
+            var pc = container.closest('.page-container');
+            if (pc) {
+                pc.querySelectorAll('.translation-ayah[data-verse-key="' + verseKey + '"]').forEach(function(el) {
+                    el.classList.add('ayah-hovered');
+                });
             }
         }
         function isOverTooltip(node) {
@@ -3160,7 +3345,7 @@
             wordTooltipLeaveBound = true;
             wordHoverTooltip.addEventListener('click', function(e) {
                 var selA = e.target.closest && e.target.closest('a.morph-shift-hint[href*="search.html"]');
-                if (selA && e.shiftKey && continuousMinimapMode() && typeof window.simpleMorphToggleFromTooltip === 'function') {
+                if (selA && !e.shiftKey && continuousMinimapMode() && typeof window.simpleMorphToggleFromTooltip === 'function') {
                     try {
                         var url = selA.href ? new URL(selA.href, window.location.origin) : null;
                         if (url) {
@@ -3228,6 +3413,13 @@
             var morph = pos ? getWordMorphology(vKey, pos) : null;
             var root = (morph && morph.root) ? morph.root : '';
             var lemma = (morph && morph.lemma) ? morph.lemma : '';
+            if ((e.ctrlKey || e.metaKey) && root && typeof window.simpleMorphToggleFromTooltip === 'function') {
+                e.preventDefault();
+                e.stopPropagation();
+                window.simpleMorphToggleFromTooltip('root', root);
+                hideWordHoverTooltip();
+                return;
+            }
             var counts = getTooltipMorphCounts(root, lemma);
             if (tr || verseTr || root || lemma) {
                 wordTooltipVerseExpanded = false;
@@ -3808,6 +4000,36 @@
                 '</div>' +
                 '<div class="page-content"></div>';
             const content = card.querySelector('.page-content');
+            requestAnimationFrame(function() {
+                var hdr = card.querySelector('.page-header');
+                if (!hdr) return;
+                var cs = window.getComputedStyle(hdr);
+                var sura = hdr.querySelector('.sura-name');
+                var meta = hdr.querySelector('.page-meta');
+                var hr = hdr.getBoundingClientRect();
+                var sr = sura ? sura.getBoundingClientRect() : null;
+                var mr = meta ? meta.getBoundingClientRect() : null;
+                var cr = card.getBoundingClientRect();
+                console.log('[HDR] ' + JSON.stringify({
+                    mode: (twoPage ? 'two-pages' : (withTranslation ? 'one-page-translation' : 'one-page')),
+                    page: pageNum,
+                    headerPadding: cs.padding,
+                    headerFlexWrap: cs.flexWrap,
+                    headerWidth: hr.width,
+                    headerHeight: hr.height,
+                    headerLeft: hr.left,
+                    headerRight: hr.right,
+                    cardWidth: cr.width,
+                    cardLeft: cr.left,
+                    cardRight: cr.right,
+                    suraName: sura ? sura.textContent : null,
+                    suraWidth: sr ? sr.width : null,
+                    suraWhitespace: sura ? window.getComputedStyle(sura).whiteSpace : null,
+                    metaWidth: mr ? mr.width : null,
+                    metaWhitespace: meta ? window.getComputedStyle(meta).whiteSpace : null,
+                    viewportWidth: window.innerWidth,
+                }));
+            });
             var suraNameEl = card.querySelector('.sura-name-click');
             const cardSuraNum = suraNum;
             if (suraNameEl) {
@@ -3963,7 +4185,7 @@
                 return loadScriptById('js/simple-minimap-charts.js', 'simple-minimap-charts-script');
             });
             p = p.then(function() {
-                return loadScriptById('Yasir/morphology-hover.js?v=5', 'morphology-hover-script-simple');
+                return loadScriptById('Yasir/morphology-hover.js?v=10', 'morphology-hover-script-simple');
             });
             p.then(function() {
                 requestAnimationFrame(function() {
@@ -4389,7 +4611,8 @@
         container.setAttribute('data-columns', String(layoutConfig.columnCount || 1));
         const title = document.createElement('div');
         title.className = 'sura-title sura-title-click';
-        title.textContent = 'سوره ' + getSuraName(suraNumber);
+        title.innerHTML = buildSuraHeadingHtml(suraNumber, useQCFFont);
+        title.setAttribute('aria-label', 'سوره ' + getSuraName(suraNumber));
         title.setAttribute('role', 'button');
         title.setAttribute('tabindex', '0');
         title.addEventListener('click', function() {
@@ -4455,7 +4678,6 @@
                 '</div>' +
                 '</span>';
             sidebar.appendChild(combined);
-            sidebar.appendChild(settingsBar);
             textRoot.appendChild(container);
             leftCol.appendChild(textRoot);
             layout.appendChild(leftCol);
@@ -4626,6 +4848,9 @@
         if (main) main.classList.remove('simple-minimap-shell');
         applyTypographySettings();
         applyModeLayoutCssVars(getPageMode());
+        var inSuraScroll = suraViewMode();
+        if (navPrevPageBtn) navPrevPageBtn.style.display = inSuraScroll ? 'none' : '';
+        if (navNextPageBtn) navNextPageBtn.style.display = inSuraScroll ? 'none' : '';
         if (loadingEl) loadingEl.style.display = 'none';
 
         if (mode === 'page') {
@@ -4688,6 +4913,7 @@
         fontSelectEl.addEventListener('change', function() {
             var val = this.value === 'text' ? 'text' : 'qurancom';
             setSetting('font', val);
+            applyTypographySettings();
             render();
         });
     }
@@ -4701,31 +4927,21 @@
     }
     function syncFontSizeControls() {
         var mainValue = getMainFontSizeSetting();
-        var translationValue = getTranslationFontSizeSetting();
-        if (mainFontSizeEl) mainFontSizeEl.value = String(mainValue);
-        if (mainFontSizeValueEl) mainFontSizeValueEl.textContent = formatRemValue(mainValue);
-        if (translationFontSizeEl) translationFontSizeEl.value = String(translationValue);
-        if (translationFontSizeValueEl) translationFontSizeValueEl.textContent = formatRemValue(translationValue);
+        if (mainFontSizeEl) mainFontSizeEl.value = mainValue.toFixed(2);
+        if (mainFontSizeValueEl) mainFontSizeValueEl.textContent = 'rem';
     }
     if (mainFontSizeEl) {
         mainFontSizeEl.addEventListener('input', function() {
+            var raw = parseFloat(this.value);
+            if (!isFinite(raw) || raw < 0.7 || raw > 2.2) return;
+            setSetting('main_font_size', String(raw));
+            applyTypographySettings();
+        });
+        mainFontSizeEl.addEventListener('change', function() {
             var value = clampNumber(this.value, 0.7, 2.2, DEFAULT_MAIN_FONT_SIZE);
             setSetting('main_font_size', String(value));
             applyTypographySettings();
             syncFontSizeControls();
-        });
-        mainFontSizeEl.addEventListener('change', function() {
-            render();
-        });
-    }
-    if (translationFontSizeEl) {
-        translationFontSizeEl.addEventListener('input', function() {
-            var value = clampNumber(this.value, 0.6, 1.8, DEFAULT_TRANSLATION_FONT_SIZE);
-            setSetting('translation_font_size', String(value));
-            applyTypographySettings();
-            syncFontSizeControls();
-        });
-        translationFontSizeEl.addEventListener('change', function() {
             render();
         });
     }
@@ -4791,16 +5007,87 @@
     var rootTooltipModeEl = document.getElementById('root-tooltip-mode');
     if (rootTooltipModeEl) {
         rootTooltipModeEl.addEventListener('change', function() {
-            setSetting('root_tooltip_mode', this.value === 'root-count' ? 'root-count' : 'root');
+            var v = this.value;
+            if (v !== 'root-count' && v !== 'root' && v !== 'hidden') v = 'root-count';
+            setSetting('root_tooltip_mode', v);
         });
     }
     var lemmaTooltipModeEl = document.getElementById('lemma-tooltip-mode');
     if (lemmaTooltipModeEl) {
         lemmaTooltipModeEl.addEventListener('change', function() {
-            setSetting('lemma_tooltip_mode', this.value === 'lemma-count' ? 'lemma-count' : 'lemma');
+            var v = this.value;
+            if (v !== 'lemma-count' && v !== 'lemma' && v !== 'hidden') v = 'lemma-count';
+            setSetting('lemma_tooltip_mode', v);
         });
     }
-    navPrevPageBtn.addEventListener('click', function() { 
+    (function wireMinimapSettingsInMainMenu() {
+        var impSel = document.getElementById('mm-important-display');
+        var panelSel = document.getElementById('mm-selected-panel');
+        var colorSel = document.getElementById('mm-color-map');
+        var widthInput = document.getElementById('mm-width-ratio');
+        if (impSel) {
+            impSel.value = getSimpleMinimapImportantMode();
+            impSel.addEventListener('change', function() {
+                var v = this.value;
+                if (v !== 'numbers' && v !== 'chart' && v !== 'off') v = 'numbers';
+                setSetting('minimap_important_display', v);
+                if (v === 'chart' && !window.Chart) {
+                    loadScriptById('https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js', 'chartjs-lib-simple').then(function() {
+                        if (typeof window.__simpleRefreshImportantSectionsMode === 'function') window.__simpleRefreshImportantSectionsMode();
+                    });
+                } else if (typeof window.__simpleRefreshImportantSectionsMode === 'function') {
+                    window.__simpleRefreshImportantSectionsMode();
+                }
+                if (typeof window.simpleMinimapRefreshSelectedRootsPanel === 'function') {
+                    window.simpleMinimapRefreshSelectedRootsPanel();
+                }
+            });
+        }
+        if (panelSel) {
+            panelSel.value = getSetting('minimap_hide_selected_panel', '0') === '1' ? 'hide' : 'show';
+            panelSel.addEventListener('change', function() {
+                var hide = this.value === 'hide';
+                setSetting('minimap_hide_selected_panel', hide ? '1' : '0');
+                window.__SIMPLE_HIDE_SELECTED_PANEL__ = hide;
+                var sidebar = document.getElementById('simple-minimap-sidebar');
+                if (sidebar) sidebar.classList.toggle('minimap-only', hide);
+                if (typeof window.simpleMinimapRefreshSelectedRootsPanel === 'function') {
+                    window.simpleMinimapRefreshSelectedRootsPanel();
+                }
+            });
+        }
+        if (colorSel) {
+            colorSel.value = getSetting('minimap_hide_selected_minimap', '0') === '1' ? 'hide' : 'show';
+            colorSel.addEventListener('change', function() {
+                var hide = this.value === 'hide';
+                setSetting('minimap_hide_selected_minimap', hide ? '1' : '0');
+                window.__SIMPLE_HIDE_SELECTED_ON_MINIMAP__ = hide;
+                if (typeof window.simpleMinimapRefreshHighlightApplication === 'function') {
+                    window.simpleMinimapRefreshHighlightApplication();
+                }
+            });
+        }
+        if (widthInput) {
+            var initRatio = parseFloat(getSetting('minimap_width_ratio', ''));
+            if (!(initRatio && isFinite(initRatio))) initRatio = SIMPLE_MINIMAP_WIDTH_RATIO;
+            widthInput.value = initRatio.toFixed(2);
+            widthInput.addEventListener('input', function() {
+                var v = parseFloat(this.value);
+                if (!isFinite(v) || v < 0.1 || v > 1) return;
+                setSetting('minimap_width_ratio', String(v));
+                updateSimpleMinimapSidebarWidth();
+            });
+            widthInput.addEventListener('change', function() {
+                var v = parseFloat(this.value);
+                if (!isFinite(v)) v = SIMPLE_MINIMAP_WIDTH_RATIO;
+                v = Math.max(0.1, Math.min(1, v));
+                this.value = v.toFixed(2);
+                setSetting('minimap_width_ratio', String(v));
+                updateSimpleMinimapSidebarWidth();
+            });
+        }
+    })();
+    navPrevPageBtn.addEventListener('click', function() {
         navigatePageSpread(twoPageMode() ? -2 : -1);
     });
     navNextPageBtn.addEventListener('click', function() { 
