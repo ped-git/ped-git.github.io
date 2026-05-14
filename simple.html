@@ -3167,12 +3167,27 @@
     }
     function hideWordHoverTooltip() {
         if (!wordHoverTooltip) return;
+        cancelHideWordTooltip();
         wordHoverTooltip.style.display = 'none';
         wordHoverTooltip.textContent = '';
         wordHoverTooltip.style.pointerEvents = 'none';
         pinnedWordForTooltip = null;
         currentWordTooltipAnchor = null;
         wordTooltipVerseExpanded = false;
+    }
+    var pendingHideTooltipTimer = null;
+    function scheduleHideWordTooltip(delay) {
+        if (pendingHideTooltipTimer) clearTimeout(pendingHideTooltipTimer);
+        pendingHideTooltipTimer = setTimeout(function() {
+            pendingHideTooltipTimer = null;
+            hideWordHoverTooltip();
+        }, delay != null ? delay : 350);
+    }
+    function cancelHideWordTooltip() {
+        if (pendingHideTooltipTimer) {
+            clearTimeout(pendingHideTooltipTimer);
+            pendingHideTooltipTimer = null;
+        }
     }
     var currentWordTooltipAnchor = null;
     var wordTooltipVerseExpanded = false;
@@ -3238,6 +3253,7 @@
             content = content ? (content + versePart) : versePart;
         }
         if (!content) return;
+        cancelHideWordTooltip();
         wordHoverTooltip.innerHTML = content;
         wordHoverTooltip.style.display = 'block';
         currentWordTooltipAnchor = anchorEl || null;
@@ -3376,10 +3392,13 @@
                 toggle.setAttribute('aria-expanded', wordTooltipVerseExpanded ? 'true' : 'false');
                 positionWordHoverTooltip(currentWordTooltipAnchor);
             });
+            wordHoverTooltip.addEventListener('mouseenter', function() {
+                cancelHideWordTooltip();
+            });
             wordHoverTooltip.addEventListener('mouseleave', function(e) {
                 if (!pinnedWordForTooltip) return;
                 if (e.relatedTarget && isOverPinnedWord(e.relatedTarget)) return;
-                hideWordHoverTooltip();
+                scheduleHideWordTooltip();
             });
         }
         container.addEventListener('mouseover', function(e) {
@@ -3437,7 +3456,7 @@
                 hideAyahHadithTooltip();
             }
             if (pinnedWordForTooltip && from === pinnedWordForTooltip && !isOverTooltip(to)) {
-                hideWordHoverTooltip();
+                scheduleHideWordTooltip();
             }
         });
         container.addEventListener('mouseleave', function(e) {
@@ -3445,7 +3464,7 @@
             if (e.relatedTarget && !isOverHadithTooltip(e.relatedTarget)) hideAyahHadithTooltip();
             if (e.relatedTarget && isOverTooltip(e.relatedTarget)) return;
             if (pinnedWordForTooltip && container.contains(pinnedWordForTooltip)) {
-                hideWordHoverTooltip();
+                scheduleHideWordTooltip();
             }
         });
     }
@@ -4185,7 +4204,7 @@
                 return loadScriptById('js/simple-minimap-charts.js', 'simple-minimap-charts-script');
             });
             p = p.then(function() {
-                return loadScriptById('Yasir/morphology-hover.js?v=10', 'morphology-hover-script-simple');
+                return loadScriptById('Yasir/morphology-hover.js?v=12', 'morphology-hover-script-simple');
             });
             p.then(function() {
                 requestAnimationFrame(function() {

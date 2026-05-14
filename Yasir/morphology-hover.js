@@ -1960,8 +1960,9 @@ const morphologyData = {};
                 // Make root div clickable to search for next instance
                 rootDiv.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    if (e.ctrlKey) {
+                    if (e.ctrlKey || e.metaKey) {
                         toggleRootHighlight(root);
+                        updateHighlightedRootsPanel();
                     } else {
                         selectNextWordForRoot(root, e.shiftKey ? 'previous' : 'next');
                     }
@@ -4109,7 +4110,23 @@ const morphologyData = {};
             e.stopImmediatePropagation();
             // Ignore if click was not actually on the minimap (e.g. delegated from elsewhere)
             if (!e.target || !minimap.contains(e.target)) return;
-            
+
+            // Ctrl/Cmd+click on a word box toggles its root highlight (remove if selected).
+            if (e.ctrlKey || e.metaKey) {
+                var mw = e.target.closest && e.target.closest('.minimap-word');
+                if (mw) {
+                    var ay = parseInt(mw.getAttribute('data-ayah'), 10);
+                    var wi = parseInt(mw.getAttribute('data-word-index'), 10);
+                    if (Number.isFinite(ay) && Number.isFinite(wi)
+                        && morphologyData[ay] && morphologyData[ay][wi]
+                        && morphologyData[ay][wi].root) {
+                        toggleRootHighlight(morphologyData[ay][wi].root);
+                        updateHighlightedRootsPanel();
+                    }
+                    return;
+                }
+            }
+
             // Get click position relative to minimapContent
             // Account for minimap container's scroll position if it's scrollable
             const rect = minimapContent.getBoundingClientRect();
