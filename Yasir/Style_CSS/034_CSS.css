@@ -150,7 +150,7 @@ speech[black]::before {
   vertical-align: top;
   text-align: justify;
   margin-top: -1.5mm;
-  width: 183mm;
+  width: 164mm;
   text-indent: 0mm;
 }
 
@@ -159,7 +159,7 @@ speech[black]::before {
   vertical-align: top;
   text-align: justify;
   margin-top: 0mm;
-  width: 183mm;
+  width: 164mm;
 }
 
 .inner-paragraph-3 {
@@ -167,7 +167,7 @@ speech[black]::before {
   vertical-align: top;
   text-align: justify;
   margin-top: -1.5mm;
-  width: 148mm;
+  width: 128mm;
 }
 
 .inner-paragraph-continue {
@@ -481,8 +481,8 @@ speech[black]::before {
 body {
   direction: rtl;
   text-align: right;
-  width: 210mm;
+  width: 190mm;
   font-size: 4.5mm;
-  line-height: 200%;
+  line-height: 240%;
   font-family: 'KFGQPC Uthman Taha Naskh';
 }
