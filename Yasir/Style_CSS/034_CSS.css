@@ -261,6 +261,11 @@ speech[black]::before {
   padding: 1px 0.53mm; ;
 }
 
+.boxed-dotted {
+  border: 1px dotted rgb(150, 150, 150);
+  padding: 1px 0.53mm; ;
+}
+
 .boxed.underline-black-1 {
   border-bottom: 1px solid rgb(150, 150, 150);
   border-left: 0;
@@ -331,6 +336,14 @@ speech[black]::before {
 
 .boxed.underline-blackdashed3 {
   border-bottom: 2px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed4 {
+  border-bottom: 3px dashed rgb(200, 200, 200);
   border-left: 0;
   border-right: 0;
   border-top: 0;
@@ -420,6 +433,14 @@ speech[black]::before {
 
 .highlight4 {
   color:  rgb(50, 120, 220);
+}
+
+.highlight5 {
+  color:  rgb(120, 0, 120);
+}
+
+.highlight6 {
+  color:  rgb(140, 120, 0);
 }
 
 .backhighlight1 {
