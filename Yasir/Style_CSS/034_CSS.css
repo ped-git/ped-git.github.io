@@ -162,6 +162,14 @@ speech[black]::before {
   width: 183mm;
 }
 
+.inner-paragraph-3 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: -1.5mm;
+  width: 148mm;
+}
+
 .inner-paragraph-continue {
   display: inline-block;
   vertical-align: bottom;
