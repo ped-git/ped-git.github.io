@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ذکر یسیر - قرآن</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="fonts.css">
+    <script>
+        // Only load Hypothesis if enabled in localStorage
+        const _hypEnabled = localStorage.getItem('hypothesisEnabled');
+        console.log('[hypothesis] localStorage value:', _hypEnabled);
+        if (_hypEnabled === 'true') {
+            // Write config and embed script directly (synchronous)
+            document.write('<script type="application/json" class="js-hypothesis-config">{"showHighlights":"whenSidebarOpen"}<\/script>');
+            document.write('<script src="https://hypothes.is/embed.js" async><\/script>');
+        }
+    </script>
+        
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.1/dist/font-face.css">
+    <style>
+        @font-face {
+            font-family: 'Sahel';
+            src: url('fonts/Sahel.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Sahel", "KFGQPC Uthman Taha Naskh", Arial, sans-serif;
+            background: #ffffff;
+        }
+
+        :root {
+            --ui-font: "Sahel", "Shabnam", "Vazirmatn", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            --ui-font-scale: 0.8;
+        }
+
+        #desktop-layout {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: #ffffff;
+            direction: ltr;
+        }
+
+        #panels-column {
+            flex: 0 0 clamp(180px, 20vw, 260px);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+            border-left: 1px solid #e1e1e1;
+            padding-left: 6px;
+            direction: rtl;
+            font-family: var(--ui-font);
+            font-size: calc(1rem * var(--ui-font-scale));
+        }
+
+        /* Tooltips/hover popups should use UI font (not Quran font) */
+        #settings-menu,
+        #modes-menu,
+        #measure-info-tooltip,
+        #selected-root-tooltip,
+        #root-chart-tooltip {
+            font-family: var(--ui-font) !important;
+            font-size: calc(1rem * var(--ui-font-scale));
+        }
+
+        .content-column {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: auto;
+            direction: rtl;
+        }
+
+        #content {
+            min-height: 100%;
+        }
+
+        #panels-placeholder,
+        #panel-placeholder-bottom {
+            flex: 1 1 50%;
+            border: 1px dashed #cfcfcf;
+            border-radius: 6px;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #888;
+            padding: 6px;
+            text-align: center;
+        }
+
+        #panels-column #morphology-minimap,
+        #panels-column #highlighted-roots-panel {
+            flex: 1 1 50%;
+            min-height: 0;
+            width: 100%;
+            max-width: 100%;
+            align-self: stretch;
+        }
+
+        /* Roots panel + measure subpanels should use the same UI font as settings */
+        #panels-column #highlighted-roots-panel,
+        #panels-column #highlighted-roots-panel button {
+            font-family: var(--ui-font);
+        }
+
+        #panels-column #morphology-combined-panel {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        #settings-button,
+        #modes-button {
+            position: relative;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.18);
+            background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+            font-family: var(--ui-font);
+            font-size: calc(12px * var(--ui-font-scale));
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+            font-size: 16px;
+        }
+
+        #settings-button:hover,
+        #modes-button:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+        }
+
+        #settings-menu,
+        #modes-menu {
+            position: absolute;
+            top: 100%;
+            inset-inline-start: auto;
+            inset-inline-end: 0;
+            z-index: 10;
+            width: 240px;
+            max-width: calc(100vw - 16px);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 14px;
+            padding: 10px;
+            font-size: 12px;
+            box-shadow:
+                0 14px 30px rgba(15, 23, 42, 0.16),
+                0 2px 8px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(10px);
+            line-height: 1.25;
+            direction: rtl;
+            text-align: right;
+        }
+
+        #modes-menu {
+            width: 180px;
+            padding: 8px;
+            inset-inline-start: 0;
+            inset-inline-end: auto;
+        }
+
+        #settings-menu label {
+            display: block;
+            margin-bottom: 4px;
+            color: rgba(15, 23, 42, 0.78);
+            font-weight: 600;
+        }
+
+        #settings-menu input {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: rgba(255,255,255,0.95);
+            outline: none;
+        }
+
+        /* Make label + number inputs single-line (compact) */
+        #settings-menu .row:not(.chart-toggle):not(.button-row) {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #settings-menu .row:not(.chart-toggle):not(.button-row) label {
+            margin-bottom: 0;
+            flex: 1 1 auto;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        #settings-menu .settings-num-wrap {
+            position: relative;
+            width: 74px;
+            flex: 0 0 auto;
+        }
+
+        #settings-menu .settings-num-wrap input {
+            width: 100%;
+            padding: 5px 8px;
+            font-size: 11px;
+            color: transparent;
+            caret-color: rgba(15, 23, 42, 0.85);
+        }
+
+        #settings-menu .settings-num-wrap .settings-num-display {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            padding-inline: 8px;
+            pointer-events: none;
+            font-size: 11px;
+            font-family: var(--ui-font);
+        }
+
+
+        #settings-menu input:focus {
+            border-color: rgba(59, 130, 246, 0.55);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+        }
+
+        /* Don't reserve full row width for checkboxes */
+        #settings-menu input[type="checkbox"] {
+            width: auto;
+            padding: 0;
+            margin: 0;
+            flex: 0 0 auto;
+            accent-color: #3b82f6;
+        }
+
+        #settings-menu .chart-toggle label {
+            margin: 0;
+            font-weight: 600;
+            color: rgba(15, 23, 42, 0.78);
+            flex: 1 1 auto;
+        }
+
+        #settings-menu a {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        #settings-menu .menu-link,
+        #modes-menu .menu-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0;
+            min-height: 34px;
+            padding: 4px 6px;
+            border-radius: 10px;
+            text-align: center;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 12px;
+            line-height: 1.15;
+        }
+
+        #settings-menu .menu-link:hover,
+        #modes-menu .menu-link:hover {
+            background: rgba(59, 130, 246, 0.12);
+        }
+
+        #modes-menu button.menu-link {
+            width: 100%;
+            cursor: pointer;
+            font: inherit;
+        }
+        #modes-menu .links-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        #settings-menu .row {
+            margin-bottom: 10px;
+        }
+
+        #settings-menu .button-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        #settings-menu button {
+            flex: 1 1 auto;
+            padding: 8px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.14);
+            background: #f8fafc;
+            color: rgba(15, 23, 42, 0.9);
+        }
+
+        #apply-settings {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            border-color: rgba(37, 99, 235, 0.55);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        #apply-settings:hover {
+            filter: brightness(1.03);
+        }
+
+        #close-settings:hover {
+            background: #eef2f7;
+        }
+
+        .chart-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            padding: 6px 8px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.03);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .root-chart-canvas {
+            display: block;
+            width: 100%;
+            height: 90px;
+        }
+
+        #toggle-minimap-btn,
+        #toggle-mobile-mode-btn {
+            display: none !important;
+        }
+
+        .settings-wrapper {
+            position: absolute;
+            inset-inline-end: 6px; /* visual left in RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .modes-wrapper {
+            position: absolute;
+            inset-inline-start: 6px; /* visual right in RTL */
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .sura-title-text {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        #sura-selection-menu {
+            display: none !important;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="desktop-layout">
+        <aside id="panels-column">
+            <div id="panels-placeholder">پنل اول</div>
+            <div id="panel-placeholder-bottom">پنل دوم</div>
+        </aside>
+        <main id="desktop-content-wrapper" class="content-column">
+            <div id="content"></div>
+        </main>
+    </div>
+
+    <button id="settings-button" title="تنظیمات">⚙️</button>
+    <button id="modes-button" title="نمایش‌ها">☰</button>
+    <div id="settings-menu" hidden>
+        <div class="row">
+            <label for="sure-number-input">شماره سوره</label>
+            <div class="settings-num-wrap">
+                <input id="sure-number-input" type="number" min="1" max="114" aria-label="شماره سوره">
+                <span class="settings-num-display num-hindi" id="sure-number-display" aria-hidden="true"></span>
+            </div>
+        </div>
+        <div class="row chart-toggle">
+            <input id="root-chart-toggle" type="checkbox">
+            <label for="root-chart-toggle">نمایش نمودار ریشه‌ها</label>
+        </div>
+        <div class="row chart-toggle">
+            <input id="hypothesis-toggle" type="checkbox">
+            <label for="hypothesis-toggle">توضیحات</label>
+        </div>
+        <div class="row">
+            <label for="top-roots-limit">حد ریشه‌های پرتکرار</label>
+            <div class="settings-num-wrap">
+                <input id="top-roots-limit" type="number" min="0" aria-label="حد ریشه‌های پرتکرار">
+                <span class="settings-num-display num-hindi" id="top-roots-limit-display" aria-hidden="true"></span>
+            </div>
+        </div>
+        <div class="row">
+            <label for="distinctive-roots-limit">حد ریشه‌های متمایز</label>
+            <div class="settings-num-wrap">
+                <input id="distinctive-roots-limit" type="number" min="0" aria-label="حد ریشه‌های متمایز">
+                <span class="settings-num-display num-hindi" id="distinctive-roots-limit-display" aria-hidden="true"></span>
+            </div>
+        </div>
+        <div class="row">
+            <label for="high-kl-roots-limit">حد ریشه‌های KL بالا</label>
+            <div class="settings-num-wrap">
+                <input id="high-kl-roots-limit" type="number" min="0" aria-label="حد ریشه‌های KL بالا">
+                <span class="settings-num-display num-hindi" id="high-kl-roots-limit-display" aria-hidden="true"></span>
+            </div>
+        </div>
+        <div class="row">
+            <label for="n2n-roots-limit">حد ریشه‌های N2N</label>
+            <div class="settings-num-wrap">
+                <input id="n2n-roots-limit" type="number" min="0" aria-label="حد ریشه‌های N2N">
+                <span class="settings-num-display num-hindi" id="n2n-roots-limit-display" aria-hidden="true"></span>
+            </div>
+        </div>
+        <div class="button-row">
+            <button id="apply-settings">اعمال</button>
+            <button id="close-settings">بستن</button>
+        </div>
+        <!-- <a href="mobile.html">نسخه موبایل</a> -->
+    </div>
+    <div id="modes-menu" hidden>
+        نحوه نمایش:
+        <div class="links-grid">
+            <button type="button" class="menu-link" id="modes-yasir-btn">یسیر</button>
+            <a id="go-search-link" class="menu-link" href="search.html">جستجو</a>
+            <a id="go-simple-link" class="menu-link" href="simple.html">نمایش</a>
+            <a id="go-stat-link" class="menu-link" href="stat.html">آمار سوره</a>
+            <a id="go-stat-link" class="menu-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+            <a id="go-stat-link" class="menu-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>
+        </div>
+    </div>
+
+    <script id="chartjs-lib" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="js/buckwalter.js"></script>
+    <script src="js/corpus.js"></script>
+    <script src="js/sura-data.js"></script>
+    <script src="js/sura-picker.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/yasir.js"></script>
+</body>
+</html>

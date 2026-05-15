@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fa-IR" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفسیر</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        @font-face {
+            font-family: 'BLotus';
+            src: url('fonts/B%20LOTUS%20S1%20REGULAR%20R1.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'QPC Uthmani Hafs';
+            src: url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.woff2') format('woff2'),
+                 url('https://verses.quran.foundation/fonts/quran/hafs/uthmanic_hafs/UthmanicHafs1Ver18.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: "MeQuran";
+            src: url("fonts/me_quran.woff") format("woff"),
+                url("fonts/me_quran.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Sahel', 'Traditional Arabic', 'Scheherazade New', system-ui, sans-serif;
+            background: #f5f3ef;
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+        h1, h2, h3, h4, h5, h6, .book-content h3 {
+            margin: 0.5em 0em 0.0em 0em;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        h1 {
+            font-size: 1.6rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.4rem;
+        }
+        h4 {
+            font-size: 1.3rem;
+        }
+        h5 {
+            font-size: 1.2rem;
+        }
+        h6 {
+            font-size: 1.1rem;
+        }
+        .book-main {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 12px 16px 40px;
+        }
+        .book-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(245,243,239,0.97);
+            border-bottom: 1px solid rgba(44,62,80,0.12);
+            padding: 10px 0 12px;
+            margin: -12px -16px 16px -16px;
+            padding-left: 16px;
+            padding-right: 16px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+        }
+        input {
+            font-family: inherit;
+        }
+        .book-nav-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .book-nav-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+        .book-nav-btn:disabled, .book-nav-btn[aria-disabled="true"] {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .book-title-block {
+            flex: 1;
+            min-width: 0;
+        }
+        .book-sura-ayes {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .book-sura-ayes .aye-list {
+            font-weight: normal;
+            color: #64748b;
+            font-size: 0.92em;
+        }
+        .book-sura-name-click {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px dotted #94a3b8;
+        }
+        .book-sura-name-click:hover {
+            color: #334155;
+            border-bottom-color: #64748b;
+        }
+        .book-name-wrap {
+            position: relative;
+        }
+        .book-name-btn {
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #64748b;
+            background: none;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-family: inherit;
+        }
+        .book-name-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+            border-color: #e2e8f0;
+        }
+        .book-name-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 4px;
+            min-width: 160px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 30;
+            padding: 6px 0;
+        }
+        .book-name-dropdown.open {
+            display: block;
+        }
+        .book-name-dropdown:not(.open) {
+            pointer-events: none;
+        }
+        .book-name-dropdown button {
+            display: block;
+            width: 100%;
+            text-align: right;
+            padding: 2px 14px;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: #334155;
+        }
+        .book-name-dropdown button:hover {
+            background: #f8fafc;
+        }
+        .book-name-dropdown button.current {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .book-settings-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .book-settings-btn:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+        .book-content {
+            line-height: 1.85;
+            font-size: 1.02rem;
+        }
+        .book-content pre {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            overflow-x: auto;
+            margin: 0.6em 0;
+            font-size: 0.95em;
+        }
+        .book-content pre code.language-arabic {
+            font-family: 'MeQuran';
+            font-size: 1.15em;
+            line-height: 2.0;
+        }
+        .book-content pre code.language-farsi {
+            font-family: 'BLotus', serif;
+        }
+        .book-content p {
+            margin: 0.5em 0;
+        }
+        .book-content em {
+            font-style: normal;
+            color: #475569;
+        }
+        .book-verse-highlight {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.15);
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin: 0 1px;
+        }
+        #book-loading, #book-error {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #64748b;
+        }
+        #book-error {
+            color: #b91c1c;
+        }
+        .book-settings-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 20;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .book-settings-panel.open {
+            display: flex;
+        }
+        .book-settings-inner {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .book-settings-inner h3 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+        }
+        .book-settings-links {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .book-settings-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            padding: 4px 6px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 0.82rem;
+            line-height: 1.15;
+            color: #1e293b;
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.14);
+        }
+        .book-settings-link:hover {
+            background: rgba(59, 130, 246, 0.12);
+        }
+        .book-settings-inner button {
+            margin-top: 12px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+        pre {
+            white-space: normal;      /* allow normal wrapping */
+            direction: rtl;
+            text-align: right;
+
+            line-height: 1.8;
+
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+            padding: 12px;
+            border-radius: 6px;
+
+            margin: 1em 0;
+        }
+
+        pre code {
+            display: block;           /* make it behave like a div */
+            font-family: inherit;
+            white-space: inherit;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-main">
+        <header class="book-header" id="book-header" hidden>
+            <a href="#" class="book-nav-btn" id="book-prev" aria-label="قبلی">→</a>
+            <div class="book-title-block">
+                <span class="book-name-wrap">
+                    <button type="button" class="book-name-btn" id="book-name-btn" aria-haspopup="listbox" aria-expanded="false">تفسیر</button>
+                    <div class="book-name-dropdown" id="book-name-dropdown" role="listbox" aria-hidden="true"></div>
+                </span>
+                <span class="book-sura-ayes" id="book-sura-ayes"></span>
+            </div>
+            <a href="#" class="book-nav-btn" id="book-next" aria-label="بعدی">←</a>
+            <button type="button" class="book-settings-btn" id="book-settings-btn" aria-label="تنظیمات">⚙️</button>
+        </header>
+
+        <div id="book-loading">در حال بارگذاری…</div>
+        <div id="book-error" hidden></div>
+        <article class="book-content" id="book-content" hidden></article>
+    </div>
+
+    <div class="book-settings-panel" id="book-settings-panel">
+        <div class="book-settings-inner">
+            <h3>نحوه نمایش</h3>
+            <div class="book-settings-links">
+                <a class="book-settings-link" href="yasir.html" title="رفتن به یسیر">یسیر</a>
+                <a class="book-settings-link" href="search.html" title="ابزار جستجو">جستجو</a>
+                <a class="book-settings-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
+                <a class="book-settings-link" href="stat.html" title="آمار سوره">آمار سوره</a>
+                <a class="book-settings-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+            </div>
+            <button type="button" id="book-settings-close">بستن</button>
+        </div>
+    </div>
+
+    <script src="js/sura-data.js"></script>
+    <script src="js/sura-picker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+(function () {
+    'use strict';
+
+    var booksList = [];
+    var booksByFolder = {};
+    var bookId = 'almizan';
+    var mapData = null;
+    var contentIds = [];
+    var currentContentId = null;
+    var currentEntry = null;
+    var chunkCache = {}; // per-book: not shared across book switch
+
+    function parseParams() {
+        var params = new URLSearchParams(window.location.search);
+        var b = params.get('b');
+        if (b && booksByFolder[b]) bookId = b;
+        else if (booksList.length) bookId = booksList[0].folder;
+        else bookId = 'almizan';
+        var s = params.get('s');
+        var a = params.get('a');
+        var c = params.get('c');
+        if (c) {
+            var cNum = parseInt(c, 10);
+            return { mode: 'content', contentId: isNaN(cNum) ? 1 : Math.max(1, cNum) };
+        }
+        var sNum = s ? parseInt(s, 10) : 1;
+        var aNum = a ? parseInt(a, 10) : 1;
+        return { mode: 'sura-aye', sura: isNaN(sNum) ? 1 : Math.max(1, Math.min(114, sNum)), aye: isNaN(aNum) ? 1 : aNum };
+    }
+
+    function findContentIdBySuraAye(sura, aye) {
+        if (!mapData) return null;
+        for (var id in mapData) {
+            var ent = mapData[id];
+            if (ent.s === sura && ent.a && ent.a.indexOf(aye) !== -1)
+                return parseInt(id, 10);
+        }
+        return null;
+    }
+
+    function updateUrl(contentId, replace) {
+        var entry = mapData[String(contentId)];
+        if (!entry) return;
+        var params = new URLSearchParams(window.location.search);
+        params.set('b', bookId);
+        params.set('c', String(contentId));
+        var url = window.location.pathname + '?' + params.toString();
+        if (replace)
+            window.history.replaceState({ contentId: contentId }, '', url);
+        else
+            window.history.pushState({ contentId: contentId }, '', url);
+    }
+
+    function formatAyeList(arr) {
+        if (!arr || arr.length === 0) return '';
+        if (arr.length === 1) return 'آیه\u200cی ' + toPersianNum(arr[0]);
+        var min = Math.min.apply(null, arr);
+        var max = Math.max.apply(null, arr);
+        if (max - min + 1 === arr.length)
+            return 'آیات ' + toPersianNum(min) + ' تا ' + toPersianNum(max);
+        return 'آیات ' + arr.map(toPersianNum).join('، ');
+    }
+    function toPersianNum(n) {
+        var p = '\u06f0\u06f1\u06f2\u06f3\u06f4\u06f5\u06f6\u06f7\u06f8\u06f9';
+        return String(n).replace(/[0-9]/g, function (d) { return p[+d]; });
+    }
+
+    function getSuraName(suraNum) {
+        return (typeof SURA_NAMES !== 'undefined' && SURA_NAMES[suraNum]) ? SURA_NAMES[suraNum] : ('سوره\u200cی ' + suraNum);
+    }
+
+    function updateBookNameButton() {
+        var btn = document.getElementById('book-name-btn');
+        var book = booksByFolder[bookId];
+        if (btn) btn.textContent = book ? book.name : bookId;
+
+        var dropdown = document.getElementById('book-name-dropdown');
+        dropdown.querySelectorAll('button').forEach(function (book) {
+            var folder = book.getAttribute('data-folder');
+            console.log('buttons f:' + folder + ' b:' + bookId);
+            if (folder === bookId) book.classList.add('current');
+            else book.classList.remove('current')
+        });
+    }
+
+    function renderBookDropdown() {
+        var dropdown = document.getElementById('book-name-dropdown');
+        if (!dropdown) return;
+        dropdown.innerHTML = '';
+        dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+        booksList.forEach(function (book) {
+            var folder = book.folder || String(book.id != null ? book.id : '');
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = book.name;
+            b.setAttribute('data-folder', folder);
+            if (folder === bookId) b.classList.add('current');
+            b.addEventListener('click', function () {
+                var folder = this.getAttribute('data-folder');
+                if (folder === bookId) { closeBookDropdown(); return; }
+                var sura = (currentEntry && currentEntry.s) ? currentEntry.s : 1;
+                var aye = (currentEntry && currentEntry.a && currentEntry.a.length) ? currentEntry.a[0] : 1;
+                bookId = folder;
+                chunkCache = {};
+                closeBookDropdown();
+                updateBookNameButton();
+                var params = new URLSearchParams(window.location.search);
+                params.set('b', bookId);
+                params.set('s', String(sura));
+                params.set('a', String(aye));
+                params.delete('c');
+                window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+                loadMapThenShow();
+            });
+            dropdown.appendChild(b);
+        });
+    }
+
+    function openBookDropdown() {
+        var dd = document.getElementById('book-name-dropdown');
+        var btn = document.getElementById('book-name-btn');
+        if (dd) { dd.classList.add('open'); dd.setAttribute('aria-hidden', 'false'); }
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+    }
+    function closeBookDropdown() {
+        var dd = document.getElementById('book-name-dropdown');
+        var btn = document.getElementById('book-name-btn');
+        if (btn) { btn.setAttribute('aria-expanded', 'false'); }
+        if (dd) { dd.classList.remove('open'); dd.setAttribute('aria-hidden', 'true'); }
+    }
+
+    function attachSuraNameClick() {
+        var el = document.getElementById('book-sura-name-click');
+        if (!el || typeof SuraPicker === 'undefined') return;
+        function openPicker() {
+            var s = parseInt(el.getAttribute('data-sura'), 10);
+            var a = parseInt(el.getAttribute('data-ayah'), 10);
+            SuraPicker.open({
+                currentSura: s,
+                currentAyah: a,
+                onSelect: function (sura, ayah) {
+                    var aye = (ayah != null && ayah >= 1) ? ayah : 1;
+                    var cid = findContentIdBySuraAye(sura, aye);
+                    if (cid != null) showContent(cid, { replaceState: false });
+                }
+            });
+        }
+        el.onclick = function (e) { e.preventDefault(); openPicker(); };
+        el.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); } };
+    }
+
+    function loadMapThenShow() {
+        var params = parseParams();
+        showLoading(true);
+        fetch('data/' + bookId + '/map.json')
+            .then(function (r) {
+                if (!r.ok) throw new Error('بارگذاری نقشه ناموفق: ' + r.status);
+                return r.json();
+            })
+            .then(function (map) {
+                mapData = map;
+                contentIds = Object.keys(map).map(Number).sort(function (a, b) { return a - b; });
+                var contentId;
+                if (params.mode === 'content') {
+                    contentId = params.contentId;
+                    if (contentId > contentIds[contentIds.length - 1]) contentId = contentIds[contentIds.length - 1];
+                    if (contentId < 1) contentId = 1;
+                } else {
+                    contentId = findContentIdBySuraAye(params.sura, params.aye);
+                    if (contentId == null) contentId = 1;
+                }
+                showContent(contentId);
+            })
+            .catch(function (err) {
+                showError('خطا: ' + (err.message || err));
+            });
+    }
+
+    function showLoading(show) {
+        document.getElementById('book-loading').hidden = !show;
+        document.getElementById('book-error').hidden = true;
+        document.getElementById('book-content').hidden = true;
+        document.getElementById('book-header').hidden = show;
+    }
+
+    function showError(msg) {
+        document.getElementById('book-loading').hidden = true;
+        document.getElementById('book-content').hidden = true;
+        document.getElementById('book-header').hidden = true;
+        var el = document.getElementById('book-error');
+        el.textContent = msg;
+        el.hidden = false;
+    }
+
+    function decompressGzip(arrayBuffer) {
+        return new Promise(function (resolve, reject) {
+            try {
+                var stream = new Response(arrayBuffer).body.pipeThrough(new DecompressionStream('gzip'));
+                new Response(stream).arrayBuffer().then(function (buf) {
+                    var dec = new TextDecoder('utf-8');
+                    resolve(dec.decode(buf));
+                }).catch(reject);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    function loadChunk(filename) {
+        if (chunkCache[filename])
+            return Promise.resolve(chunkCache[filename]);
+        var url = 'data/' + bookId + '/contents/' + encodeURIComponent(filename);
+        return fetch(url)
+            .then(function (r) {
+                if (!r.ok) throw new Error('خطا در بارگذاری: ' + r.status);
+                return r.arrayBuffer();
+            })
+            .then(decompressGzip)
+            .then(function (text) {
+                var data = JSON.parse(text);
+                chunkCache[filename] = data;
+                return data;
+            });
+    }
+
+    function renderMarkdownWithHtml(raw) {
+        if (typeof marked !== 'undefined')
+            return marked.parse(raw || '', { gfm: true, breaks: true });
+        return raw.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function showContent(contentId, opts) {
+        opts = opts || {};
+        var useReplace = opts.replaceState !== false;
+        var entry = mapData[String(contentId)];
+        if (!entry) {
+            showError('بخش یافت نشد.');
+            return;
+        }
+        currentContentId = contentId;
+        currentEntry = entry;
+        var filename = entry.f;
+        var s = entry.s;
+        var aList = entry.a || [];
+
+        var suraName = getSuraName(s);
+        var firstAye = (aList && aList.length) ? aList[0] : 1;
+        document.getElementById('book-sura-ayes').innerHTML =
+            'سوره\u200cی <span class="book-sura-name-click" id="book-sura-name-click" role="button" tabindex="0" data-sura="' + s + '" data-ayah="' + firstAye + '">' + suraName + '</span> <span class="aye-list">(' + formatAyeList(aList) + ')</span>';
+        attachSuraNameClick();
+
+        updateBookNameButton();
+        var prevId = contentId - 1;
+        var nextId = contentId + 1;
+        var hasPrev = contentIds.indexOf(prevId) !== -1;
+        var hasNext = contentIds.indexOf(nextId) !== -1;
+        var prevBtn = document.getElementById('book-prev');
+        var nextBtn = document.getElementById('book-next');
+        prevBtn.href = hasPrev ? ('?b=' + encodeURIComponent(bookId) + '&c=' + prevId) : '#';
+        prevBtn.setAttribute('aria-disabled', hasPrev ? 'false' : 'true');
+        nextBtn.href = hasNext ? ('?b=' + encodeURIComponent(bookId) + '&c=' + nextId) : '#';
+        nextBtn.setAttribute('aria-disabled', hasNext ? 'false' : 'true');
+
+        document.getElementById('book-loading').hidden = false;
+        document.getElementById('book-content').hidden = true;
+        document.getElementById('book-content').innerHTML = '';
+
+        loadChunk(filename).then(function (chunk) {
+            var text = chunk[String(contentId)];
+            text = text.replace(/ى/g, 'ی‌');
+            document.getElementById('book-loading').hidden = true;
+            if (!text) {
+                document.getElementById('book-content').innerHTML = '<p>متن این بخش موجود نیست.</p>';
+            } else {
+                // function removeVerseHighlightSpans(container) {
+                //     container.querySelectorAll('span.book-verse-highlight[id^="surah-"][id*="-ayah-"]').forEach(span => {
+                //         const p = span.parentElement;
+
+                //         // remove the span
+                //         span.remove();
+
+                //         // if its parent <p> became empty, remove that too
+                //         if (
+                //             p &&
+                //             p.tagName === 'P' &&
+                //             !p.textContent.trim() &&
+                //             p.children.length === 0
+                //         ) {
+                //             p.remove();
+                //         }
+                //     });
+                // }
+
+                // function applyVerseHighlights(container, sura, ayeList) {
+                //     if (!container || !ayeList || ayeList.length === 0) return;
+                //     var spans = container.querySelectorAll('span[id^="surah-"]');
+                //     spans.forEach(function (span) {
+                //         // span.remove();
+                //         // var id = span.getAttribute('id');
+                //         // if (!id) return;
+                //         // var m = id.match(/^surah-(\d+)-ayah-(\d+)$/);
+                //         // if (!m) return;
+                //         // var s = parseInt(m[1], 10);
+                //         // var a = parseInt(m[2], 10);
+                //         // if (s === sura && ayeList.indexOf(a) !== -1)
+                //         //     span.classList.add('book-verse-highlight');
+                //     });
+                // }
+
+
+
+                var html = renderMarkdownWithHtml(text);
+
+                document.getElementById('book-content').innerHTML = html;
+                // removeVerseHighlightSpans(document.getElementById('book-content'));
+                // applyVerseHighlights(document.getElementById('book-content'), s, aList);
+            }
+            document.getElementById('book-content').hidden = false;
+            document.getElementById('book-header').hidden = false;
+            updateUrl(contentId, useReplace);
+        }).catch(function (err) {
+            showError('خطا در بارگذاری محتوا: ' + (err.message || err));
+        });
+    }
+
+    function init() {
+        showLoading(true);
+        fetch('data/books.json')
+            .then(function (r) {
+                if (!r.ok) throw new Error('بارگذاری فهرست تفسیرها ناموفق');
+                return r.json();
+            })
+            .then(function (list) {
+                booksList = Array.isArray(list) ? list : [];
+                booksByFolder = {};
+                booksList.forEach(function (b) {
+                    var folder = b.folder || String(b.id != null ? b.id : '');
+                    if (folder) booksByFolder[folder] = b;
+                });
+                if (booksList.length && !booksByFolder[bookId]) bookId = booksList[0].folder || String(booksList[0].id);
+                renderBookDropdown();
+                document.getElementById('book-name-btn').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var dd = document.getElementById('book-name-dropdown');
+                    if (dd && dd.classList.contains('open')) closeBookDropdown();
+                    else openBookDropdown();
+                });
+                document.addEventListener('click', function () { closeBookDropdown(); });
+                loadMapThenShow();
+            })
+            .catch(function (err) {
+                booksList = [{ name: 'المیزان', folder: 'almizan' }];
+                booksByFolder = { almizan: booksList[0] };
+                bookId = 'almizan';
+                renderBookDropdown();
+                loadMapThenShow();
+            });
+
+        document.getElementById('book-prev').addEventListener('click', function (e) {
+            if (currentContentId == null) return;
+            var prevId = currentContentId - 1;
+            if (contentIds.indexOf(prevId) !== -1) {
+                e.preventDefault();
+                showContent(prevId, { replaceState: false });
+            }
+        });
+        document.getElementById('book-next').addEventListener('click', function (e) {
+            if (currentContentId == null) return;
+            var nextId = currentContentId + 1;
+            if (contentIds.indexOf(nextId) !== -1) {
+                e.preventDefault();
+                showContent(nextId, { replaceState: false });
+            }
+        });
+
+        window.addEventListener('popstate', function (e) {
+            if (e.state && e.state.contentId != null && mapData)
+                showContent(e.state.contentId);
+        });
+
+        document.getElementById('book-settings-btn').addEventListener('click', function () {
+            document.getElementById('book-settings-panel').classList.add('open');
+        });
+        document.getElementById('book-settings-close').addEventListener('click', function () {
+            document.getElementById('book-settings-panel').classList.remove('open');
+        });
+        document.getElementById('book-settings-panel').addEventListener('click', function (e) {
+            if (e.target === this)
+                this.classList.remove('open');
+        });
+    }
+
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', init);
+    else
+        init();
+})();
+    </script>
+</body>
+</html>
