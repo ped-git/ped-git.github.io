@@ -154,6 +154,56 @@ speech[black]::before {
   text-indent: -4mm;
 }
 
+.boxed.underline-gradient {
+  border-bottom: 1px solid;
+  border-image: linear-gradient(to left, black, white);
+  border-image-slice: 1;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-blackdashed-far {
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm;
+}
+
+.boxed.underline-blackdashed2 {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-green {
+  border-bottom: 1px dashed rgb(100, 180, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-red {
+  border-bottom: 1px dashed rgb(220, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
 @media print {
   .header {
     position: fixed;
