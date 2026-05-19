@@ -444,11 +444,20 @@ speech[black]::before {
 }
 
 .highlight5 {
-  color:  rgb(120, 0, 120);
+  color:  rgb(90, 0, 150);
 }
 
 .highlight6 {
   color:  rgb(140, 120, 0);
+}
+
+.highlight7 {
+  color:  rgb(150, 50, 90);
+}
+
+.highlight8 {
+  color:  rgb(0, 0, 0);
+  filter: blur(0.2mm); ;
 }
 
 .backhighlight1 {

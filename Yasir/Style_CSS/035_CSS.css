@@ -1,3 +1,48 @@
+speech {
+  font-size: 10mm;
+  display: inline;
+  color: inherit;
+  text-decoration: none;
+}
+
+speech[open]::before {
+  content: "«";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[close]::before {
+  content: "»";
+  position: relative;
+  top: 1.5mm;
+}
+
+speech[underline]::before {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0mm;
+}
+
+speech[green]::before {
+  color: rgb(70,175,70);
+}
+
+speech[red]::before {
+  color: rgb(205,100,100);
+}
+
+speech[blue]::before {
+  color: rgb(70, 70, 220);
+}
+
+speech[gray]::before {
+  color: rgb(150, 150, 150);
+}
+
+speech[black]::before {
+  color: rgb(100, 100, 100);
+}
+
 .vertical-line-1 {
   border-left: 0.3mm solid black;
   height: 100%;
@@ -9,12 +54,36 @@
   position: relative; ;
 }
 
+.highlight1 {
+  color:  rgb(70, 175, 70);
+}
+
+.highlight2 {
+  color:  rgb(205, 100, 100);
+}
+
+.highlight3 {
+  color:  rgb(150, 150, 150);
+}
+
+.highlight4 {
+  color:  rgb(50, 120, 220);
+}
+
+.highlight5 {
+  color:  rgb(200, 50, 200);
+}
+
+.highlight6 {
+  color:  rgb(140, 120, 0);
+}
+
 .inner-paragraph-1 {
   display: inline-block;
   vertical-align: top;
   text-align: justify;
   margin-top: 1.5mm;
-  width: 136mm;
+  width: 99mm;
   text-indent: 0mm;
 }
 
@@ -27,6 +96,15 @@
   text-indent: 0mm;
 }
 
+.small-bullet-near {
+  margin-top: 0mm;
+  margin-right: 15mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -5mm;
+}
+
 .small-bullet-far {
   margin-top: 0mm;
   margin-right: 15mm;
@@ -36,13 +114,44 @@
   text-indent: -5mm;
 }
 
-.zero-margin-bullet {
+.big-bullet-near {
   margin-top: 0mm;
-  margin-right: 5mm;
+  margin-right: 16.5mm;
+  margin-bottom: 0mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.big-bullet-far {
+  margin-top: 0mm;
+  margin-right: 16.5mm;
+  margin-bottom: 4.5mm;
+  margin-left: 10mm;
+  text-align: justify;
+  text-indent: -6.5mm;
+}
+
+.zero-margin {
+  margin-top: 0mm;
+  margin-right: 0mm;
   margin-bottom: 0mm;
   margin-left: 0mm;
   text-align: justify;
-  text-indent: -5mm;
+  text-indent: 0mm;
+}
+
+.zero-margin.far {
+  margin-bottom: 4.5mm;
+}
+
+.zero-margin2 {
+  margin-top: 0mm;
+  margin-right: 4mm;
+  margin-bottom: 0mm;
+  margin-left: 0mm;
+  text-align: justify;
+  text-indent: -4mm;
 }
 
 @media print {
@@ -71,8 +180,8 @@
 body {
   direction: rtl;
   text-align: right;
-  width: 210mm;
+  width: 190mm;
   font-size: 4.5mm;
-  line-height: 200%;
+  line-height: 240%;
   font-family: 'KFGQPC Uthman Taha Naskh';
 }
