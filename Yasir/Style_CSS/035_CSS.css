@@ -87,6 +87,15 @@ speech[black]::before {
   text-indent: 0mm;
 }
 
+.inner-paragraph-2 {
+  display: inline-block;
+  vertical-align: top;
+  text-align: justify;
+  margin-top: 0mm;
+  width: 159mm;
+  text-indent: 0mm;
+}
+
 .ordinary-far {
   margin-top: 0mm;
   margin-right: 10mm;
@@ -196,12 +205,43 @@ speech[black]::before {
   padding: 0px 0px;
 }
 
+.boxed.underline-solidgreen {
+  border-bottom: 1px solid rgb(100, 180, 100);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.boxed.underline-solidgreen-far {
+  border-bottom: 1px solid rgb(120, 200, 120);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
+}
+
 .boxed.underline-red {
   border-bottom: 1px dashed rgb(220, 150, 150);
   border-left: 0;
   border-right: 0;
   border-top: 0;
   padding: 0px 0px;
+}
+
+.boxed.underline-solidred {
+  border-bottom: 1px solid rgb(220, 150, 150);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-solidred-far {
+  border-bottom: 1px solid rgb(240, 170, 170);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm; ;
 }
 
 @media print {
