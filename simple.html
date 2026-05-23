@@ -1365,6 +1365,167 @@
         }
         #sura-hadith-tooltip a { color: #2563eb; text-decoration: none; }
         #sura-hadith-tooltip a:hover { text-decoration: underline; }
+
+        /* Play buttons inside word / ayah pop-ups */
+        .simple-play-btn {
+            cursor: pointer;
+            font: inherit;
+            padding: 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .simple-play-btn.is-loading { cursor: pointer; }
+        .simple-play-btn svg { display: block; width: 11px; height: 11px; }
+        .simple-play-btn .simple-spinner { transform-origin: 50% 50%; animation: simple-spin 0.7s linear infinite; }
+        @keyframes simple-spin { to { transform: rotate(360deg); } }
+        .simple-play-btn.is-playing {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            color: #fff !important;
+        }
+        #word-hover-tooltip .word-tooltip-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        #word-hover-tooltip .word-tooltip-trans {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        #word-hover-tooltip .word-play-btn {
+            flex: 0 0 auto;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #word-hover-tooltip .word-play-btn:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+        #sura-hadith-tooltip .ayah-circle-link.simple-play-btn { color: #2563eb; }
+        #audio-stop-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #2563eb;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #audio-stop-btn:hover { background: #f4f7fb; }
+        #audio-stop-btn.is-playing {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            color: #ffffff !important;
+        }
+        #audio-stop-btn svg { width: 14px; height: 14px; }
+
+        /* Active ayah highlight (recitation) */
+        .page-content .qword.ayah-active {
+            background: rgba(59,130,246,0.09);
+            border-radius: 5px;
+            transition: background-color 0.25s ease;
+        }
+        .translation-content .translation-ayah.ayah-active {
+            background: rgba(59,130,246,0.07);
+            border-radius: 5px;
+            transition: background-color 0.25s ease;
+        }
+        /* Recitation bar in the bottom panel */
+        #recitation-bar {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            direction: ltr;
+        }
+        #rec-play-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #2563eb;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #rec-play-btn:hover { background: #f4f7fb; }
+        #rec-play-btn.is-playing {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            color: #ffffff !important;
+        }
+        #rec-play-btn svg { width: 14px; height: 14px; }
+        #rec-play-btn.is-playing svg { filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); }
+        .rec-scope-wrap { position: relative; display: inline-flex; align-items: center; }
+        #rec-scope-btn {
+            width: 22px;
+            height: 18px;            /* tiny, ~half height of play button */
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            line-height: 1;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #rec-scope-btn:hover { background: #f4f7fb; color: #334155; }
+        #rec-scope-menu {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            right: 0;                /* align right edge to the button's right side (opens into the page) */
+            display: none;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.16);
+            padding: 8px;
+            z-index: 10001;
+            direction: rtl;
+            text-align: right;
+        }
+        #rec-scope-menu.open { display: block; }
+        #rec-scope-menu .rec-scope-title { font-size: 0.78rem; color: #64748b; margin-bottom: 5px; }
+        #rec-scope-select {
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #2c3e50;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 0.85rem;
+            padding: 4px 6px;
+            cursor: pointer;
+            direction: rtl;
+            text-align: right;
+            min-width: 150px;
+        }
+        #rec-active-label {
+            position: fixed;
+            display: none;
+            background: #1e293b;
+            color: #ffffff;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            z-index: 10002;
+            pointer-events: none;
+            direction: rtl;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -1407,6 +1568,21 @@
                         <select id="translation-language" aria-label="زبان ترجمه واژه">
                             <option value="fa">فارسی</option>
                             <option value="en">English</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>قاری</span>
+                    <label class="settings-row-select">
+                        <select id="reciter-select" aria-label="قاری"></select>
+                    </label>
+                </div>
+                <div class="settings-row-inline">
+                    <span>نوار تلاوت</span>
+                    <label class="settings-row-select">
+                        <select id="recitation-show" aria-label="نمایش نوار تلاوت">
+                            <option value="hide">پنهان</option>
+                            <option value="show">نمایش</option>
                         </select>
                     </label>
                 </div>
@@ -1515,11 +1691,23 @@
             <button type="button" id="nav-prev-page" class="bottom-nav-btn" title="صفحه قبل">→</button>
             <button type="button" id="nav-next-page" class="bottom-nav-btn" title="صفحه بعد">←</button>
             <button type="button" id="nav-next-sura" class="bottom-nav-btn" title="سوره بعد">«</button>
+            <button type="button" id="audio-stop-btn" class="simple-play-btn audio-stop-btn" style="display:none" title="توقف پخش" aria-label="توقف پخش"></button>
+            <div id="recitation-bar" style="display:none">
+                <button type="button" id="rec-play-btn" class="simple-play-btn rec-play-btn" title="پخش تلاوت" aria-label="پخش تلاوت"></button>
+                <span class="rec-scope-wrap">
+                    <button type="button" id="rec-scope-btn" title="دامنه پخش" aria-haspopup="true" aria-expanded="false">▾</button>
+                    <div id="rec-scope-menu" role="menu">
+                        <div class="rec-scope-title">دامنه پخش</div>
+                        <select id="rec-scope-select" aria-label="دامنه پخش تلاوت"></select>
+                    </div>
+                </span>
+            </div>
         </div>
     </div>
     <div id="progress-tooltip"></div>
     <div id="word-hover-tooltip"></div>
     <div id="sura-hadith-tooltip"></div>
+    <div id="rec-active-label"></div>
 
     <script src="js/sura-data.js"></script>
     <script src="js/sura-picker.js"></script>
@@ -2515,6 +2703,7 @@
         return { mode: 'page', page: saved.page, sura: saved.sura };
     }
 
+    var lastUrlSura = null;
     function setUrl(mode, page, sura, ayah) {
         const u = new URL(window.location.href);
         if (mode === 'sura') {
@@ -2537,7 +2726,22 @@
             saveCurrentLocation('page', page, sura, ayah);
         }
         u.searchParams.delete('view');
-        window.history.replaceState({}, '', u.toString());
+        var nextHref = u.toString();
+        var effectiveSura = null;
+        if (mode === 'sura') {
+            effectiveSura = sura != null ? sura : null;
+        } else if (page != null && pageToSura && pageToSura[page] != null) {
+            effectiveSura = pageToSura[page];
+        } else if (sura != null) {
+            effectiveSura = sura;
+        }
+        var suraChanged = (effectiveSura != null && lastUrlSura != null && effectiveSura !== lastUrlSura);
+        if (suraChanged && nextHref !== window.location.href) {
+            window.history.pushState({}, '', nextHref);
+        } else {
+            window.history.replaceState({}, '', nextHref);
+        }
+        if (effectiveSura != null) lastUrlSura = effectiveSura;
     }
 
     function initializeLocationState() {
@@ -3061,6 +3265,11 @@
     }
 
     function renderPageContent(verses, container, useQCFFont) {
+        for (var vpi = 0; vpi < verses.length; vpi++) {
+            if (verses[vpi] && verses[vpi].verse_key && verses[vpi].page_number) {
+                versePageMap[verses[vpi].verse_key] = verses[vpi].page_number;
+            }
+        }
         container.classList.toggle('font-qcf', useQCFFont);
         var ayahPerLine = layoutAyahPerLine();
         var isDoubleContinuous = doubleContinuousMode();
@@ -3165,6 +3374,390 @@
         }
         container.innerHTML = html || '<div class="loading">ترجمه‌ای برای این صفحه پیدا نشد.</div>';
     }
+    /* ----- Audio playback (word + ayah recitation) ----- */
+    var SIMPLE_PLAY_ICON = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.2 2.4 9.4 6 3.2 9.6Z" fill="currentColor"/></svg>';
+    var SIMPLE_PAUSE_ICON = '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="3" y="2.4" width="2.2" height="7.2" rx="0.6" fill="currentColor"/><rect x="6.8" y="2.4" width="2.2" height="7.2" rx="0.6" fill="currentColor"/></svg>';
+    var SIMPLE_SPINNER_ICON = '<svg class="simple-spinner" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="13 30"/></svg>';
+    var QURANCOM_RECITERS = [
+        { id: 'qc:1', label: 'عبدالباسط عبدالصمد (مجوّد)' },
+        { id: 'qc:2', label: 'عبدالباسط عبدالصمد (مرتّل)' },
+        { id: 'qc:3', label: 'عبدالرحمن السدیس' },
+        { id: 'qc:4', label: 'أبوبکر الشاطری' },
+        { id: 'qc:5', label: 'هانی الرفاعی' },
+        { id: 'qc:6', label: 'محمود خلیل الحصری' },
+        { id: 'qc:7', label: 'مشاری راشد العفاسی' },
+        { id: 'qc:8', label: 'محمد صدیق المنشاوی (مجوّد)' },
+        { id: 'qc:9', label: 'محمد صدیق المنشاوی (مرتّل)' },
+        { id: 'qc:10', label: 'سعود الشریم' },
+        { id: 'qc:11', label: 'محمد الطبلاوی' },
+        { id: 'qc:12', label: 'محمود خلیل الحصری (معلّم)' }
+    ];
+    var TANZIL_RECITERS = [
+        { id: 'tz:abdulbasit', label: 'AbdulBasit' },
+        { id: 'tz:abdulbasit-mjwd', label: 'AbdulBasit (Mujawwad)' },
+        { id: 'tz:basfar', label: 'Basfar' },
+        { id: 'tz:basfar2', label: 'Basfar II' },
+        { id: 'tz:ajamy', label: 'Al-Ajamy' },
+        { id: 'tz:ghamadi', label: 'Al-Ghamadi' },
+        { id: 'tz:hudhaify', label: 'Al-Hudhaify' },
+        { id: 'tz:husary', label: 'Al-Husary' },
+        { id: 'tz:husary-mjwd', label: 'Al-Husary (Mujawwad)' },
+        { id: 'tz:minshawi', label: 'Al-Minshawi' },
+        { id: 'tz:minshawi-mjwd', label: 'Al-Minshawi (Mujawwad)' },
+        { id: 'tz:shateri', label: 'Ash-Shateri' },
+        { id: 'tz:shuraim', label: 'Ash-Shuraim' },
+        { id: 'tz:sudais', label: 'As-Sudais' },
+        { id: 'tz:tablawi', label: 'At-Tablawi' },
+        { id: 'tz:hani', label: 'Ar-Rafai' },
+        { id: 'tz:akhdar', label: 'Al-Akhdar' },
+        { id: 'tz:muaiqly', label: 'Al-Muaiqly' },
+        { id: 'tz:afasy', label: 'Al-Afasy' },
+        { id: 'tz:ayyub', label: 'Muhammad Ayyub' },
+        { id: 'tz:jibreel', label: 'Muhammad Jibreel' },
+        { id: 'tz:parhizgar', label: 'Parhizgar' },
+        { id: 'tz:bukhatir', label: 'Bukhatir' },
+        { id: 'tz:qasim', label: 'Al-Qasim' },
+        { id: 'tz:juhany', label: 'Al-Juhany' },
+        { id: 'tz:matrood', label: 'Al-Matrood' }
+    ];
+    var DEFAULT_RECITER = 'qc:7';
+    function getReciterSetting() {
+        return getSetting('reciter', DEFAULT_RECITER);
+    }
+    function pad3(n) {
+        n = String(n);
+        while (n.length < 3) n = '0' + n;
+        return n;
+    }
+    function buildWordAudioUrl(verseKey, position) {
+        var m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+        if (!m || !position) return '';
+        return 'https://audio.qurancdn.com/wbw/' + pad3(m[1]) + '_' + pad3(m[2]) + '_' + pad3(position) + '.mp3';
+    }
+    var ayahAudioUrlCache = {};
+    function resolveAyahAudioUrl(verseKey, cb) {
+        var m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+        if (!m) { cb(''); return; }
+        var reciter = getReciterSetting();
+        var cacheKey = reciter + '|' + verseKey;
+        if (ayahAudioUrlCache[cacheKey] != null) { cb(ayahAudioUrlCache[cacheKey]); return; }
+        if (reciter.indexOf('tz:') === 0) {
+            var url = 'https://tanzil.net/res/audio/' + reciter.slice(3) + '/' + pad3(m[1]) + pad3(m[2]) + '.mp3';
+            ayahAudioUrlCache[cacheKey] = url;
+            cb(url);
+            return;
+        }
+        var id = reciter.indexOf('qc:') === 0 ? reciter.slice(3) : reciter;
+        fetch('https://api.quran.com/api/v4/recitations/' + encodeURIComponent(id) + '/by_ayah/' + encodeURIComponent(verseKey))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                var f = data && data.audio_files && data.audio_files[0];
+                var url = (f && f.url) ? ('https://verses.quran.com/' + f.url) : '';
+                ayahAudioUrlCache[cacheKey] = url;
+                cb(url);
+            })
+            .catch(function() { cb(''); });
+    }
+    var simpleAudioEl = null;
+    function ensureSimpleAudio() {
+        if (!simpleAudioEl) {
+            simpleAudioEl = new Audio();
+            simpleAudioEl._state = 'idle';   /* idle | loading | playing */
+            simpleAudioEl._playToken = null;
+            simpleAudioEl._kind = null;      /* 'word' | 'recitation' */
+            simpleAudioEl.addEventListener('playing', function() { simpleAudioEl._state = 'playing'; refreshPlayButtons(); });
+            simpleAudioEl.addEventListener('waiting', function() { if (simpleAudioEl._state !== 'idle') { simpleAudioEl._state = 'loading'; refreshPlayButtons(); } });
+            simpleAudioEl.addEventListener('ended', function() {
+                var wasRecitation = simpleAudioEl._kind === 'recitation';
+                var endedToken = simpleAudioEl._playToken;
+                simpleAudioEl._state = 'idle'; simpleAudioEl._playToken = null;
+                refreshPlayButtons();
+                if (wasRecitation) recitationAdvance(endedToken);
+            });
+            simpleAudioEl.addEventListener('error', function() { simpleAudioEl._state = 'idle'; simpleAudioEl._playToken = null; refreshPlayButtons(); });
+            simpleAudioEl.addEventListener('timeupdate', updateRecProgress);
+        }
+        return simpleAudioEl;
+    }
+    /* The recitation play button doubles as a per-ayah progress bar: the played
+       portion is darker blue and fills right-to-left (from the right edge leftward). */
+    var REC_PROGRESS_DARK = '#1e40af';
+    var REC_PROGRESS_LIGHT = '#93c5fd';
+    function updateRecProgress() {
+        var rb = document.getElementById('rec-play-btn');
+        if (!rb) return;
+        if (isRecitationPlaying() && simpleAudioEl && simpleAudioEl._state === 'playing') {
+            var d = simpleAudioEl.duration, c = simpleAudioEl.currentTime;
+            var p = (d && isFinite(d) && d > 0) ? Math.max(0, Math.min(1, c / d)) : 0;
+            var pn = (p * 100).toFixed(2);
+            rb.style.setProperty('background',
+                'linear-gradient(to left, ' + REC_PROGRESS_DARK + ' 0%, ' + REC_PROGRESS_DARK + ' ' + pn + '%, ' +
+                REC_PROGRESS_LIGHT + ' ' + pn + '%, ' + REC_PROGRESS_LIGHT + ' 100%)', 'important');
+        } else {
+            rb.style.removeProperty('background');
+        }
+    }
+    function setPlayBtnVisual(b, state) {
+        if (b.getAttribute('data-state') === state) return;
+        b.setAttribute('data-state', state);
+        b.classList.toggle('is-playing', state === 'playing');
+        b.classList.toggle('is-loading', state === 'loading');
+        b.innerHTML = (state === 'playing') ? SIMPLE_PAUSE_ICON : (state === 'loading' ? SIMPLE_SPINNER_ICON : SIMPLE_PLAY_ICON);
+    }
+    function refreshPlayButtons() {
+        var tok = simpleAudioEl ? simpleAudioEl._playToken : null;
+        var state = (simpleAudioEl && simpleAudioEl._state) ? simpleAudioEl._state : 'idle';
+        var kind = simpleAudioEl ? simpleAudioEl._kind : null;
+        document.querySelectorAll('.simple-play-btn').forEach(function(b) {
+            if (b.id === 'audio-stop-btn' || b.id === 'rec-play-btn') return;
+            var active = !!tok && b.getAttribute('data-play-token') === tok;
+            setPlayBtnVisual(b, active ? state : 'idle');
+        });
+        /* Transient word-audio stop control (recitation audio is handled by the recitation bar). */
+        var globalBtn = document.getElementById('audio-stop-btn');
+        if (globalBtn) {
+            var wordActive = (kind === 'word' && state !== 'idle');
+            setPlayBtnVisual(globalBtn, wordActive ? state : 'idle');
+            globalBtn.style.display = wordActive ? '' : 'none';
+        }
+        /* Recitation bar play/pause button reflects recitation playback. */
+        var recBtn = document.getElementById('rec-play-btn');
+        if (recBtn) setPlayBtnVisual(recBtn, (kind === 'recitation') ? state : 'idle');
+        if (typeof updateActiveAyahHighlight === 'function') updateActiveAyahHighlight();
+        if (typeof updateRecProgress === 'function') updateRecProgress();
+        if (typeof updateRecBarVisibility === 'function') updateRecBarVisibility();
+    }
+    function isTokenActive(token) {
+        return !!(simpleAudioEl && simpleAudioEl._playToken === token && simpleAudioEl._state !== 'idle');
+    }
+    function isRecitationPlaying() {
+        return !!(simpleAudioEl && simpleAudioEl._kind === 'recitation' && simpleAudioEl._state !== 'idle');
+    }
+    function stopSimpleAudio() {
+        if (simpleAudioEl) {
+            var wasRecitation = simpleAudioEl._kind === 'recitation';
+            try { simpleAudioEl.pause(); simpleAudioEl.currentTime = 0; } catch (e) {}
+            simpleAudioEl._playToken = null;
+            simpleAudioEl._state = 'idle';
+            simpleAudioEl._kind = null;
+            /* Stopping recitation ends the on-demand session, so the bar can hide again. */
+            if (wasRecitation) recitationForceShow = false;
+        }
+        refreshPlayButtons();
+    }
+    function setAudioLoading(token, kind) {
+        var el = ensureSimpleAudio();
+        try { el.pause(); } catch (e) {}
+        el._playToken = token;
+        el._kind = kind || null;
+        el._state = 'loading';
+        refreshPlayButtons();
+    }
+    function startAudio(url, token, kind) {
+        if (!url) return;
+        var el = ensureSimpleAudio();
+        try { el.pause(); } catch (e) {}
+        el._playToken = token;
+        el._kind = kind || null;
+        el._state = 'loading';
+        el.src = url;
+        refreshPlayButtons();
+        var p = el.play();
+        if (p && p.catch) p.catch(function() {});
+    }
+    function togglePlay(url, token, kind) {
+        if (isTokenActive(token)) { stopSimpleAudio(); return; }
+        startAudio(url, token, kind);
+    }
+
+    /* ===== Recitation player (active ayah + sequential playback) ===== */
+    var activeVerseKey = null;
+    var recitationForceShow = false;   /* set true after handover from a pop-up */
+    var pendingActiveScroll = false;   /* scroll to active ayah after next render */
+    var recHoverActive = false;        /* hovering the recitation play button */
+    var versePageMap = {};             /* verse_key -> mushaf page number */
+
+    function getRecScope() {
+        var s = getSetting('recitation_scope', 'ayah');
+        if (['ayah', 'page', 'sura', 'sura-repeat', 'quran'].indexOf(s) === -1) return 'ayah';
+        return s;
+    }
+    function getRecDefaultShow() { return getSetting('recitation_show', 'hide') === 'show'; }
+    function suraAyahCount(s) { return (window.SURA_AYAT && window.SURA_AYAT[s]) ? window.SURA_AYAT[s] : 0; }
+
+    function firstWordOfVerse(verseKey) {
+        if (!main || !verseKey) return null;
+        return main.querySelector('.qword[data-verse-key="' + verseKey + '"]');
+    }
+    function isVerseInDom(verseKey) { return !!firstWordOfVerse(verseKey); }
+
+    function samePageInDom(vkA, vkB) {
+        var a = firstWordOfVerse(vkA), b = firstWordOfVerse(vkB);
+        if (!a || !b) return false;
+        var ca = a.closest('.page-card, .sura-page-block');
+        var cb = b.closest('.page-card, .sura-page-block');
+        return !!(ca && ca === cb);
+    }
+
+    function isVerseVisible(verseKey) {
+        var el = firstWordOfVerse(verseKey);
+        if (!el) return false;
+        var r = el.getBoundingClientRect();
+        var sc = el.closest('.sura-scroll');
+        var top, bottom;
+        if (sc) { var sr = sc.getBoundingClientRect(); top = sr.top; bottom = sr.bottom; }
+        else { top = 0; bottom = window.innerHeight || document.documentElement.clientHeight || 0; }
+        return r.bottom > top + 4 && r.top < bottom - 4;
+    }
+    function scrollVerseIntoViewIfNeeded(verseKey, force) {
+        var el = firstWordOfVerse(verseKey);
+        if (!el) return;
+        if (!force && isVerseVisible(verseKey)) return;
+        try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e) { el.scrollIntoView(); }
+    }
+
+    function updateActiveAyahHighlight() {
+        if (!main) return;
+        var on = isRecitationPlaying() || recHoverActive;
+        main.querySelectorAll('.qword.ayah-active').forEach(function(el) { el.classList.remove('ayah-active'); });
+        main.querySelectorAll('.translation-ayah.ayah-active').forEach(function(el) { el.classList.remove('ayah-active'); });
+        if (on && activeVerseKey) {
+            main.querySelectorAll('.qword[data-verse-key="' + activeVerseKey + '"]').forEach(function(el) { el.classList.add('ayah-active'); });
+            main.querySelectorAll('.translation-ayah[data-verse-key="' + activeVerseKey + '"]').forEach(function(el) { el.classList.add('ayah-active'); });
+        }
+    }
+
+    function recBarLabelText(verseKey) {
+        var m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+        if (!m) return '';
+        return getSuraName(parseInt(m[1], 10)) + ' ' + fmtFa(m[2]);
+    }
+    function updateRecBarTitle() {
+        var rb = document.getElementById('rec-play-btn');
+        if (rb && activeVerseKey) rb.title = 'پخش تلاوت: ' + recBarLabelText(activeVerseKey);
+    }
+
+    function recitationDefaultActiveForView() {
+        var st = getMode();
+        if (st.mode === 'sura') {
+            var key = st.sura + ':1';
+            return isVerseInDom(key) ? key : key;
+        }
+        var w = main ? main.querySelector('.page-card .page-content .qword[data-verse-key]:not([data-synthetic-bismillah="1"])') : null;
+        return w ? w.getAttribute('data-verse-key') : null;
+    }
+
+    /* Called at the end of each render once the new DOM is in place. */
+    function afterRenderActiveAyah() {
+        if (!main) return;
+        if (!activeVerseKey || !isVerseInDom(activeVerseKey)) {
+            var def = recitationDefaultActiveForView();
+            if (def) activeVerseKey = def;
+        }
+        updateRecBarTitle();
+        updateRecBarVisibility();
+        refreshPlayButtons();
+        updateActiveAyahHighlight();
+        if (pendingActiveScroll && activeVerseKey) {
+            pendingActiveScroll = false;
+            var key = activeVerseKey;
+            requestAnimationFrame(function() { scrollVerseIntoViewIfNeeded(key, true); });
+        }
+    }
+
+    function setActiveAyah(verseKey, opts) {
+        opts = opts || {};
+        if (!verseKey) return;
+        activeVerseKey = verseKey;
+        updateRecBarTitle();
+        if (isVerseInDom(verseKey)) {
+            if (opts.scroll) scrollVerseIntoViewIfNeeded(verseKey, opts.forceScroll);
+            updateActiveAyahHighlight();
+        } else if (opts.navigate) {
+            pendingActiveScroll = true;
+            navigateToVerse(verseKey);
+        }
+    }
+
+    function resolveVersePage(verseKey, cb) {
+        if (versePageMap[verseKey]) { cb(versePageMap[verseKey]); return; }
+        fetch('https://api.quran.com/api/v4/verses/by_key/' + encodeURIComponent(verseKey) + '?fields=page_number')
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                var p = d && d.verse && d.verse.page_number;
+                if (p) versePageMap[verseKey] = p;
+                cb(p || null);
+            })
+            .catch(function() { cb(null); });
+    }
+
+    function navigateToVerse(verseKey) {
+        var m = String(verseKey).match(/^(\d+):(\d+)$/);
+        if (!m) return;
+        var S = parseInt(m[1], 10), A = parseInt(m[2], 10);
+        /* Match render()'s branch (URL view), not just the layout setting. */
+        if (getMode().mode === 'sura') {
+            setUrl('sura', null, S, A);
+            render();
+        } else {
+            resolveVersePage(verseKey, function(page) {
+                setUrl('page', pageForCurrentMode(page || 1), S, A);
+                render();
+            });
+        }
+    }
+
+    function nextVerseForScope(verseKey, scope) {
+        var m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+        if (!m) return null;
+        var S = parseInt(m[1], 10), A = parseInt(m[2], 10);
+        if (scope === 'ayah') return null;
+        var count = suraAyahCount(S);
+        if (scope === 'page') {
+            if (A >= count) return null;
+            var cand = S + ':' + (A + 1);
+            return samePageInDom(verseKey, cand) ? cand : null;
+        }
+        if (A < count) return S + ':' + (A + 1);
+        if (scope === 'sura') return null;
+        if (scope === 'sura-repeat') return S + ':1';
+        if (scope === 'quran') return (S < 114) ? (S + 1) + ':1' : null;
+        return null;
+    }
+
+    function startRecitation(verseKey, forceScroll) {
+        if (!verseKey) return;
+        recitationForceShow = true;
+        updateRecBarVisibility();
+        setActiveAyah(verseKey, { navigate: true, scroll: true, forceScroll: !!forceScroll });
+        var token = 'a:' + verseKey;
+        setAudioLoading(token, 'recitation');
+        resolveAyahAudioUrl(verseKey, function(url) {
+            if (!simpleAudioEl || simpleAudioEl._playToken !== token) return; /* cancelled / switched */
+            if (!url) { stopSimpleAudio(); return; }
+            startAudio(url, token, 'recitation');
+        });
+    }
+
+    function recitationAdvance(endedToken) {
+        var vk = (endedToken && endedToken.indexOf('a:') === 0) ? endedToken.slice(2) : activeVerseKey;
+        var next = nextVerseForScope(vk, getRecScope());
+        if (!next) {
+            /* Playback finished: if the bar is only shown on demand, hide it again. */
+            if (!getRecDefaultShow()) { recitationForceShow = false; updateRecBarVisibility(); }
+            updateActiveAyahHighlight();
+            return;
+        }
+        startRecitation(next);
+    }
+
+    function updateRecBarVisibility() {
+        var bar = document.getElementById('recitation-bar');
+        if (!bar) return;
+        var show = recitationForceShow || getRecDefaultShow();
+        bar.style.display = show ? '' : 'none';
+    }
+
     function hideWordHoverTooltip() {
         if (!wordHoverTooltip) return;
         cancelHideWordTooltip();
@@ -3225,9 +3818,17 @@
             return { rootCount: 0, lemmaCount: 0 };
         }
     }
-    function showWordHoverTooltip(text, anchorEl, verseTranslation, root, lemma, rootCount, lemmaCount, isPinned) {
+    function showWordHoverTooltip(text, anchorEl, verseTranslation, root, lemma, rootCount, lemmaCount, isPinned, verseKey, position) {
         if (!wordHoverTooltip) return;
-        var content = (text && text.length > 0) ? escapeHtml(text) : '';
+        var transText = (text && text.length > 0) ? escapeHtml(text) : '';
+        var wordAudioUrl = buildWordAudioUrl(verseKey, position);
+        var playBtnHtml = wordAudioUrl
+            ? ('<button type="button" class="simple-play-btn word-play-btn" data-audio-url="' + escapeAttr(wordAudioUrl) + '" data-play-token="' + escapeAttr(wordAudioUrl) + '" title="پخش واژه" aria-label="پخش واژه">' + SIMPLE_PLAY_ICON + '</button>')
+            : '';
+        var content = '';
+        if (transText || playBtnHtml) {
+            content = '<div class="word-tooltip-head"><span class="word-tooltip-trans">' + transText + '</span>' + playBtnHtml + '</div>';
+        }
         if (root || lemma) {
             var morphParts = [];
             var mm = continuousMinimapMode();
@@ -3252,7 +3853,7 @@
             var versePart = '<div class="verse-translation' + (wordTooltipVerseExpanded ? ' expanded' : '') + '">' + escapeHtml(verseTranslation) + '</div>';
             content = content ? (content + versePart) : versePart;
         }
-        if (!content) return;
+        if (!content) { hideWordHoverTooltip(); return; }
         cancelHideWordTooltip();
         wordHoverTooltip.innerHTML = content;
         wordHoverTooltip.style.display = 'block';
@@ -3262,6 +3863,7 @@
             pinnedWordForTooltip = anchorEl;
             wordHoverTooltip.style.pointerEvents = 'auto';
         }
+        refreshPlayButtons();
     }
     var currentAyahTooltipAnchor = null;
     function positionAyahHadithTooltip(anchorEl) {
@@ -3294,11 +3896,13 @@
             verseTranslation = verseWordEl ? (verseWordEl.getAttribute('data-verse-translation') || '') : '';
         }
         var toggleHtml = verseTranslation ? '<button type="button" class="verse-toggle" aria-expanded="' + (ayahTooltipVerseExpanded ? 'true' : 'false') + '" title="نمایش ترجمه آیه" aria-label="نمایش ترجمه آیه"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.25 4.5 6 8.25 9.75 4.5"/></svg></button>' : '';
-        tt.innerHTML = '<div class="ayah-tooltip-row"><div class="ayah-tooltip-links"><a class="ayah-circle-link" href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '" title="حدیث" aria-label="حدیث">ح</a><a class="ayah-circle-link" href="commentary.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '" title="تفسیر" aria-label="تفسیر">ت</a></div>' + toggleHtml + '</div>'
+        var playBtn = '<button type="button" class="ayah-circle-link simple-play-btn ayah-play-btn" data-verse-key="' + escapeAttr(verseKey) + '" data-play-token="a:' + escapeAttr(verseKey) + '" title="پخش آیه" aria-label="پخش آیه">' + SIMPLE_PLAY_ICON + '</button>';
+        tt.innerHTML = '<div class="ayah-tooltip-row"><div class="ayah-tooltip-links">' + playBtn + '<a class="ayah-circle-link" href="hadith.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '" title="حدیث" aria-label="حدیث">ح</a><a class="ayah-circle-link" href="commentary.html?s=' + escapeHtml(s) + '&a=' + escapeHtml(a) + '" title="تفسیر" aria-label="تفسیر">ت</a></div>' + toggleHtml + '</div>'
             + (verseTranslation ? ('<div class="verse-translation' + (ayahTooltipVerseExpanded ? ' expanded' : '') + '">' + escapeHtml(verseTranslation) + '</div>') : '');
         tt.style.display = 'block';
         currentAyahTooltipAnchor = anchorEl || null;
         positionAyahHadithTooltip(anchorEl);
+        refreshPlayButtons();
     }
     function hideAyahHadithTooltip() {
         var tt = document.getElementById('sura-hadith-tooltip');
@@ -3345,6 +3949,20 @@
         if (hadithTooltipEl && !hadithTooltipEl._leaveBound) {
             hadithTooltipEl._leaveBound = true;
             hadithTooltipEl.addEventListener('click', function(e) {
+                var playBtn = e.target && e.target.closest ? e.target.closest('.simple-play-btn') : null;
+                if (playBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var vk = playBtn.getAttribute('data-verse-key') || '';
+                    var token = playBtn.getAttribute('data-play-token') || ('a:' + vk);
+                    /* Hand playback over to the recitation bar (it becomes visible). */
+                    if (isTokenActive(token)) {
+                        stopSimpleAudio();
+                        return;
+                    }
+                    startRecitation(vk, true);
+                    return;
+                }
                 var toggle = e.target && e.target.closest ? e.target.closest('.verse-toggle') : null;
                 if (!toggle) return;
                 e.preventDefault();
@@ -3360,6 +3978,13 @@
         if (!wordTooltipLeaveBound && wordHoverTooltip) {
             wordTooltipLeaveBound = true;
             wordHoverTooltip.addEventListener('click', function(e) {
+                var playBtn = e.target.closest ? e.target.closest('.simple-play-btn') : null;
+                if (playBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    togglePlay(playBtn.getAttribute('data-audio-url'), playBtn.getAttribute('data-play-token'));
+                    return;
+                }
                 var selA = e.target.closest && e.target.closest('a.morph-shift-hint[href*="search.html"]');
                 if (selA && !e.shiftKey && continuousMinimapMode() && typeof window.simpleMorphToggleFromTooltip === 'function') {
                     try {
@@ -3421,7 +4046,10 @@
             if (wordEl.classList.contains('ayah-end')) {
                 var vKey = wordEl.getAttribute('data-verse-key') || '';
                 ayahTooltipVerseExpanded = false;
-                if (vKey) showAyahHadithTooltip(vKey, wordEl);
+                if (vKey) {
+                    setActiveAyah(vKey, { scroll: false });
+                    showAyahHadithTooltip(vKey, wordEl);
+                }
                 return;
             }
             var tr = wordEl.getAttribute('data-word-translation') || '';
@@ -3440,12 +4068,8 @@
                 return;
             }
             var counts = getTooltipMorphCounts(root, lemma);
-            if (tr || verseTr || root || lemma) {
-                wordTooltipVerseExpanded = false;
-                showWordHoverTooltip(tr, wordEl, verseTr, root, lemma, counts.rootCount || 0, counts.lemmaCount || 0, true);
-            } else {
-                hideWordHoverTooltip();
-            }
+            wordTooltipVerseExpanded = false;
+            showWordHoverTooltip(tr, wordEl, verseTr, root, lemma, counts.rootCount || 0, counts.lemmaCount || 0, true, vKey, pos);
         });
         container.addEventListener('mouseout', function(e) {
             var from = e.target && e.target.closest ? e.target.closest('.qword') : null;
@@ -4132,6 +4756,7 @@
         if (pageList.length > 0) {
             saveCurrentLocation('page', pageList[0].pageNumber || pageList[0].page_number || 1, null, null);
         }
+        afterRenderActiveAyah();
         // Ribbon disabled (commented out per request)
         // main.appendChild(progressInlineWrap);
         // var barPages = progressInlineWrap.querySelector('#pages-bar');
@@ -4710,6 +5335,7 @@
             teardownSimpleMinimapRuntime();
             main.appendChild(container);
         }
+        afterRenderActiveAyah();
         function syncSuraLocation(keepAyah) {
             var currentPage = getCurrentContinuousPage() || ((pageBlocks[0] && pageBlocks[0].pageNumber) ? pageBlocks[0].pageNumber : 1);
             setUrl('sura', currentPage, suraNumber, keepAyah ? getAyahFromUrl() : null);
@@ -5039,6 +5665,114 @@
             setSetting('lemma_tooltip_mode', v);
         });
     }
+    var reciterSelectEl = document.getElementById('reciter-select');
+    if (reciterSelectEl) {
+        function buildReciterGroup(label, items) {
+            var og = document.createElement('optgroup');
+            og.label = label;
+            items.forEach(function(r) {
+                var o = document.createElement('option');
+                o.value = r.id;
+                o.textContent = r.label;
+                og.appendChild(o);
+            });
+            return og;
+        }
+        reciterSelectEl.appendChild(buildReciterGroup('quran.com', QURANCOM_RECITERS));
+        reciterSelectEl.appendChild(buildReciterGroup('tanzil.net', TANZIL_RECITERS));
+        reciterSelectEl.value = getReciterSetting();
+        if (!reciterSelectEl.value) reciterSelectEl.value = DEFAULT_RECITER;
+        reciterSelectEl.addEventListener('change', function() {
+            setSetting('reciter', this.value);
+            stopSimpleAudio();
+        });
+    }
+    var audioStopBtn = document.getElementById('audio-stop-btn');
+    if (audioStopBtn) {
+        audioStopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            stopSimpleAudio();
+        });
+    }
+    (function wireRecitationBar() {
+        var recPlayBtn = document.getElementById('rec-play-btn');
+        var scopeBtn = document.getElementById('rec-scope-btn');
+        var scopeMenu = document.getElementById('rec-scope-menu');
+        var scopeSel = document.getElementById('rec-scope-select');
+        var recLabel = document.getElementById('rec-active-label');
+        var REC_SCOPES = [
+            { value: 'ayah', label: 'این آیه' },
+            { value: 'page', label: 'تا پایان صفحه' },
+            { value: 'sura', label: 'تا پایان سوره' },
+            { value: 'sura-repeat', label: 'سوره (با تکرار)' },
+            { value: 'quran', label: 'تا پایان قرآن' }
+        ];
+        function closeScopeMenu() {
+            if (scopeMenu) scopeMenu.classList.remove('open');
+            if (scopeBtn) scopeBtn.setAttribute('aria-expanded', 'false');
+        }
+        if (scopeSel) {
+            REC_SCOPES.forEach(function(s) {
+                var o = document.createElement('option');
+                o.value = s.value;
+                o.textContent = s.label;
+                scopeSel.appendChild(o);
+            });
+            scopeSel.value = getRecScope();
+            scopeSel.addEventListener('change', function() {
+                setSetting('recitation_scope', this.value);
+            });
+        }
+        if (scopeBtn && scopeMenu) {
+            scopeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var open = scopeMenu.classList.toggle('open');
+                scopeBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open && scopeSel) scopeSel.value = getRecScope();
+            });
+            document.addEventListener('click', function(e) {
+                if (scopeMenu.classList.contains('open') && !scopeMenu.contains(e.target) && e.target !== scopeBtn) {
+                    closeScopeMenu();
+                }
+            });
+        }
+        if (recPlayBtn) {
+            recPlayBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (isRecitationPlaying()) { stopSimpleAudio(); return; }
+                startRecitation(activeVerseKey, true);
+            });
+            recPlayBtn.addEventListener('mouseenter', function() {
+                recHoverActive = true;
+                updateActiveAyahHighlight();
+                if (activeVerseKey) {
+                    scrollVerseIntoViewIfNeeded(activeVerseKey);
+                    if (recLabel) {
+                        recLabel.textContent = recBarLabelText(activeVerseKey);
+                        recLabel.style.display = 'block';
+                        var r = recPlayBtn.getBoundingClientRect();
+                        recLabel.style.left = Math.max(8, r.left) + 'px';
+                        recLabel.style.top = (r.top - 28) + 'px';
+                    }
+                }
+            });
+            recPlayBtn.addEventListener('mouseleave', function() {
+                recHoverActive = false;
+                updateActiveAyahHighlight();
+                if (recLabel) recLabel.style.display = 'none';
+            });
+        }
+        var recShowSel = document.getElementById('recitation-show');
+        if (recShowSel) {
+            recShowSel.value = getRecDefaultShow() ? 'show' : 'hide';
+            recShowSel.addEventListener('change', function() {
+                setSetting('recitation_show', this.value === 'show' ? 'show' : 'hide');
+                updateRecBarVisibility();
+            });
+        }
+        updateRecBarVisibility();
+    })();
     (function wireMinimapSettingsInMainMenu() {
         var impSel = document.getElementById('mm-important-display');
         var panelSel = document.getElementById('mm-selected-panel');
@@ -5390,6 +6124,16 @@
     updateSearchButtons();
 
     window.addEventListener('popstate', function() {
+        var st = getMode();
+        var resolvedSura = null;
+        if (st && st.mode === 'sura' && st.sura != null) {
+            resolvedSura = st.sura;
+        } else if (st && st.page != null && pageToSura && pageToSura[st.page] != null) {
+            resolvedSura = pageToSura[st.page];
+        } else if (st && st.sura != null) {
+            resolvedSura = st.sura;
+        }
+        if (resolvedSura != null) lastUrlSura = resolvedSura;
         render();
     });
     window.addEventListener('resize', function() {

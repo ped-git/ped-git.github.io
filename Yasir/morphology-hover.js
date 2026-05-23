@@ -1331,7 +1331,6 @@ const morphologyData = {};
             border: 1px solid #aaa;
             border-radius: 4px;
             padding: 3px;
-            z-index: 9998;
             overflow-y: auto;
             overflow-x: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.15);
@@ -1341,6 +1340,7 @@ const morphologyData = {};
             box-sizing: border-box;
             display: block;
         `;
+            // z-index: 9998;
         
         // Explicitly remove top and max-height if in wrapper (to override any previous inline styles)
         if (wrapper) {
