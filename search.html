@@ -2423,6 +2423,7 @@
             __searchInFlight = (async () => {
                 const results = performSearch();
                 await renderResults(results);
+                maybePushSearchHistory();
             })();
             try {
                 return await __searchInFlight;
@@ -3386,7 +3387,9 @@
         const STATS_ALPHA = window.SearchShared.STATS_ALPHA;
         let statsUniverseCache = null;
         let searchResultsView = localStorage.getItem(SEARCH_RESULTS_VIEW_STORAGE_KEY) || 'regions';
-        const STATS_MATCH_MODES = ['separated', 'any-total', 'all'];
+        // 'separated' is temporarily disabled (kept in the labels/code so it can be re-enabled later);
+        // the toggle now only cycles between 'any-total' and 'all'.
+        const STATS_MATCH_MODES = ['any-total', 'all'];
         const statsMatchModeLabels = {
             separated: 'مجزا',
             'any-total': 'هر کدام',
@@ -3394,14 +3397,23 @@
         };
         const statsMatchModeTitles = {
             separated: 'جدا: آمار جداگانه هر مورد',
-            'any-total': 'هر کدام: مجموع تعداد تطابق‌های همه موارد (x+y+...)',
-            all: 'همه: تعداد آیات شروع که همه موارد در فاصله دارند'
+            'any-total': 'هر کدام: مجموع رخدادهای همهٔ موارد در هر سوره',
+            all: 'همه: رخدادهای همهٔ موارد درون نواحیِ هم‌آیی'
         };
-        let statsMatchMode = localStorage.getItem('searchStatsMatchMode') || 'separated';
-        if (statsMatchMode === 'any') statsMatchMode = 'separated';
-        if (!STATS_MATCH_MODES.includes(statsMatchMode)) statsMatchMode = 'separated';
+        let statsMatchMode = localStorage.getItem('searchStatsMatchMode') || 'all';
+        if (statsMatchMode === 'any') statsMatchMode = 'any-total';
+        if (!STATS_MATCH_MODES.includes(statsMatchMode)) statsMatchMode = 'all';
         let statsSortKey = localStorage.getItem('searchStatsSortKey') || 'sura';
         let statsSortDir = localStorage.getItem('searchStatsSortDir') || 'asc';
+        // Which chart measures are hidden (toggled off in the legend). Persisted across searches.
+        let chartHiddenMeasures = new Set((() => {
+            try { return JSON.parse(localStorage.getItem('searchChartHiddenMeasures') || '[]') || []; }
+            catch (_) { return []; }
+        })());
+        let chartVisibilitySyncing = false;
+        // Browser-history (back/forward) tracking for the committed search state.
+        let lastPushedSearchState = null;
+        let isRestoringHistory = false;
         let lastRenderedStats = [];
         let lastCombinedSearchMeta = { bySura: {}, startsBySura: {}, startDebug: [], totalCS: 0, eligible: false };
 
@@ -3472,14 +3484,17 @@
             const useCombinedAll = (statsMatchMode === 'all' && !highlightedItem && checkedCount > 1 && combinedData?.eligible);
 
             if (useCombinedAll) {
-                const bySura = combinedData.bySura || {};
-                const totalCS = Object.values(bySura).reduce((a, b) => a + b, 0);
-                const suras = Object.keys(bySura).map(Number).sort((a, b) => a - b);
-                const nTotalAyah = getTotalAyahCount();
+                // Count occurrences (of all selected items) inside the co-occurrence regions,
+                // not the ayah anchors — so "تعداد" means occurrences consistently (single or
+                // multi item). The merged-region count is shown in the separate بازه column.
+                const occBySura = combinedData.occBySura || {};
+                const totalOcc = Object.values(occBySura).reduce((a, b) => a + b, 0);
+                const universe = resolveStatsUniverse('word');
+                const suras = Object.keys(occBySura).map(Number).sort((a, b) => a - b);
                 const rows = suras.map(sura => {
-                    const cSura = bySura[sura] || 0;
-                    const nSura = Math.max(1, Object.keys(morphologyData[sura] || {}).length);
-                    const metrics = computePerSuraMetrics(cSura, totalCS, nSura, nTotalAyah, 1);
+                    const cSura = occBySura[sura] || 0;
+                    const N_s = universe.tokensBySura[sura] || 1;
+                    const metrics = computePerSuraMetrics(cSura, totalOcc, N_s, universe.totalTokens, universe.vocabularySize);
                     return {
                         sura,
                         count: cSura,
@@ -3487,14 +3502,14 @@
                         ratio: metrics.ratio,
                         kl: metrics.kl,
                         m: metrics.m,
-                        detail: { cSura, cAll: totalCS, nSura, nTotal: nTotalAyah, v: 1, alpha: STATS_ALPHA, pSura: metrics.pSura, pElse: metrics.pElse }
+                        detail: { cSura, cAll: totalOcc, nSura: N_s, nTotal: universe.totalTokens, v: universe.vocabularySize, alpha: STATS_ALPHA, pSura: metrics.pSura, pElse: metrics.pElse }
                     };
                 });
-                return [{ item: { type: 'text', display: 'ترکیبی (همه موارد)' }, itemIndex: 0, totalMatches: totalCS, rows, focusedLem: null }];
+                return [{ item: { type: 'text', display: 'ترکیبی (همه موارد)' }, itemIndex: 0, totalMatches: totalOcc, rows, focusedLem: null }];
             }
 
             if (statsMatchMode === 'any-total' && checkedCount > 1 && !highlightedItem) {
-                const nTotalAyah = getTotalAyahCount();
+                const universe = resolveStatsUniverse('word');
                 const countsBySura = {};
                 let totalMatchCount = 0;
                 for (let i = 0; i < statsInput.sections.length; i++) {
@@ -3509,8 +3524,8 @@
                 const suras = Object.keys(countsBySura).map(Number).sort((a, b) => a - b);
                 const rows = suras.map(sura => {
                     const cSura = countsBySura[sura] || 0;
-                    const nSura = Math.max(1, Object.keys(morphologyData[sura] || {}).length);
-                    const metrics = computePerSuraMetrics(cSura, totalMatchCount, nSura, nTotalAyah, 1);
+                    const N_s = universe.tokensBySura[sura] || 1;
+                    const metrics = computePerSuraMetrics(cSura, totalMatchCount, N_s, universe.totalTokens, universe.vocabularySize);
                     return {
                         sura,
                         count: cSura,
@@ -3518,7 +3533,7 @@
                         ratio: metrics.ratio,
                         kl: metrics.kl,
                         m: metrics.m,
-                        detail: { cSura, cAll: totalMatchCount, nSura, nTotal: nTotalAyah, v: 1, alpha: STATS_ALPHA, pSura: metrics.pSura, pElse: metrics.pElse }
+                        detail: { cSura, cAll: totalMatchCount, nSura: N_s, nTotal: universe.totalTokens, v: universe.vocabularySize, alpha: STATS_ALPHA, pSura: metrics.pSura, pElse: metrics.pElse }
                     };
                 });
                 return [{ item: { type: 'text', display: 'مجموع (همه موارد)' }, itemIndex: 0, totalMatches: totalMatchCount, rows, focusedLem: null }];
@@ -3900,6 +3915,9 @@
                 v: 1,
                 distance: getDistanceValueClamped(),
                 crossSura: document.getElementById('cross-sura-toggle')?.getAttribute('aria-pressed') === 'true',
+                view: searchResultsView,
+                sortKey: statsSortKey,
+                sortDir: statsSortDir,
                 suras: allSurasSelected ? 'all' : Array.from(selectedSuras).sort((a, b) => a - b),
                 items: selectedItems.map((item, index) => {
                     const entry = {
@@ -4016,6 +4034,19 @@
                     itemCheckedState[index] = computedChecked;
                 });
 
+                if (state.view === 'regions' || state.view === 'stats' || state.view === 'charts') {
+                    searchResultsView = state.view;
+                    localStorage.setItem(SEARCH_RESULTS_VIEW_STORAGE_KEY, searchResultsView);
+                }
+                if (typeof state.sortKey === 'string' && state.sortKey) {
+                    statsSortKey = state.sortKey;
+                    localStorage.setItem('searchStatsSortKey', statsSortKey);
+                }
+                if (state.sortDir === 'asc' || state.sortDir === 'desc') {
+                    statsSortDir = state.sortDir;
+                    localStorage.setItem('searchStatsSortDir', statsSortDir);
+                }
+
                 updateSelectedItemsUI();
                 buildItemsPanel();
                 return true;
@@ -4029,6 +4060,41 @@
             url.searchParams.delete('sure');
             url.searchParams.set(SEARCH_STATE_PARAM, encodeSearchStatePayload(buildSearchStatePayload()));
             return url.toString();
+        }
+
+        function currentEncodedSearchState() {
+            return encodeSearchStatePayload(buildSearchStatePayload());
+        }
+
+        // URL to reflect in history: encoded state when there is a search, else a clean URL.
+        function searchHistoryUrl() {
+            if (selectedItems.length > 0) return buildCurrentSearchUrl();
+            const url = new URL(window.location.href);
+            url.searchParams.delete(SEARCH_STATE_PARAM);
+            url.searchParams.delete('root');
+            url.searchParams.delete('lem');
+            url.searchParams.delete('sure');
+            return url.toString();
+        }
+
+        // Mark the current state as the baseline history entry (replaces, no new step).
+        function initSearchHistoryBaseline() {
+            lastPushedSearchState = currentEncodedSearchState();
+            try { window.history.replaceState({ searchState: lastPushedSearchState }, '', searchHistoryUrl()); }
+            catch (_) {}
+        }
+
+        // Add a back/forward step when the committed search state changed: search items
+        // (add/remove), sub-item selection, suras, distance, view, or sort.
+        // Chart measure visibility is deliberately NOT part of the state, so toggling a
+        // measure in the chart legend never creates a history step.
+        function maybePushSearchHistory() {
+            if (isRestoringHistory) return;
+            const encoded = currentEncodedSearchState();
+            if (encoded === lastPushedSearchState) return;
+            lastPushedSearchState = encoded;
+            try { window.history.pushState({ searchState: encoded }, '', searchHistoryUrl()); }
+            catch (_) {}
         }
 
         function syncItemsPanelToggle() {
@@ -4511,6 +4577,37 @@
                    '<div>' + escapeHtml(head.text) + '</div>' + varsHtml;
         }
 
+        // Mode-aware tooltip for the تعداد (occurrence) cell.
+        function statsCountTooltipHtml(sec, row) {
+            const combined = !!(sec && sec.item && sec.item.type === 'text');
+            let title, text;
+            if (combined && statsMatchMode === 'all') {
+                title = 'تعداد رخدادها — حالت «همه»';
+                text = 'تعداد رخدادهای همهٔ موارد که داخل نواحیِ هم‌آییِ این سوره قرار دارند.';
+            } else if (combined && statsMatchMode === 'any-total') {
+                title = 'تعداد رخدادها — حالت «هر کدام»';
+                text = 'مجموع رخدادهای همهٔ موارد جستجو در این سوره (x+y+…).';
+            } else {
+                title = 'تعداد رخدادها';
+                text = 'تعداد رخدادهای این مورد در این سوره.';
+            }
+            return '<div class="title">' + escapeHtml(title) + '</div>' +
+                   '<div>' + escapeHtml(text) + '</div>' +
+                   '<div class="var-line"><strong>' + escapeHtml(fmtFa(row.count || 0)) + '</strong> ' + escapeHtml('رخداد در این سوره') + '</div>' +
+                   '<div class="var-line">' + escapeHtml('کلیک: فیلتر به این سوره و نمایش نتایج') + '</div>';
+        }
+
+        // Tooltip for the بازه (region) cell.
+        function statsRangeTooltipHtml(sec, row) {
+            const combined = !!(sec && sec.item && sec.item.type === 'text');
+            const text = combined
+                ? 'تعداد نواحیِ هم‌آییِ ادغام‌شده در این سوره. بازه‌هایی که در یک آیه هم‌پوشانی دارند، در یک ناحیه ادغام می‌شوند.'
+                : 'تعداد نواحیِ این مورد در این سوره. رخدادهای نزدیک‌به‌هم (در فاصلهٔ مجاز) در یک بازه ادغام می‌شوند.';
+            return '<div class="title">' + escapeHtml('بازه (نواحی)') + '</div>' +
+                   '<div>' + escapeHtml(text) + '</div>' +
+                   '<div class="var-line"><strong>' + escapeHtml(fmtFa(row.regions || 0)) + '</strong> ' + escapeHtml('بازه در این سوره') + '</div>';
+        }
+
         let measureTooltipEl = null;
         function ensureMeasureTooltip() {
             if (measureTooltipEl) return measureTooltipEl;
@@ -4576,6 +4673,7 @@
             const map = {
                 sura: 'سوره',
                 count: 'تعداد',
+                regions: 'بازه',
                 relInSura: 'فراوانی',
                 ratio: 'تمایز',
                 kl: 'KL',
@@ -4588,6 +4686,7 @@
             const options = [
                 ['sura', 'سوره'],
                 ['count', 'تعداد'],
+                ['regions', 'بازه'],
                 ['relInSura', 'فراوانی'],
                 ['ratio', 'تمایز'],
                 ['kl', 'KL'],
@@ -4598,6 +4697,74 @@
                 `<select id="stats-sort-select" class="stats-sort-select" title="مرتب‌سازی">${opts}</select>` +
                 `<button type="button" id="stats-sort-dir" class="stats-sort-dir-btn" title="تغییر جهت مرتب‌سازی">${statsSortDir === 'desc' ? 'نزولی' : 'صعودی'}</button>` +
                 `</span>`;
+        }
+
+        // Number of distinct regions (merged matching ranges) per sura, derived from the
+        // rendered groups. A multi-sura interval is counted once in each sura it touches.
+        function computeRegionsBySura(groups) {
+            const bySura = {};
+            if (!Array.isArray(groups)) return bySura;
+            const seen = {};
+            for (const g of groups) {
+                if (!g || typeof g.sura === 'undefined') continue;
+                const s = g.sura;
+                const id = (g.intervalId === undefined || g.intervalId === null)
+                    ? (g.groupKey || `${g.sura}-${g.startAyah}-${g.endAyah}`)
+                    : g.intervalId;
+                if (!seen[s]) seen[s] = new Set();
+                seen[s].add(id);
+            }
+            for (const s of Object.keys(seen)) bySura[s] = seen[s].size;
+            return bySura;
+        }
+
+        // Number of matched word occurrences (of all selected items) that fall inside the
+        // merged regions, per sura. Merged regions are disjoint, so summing group matches
+        // does not double-count.
+        function computeRegionOccurrencesBySura(groups) {
+            const bySura = {};
+            if (!Array.isArray(groups)) return bySura;
+            for (const g of groups) {
+                if (!g || typeof g.sura === 'undefined') continue;
+                const n = Array.isArray(g.matches) ? g.matches.length : 0;
+                bySura[g.sura] = (bySura[g.sura] || 0) + n;
+            }
+            return bySura;
+        }
+
+        // Title for a stats card / chart. When an item has sub-items (a root's lemmas or a
+        // similar-root's related roots) and only SOME are selected, show the selected ones
+        // (max 2, then "+N") instead of just the root name. When all are selected, keep the
+        // plain item name.
+        function getStatsItemTitle(sec) {
+            const item = sec.item || {};
+            const baseName = item.display || item.value || '';
+            if (sec.focusedLem) return `${item.value} ← ${sec.focusedLem}`;
+
+            const partialLabel = (names) => {
+                const shown = names.slice(0, 2).join('، ');
+                const extra = names.length - 2;
+                return extra > 0 ? `${shown} +${fmtFa(extra)}` : shown;
+            };
+
+            if (item.type === 'root') {
+                const data = rootLemData[item.value];
+                if (data && Array.isArray(data.lems) && data.lems.length > 0) {
+                    const selected = data.lems.filter(l => l.selected);
+                    if (selected.length > 0 && selected.length < data.lems.length) {
+                        return `${baseName}: ${partialLabel(selected.map(l => l.lem))}`;
+                    }
+                }
+            } else if (item.type === 'similar-root') {
+                const data = similarRootData[item.value];
+                if (data && Array.isArray(data.relatedRoots) && data.relatedRoots.length > 0) {
+                    const selectedRoots = data.relatedRoots.filter(entry => entry.lems.some(l => l.selected));
+                    if (selectedRoots.length > 0 && selectedRoots.length < data.relatedRoots.length) {
+                        return `${baseName}: ${partialLabel(selectedRoots.map(e => e.root))}`;
+                    }
+                }
+            }
+            return baseName;
         }
 
         function renderStatsCharts(itemSections, resultsContent) {
@@ -4618,6 +4785,7 @@
             const typeLabels = { root: 'ریشه', 'similar-root': 'ریشه مشابه', word: 'واژه', text: 'عبارت', lemma: 'لمه' };
             const series = [
                 { key: 'count', label: 'تعداد', color: '#dc2626' },
+                { key: 'regions', label: 'بازه', color: '#db2777' },
                 { key: 'relInSura', label: 'فراوانی', color: '#2563eb' },
                 { key: 'ratio', label: 'تمایز', color: '#ea580c' },
                 { key: 'kl', label: 'KL', color: '#7c3aed' },
@@ -4627,7 +4795,7 @@
             for (let i = 0; i < itemSections.length; i++) {
                 const sec = itemSections[i];
                 const item = sec.item || {};
-                const itemLabel = escapeHtml(sec.focusedLem ? `${item.value} ← ${sec.focusedLem}` : (item.display || item.value || ''));
+                const itemLabel = escapeHtml(getStatsItemTitle(sec));
                 const typeLabel = typeLabels[sec.focusedLem ? 'lemma' : item.type] || 'مورد';
                 html += `<div class="item-stats-card"><div class="item-stats-header"><span class="item-stats-title">${itemLabel}</span><span class="item-stats-type">${typeLabel}</span><span class="item-stats-total num-hindi" title="مرتب‌سازی: ${statsSortLabel(statsSortKey)}">${fmtFa(sec.totalMatches || 0)} تطابق</span></div>`;
                 if (!sec.rows || sec.rows.length === 0) {
@@ -4646,6 +4814,8 @@
                 });
                 return;
             }
+            // Track the charts rendered this pass so a legend toggle on one mirrors to the rest.
+            const renderedChartTargets = [];
             for (let i = 0; i < itemSections.length; i++) {
                 const sec = itemSections[i];
                 if (!sec.rows || sec.rows.length === 0) continue;
@@ -4707,13 +4877,14 @@
                     }
                     axisRanges[s.key] = [lo, hi];
                 });
-                const axisIds = ['y', 'y2', 'y3', 'y4', 'y5'];
+                const axisIds = ['y', 'y2', 'y3', 'y4', 'y5', 'y6'];
                 const traces = series.map((s, si) => ({
                     x,
                     y: rows.map(r => Number(r[s.key]) || 0),
                     type: 'scatter',
                     mode: 'lines+markers',
                     name: `${s.label} (max: ${fmtFaFloat(maxima[s.key], 4)})`,
+                    visible: chartHiddenMeasures.has(s.key) ? 'legendonly' : true,
                     yaxis: axisIds[si],
                     line: { color: s.color, width: 2 },
                     marker: { color: s.color, size: 5 },
@@ -4742,9 +4913,28 @@
                     yaxis2: { title: '', tickfont: { color: series[1].color, size: 5 }, range: axisRanges[series[1].key], overlaying: 'y', side: 'right', anchor: 'free', position: 0.92, showline: true, linecolor: series[1].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 },
                     yaxis3: { title: '', tickfont: { color: series[2].color, size: 5 }, range: axisRanges[series[2].key], overlaying: 'y', side: 'right', anchor: 'free', position: 0.90, showline: true, linecolor: series[2].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 },
                     yaxis4: { title: '', tickfont: { color: series[3].color, size: 5 }, range: axisRanges[series[3].key], overlaying: 'y', side: 'right', anchor: 'free', position: 0.96, showline: true, linecolor: series[3].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 },
-                    yaxis5: { title: '', tickfont: { color: series[4].color, size: 5 }, range: axisRanges[series[4].key], overlaying: 'y', side: 'right', anchor: 'free', position: 1.00, showline: true, linecolor: series[4].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 }
+                    yaxis5: { title: '', tickfont: { color: series[4].color, size: 5 }, range: axisRanges[series[4].key], overlaying: 'y', side: 'right', anchor: 'free', position: 1.00, showline: true, linecolor: series[4].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 },
+                    yaxis6: { title: '', tickfont: { color: series[5].color, size: 5 }, range: axisRanges[series[5].key], overlaying: 'y', side: 'right', anchor: 'free', position: 0.94, showline: true, linecolor: series[5].color, linewidth: 1, zeroline: true, zerolinecolor: '#94a3b8', zerolinewidth: 1 }
                 };
                 Plotly.newPlot(target, traces, layout, { displayModeBar: false, responsive: true });
+                renderedChartTargets.push(target);
+                // Persist which measures are toggled off, and mirror the choice to sibling charts.
+                target.on('plotly_restyle', () => {
+                    if (chartVisibilitySyncing) return;
+                    const hidden = [];
+                    series.forEach((s, si) => {
+                        if (target.data[si] && target.data[si].visible === 'legendonly') hidden.push(s.key);
+                    });
+                    chartHiddenMeasures = new Set(hidden);
+                    try { localStorage.setItem('searchChartHiddenMeasures', JSON.stringify(hidden)); } catch (_) {}
+                    const others = renderedChartTargets.filter(o => o !== target);
+                    if (!others.length) return;
+                    chartVisibilitySyncing = true;
+                    const visibleArr = series.map(s => chartHiddenMeasures.has(s.key) ? 'legendonly' : true);
+                    Promise.all(others.map(o => Plotly.restyle(o, { visible: visibleArr })))
+                        .catch(() => {})
+                        .then(() => { chartVisibilitySyncing = false; });
+                });
             }
         }
 
@@ -4768,26 +4958,22 @@
                 const sec = itemSections[i];
                 const item = sec.item || {};
                 const colorIndex = (sec.itemIndex ?? i) % 8;
-                const itemLabel = escapeHtml(sec.focusedLem ? `${item.value} ← ${sec.focusedLem}` : (item.display || item.value || ''));
+                const itemLabel = escapeHtml(getStatsItemTitle(sec));
                 const typeLabel = typeLabels[sec.focusedLem ? 'lemma' : item.type] || 'مورد';
                 const matchesTitle = (statsMatchMode === 'all' && sec.item?.display === 'ترکیبی (همه موارد)')
-                    ? 'تعداد آیات شروع که همه موارد در فاصلهٔ مجاز دارند'
+                    ? 'مجموع رخدادهای همهٔ موارد درون نواحیِ هم‌آیی'
                     : (statsMatchMode === 'any-total')
-                        ? 'مجموع تطابق‌های همهٔ موارد در جستجو'
-                        : 'تعداد کل تطابق‌های این مورد در جستجو';
+                        ? 'مجموع رخدادهای همهٔ موارد در جستجو'
+                        : 'تعداد کل رخدادهای این مورد در جستجو';
                 html += `<div class="item-stats-card"><div class="item-stats-header"><span class="item-stats-dot" style="background: var(--color-${colorIndex});"></span><span class="item-stats-title">${itemLabel}</span><span class="item-stats-type">${typeLabel}</span><span class="item-stats-total num-hindi" title="${matchesTitle}">${fmtFa(sec.totalMatches || 0)} تطابق</span></div>`;
                 if (!sec.rows || sec.rows.length === 0) {
                     html += `<div class="no-results">در سوره‌های انتخاب‌شده موردی یافت نشد</div>`;
                 } else {
                     const sortedRows = sortStatsRows(sec.rows);
-                    const countCellTitle = (statsMatchMode === 'all' && sec.item?.display === 'ترکیبی (همه موارد)')
-                        ? 'تعداد بازه‌ها با همهٔ موارد، پیش از ادغام (ممکن است با بازه‌های ادغام‌شده در نتایج جستجو متفاوت باشد). کلیک: فیلتر به این سوره و نمایش نتایج'
-                        : (statsMatchMode === 'any-total')
-                            ? 'مجموع تطابق‌های همهٔ موارد در این سوره. کلیک: فیلتر به این سوره و نمایش نتایج'
-                            : 'تعداد تطابق‌های این مورد در این سوره. کلیک: فیلتر به این سوره و نمایش نتایج';
                     html += `<table class="item-stats-table"><thead><tr>` +
                         `<th data-sort-key="sura" role="button" tabindex="0" title="مرتب‌سازی بر اساس سوره">سوره${sortIndicatorFor('sura')}</th>` +
                         `<th data-sort-key="count" role="button" tabindex="0" title="مرتب‌سازی بر اساس تعداد">تعداد${sortIndicatorFor('count')}</th>` +
+                        `<th data-sort-key="regions" role="button" tabindex="0" title="مرتب‌سازی بر اساس بازه‌ها (نواحی ادغام‌شده)">بازه${sortIndicatorFor('regions')}</th>` +
                         `<th data-sort-key="relInSura" role="button" tabindex="0" title="مرتب‌سازی بر اساس فراوانی">فراوانی${sortIndicatorFor('relInSura')}</th>` +
                         `<th data-sort-key="ratio" role="button" tabindex="0" title="مرتب‌سازی بر اساس تمایز">تمایز${sortIndicatorFor('ratio')}</th>` +
                         `<th data-sort-key="kl" role="button" tabindex="0" title="مرتب‌سازی بر اساس KL">KL${sortIndicatorFor('kl')}</th>` +
@@ -4796,7 +4982,8 @@
                     for (let r = 0; r < sortedRows.length; r++) {
                         const row = sortedRows[r];
                         html += `<tr><td><a class="stats-sura-link num-hindi" href="${escapeAttr(buildAyahTargetHref(row.sura))}" title="باز کردن سوره در ${escapeAttr(getAyahLinkTargetLabel())}">${escapeHtml(SURA_NAMES[row.sura] || ('سوره ' + fmtFa(row.sura)))}</a></td>`;
-                        html += `<td class="num-hindi stats-sura-count" data-sura="${row.sura}" role="button" tabindex="0" title="${countCellTitle}">${fmtFa(row.count)}</td>`;
+                        html += `<td class="num-hindi stats-sura-count measure-help" data-sura="${row.sura}" role="button" tabindex="0" data-tooltip-html="${statsCountTooltipHtml(sec, row).replace(/"/g, '&quot;')}">${fmtFa(row.count)}</td>`;
+                        html += `<td class="num-hindi measure-help" data-tooltip-html="${statsRangeTooltipHtml(sec, row).replace(/"/g, '&quot;')}">${fmtFa(row.regions || 0)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('freq', row).replace(/"/g, '&quot;')}">${fmtFaPercent(row.relInSura)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('ratio', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.ratio, 3)}</td>`;
                         html += `<td class="num-hindi measure-help" data-tooltip-html="${measureCellTooltip('kl', row).replace(/"/g, '&quot;')}">${fmtFaFloat(row.kl, 4)}</td>`;
@@ -4860,13 +5047,19 @@
             // In stats/table modes, render per-item/per-sura stats in-place of regions.
             if (searchResultsView === 'stats' || searchResultsView === 'charts') {
                 lastRenderedGroups = safeGroups;
+                const regionsBySura = computeRegionsBySura(safeGroups);
+                const occInRegionsBySura = computeRegionOccurrencesBySura(safeGroups);
                 const combinedData = safeGroups.__combinedEligible ? {
                     bySura: safeGroups.__combinedCSBySura || {},
+                    occBySura: occInRegionsBySura,
+                    regionsBySura: regionsBySura,
                     startsBySura: safeGroups.__combinedStartAyahsBySura || {},
                     startDebug: safeGroups.__combinedStartDebug || [],
                     eligible: true
                 } : null;
                 const statsSections = performItemSuraStatsSearch(safeGroups.__statsInput, combinedData, statsMatchMode);
+                // Attach per-sura region count (merged matching ranges) to every row.
+                statsSections.forEach(sec => (sec.rows || []).forEach(row => { row.regions = regionsBySura[row.sura] || 0; }));
                 if (searchResultsView === 'charts') renderStatsCharts(statsSections, resultsContent);
                 else renderStatsResults(statsSections, resultsContent);
                 return;
@@ -5135,6 +5328,7 @@
             buildItemsPanel();
             if (selectedItems.length === 0) {
                 clearSearchResultsUI();
+                maybePushSearchHistory();
                 return;
             }
             requestAutoSearch(0);
@@ -5193,6 +5387,7 @@
                         buildSuraFilterList();
                         updateSuraFilterLabel();
                         updateDistanceDisplay();
+                        syncViewResultsToggle();
                         if (selectedItems.length > 0) triggerSearch();
                     } else {
                         console.warn('Falling back to legacy URL params because search state could not be restored.');
@@ -5225,6 +5420,30 @@
                         else url.search = '';
                         window.history.replaceState({}, '', url.toString());
                     }
+                }
+                // Establish the baseline history entry so back/forward have something to return to.
+                initSearchHistoryBaseline();
+            });
+
+            // Back/forward navigation restores the corresponding committed search state.
+            window.addEventListener('popstate', async (event) => {
+                let encoded = (event.state && event.state.searchState) ? event.state.searchState : null;
+                if (!encoded) {
+                    encoded = new URLSearchParams(window.location.search).get(SEARCH_STATE_PARAM);
+                }
+                isRestoringHistory = true;
+                try {
+                    const restored = (encoded ? decodeSearchStatePayload(encoded) : null) || { items: [], suras: 'all' };
+                    applySearchStatePayload(restored);
+                    buildSuraFilterList();
+                    updateSuraFilterLabel();
+                    updateDistanceDisplay();
+                    syncViewResultsToggle();
+                    lastPushedSearchState = currentEncodedSearchState();
+                    if (selectedItems.length > 0) await triggerSearch();
+                    else clearSearchResultsUI();
+                } finally {
+                    isRestoringHistory = false;
                 }
             });
 
@@ -5488,6 +5707,7 @@
                     localStorage.setItem(SEARCH_RESULTS_VIEW_STORAGE_KEY, searchResultsView);
                     syncViewResultsToggle();
                     renderResults(lastRenderedGroups || []);
+                    maybePushSearchHistory();
                 });
             }
 
@@ -5505,6 +5725,7 @@
                             localStorage.setItem('searchStatsSortKey', statsSortKey);
                             localStorage.setItem('searchStatsSortDir', statsSortDir);
                             if (searchResultsView !== 'regions') renderResults(lastRenderedGroups || []);
+                            maybePushSearchHistory();
                         }
                         return;
                     }
@@ -5515,6 +5736,7 @@
                         statsSortDir = (statsSortDir === 'asc') ? 'desc' : 'asc';
                         localStorage.setItem('searchStatsSortDir', statsSortDir);
                         if (searchResultsView !== 'regions') renderResults(lastRenderedGroups || []);
+                        maybePushSearchHistory();
                         return;
                     }
                     const countCell = e.target.closest('.stats-sura-count');
@@ -5552,6 +5774,7 @@
                     statsSortKey = key;
                     localStorage.setItem('searchStatsSortKey', statsSortKey);
                     if (searchResultsView !== 'regions') renderResults(lastRenderedGroups || []);
+                    maybePushSearchHistory();
                 });
                 resultsContentEl.addEventListener('keydown', (e) => {
                     const sortHeader = e.target.closest('th[data-sort-key]');
@@ -5875,6 +6098,8 @@
                 e.stopPropagation();
                 suraFilterPopup.classList.toggle('visible');
                 if (suraFilterPopup.classList.contains('visible')) {
+                    // Reset the filter text so the freshly built list isn't out of sync with stale text.
+                    suraFilterSearch.value = '';
                     buildSuraFilterList();
                 }
             });
