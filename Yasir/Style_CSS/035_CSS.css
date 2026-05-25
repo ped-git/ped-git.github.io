@@ -197,6 +197,22 @@ speech[black]::before {
   padding: 0px 0px; ;
 }
 
+.boxed.underline-blackdashed3 {
+  border-bottom: 2px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed4 {
+  border-bottom: 3px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px; ;
+}
+
 .boxed.underline-green {
   border-bottom: 1px dashed rgb(100, 180, 100);
   border-left: 0;

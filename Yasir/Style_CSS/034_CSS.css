@@ -57,9 +57,24 @@ speech[black]::before {
   right: 7.4mm; ;
 }
 
+.vertical-line-dashedred-1 {
+  border-left: 0.3mm dashed rgb(205,100,100);
+  height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
 .vertical-line-green-1 {
   border-left: 0.3mm solid rgb(70,175,70);
   height: 100%;
+  position: absolute;
+  right: 7.4mm; ;
+}
+
+.vertical-line-dashedgreen-1 {
+  border-left: 0.3mm dashed rgb(70,175,70);
+  height: 80%;
+  top: 20%;
   position: absolute;
   right: 7.4mm; ;
 }
@@ -424,6 +439,14 @@ speech[black]::before {
   border-right: 0;
   border-top: 0;
   padding: 0px 0px;
+}
+
+.boxed.underline-notsure {
+  border-bottom: 0;
+  border-left: 1px dotted rgb(100, 100, 100);
+  border-right: 1px dotted rgb(100, 100, 100);
+  border-top: 0;
+  padding: 0px 0.264583mm;
 }
 
 
