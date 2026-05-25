@@ -99,11 +99,12 @@
       const arabicWord = toArabic(fullWordBuckwalter);
       let root = null;
       let lemma = null;
+      let stem = null; // Arabic text of the root-bearing segment (the part of the word carrying this root)
 
       for (const segment of segments) {
         if (!root) {
           const rootMatch = (segment.features || '').match(/ROOT:([^\|]+)/);
-          if (rootMatch) root = toArabic(rootMatch[1]);
+          if (rootMatch) { root = toArabic(rootMatch[1]); stem = toArabic(segment.text); }
         }
         if (!lemma) {
           const lemmaMatch = (segment.features || '').match(/LEM:([^\|]+)/);
@@ -114,7 +115,7 @@
       if (!morphologyData[sura]) morphologyData[sura] = {};
       if (!morphologyData[sura][ayah]) morphologyData[sura][ayah] = {};
       morphologyData[sura][ayah][wordIndex] = includeText
-        ? { root, lemma, text: arabicWord }
+        ? { root, lemma, text: arabicWord, stem }
         : { root, lemma };
 
       if (root) {

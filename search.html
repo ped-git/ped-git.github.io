@@ -610,7 +610,8 @@
         }
         
         .expand-toggle.collapsed {
-            transform: rotate(-90deg);
+            /* RTL: a collapsed branch points left (toward the start of the line) */
+            transform: rotate(90deg);
         }
         
         .expand-spacer {
@@ -730,7 +731,28 @@
         .similar-root-lem-subrow {
             padding-right: 34px;
         }
-        
+
+        /* Third level: word-forms (stems) under each lemma of a root */
+        .word-container {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-right: 16px;
+            padding-right: 8px;
+            border-right: 1px dotted #d9e3f8;
+        }
+
+        .word-container.collapsed {
+            max-height: 0 !important;
+        }
+
+        .word-subrow {
+            padding-right: 40px;
+        }
+
+        .word-subrow .lem-label {
+            color: #555;
+        }
+
         .result-group {
             padding: 8px 10px;
             margin-bottom: 8px;
@@ -1647,6 +1669,81 @@
             font-style: italic;
             font-size: 14px;
         }
+
+        /* ===== Audio playback (word + ayah recitation) ===== */
+        .simple-play-btn {
+            cursor: pointer;
+            font: inherit;
+            padding: 0;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .simple-play-btn svg { display: block; width: 11px; height: 11px; }
+        .simple-play-btn .simple-spinner { transform-origin: 50% 50%; animation: simple-spin 0.7s linear infinite; }
+        @keyframes simple-spin { to { transform: rotate(360deg); } }
+        .simple-play-btn.is-playing { background: #2563eb !important; border-color: #2563eb !important; color: #fff !important; }
+
+        /* Per-ayah play button shown next to the ayah reference link */
+        .ayah-play-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #2563eb;
+            vertical-align: middle;
+            margin-inline: 2px;
+        }
+        .ayah-play-btn:hover { background: #eff6ff; border-color: #93c5fd; }
+
+        /* Play button inside the word tooltip */
+        #word-hover-tooltip .morph-tooltip-row { gap: 6px; }
+        #word-hover-tooltip .word-tooltip-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #word-hover-tooltip .word-tooltip-trans {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        #word-hover-tooltip .word-play-btn {
+            flex: 0 0 auto;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #word-hover-tooltip .word-play-btn:hover { background: #eff6ff; border-color: #93c5fd; }
+
+        /* Floating stop control for transient word audio */
+        #audio-stop-btn {
+            position: fixed;
+            bottom: 18px;
+            inset-inline-start: 18px;
+            z-index: 9999;
+            min-width: 40px;
+            height: 40px;
+            border: 1px solid #c9d2dd;
+            background: #ffffff;
+            color: #2563eb;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #audio-stop-btn:hover { background: #f4f7fb; }
+        #audio-stop-btn.is-playing { background: #2563eb !important; border-color: #2563eb !important; color: #ffffff !important; }
+        #audio-stop-btn svg { width: 16px; height: 16px; }
     </style>
     
     <!-- QCF page fonts will be loaded dynamically -->
@@ -1706,6 +1803,10 @@
                     <button class="settings-btn" id="settings-btn" title="تنظیمات">⚙️</button>
                     <div class="settings-menu" id="settings-menu">
                         <div class="settings-title">تنظیمات</div>
+                        <div class="settings-item">
+                            <label>قاری:</label>
+                            <select id="reciter-select" aria-label="قاری"></select>
+                        </div>
                         <div class="settings-item">
                             <label>فونت قرآن:</label>
                             <select id="font-select">
@@ -1783,6 +1884,7 @@
                     </div>
                 </div>
             </div>
+            <button type="button" id="audio-stop-btn" class="simple-play-btn" style="display:none" title="توقف پخش" aria-label="توقف پخش"></button>
     </div>
 
     <script src="js/buckwalter.js"></script>
@@ -1846,36 +1948,68 @@
         const itemCheckedState = []; // [boolean, ...] - tracks checked state for each selectedItem
         
         // LEM tracking for roots
-        const rootLemData = {}; // {root: {lems: [{lem, count, selected}], allSelected: boolean}}
+        const rootLemData = {}; // {root: {lems: [{lem, count, selected, words: [{word, count, selected}]}], allSelected: boolean}}
         const rootExpandedState = {}; // {root: boolean} - tracks if root LEMs are expanded
+        const lemWordsExpandedState = {}; // {"root::lem": boolean} - tracks if a lemma's word-forms are expanded (default collapsed)
         const similarRootData = {}; // {root: {relatedRoots: [{root, similarity, count, selected, lems: [...] }], allSelected: boolean}}
         const similarRootSelectionState = {}; // {baseRoot: {relatedRoots: {relatedRoot: {lems: {lem: selected}}}}}
         const similarRootExpandedState = {}; // {root: boolean}
         const similarRootChildExpandedState = {}; // {"base::related": boolean}
-        let highlightedItem = null; // {type: 'item'|'lem'|'similar-root-node'|'similar-root-lem', itemIndex, similarRoot?, lem?} - for focus mode
+        let highlightedItem = null; // {type: 'item'|'lem'|'word'|'similar-root-node'|'similar-root-lem', itemIndex, similarRoot?, lem?, word?} - for focus mode
         
         // Sura filter
         const selectedSuras = new Set(); // empty = all suras selected
         let allSurasSelected = true;
         
         // Get all LEMs for a root from morphology data (filtered by selected suras)
+        // Stem (the root-bearing part of a word). Falls back to the full word text.
+        function getWordStem(wordData) {
+            return (wordData && (wordData.stem || wordData.text)) || '';
+        }
+
         function getLemsForRoot(root, filterBySura = true) {
-            const lemCounts = {};
+            const lemMap = {}; // lem -> { count, words: { stem -> count } }
             const locations = rootToWordsMap[root] || [];
-            
+
             for (const loc of locations) {
                 // Filter by selected suras if requested
                 if (filterBySura && !isSuraSelected(loc.sura)) continue;
-                
+
                 const wordData = morphologyData[loc.sura]?.[loc.ayah]?.[loc.wordIndex];
-                if (wordData?.lemma) {
-                    lemCounts[wordData.lemma] = (lemCounts[wordData.lemma] || 0) + 1;
-                }
+                const lem = wordData?.lemma;
+                if (!lem) continue;
+                const stem = getWordStem(wordData) || lem;
+                if (!lemMap[lem]) lemMap[lem] = { count: 0, words: {} };
+                lemMap[lem].count++;
+                lemMap[lem].words[stem] = (lemMap[lem].words[stem] || 0) + 1;
             }
-            
-            return Object.entries(lemCounts)
-                .map(([lem, count]) => ({ lem, count, selected: true }))
+
+            return Object.entries(lemMap)
+                .map(([lem, info]) => ({
+                    lem,
+                    count: info.count,
+                    selected: true,
+                    words: Object.entries(info.words)
+                        .map(([word, count]) => ({ word, count, selected: true }))
+                        .sort((a, b) => b.count - a.count)
+                }))
                 .sort((a, b) => b.count - a.count);
+        }
+
+        // Set of allowed "lemword" keys given the current selection / focus.
+        // Returns null to mean "no filter (allow all)".
+        function getAllowedRootWords(root, { focusedLem = null, focusedWord = null } = {}) {
+            const data = rootLemData[root];
+            if (!data || !Array.isArray(data.lems)) return null;
+            const allowed = new Set();
+            data.lems.forEach(l => {
+                if (focusedLem && l.lem !== focusedLem) return;
+                (l.words || []).forEach(w => {
+                    if (focusedWord) { if (w.word === focusedWord) allowed.add(l.lem + '' + w.word); return; }
+                    if (focusedLem || w.selected) allowed.add(l.lem + '' + w.word);
+                });
+            });
+            return allowed;
         }
 
         function getRootCount(root, filterBySura = true) {
@@ -1891,7 +2025,9 @@
         function syncRootLemSelectionState(root) {
             const data = rootLemData[root];
             if (!data) return;
-            data.allSelected = data.lems.length > 0 && data.lems.every(l => l.selected);
+            // A lemma is "selected" (active) iff at least one of its word-forms is selected.
+            data.lems.forEach(l => { l.selected = (l.words || []).some(w => w.selected); });
+            data.allSelected = data.lems.length > 0 && data.lems.every(l => (l.words || []).every(w => w.selected));
         }
 
         function withAutoSearchSuspended(callback) {
@@ -1913,15 +2049,19 @@
                     allSelected: true
                 };
             } else if (forceRefresh) {
-                // Preserve selection state
-                const oldSelections = {};
-                rootLemData[root].lems.forEach(l => { oldSelections[l.lem] = l.selected; });
-                
-                // Update with new counts, preserve selections
-                rootLemData[root].lems = newLems.map(l => ({
-                    ...l,
-                    selected: oldSelections[l.lem] !== undefined ? oldSelections[l.lem] : true
-                }));
+                // Preserve per-word selection state across refreshes (e.g. sura-filter changes)
+                const oldWordSel = {}; // lem -> { word -> selected }
+                rootLemData[root].lems.forEach(l => {
+                    oldWordSel[l.lem] = {};
+                    (l.words || []).forEach(w => { oldWordSel[l.lem][w.word] = w.selected; });
+                });
+                rootLemData[root].lems = newLems.map(l => {
+                    const words = (l.words || []).map(w => ({
+                        ...w,
+                        selected: oldWordSel[l.lem]?.[w.word] !== undefined ? oldWordSel[l.lem][w.word] : true
+                    }));
+                    return { ...l, words, selected: words.some(w => w.selected) };
+                });
             }
             syncRootLemSelectionState(root);
             return rootLemData[root];
@@ -2117,16 +2257,37 @@
                     const lemData = initRootLemData(item.value, true); // true = refresh counts for current sura filter
                     html += `<div class="lems-container ${!isExpanded ? 'collapsed' : ''}" data-root="${item.value}">`;
                     lemData.lems.forEach((lemInfo, lemIndex) => {
-                        const isLemHighlighted = highlightedItem?.type === 'lem' && 
-                                                  highlightedItem?.itemIndex === index && 
+                        const isLemHighlighted = highlightedItem?.type === 'lem' &&
+                                                  highlightedItem?.itemIndex === index &&
                                                   highlightedItem?.lem === lemInfo.lem;
-                        html += `<div class="lem-subrow ${isLemHighlighted ? 'highlighted' : ''} ${!lemInfo.selected ? 'unchecked' : ''}"
-                                      data-item-index="${index}" data-lem="${lemInfo.lem}" data-lem-index="${lemIndex}">
-                            <input type="checkbox" ${lemInfo.selected ? 'checked' : ''} 
+                        const wordList = lemInfo.words || [];
+                        const selWordCount = wordList.filter(w => w.selected).length;
+                        const lemChecked = selWordCount > 0;
+                        const lemPartial = lemChecked && selWordCount < wordList.length;
+                        const lemKey = `${item.value}::${lemInfo.lem}`;
+                        const wordsExpanded = lemWordsExpandedState[lemKey] === true; // default collapsed
+                        html += `<div class="lem-subrow ${isLemHighlighted ? 'highlighted' : ''} ${!lemChecked ? 'unchecked' : ''}"
+                                      data-item-index="${index}" data-lem="${escapeAttr(lemInfo.lem)}" data-lem-index="${lemIndex}">
+                            <input type="checkbox" ${lemChecked ? 'checked' : ''} data-partial="${lemPartial ? 'true' : 'false'}"
                                    onclick="event.stopPropagation()">
+                            <span class="expand-toggle ${!wordsExpanded ? 'collapsed' : ''}" data-role="lem-toggle" onclick="event.stopPropagation()">▼</span>
                             <span class="lem-label">${lemInfo.lem}</span>
                             <span class="lem-count num-hindi">${fmtFa(lemInfo.count)}</span>
                         </div>`;
+                        html += `<div class="word-container ${!wordsExpanded ? 'collapsed' : ''}" data-root="${escapeAttr(item.value)}" data-lem="${escapeAttr(lemInfo.lem)}">`;
+                        wordList.forEach((wordInfo, wordIdx) => {
+                            const isWordHighlighted = highlightedItem?.type === 'word' &&
+                                highlightedItem?.itemIndex === index &&
+                                highlightedItem?.lem === lemInfo.lem &&
+                                highlightedItem?.word === wordInfo.word;
+                            html += `<div class="lem-subrow word-subrow ${isWordHighlighted ? 'highlighted' : ''} ${!wordInfo.selected ? 'unchecked' : ''}"
+                                          data-item-index="${index}" data-lem-index="${lemIndex}" data-lem="${escapeAttr(lemInfo.lem)}" data-word-index="${wordIdx}" data-word="${escapeAttr(wordInfo.word)}">
+                                <input type="checkbox" ${wordInfo.selected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <span class="lem-label">${escapeHtml(wordInfo.word)}</span>
+                                <span class="lem-count num-hindi">${fmtFa(wordInfo.count)}</span>
+                            </div>`;
+                        });
+                        html += `</div>`;
                     });
                     html += `</div>`;
                 } else if (isSimilarRoot) {
@@ -2196,14 +2357,37 @@
                 }
             });
             
-            container.querySelectorAll('.lem-subrow:not(.similar-root-lem-subrow)').forEach(row => {
+            container.querySelectorAll('.lem-subrow:not(.similar-root-lem-subrow):not(.word-subrow)').forEach(row => {
                 row.addEventListener('click', (e) => {
-                    if (e.target.type !== 'checkbox') {
+                    if (e.target.type !== 'checkbox' && !e.target.classList.contains('expand-toggle')) {
                         handleLemClick(row);
                     }
                 });
-                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
                     handleLemCheckbox(row, e.target.checked);
+                });
+                checkbox.indeterminate = checkbox.dataset.partial === 'true';
+                const toggle = row.querySelector('[data-role="lem-toggle"]');
+                if (toggle) {
+                    toggle.addEventListener('click', () => {
+                        const itemIndex = parseInt(row.dataset.itemIndex, 10);
+                        const baseRoot = selectedItems[itemIndex]?.value;
+                        const lemKey = `${baseRoot}::${row.dataset.lem}`;
+                        lemWordsExpandedState[lemKey] = !(lemWordsExpandedState[lemKey] === true);
+                        buildItemsPanel();
+                    });
+                }
+            });
+
+            container.querySelectorAll('.word-subrow').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        handleWordClick(row);
+                    }
+                });
+                row.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                    handleWordCheckbox(row, e.target.checked);
                 });
             });
 
@@ -2311,18 +2495,54 @@
             requestAutoSearch(0);
         }
         
-        // Handle LEM checkbox change
+        // Handle LEM checkbox change (cascades to all of the lemma's word-forms)
         function handleLemCheckbox(row, checked) {
             const itemIndex = parseInt(row.dataset.itemIndex);
             const lemIndex = parseInt(row.dataset.lemIndex);
             const root = selectedItems[itemIndex].value;
-            
-            if (rootLemData[root]) {
-                rootLemData[root].lems[lemIndex].selected = checked;
+
+            const lem = rootLemData[root]?.lems?.[lemIndex];
+            if (lem) {
+                (lem.words || []).forEach(w => { w.selected = checked; });
                 syncRootLemSelectionState(root);
                 itemCheckedState[itemIndex] = rootLemData[root].lems.some(l => l.selected);
             }
-            
+
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
+
+        // Handle a word-form (3rd level) checkbox change
+        function handleWordCheckbox(row, checked) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            const lemIndex = parseInt(row.dataset.lemIndex);
+            const wordIndex = parseInt(row.dataset.wordIndex);
+            const root = selectedItems[itemIndex].value;
+
+            const lem = rootLemData[root]?.lems?.[lemIndex];
+            if (lem && lem.words?.[wordIndex]) {
+                lem.words[wordIndex].selected = checked;
+                syncRootLemSelectionState(root);
+                itemCheckedState[itemIndex] = rootLemData[root].lems.some(l => l.selected);
+            }
+
+            buildItemsPanel();
+            requestAutoSearch(0);
+        }
+
+        // Handle clicking a word-form row (focus/highlight just that word)
+        function handleWordClick(row) {
+            const itemIndex = parseInt(row.dataset.itemIndex);
+            const lem = row.dataset.lem;
+            const word = row.dataset.word;
+
+            if (highlightedItem?.type === 'word' && highlightedItem?.itemIndex === itemIndex &&
+                highlightedItem?.lem === lem && highlightedItem?.word === word) {
+                highlightedItem = null;
+            } else {
+                highlightedItem = { type: 'word', itemIndex, lem, word };
+            }
+
             buildItemsPanel();
             requestAutoSearch(0);
         }
@@ -2370,7 +2590,7 @@
             if (item?.type === 'root') {
                 const lemData = initRootLemData(item.value, false);
                 lemData.lems.forEach(lem => {
-                    lem.selected = checked;
+                    (lem.words || []).forEach(w => { w.selected = checked; });
                 });
                 syncRootLemSelectionState(item.value);
                 itemCheckedState[itemIndex] = checked;
@@ -2948,37 +3168,36 @@
         // focusedLem: specific lemma to search
         // ignoreFilters: if true, ignore child checkbox filters
         // focusedRelatedRoot: for similar-root items, search only one related root
-        function findMatchingWords(item, itemIndex = -1, focusedLem = null, ignoreFilters = false, focusedRelatedRoot = null) {
+        function findMatchingWords(item, itemIndex = -1, focusedLem = null, ignoreFilters = false, focusedRelatedRoot = null, focusedWord = null) {
             const matches = [];
             const normalized = normalizeArabic(item.value || '');
             
             if (item.type === 'root') {
                 const words = rootToWordsMap[item.value] || [];
-                const lemData = rootLemData[item.value];
-                
-                // Get selected LEMs (or just the focused one)
-                let allowedLems = null;
-                if (focusedLem) {
-                    // Specific LEM is focused - only that one
-                    allowedLems = new Set([focusedLem]);
-                } else if (!ignoreFilters && lemData) {
-                    // Normal mode - filter by checked LEMs
-                    allowedLems = new Set(lemData.lems.filter(l => l.selected).map(l => l.lem));
+
+                // Filter at the word-form level. allowedWords is a Set of "lemmastem"
+                // keys, or null to allow everything (ignoreFilters / data not yet built).
+                let allowedWords = null;
+                if (focusedWord) {
+                    allowedWords = getAllowedRootWords(item.value, { focusedLem, focusedWord });
+                } else if (focusedLem) {
+                    allowedWords = getAllowedRootWords(item.value, { focusedLem });
+                } else if (!ignoreFilters) {
+                    allowedWords = getAllowedRootWords(item.value);
                 }
-                // If ignoreFilters is true, allowedLems stays null (all LEMs allowed)
-                
+
                 words.forEach(w => {
                     // Filter by sura
                     if (!isSuraSelected(w.sura)) return;
-                    
+
                     const wordData = morphologyData[w.sura]?.[w.ayah]?.[w.wordIndex];
-                    const wordLem = wordData?.lemma;
-                    
-                    // Filter by allowed LEMs if specified
-                    if (allowedLems && wordLem && !allowedLems.has(wordLem)) {
-                        return;
+
+                    // Filter by allowed word-forms if specified
+                    if (allowedWords) {
+                        const key = (wordData?.lemma || '') + '' + getWordStem(wordData);
+                        if (!allowedWords.has(key)) return;
                     }
-                    
+
                     matches.push({ ...w, matchType: 'root' });
                 });
             } else if (item.type === 'similar-root') {
@@ -3124,11 +3343,16 @@
                 
                 let focusedLem = null;
                 let focusedRelatedRoot = null;
+                let focusedWord = null;
                 let ignoreFilters = false;
-                
+
                 if (highlightedItem.type === 'lem') {
                     // Specific LEM highlighted - search only that LEM
                     focusedLem = highlightedItem.lem;
+                } else if (highlightedItem.type === 'word') {
+                    // Specific word-form highlighted - search only that word of that lemma
+                    focusedLem = highlightedItem.lem;
+                    focusedWord = highlightedItem.word;
                 } else if (highlightedItem.type === 'similar-root-node') {
                     focusedRelatedRoot = highlightedItem.similarRoot;
                     ignoreFilters = true;
@@ -3139,8 +3363,8 @@
                     // Entire item highlighted - ignore LEM filters, search all
                     ignoreFilters = true;
                 }
-                
-                const matches = findMatchingWords(item, itemIndex, focusedLem, ignoreFilters, focusedRelatedRoot);
+
+                const matches = findMatchingWords(item, itemIndex, focusedLem, ignoreFilters, focusedRelatedRoot, focusedWord);
                 matches.forEach(m => m.itemIndex = itemIndex);
                 const groups = groupMatchesByRegion(matches.sort(comparePositions), crossSura, distance);
                 groups.__combinedCSBySura = {};
@@ -3895,8 +4119,21 @@
         function serializeRootLemmaSelection(root) {
             const data = rootLemData[root] || initRootLemData(root, true);
             if (!data || !Array.isArray(data.lems)) return undefined;
-            const selected = data.lems.filter(lem => lem.selected).map(lem => lem.lem);
-            return selected.length === data.lems.length ? 'all' : selected;
+            // Word-level aware: 'all' when every word of every lemma is selected; otherwise a
+            // map lemma -> ('all' | [selected words]).
+            let everythingSelected = true;
+            const map = {};
+            data.lems.forEach(lem => {
+                const words = lem.words || [];
+                const selWords = words.filter(w => w.selected).map(w => w.word);
+                if (selWords.length === words.length) {
+                    map[lem.lem] = 'all';
+                } else {
+                    everythingSelected = false;
+                    map[lem.lem] = selWords;
+                }
+            });
+            return everythingSelected ? 'all' : map;
         }
 
         function serializeSimilarRootSelection(root) {
@@ -3955,11 +4192,26 @@
         function applyRootLemmaSelection(root, selection) {
             const data = initRootLemData(root, true);
             if (!data || !Array.isArray(data.lems)) return false;
+            const setAll = (lem, on) => { (lem.words || []).forEach(w => { w.selected = on; }); };
             if (selection === 'all' || selection === true || selection == null) {
-                data.lems.forEach(lem => { lem.selected = true; });
+                data.lems.forEach(lem => setAll(lem, true));
             } else if (Array.isArray(selection)) {
+                // Legacy format: array of selected lemma names (whole lemma on/off).
                 const selectedSet = new Set(selection.map(lem => String(lem)));
-                data.lems.forEach(lem => { lem.selected = selectedSet.has(lem.lem); });
+                data.lems.forEach(lem => setAll(lem, selectedSet.has(lem.lem)));
+            } else if (selection && typeof selection === 'object') {
+                // Word-level format: lemma -> ('all' | [selected words]).
+                data.lems.forEach(lem => {
+                    const sel = selection[lem.lem];
+                    if (sel === undefined || sel === 'all') {
+                        setAll(lem, true);
+                    } else if (Array.isArray(sel)) {
+                        const wset = new Set(sel.map(String));
+                        (lem.words || []).forEach(w => { w.selected = wset.has(w.word); });
+                    } else {
+                        setAll(lem, false);
+                    }
+                });
             }
             syncRootLemSelectionState(root);
             return data.lems.some(lem => lem.selected);
@@ -4205,17 +4457,31 @@
             if (inlineStyle) attrs.push(`style="${escapeAttr(inlineStyle)}"`);
             return `<span ${attrs.join(' ')}>${text}</span>`;
         }
-        function buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma) {
-            let content = wordTranslation ? escapeHtml(wordTranslation) : '';
+        function buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma, verseKey, position) {
+            let playHtml = '';
+            if (verseKey && position) {
+                const token = 'word|' + verseKey + '|' + position;
+                playHtml = '<button type="button" class="simple-play-btn word-play-btn" data-play-token="' + escapeAttr(token) +
+                    '" data-verse-key="' + escapeAttr(verseKey) + '" data-word-position="' + escapeAttr(String(position)) +
+                    '" title="پخش این واژه" aria-label="پخش این واژه">' + SIMPLE_PLAY_ICON + '</button>';
+            }
+            // First line: word translation with the play button to its left.
+            const transHtml = wordTranslation ? escapeHtml(wordTranslation) : '';
+            let content = (playHtml || transHtml)
+                ? ('<div class="word-tooltip-head"><span class="word-tooltip-trans">' + transHtml + '</span>' + playHtml + '</div>')
+                : '';
             const morphParts = [];
             if (root) morphParts.push('<a href="search.html?root=' + encodeURIComponent(root) + '">' + escapeHtml(root) + '</a>');
             if (lemma) morphParts.push('<a href="search.html?lem=' + encodeURIComponent(lemma) + '">' + escapeHtml(lemma) + '</a>');
-            if (morphParts.length > 0) {
-                let toggleHtml = '';
-                if (verseTranslation) {
-                    toggleHtml = '<button type="button" class="verse-toggle" aria-expanded="' + (wordTooltipVerseExpanded ? 'true' : 'false') + '" title="نمایش ترجمه آیه">▾</button>';
-                }
-                const morphLine = '<div class="morph-tooltip-row"><span class="morph-tooltip-line morph-tooltip-links">' + morphParts.join(' &nbsp;|&nbsp; ') + '</span>' + toggleHtml + '</div>';
+            let toggleHtml = '';
+            if (verseTranslation) {
+                toggleHtml = '<button type="button" class="verse-toggle" aria-expanded="' + (wordTooltipVerseExpanded ? 'true' : 'false') + '" title="نمایش ترجمه آیه">▾</button>';
+            }
+            if (morphParts.length > 0 || toggleHtml) {
+                const linksHtml = morphParts.length > 0
+                    ? '<span class="morph-tooltip-line morph-tooltip-links">' + morphParts.join(' &nbsp;|&nbsp; ') + '</span>'
+                    : '<span class="morph-tooltip-links"></span>';
+                const morphLine = '<div class="morph-tooltip-row">' + linksHtml + toggleHtml + '</div>';
                 content = content ? (content + morphLine) : morphLine;
             }
             if (verseTranslation) {
@@ -4254,6 +4520,7 @@
             wordHoverTooltip.style.top = (top + scrollY) + 'px';
             wordHoverTooltip.style.pointerEvents = 'auto';
             pinnedWordForTooltip = anchorEl;
+            if (typeof refreshAudioButtons === 'function') refreshAudioButtons();
         }
         async function loadVerseTooltipData(verseKey) {
             if (!verseKey) return null;
@@ -4274,6 +4541,20 @@
             if (wordTooltipLeaveBound || !wordHoverTooltip) return;
             wordTooltipLeaveBound = true;
             wordHoverTooltip.addEventListener('click', function(e) {
+                const playBtn = e.target && e.target.closest ? e.target.closest('.word-play-btn') : null;
+                if (playBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    playWordAudio(playBtn.getAttribute('data-verse-key') || '', parseInt(playBtn.getAttribute('data-word-position') || '0', 10));
+                    return;
+                }
+                const ayahPlayBtn = e.target && e.target.closest ? e.target.closest('.ayah-play-btn') : null;
+                if (ayahPlayBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    playAyahAudio(ayahPlayBtn.getAttribute('data-verse-key') || '');
+                    return;
+                }
                 const toggle = e.target && e.target.closest ? e.target.closest('.verse-toggle') : null;
                 if (!toggle) return;
                 e.preventDefault();
@@ -4290,8 +4571,8 @@
             });
             document.addEventListener('click', function(e) {
                 if (!pinnedWordForTooltip) return;
-                const wordEl = e.target && e.target.closest ? e.target.closest('.result-word') : null;
-                if (wordEl) return;
+                const trigger = e.target && e.target.closest ? e.target.closest('.result-word, .result-ref, .ayah-ref-leading') : null;
+                if (trigger) return;
                 if (wordHoverTooltip.contains(e.target)) return;
                 hideWordHoverTooltip();
             });
@@ -4305,14 +4586,213 @@
             const root = morph?.root || '';
             const lemma = morph?.lemma || '';
             wordTooltipVerseExpanded = false;
-            showWordHoverTooltip(buildWordTooltipContent('', '', root, lemma), wordEl);
+            showWordHoverTooltip(buildWordTooltipContent('', '', root, lemma, verseKey, position), wordEl);
             const verse = await loadVerseTooltipData(verseKey);
             if (pinnedWordForTooltip !== wordEl) return;
             const word = Array.isArray(verse?.words) ? verse.words[position - 1] : null;
             const wordTranslation = getWordTranslation(word);
             const verseTranslation = getVerseTranslationText(verse);
-            const content = buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma);
+            const content = buildWordTooltipContent(wordTranslation, verseTranslation, root, lemma, verseKey, position);
             if (content) showWordHoverTooltip(content, wordEl);
+        }
+
+        // Ayah popup: shows the ayah's translation (description) with a play button + a link
+        // to open it in the configured viewer. Triggered by clicking the ayah reference.
+        function buildAyahPopupContent(sura, ayah, verseTranslation, loading) {
+            const verseKey = sura + ':' + ayah;
+            const label = '[' + (SURA_NAMES[sura] || ('سوره ' + fmtFa(sura))) + ' ' + fmtFa(ayah) + ']';
+            const refHtml = '<a class="num-hindi" href="' + escapeAttr(buildAyahTargetHref(sura, ayah)) +
+                '" title="باز کردن در ' + escapeAttr(getAyahLinkTargetLabel()) + '">' + escapeHtml(label) + '</a>';
+            const head = '<div class="word-tooltip-head"><span class="word-tooltip-trans">' + refHtml + '</span>' +
+                buildAyahPlayBtn(sura, ayah) + '</div>';
+            let descHtml = '';
+            if (verseTranslation) descHtml = '<div class="verse-translation expanded">' + escapeHtml(verseTranslation) + '</div>';
+            else if (loading) descHtml = '<div class="verse-translation expanded">…</div>';
+            return head + descHtml;
+        }
+        async function showAyahPopup(sura, ayah, anchorEl) {
+            if (!anchorEl) return;
+            const verseKey = sura + ':' + ayah;
+            showWordHoverTooltip(buildAyahPopupContent(sura, ayah, '', true), anchorEl);
+            const verse = await loadVerseTooltipData(verseKey);
+            if (pinnedWordForTooltip !== anchorEl) return;
+            const verseTranslation = getVerseTranslationText(verse);
+            showWordHoverTooltip(buildAyahPopupContent(sura, ayah, verseTranslation, false), anchorEl);
+        }
+
+        // ===== Audio playback (word + ayah recitation) =====
+        // Reciter setting is shared across the whole site via localStorage['simple_reciter']
+        // (the same key simple.html uses).
+        const RECITER_STORAGE_KEY = 'simple_reciter';
+        const DEFAULT_RECITER = 'qc:7';
+        const QURANCOM_RECITERS = [
+            { id: 'qc:1', label: 'عبدالباسط عبدالصمد (مجوّد)' },
+            { id: 'qc:2', label: 'عبدالباسط عبدالصمد (مرتّل)' },
+            { id: 'qc:3', label: 'عبدالرحمن السدیس' },
+            { id: 'qc:4', label: 'أبوبکر الشاطری' },
+            { id: 'qc:5', label: 'هانی الرفاعی' },
+            { id: 'qc:6', label: 'محمود خلیل الحصری' },
+            { id: 'qc:7', label: 'مشاری راشد العفاسی' },
+            { id: 'qc:8', label: 'محمد صدیق المنشاوی (مجوّد)' },
+            { id: 'qc:9', label: 'محمد صدیق المنشاوی (مرتّل)' },
+            { id: 'qc:10', label: 'سعود الشریم' },
+            { id: 'qc:11', label: 'محمد الطبلاوی' },
+            { id: 'qc:12', label: 'محمود خلیل الحصری (معلّم)' }
+        ];
+        const TANZIL_RECITERS = [
+            { id: 'tz:abdulbasit', label: 'AbdulBasit' },
+            { id: 'tz:abdulbasit-mjwd', label: 'AbdulBasit (Mujawwad)' },
+            { id: 'tz:basfar', label: 'Basfar' },
+            { id: 'tz:basfar2', label: 'Basfar II' },
+            { id: 'tz:ajamy', label: 'Al-Ajamy' },
+            { id: 'tz:ghamadi', label: 'Al-Ghamadi' },
+            { id: 'tz:hudhaify', label: 'Al-Hudhaify' },
+            { id: 'tz:husary', label: 'Al-Husary' },
+            { id: 'tz:husary-mjwd', label: 'Al-Husary (Mujawwad)' },
+            { id: 'tz:minshawi', label: 'Al-Minshawi' },
+            { id: 'tz:minshawi-mjwd', label: 'Al-Minshawi (Mujawwad)' },
+            { id: 'tz:shateri', label: 'Ash-Shateri' },
+            { id: 'tz:shuraim', label: 'Ash-Shuraim' },
+            { id: 'tz:sudais', label: 'As-Sudais' },
+            { id: 'tz:tablawi', label: 'At-Tablawi' },
+            { id: 'tz:hani', label: 'Ar-Rafai' },
+            { id: 'tz:akhdar', label: 'Al-Akhdar' },
+            { id: 'tz:muaiqly', label: 'Al-Muaiqly' },
+            { id: 'tz:afasy', label: 'Al-Afasy' },
+            { id: 'tz:ayyub', label: 'Muhammad Ayyub' },
+            { id: 'tz:jibreel', label: 'Muhammad Jibreel' },
+            { id: 'tz:parhizgar', label: 'Parhizgar' },
+            { id: 'tz:bukhatir', label: 'Bukhatir' },
+            { id: 'tz:qasim', label: 'Al-Qasim' },
+            { id: 'tz:juhany', label: 'Al-Juhany' },
+            { id: 'tz:matrood', label: 'Al-Matrood' }
+        ];
+        function getReciterSetting() {
+            try { return localStorage.getItem(RECITER_STORAGE_KEY) || DEFAULT_RECITER; }
+            catch (e) { return DEFAULT_RECITER; }
+        }
+        function setReciterSetting(v) { try { localStorage.setItem(RECITER_STORAGE_KEY, v); } catch (e) {} }
+
+        const SIMPLE_PLAY_ICON = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.2 2.4 9.4 6 3.2 9.6Z" fill="currentColor"/></svg>';
+        const SIMPLE_PAUSE_ICON = '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="3" y="2.4" width="2.2" height="7.2" rx="0.6" fill="currentColor"/><rect x="6.8" y="2.4" width="2.2" height="7.2" rx="0.6" fill="currentColor"/></svg>';
+        const SIMPLE_SPINNER_ICON = '<svg class="simple-spinner" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="13 30"/></svg>';
+        function pad3(n) { n = String(n); while (n.length < 3) n = '0' + n; return n; }
+        function buildWordAudioUrl(verseKey, position) {
+            const m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+            if (!m || !position) return '';
+            return 'https://audio.qurancdn.com/wbw/' + pad3(m[1]) + '_' + pad3(m[2]) + '_' + pad3(position) + '.mp3';
+        }
+        const ayahAudioUrlCache = {};
+        function resolveAyahAudioUrl(verseKey, cb) {
+            const m = String(verseKey || '').match(/^(\d+):(\d+)$/);
+            if (!m) { cb(''); return; }
+            const reciter = getReciterSetting();
+            const cacheKey = reciter + '|' + verseKey;
+            if (ayahAudioUrlCache[cacheKey] != null) { cb(ayahAudioUrlCache[cacheKey]); return; }
+            if (reciter.indexOf('tz:') === 0) {
+                const url = 'https://tanzil.net/res/audio/' + reciter.slice(3) + '/' + pad3(m[1]) + pad3(m[2]) + '.mp3';
+                ayahAudioUrlCache[cacheKey] = url;
+                cb(url);
+                return;
+            }
+            const id = reciter.indexOf('qc:') === 0 ? reciter.slice(3) : reciter;
+            fetch('https://api.quran.com/api/v4/recitations/' + encodeURIComponent(id) + '/by_ayah/' + encodeURIComponent(verseKey))
+                .then(res => res.json())
+                .then(data => {
+                    const f = data && data.audio_files && data.audio_files[0];
+                    const url = (f && f.url) ? ('https://verses.quran.com/' + f.url) : '';
+                    ayahAudioUrlCache[cacheKey] = url;
+                    cb(url);
+                })
+                .catch(() => cb(''));
+        }
+        let audioEl = null;
+        function ensureAudio() {
+            if (!audioEl) {
+                audioEl = new Audio();
+                audioEl._state = 'idle';   // idle | loading | playing
+                audioEl._playToken = null;
+                audioEl._kind = null;      // 'word' | 'recitation'
+                audioEl.addEventListener('playing', () => { audioEl._state = 'playing'; refreshAudioButtons(); });
+                audioEl.addEventListener('waiting', () => { if (audioEl._state !== 'idle') { audioEl._state = 'loading'; refreshAudioButtons(); } });
+                audioEl.addEventListener('ended', () => { audioEl._state = 'idle'; audioEl._playToken = null; refreshAudioButtons(); });
+                audioEl.addEventListener('error', () => { audioEl._state = 'idle'; audioEl._playToken = null; refreshAudioButtons(); });
+            }
+            return audioEl;
+        }
+        function setPlayBtnVisual(b, state) {
+            if (b.getAttribute('data-state') === state) return;
+            b.setAttribute('data-state', state);
+            b.classList.toggle('is-playing', state === 'playing');
+            b.classList.toggle('is-loading', state === 'loading');
+            b.innerHTML = (state === 'playing') ? SIMPLE_PAUSE_ICON : (state === 'loading' ? SIMPLE_SPINNER_ICON : SIMPLE_PLAY_ICON);
+        }
+        function refreshAudioButtons() {
+            const tok = audioEl ? audioEl._playToken : null;
+            const state = (audioEl && audioEl._state) ? audioEl._state : 'idle';
+            document.querySelectorAll('.simple-play-btn[data-play-token]').forEach(b => {
+                const active = !!tok && b.getAttribute('data-play-token') === tok;
+                setPlayBtnVisual(b, active ? state : 'idle');
+            });
+            const stopBtn = document.getElementById('audio-stop-btn');
+            if (stopBtn) {
+                const playingSomething = state !== 'idle';
+                setPlayBtnVisual(stopBtn, playingSomething ? state : 'idle');
+                stopBtn.style.display = playingSomething ? '' : 'none';
+            }
+        }
+        function isTokenActive(token) {
+            return !!(audioEl && audioEl._playToken === token && audioEl._state !== 'idle');
+        }
+        function stopAudio() {
+            if (audioEl) {
+                try { audioEl.pause(); audioEl.currentTime = 0; } catch (e) {}
+                audioEl._playToken = null;
+                audioEl._state = 'idle';
+                audioEl._kind = null;
+            }
+            refreshAudioButtons();
+        }
+        function setAudioLoading(token, kind) {
+            const el = ensureAudio();
+            try { el.pause(); } catch (e) {}
+            el._playToken = token;
+            el._kind = kind || null;
+            el._state = 'loading';
+            refreshAudioButtons();
+        }
+        function startAudio(url, token, kind) {
+            if (!url) { stopAudio(); return; }
+            const el = ensureAudio();
+            try { el.pause(); } catch (e) {}
+            el._playToken = token;
+            el._kind = kind || null;
+            el._state = 'loading';
+            el.src = url;
+            refreshAudioButtons();
+            const p = el.play();
+            if (p && p.catch) p.catch(() => {});
+        }
+        function playWordAudio(verseKey, position) {
+            const token = 'word|' + verseKey + '|' + position;
+            if (isTokenActive(token)) { stopAudio(); return; }
+            const url = buildWordAudioUrl(verseKey, position);
+            startAudio(url, token, 'word');
+        }
+        function playAyahAudio(verseKey) {
+            const token = 'ayah|' + verseKey;
+            if (isTokenActive(token)) { stopAudio(); return; }
+            setAudioLoading(token, 'recitation');
+            resolveAyahAudioUrl(verseKey, (url) => {
+                // Ignore if another play started meanwhile.
+                if (!audioEl || audioEl._playToken !== token) return;
+                if (!url) { stopAudio(); return; }
+                startAudio(url, token, 'recitation');
+            });
+        }
+        function buildAyahPlayBtn(sura, ayah) {
+            const token = 'ayah|' + sura + ':' + ayah;
+            return `<button type="button" class="simple-play-btn ayah-play-btn" data-play-token="${escapeAttr(token)}" data-verse-key="${escapeAttr(sura + ':' + ayah)}" title="پخش تلاوت آیه" aria-label="پخش تلاوت آیه">${SIMPLE_PLAY_ICON}</button>`;
         }
 
         function buildHighlightedAyahHTML(sura, ayah, highlightMatchesForGroup) {
@@ -5139,14 +5619,14 @@
                     const viewMode = localStorage.getItem('searchViewMode') || 'paragraph';
                     if (viewMode === 'rows') {
                         html += `<div class="ayah-row">`;
-                        html += `<a class="ayah-ref-leading num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" title="باز کردن در ${escapeAttr(getAyahLinkTargetLabel())}">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a> `;
+                        html += `<a class="ayah-ref-leading num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" data-sura="${group.sura}" data-ayah="${ayah}" title="نمایش توضیح و پخش آیه">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a> `;
                         html += `<span class="result-ayah">${highlightedText}</span>`;
                         html += `</div>`;
                     } else {
                         html += `<span class="result-ayah">`;
                         html += highlightedText;
                         html += ` `;
-                        html += `<a class="result-ref num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" title="باز کردن در ${escapeAttr(getAyahLinkTargetLabel())}">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a>`;
+                        html += `<a class="result-ref num-hindi" href="${escapeAttr(buildAyahTargetHref(group.sura, ayah))}" data-sura="${group.sura}" data-ayah="${ayah}" title="نمایش توضیح و پخش آیه">[${SURA_NAMES[group.sura]} ${fmtFa(ayah)}]</a>`;
                         html += `</span> `;
                     }
                 }
@@ -5172,6 +5652,13 @@
             if (!resultsContent.dataset.regionControlsBound) {
                 resultsContent.dataset.regionControlsBound = '1';
                 resultsContent.addEventListener('click', (e) => {
+                    const ayahRef = e.target.closest('.result-ref, .ayah-ref-leading');
+                    if (ayahRef && ayahRef.dataset.sura) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showAyahPopup(parseInt(ayahRef.dataset.sura, 10), parseInt(ayahRef.dataset.ayah, 10), ayahRef);
+                        return;
+                    }
                     const wordEl = e.target.closest('.result-word');
                     if (wordEl) {
                         e.preventDefault();
@@ -5238,9 +5725,12 @@
                 }
             }
             
-            return highlightedWords.join(' ');
+            // For the quran.com (QCF) font the glyphs already include their own spacing, so
+            // joining with a literal space adds an unwanted gap. Use <wbr> instead: a
+            // zero-width line-break opportunity that lets words wrap without showing a space.
+            return highlightedWords.join(useQCF ? '<wbr>' : ' ');
         }
-        
+
         // UI handlers
         function updateSelectedItemsUI() {
             const container = document.getElementById('selected-items');
@@ -5871,6 +6361,31 @@
             const rootSimilarityThresholdInput = document.getElementById('root-similarity-threshold');
             const applySettings = document.getElementById('apply-settings');
             const goDesktopLink = document.getElementById('go-desktop-link');
+
+            // Reciter select (shared site-wide via localStorage['simple_reciter'])
+            const reciterSelectEl = document.getElementById('reciter-select');
+            if (reciterSelectEl) {
+                const buildReciterGroup = (label, items) => {
+                    const og = document.createElement('optgroup');
+                    og.label = label;
+                    items.forEach(r => {
+                        const o = document.createElement('option');
+                        o.value = r.id;
+                        o.textContent = r.label;
+                        og.appendChild(o);
+                    });
+                    return og;
+                };
+                reciterSelectEl.appendChild(buildReciterGroup('quran.com', QURANCOM_RECITERS));
+                reciterSelectEl.appendChild(buildReciterGroup('tanzil.net', TANZIL_RECITERS));
+                reciterSelectEl.value = getReciterSetting() || DEFAULT_RECITER;
+                reciterSelectEl.addEventListener('change', function() {
+                    setReciterSetting(this.value);
+                    stopAudio(); // current audio was for the previous reciter
+                });
+            }
+            const audioStopBtn = document.getElementById('audio-stop-btn');
+            if (audioStopBtn) audioStopBtn.addEventListener('click', (e) => { e.preventDefault(); stopAudio(); });
 
             // Use a lightweight positioning library (Floating UI) instead of ad-hoc RTL/viewport logic
             let cleanupSettingsAutoUpdate = null;
