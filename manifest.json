@@ -1,0 +1,27 @@
+{
+  "name": "قرآن - نمایش",
+  "short_name": "قرآن",
+  "description": "نمایش قرآن، تفسیر و حدیث با امکان استفاده آفلاین",
+  "start_url": "./simple.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f3ef",
+  "theme_color": "#2c3e50",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "نمایش قرآن", "url": "./simple.html" },
+    { "name": "تفسیر", "url": "./commentary.html" },
+    { "name": "حدیث", "url": "./hadith.html" },
+    { "name": "مدیریت دانلود آفلاین", "url": "./offline.html" }
+  ]
+}

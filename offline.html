@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="fa-IR" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>دانلود برای استفاده آفلاین</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Vazirmatn', system-ui, sans-serif;
+            background: #f5f3ef;
+            color: #1f2937;
+            min-height: 100vh;
+            padding-bottom: 120px;
+        }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+        header nav a { color: #cbd5e1; margin-inline-start: 12px; font-size: 0.9rem; }
+        header nav a:hover { color: white; }
+        main { max-width: 1100px; margin: 0 auto; padding: 16px; }
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .panel h2 { font-size: 1rem; margin: 0 0 10px; color: #2c3e50; font-weight: 600; }
+        .panel p { margin: 6px 0; font-size: 0.9rem; color: #4b5563; line-height: 1.6; }
+        .pref-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 18px;
+            margin: 8px 0;
+            font-size: 0.92rem;
+        }
+        .pref-row label { display: inline-flex; align-items: center; gap: 6px; }
+        select, button, input[type="checkbox"] {
+            font-family: inherit;
+            font-size: 0.92rem;
+        }
+        select {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background: white;
+            color: #1f2937;
+        }
+        button {
+            cursor: pointer;
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: #2563eb;
+            color: white;
+            font-weight: 500;
+        }
+        button:hover { background: #1d4ed8; }
+        button.secondary { background: #e5e7eb; color: #111827; }
+        button.secondary:hover { background: #d1d5db; }
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .tafsir-books {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            margin: 6px 0;
+            font-size: 0.92rem;
+        }
+        .tafsir-books label { display: inline-flex; align-items: center; gap: 5px; }
+        .sura-table-wrap {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .table-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.88rem;
+            align-items: center;
+        }
+        .table-controls button {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        .table-controls .spacer { flex: 1; }
+        .sura-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 0.92rem;
+        }
+        .sura-table col.col-num { width: 46px; }
+        .sura-table col.col-name { width: auto; }
+        .sura-table col.col-ayat { width: 56px; }
+        .sura-table col.col-check { width: 58px; }
+        .sura-table col.col-status { width: 90px; }
+        .sura-table col.col-actions { width: 64px; }
+        .sura-table th, .sura-table td {
+            padding: 7px 6px;
+            text-align: center;
+            border-bottom: 1px solid #f1f1ef;
+            vertical-align: middle;
+        }
+        .sura-table thead th {
+            background: #f9fafb;
+            font-size: 0.85rem;
+            color: #374151;
+            font-weight: 600;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .sura-table th.th-name { text-align: right; padding-inline-start: 10px; }
+        .sura-table tbody tr:hover { background: #fafbfc; }
+        .sura-table td.sura-name {
+            text-align: right;
+            font-weight: 500;
+            color: #1f2937;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-inline-start: 10px;
+        }
+        .sura-table td.sura-num {
+            color: #6b7280;
+            font-variant-numeric: tabular-nums;
+        }
+        .sura-table td.ayat-count {
+            color: #9ca3af;
+            font-size: 0.82rem;
+        }
+        .sura-table td.status-cell { font-size: 0.8rem; }
+        .status-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+        .status-pill.ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-pill.partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .row-actions {
+            white-space: nowrap;
+        }
+        .row-actions button {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            margin-inline-start: 2px;
+        }
+        .footer-bar {
+            position: fixed;
+            inset-inline: 0;
+            bottom: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+            padding: 10px 16px;
+            z-index: 9;
+        }
+        .footer-bar-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .progress-block {
+            flex: 1;
+            min-width: 200px;
+            font-size: 0.85rem;
+            color: #374151;
+        }
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar > div {
+            height: 100%;
+            background: #2563eb;
+            transition: width 0.2s ease;
+        }
+        #log {
+            max-height: 80px;
+            overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: #f9fafb;
+            border-radius: 5px;
+            padding: 4px 8px;
+            margin-top: 4px;
+            white-space: pre-wrap;
+            direction: ltr;
+            text-align: left;
+        }
+        .danger-zone {
+            border: 1px dashed #fca5a5;
+            background: #fff7f7;
+        }
+        .info-banner {
+            padding: 10px 14px;
+            background: #eff6ff;
+            border-inline-start: 3px solid #2563eb;
+            font-size: 0.88rem;
+            color: #1e3a8a;
+            border-radius: 5px;
+            margin-bottom: 12px;
+        }
+        .err-banner {
+            padding: 10px 14px;
+            background: #fef2f2;
+            border-inline-start: 3px solid #dc2626;
+            font-size: 0.88rem;
+            color: #7f1d1d;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        @media (max-width: 700px) {
+            .sura-table th, .sura-table td { padding: 5px 3px; font-size: 0.82rem; }
+            .sura-table col.col-ayat { width: 0; }
+            .sura-table td.ayat-count { display: none; }
+            .sura-table thead th.ayat-count-h { display: none; }
+            .sura-table col.col-num { width: 36px; }
+            .sura-table col.col-check { width: 44px; }
+            .sura-table col.col-status { width: 76px; }
+            .sura-table col.col-actions { width: 52px; }
+            header h1 { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>دانلود برای استفاده آفلاین</h1>
+    <nav>
+        <a href="simple.html">قرآن</a>
+        <a href="commentary.html">تفسیر</a>
+        <a href="hadith.html">حدیث</a>
+    </nav>
+</header>
+
+<main>
+    <div class="info-banner" id="info-banner">
+        با انتخاب موارد مورد نظر برای هر سوره و کلیک روی «دانلود انتخاب‌شده‌ها» محتوا روی دستگاه ذخیره می‌شود تا بدون اینترنت قابل دسترسی باشد.
+    </div>
+    <div class="err-banner" id="sw-error">سرویس‌ورکر فعال نیست. این صفحه نیاز به اجرا روی <code>https://</code> یا <code>localhost</code> دارد.</div>
+
+    <div class="panel">
+        <h2>تنظیمات پیش‌فرض</h2>
+        <p>این تنظیمات هنگام انتخاب «دانلود همه» در ستون‌ها استفاده می‌شوند. می‌توانید برای هر سوره به‌صورت جداگانه نیز چک‌باکس مربوطه را علامت بزنید.</p>
+        <div class="pref-row">
+            <label>قاری:
+                <select id="pref-reciter"></select>
+            </label>
+        </div>
+        <div>
+            <div style="font-size:0.88rem;color:#374151;margin-bottom:4px;">تفسیرها:</div>
+            <div class="tafsir-books" id="pref-tafsir-books">
+                <span style="color:#9ca3af;font-size:0.85rem;">در حال بارگذاری...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="sura-table-wrap">
+        <div class="table-controls">
+            <span>انتخاب همه ستون:</span>
+            <button type="button" class="secondary" data-toggle-col="text">متن</button>
+            <button type="button" class="secondary" data-toggle-col="recitation">تلاوت</button>
+            <button type="button" class="secondary" data-toggle-col="hadith">حدیث</button>
+            <button type="button" class="secondary" data-toggle-col="tafsir">تفسیر</button>
+            <span class="spacer"></span>
+            <button type="button" class="secondary" id="clear-selection">پاک‌کردن انتخاب</button>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="sura-table" id="sura-table">
+                <colgroup>
+                    <col class="col-num">
+                    <col class="col-name">
+                    <col class="col-ayat">
+                    <col class="col-check">
+                    <col class="col-check">
+                    <col class="col-check">
+                    <col class="col-check">
+                    <col class="col-status">
+                    <col class="col-actions">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="th-num">#</th>
+                        <th class="th-name">سوره</th>
+                        <th class="ayat-count-h">آیات</th>
+                        <th>متن</th>
+                        <th>تلاوت</th>
+                        <th>حدیث</th>
+                        <th>تفسیر</th>
+                        <th>وضعیت</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="sura-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel danger-zone">
+        <h2>پاک‌سازی</h2>
+        <p>برای آزاد کردن فضای دستگاه می‌توانید تمام داده‌های آفلاین (متن، تلاوت، حدیث، تفسیر) را حذف کنید.</p>
+        <button type="button" class="danger" id="btn-clear-all">حذف کل داده‌های آفلاین</button>
+    </div>
+</main>
+
+<div class="footer-bar">
+    <div class="footer-bar-inner">
+        <div class="progress-block">
+            <div id="progress-text">آماده</div>
+            <div class="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+            <div id="log"></div>
+        </div>
+        <button type="button" id="btn-start" disabled>دانلود انتخاب‌شده‌ها</button>
+        <button type="button" class="secondary" id="btn-cancel" style="display:none">لغو</button>
+    </div>
+</div>
+
+<script src="js/sura-data.js"></script>
+<script>
+(function() {
+    'use strict';
+
+    /* ----- PWA service worker registration ----- */
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(function(err) {
+            console.warn('SW registration failed', err);
+            document.getElementById('sw-error').style.display = 'block';
+        });
+    } else {
+        document.getElementById('sw-error').style.display = 'block';
+    }
+
+    /* ----- Reciter list (mirrors simple.html so user choice is consistent) ----- */
+    var QURANCOM_RECITERS = [
+        { id: 'qc:1', label: 'عبدالباسط عبدالصمد (مجوّد)' },
+        { id: 'qc:2', label: 'عبدالباسط عبدالصمد (مرتّل)' },
+        { id: 'qc:3', label: 'عبدالرحمن السدیس' },
+        { id: 'qc:4', label: 'أبوبکر الشاطری' },
+        { id: 'qc:5', label: 'هانی الرفاعی' },
+        { id: 'qc:6', label: 'محمود خلیل الحصری' },
+        { id: 'qc:7', label: 'مشاری راشد العفاسی' },
+        { id: 'qc:8', label: 'محمد صدیق المنشاوی (مجوّد)' },
+        { id: 'qc:9', label: 'محمد صدیق المنشاوی (مرتّل)' },
+        { id: 'qc:10', label: 'سعود الشریم' },
+        { id: 'qc:11', label: 'محمد الطبلاوی' },
+        { id: 'qc:12', label: 'محمود خلیل الحصری (معلّم)' }
+    ];
+    var TANZIL_RECITERS = [
+        { id: 'tz:abdulbasit', label: 'AbdulBasit' },
+        { id: 'tz:abdulbasit-mjwd', label: 'AbdulBasit (Mujawwad)' },
+        { id: 'tz:basfar', label: 'Basfar' },
+        { id: 'tz:basfar2', label: 'Basfar II' },
+        { id: 'tz:ajamy', label: 'Al-Ajamy' },
+        { id: 'tz:ghamadi', label: 'Al-Ghamadi' },
+        { id: 'tz:hudhaify', label: 'Al-Hudhaify' },
+        { id: 'tz:husary', label: 'Al-Husary' },
+        { id: 'tz:husary-mjwd', label: 'Al-Husary (Mujawwad)' },
+        { id: 'tz:minshawi', label: 'Al-Minshawi' },
+        { id: 'tz:minshawi-mjwd', label: 'Al-Minshawi (Mujawwad)' },
+        { id: 'tz:shateri', label: 'Ash-Shateri' },
+        { id: 'tz:shuraim', label: 'Ash-Shuraim' },
+        { id: 'tz:sudais', label: 'As-Sudais' },
+        { id: 'tz:tablawi', label: 'At-Tablawi' },
+        { id: 'tz:hani', label: 'Ar-Rafai' },
+        { id: 'tz:akhdar', label: 'Al-Akhdar' },
+        { id: 'tz:muaiqly', label: 'Al-Muaiqly' },
+        { id: 'tz:afasy', label: 'Al-Afasy' },
+        { id: 'tz:ayyub', label: 'Muhammad Ayyub' },
+        { id: 'tz:jibreel', label: 'Muhammad Jibreel' },
+        { id: 'tz:parhizgar', label: 'Parhizgar' },
+        { id: 'tz:bukhatir', label: 'Bukhatir' },
+        { id: 'tz:qasim', label: 'Al-Qasim' },
+        { id: 'tz:juhany', label: 'Al-Juhany' },
+        { id: 'tz:matrood', label: 'Al-Matrood' }
+    ];
+
+    var META_KEY = 'offline_meta_v1';
+    function loadMeta() {
+        try { return JSON.parse(localStorage.getItem(META_KEY) || '{}') || {}; }
+        catch (e) { return {}; }
+    }
+    function saveMeta(m) {
+        try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) {}
+    }
+    var offlineMeta = loadMeta();
+
+    /* ----- Reciter dropdown ----- */
+    function populateReciters() {
+        var sel = document.getElementById('pref-reciter');
+        function addGroup(label, list) {
+            var g = document.createElement('optgroup');
+            g.label = label;
+            list.forEach(function(r) {
+                var o = document.createElement('option');
+                o.value = r.id; o.textContent = r.label;
+                g.appendChild(o);
+            });
+            sel.appendChild(g);
+        }
+        addGroup('Tanzil', TANZIL_RECITERS);
+        addGroup('Quran.com', QURANCOM_RECITERS);
+        var saved = localStorage.getItem('simple_reciter') || 'tz:husary';
+        sel.value = saved;
+        sel.addEventListener('change', function() {
+            try { localStorage.setItem('simple_reciter', sel.value); } catch (e) {}
+        });
+    }
+    populateReciters();
+
+    function getCurrentReciter() { return document.getElementById('pref-reciter').value; }
+
+    /* ----- Tafsir books loaded from data/books.json ----- */
+    var booksList = [];
+    function loadBooks() {
+        return fetch('data/books.json')
+            .then(function(r) { if (!r.ok) throw new Error('books'); return r.json(); })
+            .then(function(list) {
+                booksList = list || [];
+                var holder = document.getElementById('pref-tafsir-books');
+                holder.innerHTML = '';
+                booksList.forEach(function(b, idx) {
+                    var lbl = document.createElement('label');
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = b.folder;
+                    cb.dataset.role = 'tafsir-book';
+                    if (idx === 0) cb.checked = true;
+                    lbl.appendChild(cb);
+                    lbl.appendChild(document.createTextNode(' ' + b.name));
+                    holder.appendChild(lbl);
+                });
+            })
+            .catch(function() {
+                document.getElementById('pref-tafsir-books').innerHTML =
+                    '<span style="color:#dc2626;font-size:0.85rem;">خطا در بارگذاری فهرست تفسیرها</span>';
+            });
+    }
+    function getSelectedTafsirBooks() {
+        var out = [];
+        document.querySelectorAll('input[data-role="tafsir-book"]:checked').forEach(function(cb) { out.push(cb.value); });
+        return out;
+    }
+
+    /* ----- Sura table ----- */
+    var SURA_NAMES = window.SURA_NAMES || {};
+    var SURA_AYAT = window.SURA_AYAT || {};
+    var faDigits = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+    function fa(n) { return String(n).replace(/[0-9]/g, function(d) { return faDigits[+d]; }); }
+
+    function buildTable() {
+        var tbody = document.getElementById('sura-tbody');
+        var rows = '';
+        for (var s = 1; s <= 114; s++) {
+            var name = SURA_NAMES[s] || ('سوره ' + s);
+            var ayat = SURA_AYAT[s] || 0;
+            rows += '<tr data-sura="' + s + '">' +
+                '<td class="sura-num">' + fa(s) + '</td>' +
+                '<td class="sura-name">' + name + '</td>' +
+                '<td class="ayat-count">' + fa(ayat) + '</td>' +
+                '<td><input type="checkbox" data-col="text"></td>' +
+                '<td><input type="checkbox" data-col="recitation"></td>' +
+                '<td><input type="checkbox" data-col="hadith"></td>' +
+                '<td><input type="checkbox" data-col="tafsir"></td>' +
+                '<td class="status-cell"><span class="status-pill">-</span></td>' +
+                '<td class="row-actions"><button type="button" class="secondary" data-act="delete">حذف</button></td>' +
+                '</tr>';
+        }
+        tbody.innerHTML = rows;
+        refreshStatusColumn();
+        attachTableHandlers();
+    }
+
+    function refreshStatusColumn() {
+        for (var s = 1; s <= 114; s++) {
+            var meta = offlineMeta[s];
+            var row = document.querySelector('tr[data-sura="' + s + '"]');
+            if (!row) continue;
+            var pill = row.querySelector('.status-pill');
+            if (!meta) {
+                pill.className = 'status-pill';
+                pill.textContent = '-';
+            } else {
+                var bits = [];
+                if (meta.text) bits.push('متن');
+                if (meta.recitation) bits.push('تلاوت');
+                if (meta.hadith) bits.push('حدیث');
+                if (meta.tafsir && meta.tafsir.length) bits.push('تفسیر');
+                pill.className = 'status-pill ' + (bits.length >= 4 ? 'ok' : 'partial');
+                pill.textContent = bits.length ? bits.join('، ') : '-';
+                pill.title = bits.length ? bits.join('، ') : '';
+            }
+        }
+        updateStartButton();
+    }
+
+    function attachTableHandlers() {
+        document.querySelectorAll('[data-toggle-col]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var col = btn.getAttribute('data-toggle-col');
+                var boxes = document.querySelectorAll('input[data-col="' + col + '"]');
+                var anyUnchecked = false;
+                boxes.forEach(function(cb) { if (!cb.checked) anyUnchecked = true; });
+                boxes.forEach(function(cb) { cb.checked = anyUnchecked; });
+                updateStartButton();
+            });
+        });
+        document.getElementById('clear-selection').addEventListener('click', function() {
+            document.querySelectorAll('input[data-col]').forEach(function(cb) { cb.checked = false; });
+            updateStartButton();
+        });
+        document.getElementById('sura-tbody').addEventListener('change', function(e) {
+            if (e.target && e.target.matches('input[data-col]')) updateStartButton();
+        });
+        document.getElementById('sura-tbody').addEventListener('click', function(e) {
+            var btn = e.target.closest && e.target.closest('button[data-act="delete"]');
+            if (!btn) return;
+            var row = btn.closest('tr');
+            var sura = parseInt(row.getAttribute('data-sura'), 10);
+            if (!confirm('حذف داده‌های آفلاین سوره ' + (SURA_NAMES[sura] || sura) + '؟')) return;
+            deleteSura(sura);
+        });
+    }
+
+    function collectSelections() {
+        var out = [];
+        document.querySelectorAll('tr[data-sura]').forEach(function(tr) {
+            var s = parseInt(tr.getAttribute('data-sura'), 10);
+            var sel = {
+                sura: s,
+                text: tr.querySelector('input[data-col="text"]').checked,
+                recitation: tr.querySelector('input[data-col="recitation"]').checked,
+                hadith: tr.querySelector('input[data-col="hadith"]').checked,
+                tafsir: tr.querySelector('input[data-col="tafsir"]').checked
+            };
+            if (sel.text || sel.recitation || sel.hadith || sel.tafsir) out.push(sel);
+        });
+        return out;
+    }
+
+    function updateStartButton() {
+        var sel = collectSelections();
+        document.getElementById('btn-start').disabled = sel.length === 0 || downloading;
+    }
+
+    /* ----- Download engine ----- */
+    var downloading = false;
+    var cancelRequested = false;
+    var progress = { done: 0, total: 0, failed: 0 };
+    var logLines = [];
+
+    function setProgressText(msg) { document.getElementById('progress-text').textContent = msg; }
+    function setProgressBar(pct) { document.getElementById('progress-fill').style.width = Math.min(100, pct) + '%'; }
+    function logLine(line) {
+        logLines.push(line);
+        if (logLines.length > 60) logLines.shift();
+        document.getElementById('log').textContent = logLines.join('\n');
+        var el = document.getElementById('log');
+        el.scrollTop = el.scrollHeight;
+    }
+    function tick(label) {
+        progress.done++;
+        var pct = progress.total ? Math.round(progress.done * 100 / progress.total) : 0;
+        setProgressBar(pct);
+        setProgressText(label + ' (' + progress.done + '/' + progress.total + ')');
+    }
+
+    function pad3(n) { n = String(n); while (n.length < 3) n = '0' + n; return n; }
+    function getTranslationParam() { return '&translations=135'; }
+
+    function textUrlForSura(sura) {
+        return 'https://api.quran.com/api/v4/verses/by_chapter/' + sura +
+               '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation' +
+               '&language=fa' + getTranslationParam() + '&per_page=300';
+    }
+
+    async function safeFetch(url, init) {
+        try {
+            var resp = await fetch(url, init || {});
+            return resp;
+        } catch (e) {
+            logLine('fetch fail: ' + url + ' — ' + (e && e.message || e));
+            return null;
+        }
+    }
+
+    async function downloadText(sura) {
+        var url = textUrlForSura(sura);
+        var resp = await safeFetch(url);
+        if (!resp || !resp.ok) { progress.failed++; return false; }
+        return true;
+    }
+
+    function audioUrlsForTanzil(sura, reciter) {
+        var slug = reciter.slice(3);
+        var n = SURA_AYAT[sura] || 0;
+        var urls = [];
+        for (var a = 1; a <= n; a++) {
+            urls.push('https://tanzil.net/res/audio/' + slug + '/' + pad3(sura) + pad3(a) + '.mp3');
+        }
+        return urls;
+    }
+
+    async function resolveQcAudioUrl(reciterId, verseKey) {
+        var url = 'https://api.quran.com/api/v4/recitations/' + encodeURIComponent(reciterId) +
+                  '/by_ayah/' + encodeURIComponent(verseKey);
+        var resp = await safeFetch(url);
+        if (!resp || !resp.ok) return '';
+        try {
+            var data = await resp.json();
+            var f = data && data.audio_files && data.audio_files[0];
+            return (f && f.url) ? ('https://verses.quran.com/' + f.url) : '';
+        } catch (e) { return ''; }
+    }
+
+    async function downloadRecitation(sura, reciter) {
+        var n = SURA_AYAT[sura] || 0;
+        var anyFail = false;
+        if (reciter.indexOf('tz:') === 0) {
+            var urls = audioUrlsForTanzil(sura, reciter);
+            for (var i = 0; i < urls.length; i++) {
+                if (cancelRequested) return false;
+                var r = await safeFetch(urls[i], { mode: 'no-cors' });
+                if (!r) anyFail = true;
+                tick('تلاوت سوره ' + sura + ' آیه ' + (i + 1));
+            }
+        } else {
+            var id = reciter.indexOf('qc:') === 0 ? reciter.slice(3) : reciter;
+            for (var a = 1; a <= n; a++) {
+                if (cancelRequested) return false;
+                var audioUrl = await resolveQcAudioUrl(id, sura + ':' + a);
+                if (audioUrl) {
+                    var r2 = await safeFetch(audioUrl, { mode: 'no-cors' });
+                    if (!r2) anyFail = true;
+                } else { anyFail = true; }
+                tick('تلاوت سوره ' + sura + ' آیه ' + a);
+            }
+        }
+        return !anyFail;
+    }
+
+    async function downloadHadithAyah(sura, ayah) {
+        var bodyAyah = JSON.stringify({ suraId: sura, ayaId: ayah });
+        var resp = await safeFetch('https://hadith.ai/get_hadith_content/get_ayah', {
+            method: 'POST',
+            headers: { 'accept': 'application/json', 'Content-Type': 'application/json' },
+            body: bodyAyah
+        });
+        if (!resp || !resp.ok) return [];
+        try {
+            var raw = await resp.json();
+            var arr = Array.isArray(raw) ? raw :
+                      (raw && (raw.data || raw.ids || raw.hadith_ids || raw.result)) || [];
+            if (!Array.isArray(arr)) arr = [];
+            var ids = [];
+            arr.forEach(function(item) {
+                if (item != null && typeof item === 'object' && (item.hid != null || item.id != null))
+                    ids.push(String(item.hid != null ? item.hid : item.id));
+                else if (item != null) ids.push(String(item));
+            });
+            return ids;
+        } catch (e) { return []; }
+    }
+
+    async function downloadHadithById(hid) {
+        var body = JSON.stringify({ hid: [String(hid)], out_type: 'json' });
+        var resp = await safeFetch('https://hadith.ai/get_hadith_content/get_hadith', {
+            method: 'POST',
+            headers: { 'accept': 'application/json', 'Content-Type': 'application/json' },
+            body: body
+        });
+        return !!(resp && resp.ok);
+    }
+
+    async function downloadHadithForSura(sura) {
+        var n = SURA_AYAT[sura] || 0;
+        var ok = true;
+        var seenHid = {};
+        for (var a = 1; a <= n; a++) {
+            if (cancelRequested) return false;
+            var ids = await downloadHadithAyah(sura, a);
+            tick('احادیث سوره ' + sura + ' آیه ' + a);
+            for (var i = 0; i < ids.length; i++) {
+                if (cancelRequested) return false;
+                var hid = ids[i];
+                if (seenHid[hid]) continue;
+                seenHid[hid] = true;
+                var hok = await downloadHadithById(hid);
+                if (!hok) ok = false;
+            }
+        }
+        return ok;
+    }
+
+    var tafsirMapCache = {};
+    async function loadTafsirMap(folder) {
+        if (tafsirMapCache[folder]) return tafsirMapCache[folder];
+        var resp = await safeFetch('data/' + folder + '/map.json');
+        if (!resp || !resp.ok) throw new Error('map ' + folder);
+        var map = await resp.json();
+        tafsirMapCache[folder] = map;
+        return map;
+    }
+
+    async function downloadTafsirForSura(sura, books) {
+        var ok = true;
+        for (var b = 0; b < books.length; b++) {
+            if (cancelRequested) return false;
+            var folder = books[b];
+            try {
+                var map = await loadTafsirMap(folder);
+                var chunks = {};
+                Object.keys(map).forEach(function(k) {
+                    var entry = map[k];
+                    if (entry && entry.s === sura && entry.f) chunks[entry.f] = true;
+                });
+                var muq = await safeFetch('data/' + folder + '/muqadimah.json.gz');
+                if (muq && !muq.ok) { /* may not exist */ }
+                var fileList = Object.keys(chunks);
+                for (var i = 0; i < fileList.length; i++) {
+                    if (cancelRequested) return false;
+                    var r = await safeFetch('data/' + folder + '/contents/' + encodeURIComponent(fileList[i]));
+                    if (!r || !r.ok) ok = false;
+                }
+                tick('تفسیر ' + folder + ' برای سوره ' + sura);
+            } catch (e) {
+                logLine('tafsir ' + folder + ' failed: ' + (e.message || e));
+                ok = false;
+            }
+        }
+        return ok;
+    }
+
+    function estimateTotal(selections, reciter, books) {
+        var t = 0;
+        selections.forEach(function(sel) {
+            var n = SURA_AYAT[sel.sura] || 0;
+            if (sel.text) t += 1;
+            if (sel.recitation) t += n;
+            if (sel.hadith) t += n;
+            if (sel.tafsir) t += books.length;
+        });
+        return t;
+    }
+
+    async function runDownload() {
+        if (downloading) return;
+        var selections = collectSelections();
+        if (selections.length === 0) return;
+        var reciter = getCurrentReciter();
+        var books = getSelectedTafsirBooks();
+        if (selections.some(function(s) { return s.tafsir; }) && books.length === 0) {
+            alert('برای دانلود تفسیر باید حداقل یک کتاب را در تنظیمات بالا انتخاب کنید.');
+            return;
+        }
+
+        downloading = true;
+        cancelRequested = false;
+        progress = { done: 0, total: estimateTotal(selections, reciter, books), failed: 0 };
+        logLines = [];
+        document.getElementById('log').textContent = '';
+        document.getElementById('btn-start').disabled = true;
+        document.getElementById('btn-cancel').style.display = '';
+        setProgressBar(0);
+        setProgressText('شروع دانلود... (۰/' + progress.total + ')');
+
+        for (var i = 0; i < selections.length; i++) {
+            if (cancelRequested) break;
+            var sel = selections[i];
+            var sura = sel.sura;
+            var meta = offlineMeta[sura] || {};
+
+            if (sel.text) {
+                var ok = await downloadText(sura);
+                if (ok) meta.text = true;
+                tick('متن سوره ' + sura);
+            }
+            if (!cancelRequested && sel.recitation) {
+                var rok = await downloadRecitation(sura, reciter);
+                if (rok) meta.recitation = reciter;
+            }
+            if (!cancelRequested && sel.hadith) {
+                var hok = await downloadHadithForSura(sura);
+                if (hok) meta.hadith = true;
+            }
+            if (!cancelRequested && sel.tafsir) {
+                var tok = await downloadTafsirForSura(sura, books);
+                if (tok) meta.tafsir = (meta.tafsir || []).filter(function(b) { return books.indexOf(b) === -1; }).concat(books);
+            }
+            offlineMeta[sura] = meta;
+            saveMeta(offlineMeta);
+            refreshStatusColumn();
+        }
+
+        downloading = false;
+        cancelRequested = false;
+        document.getElementById('btn-cancel').style.display = 'none';
+        updateStartButton();
+        setProgressText(progress.failed
+            ? ('پایان (' + progress.done + '/' + progress.total + ' — ' + progress.failed + ' خطا)')
+            : ('پایان (' + progress.done + '/' + progress.total + ')'));
+    }
+
+    document.getElementById('btn-start').addEventListener('click', runDownload);
+    document.getElementById('btn-cancel').addEventListener('click', function() {
+        cancelRequested = true;
+        setProgressText('در حال لغو...');
+    });
+
+    /* ----- Delete a single sura’s offline data ----- */
+    function urlPrefixesForSura(sura, meta) {
+        var prefixes = [];
+        prefixes.push('https://api.quran.com/api/v4/verses/by_chapter/' + sura + '?');
+        prefixes.push('https://api.quran.com/api/v4/verses/by_chapter/' + sura + '/');
+        prefixes.push('https://api.quran.com/api/v4/recitations/');
+        // Audio (tanzil + qurancdn) — match the sura segment in the URL path.
+        prefixes.push('https://tanzil.net/res/audio/');
+        prefixes.push('https://verses.quran.com/');
+        prefixes.push('https://audio.qurancdn.com/');
+        // Hadith POST cache keys carry the URL prefix + body-hash fragment
+        prefixes.push('https://hadith.ai/get_hadith_content/');
+        // We cannot easily attribute audio/hadith cache entries to one sura,
+        // so the SW delete uses substring matching; we narrow with sura number.
+        return prefixes;
+    }
+    function deleteSura(sura) {
+        if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+            alert('سرویس‌ورکر آماده نیست. لطفاً صفحه را رفرش کنید.');
+            return;
+        }
+        // For per-sura precision we send sura-specific prefixes when possible,
+        // and otherwise just clear metadata so the UI stops claiming it’s saved.
+        var prefixes = [
+            'https://api.quran.com/api/v4/verses/by_chapter/' + sura + '?'
+        ];
+        // Tanzil audio uses zero-padded sura number in filename (003001.mp3 etc.).
+        prefixes.push('/' + pad3(sura));
+        navigator.serviceWorker.controller.postMessage({ type: 'DELETE_BY_PREFIX', prefixes: prefixes });
+        delete offlineMeta[sura];
+        saveMeta(offlineMeta);
+        refreshStatusColumn();
+    }
+
+    document.getElementById('btn-clear-all').addEventListener('click', function() {
+        if (!confirm('کل داده‌های آفلاین (متن، تلاوت، حدیث، تفسیر) پاک شوند؟')) return;
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_ALL' });
+        }
+        offlineMeta = {};
+        saveMeta(offlineMeta);
+        refreshStatusColumn();
+        alert('تمام داده‌های آفلاین حذف شدند.');
+    });
+
+    /* ----- Boot ----- */
+    buildTable();
+    loadBooks();
+})();
+</script>
+</body>
+</html>
