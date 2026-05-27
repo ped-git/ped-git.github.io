@@ -120,6 +120,14 @@ async function postCacheKey(req) {
   return new Request(req.url + '#body=' + hash, { method: 'GET' });
 }
 
+function offlineResponse(message) {
+  return new Response(JSON.stringify({ error: 'offline', message: String(message || 'network failed') }), {
+    status: 504,
+    statusText: 'Offline',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' }
+  });
+}
+
 async function handleHadithPost(req) {
   const cache = await caches.open(DATA_CACHE);
   const key = await postCacheKey(req);
@@ -132,7 +140,7 @@ async function handleHadithPost(req) {
   } catch (err) {
     const cached = await cache.match(key);
     if (cached) return cached;
-    throw err;
+    return offlineResponse(err && err.message);
   }
 }
 
@@ -149,7 +157,7 @@ async function cacheFirst(req, cacheName) {
   } catch (err) {
     const fallback = await cache.match(req, { ignoreSearch: true });
     if (fallback) return fallback;
-    throw err;
+    return offlineResponse(err && err.message);
   }
 }
 
@@ -164,7 +172,7 @@ async function networkFirst(req, cacheName) {
   } catch (err) {
     const cached = await cache.match(req);
     if (cached) return cached;
-    throw err;
+    return offlineResponse(err && err.message);
   }
 }
 
@@ -193,7 +201,7 @@ self.addEventListener('fetch', (event) => {
         const cache = await caches.open(APP_SHELL_CACHE);
         const cached = await cache.match(req) || await cache.match('./simple.html');
         if (cached) return cached;
-        throw err;
+        return offlineResponse(err && err.message);
       }
     })());
     return;
