@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تفسیر</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="قرآن">
+    <link rel="apple-touch-icon" href="favicon.svg">
     <style>
         @font-face {
             font-family: 'BLotus';
@@ -365,6 +370,7 @@
                 <a class="book-settings-link" href="simple.html" title="رفتن به نمایش">نمایش</a>
                 <a class="book-settings-link" href="stat.html" title="آمار سوره">آمار سوره</a>
                 <a class="book-settings-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
+                <a class="book-settings-link" href="offline.html" title="دانلود برای استفاده آفلاین">آفلاین</a>
             </div>
             <button type="button" id="book-settings-close">بستن</button>
         </div>
@@ -771,6 +777,15 @@
     else
         init();
 })();
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').catch(function(err) {
+                console.warn('Service worker registration failed:', err);
+            });
+        });
+    }
     </script>
 </body>
 </html>

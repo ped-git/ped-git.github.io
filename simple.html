@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>قرآن - نمایش</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="قرآن">
+    <link rel="apple-touch-icon" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -1668,6 +1674,7 @@
                         <a id="go-stat-link" class="desktop-link" href="stat.html" title="آمار سوره">آمار سوره</a>
                         <a id="go-stat-link" class="desktop-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>
                         <a id="go-stat-link" class="desktop-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>
+                        <a class="desktop-link" href="offline.html" title="دانلود برای استفاده آفلاین">آفلاین</a>
                     </div>
                 </div>
             </div>
@@ -1709,6 +1716,15 @@
     <div id="sura-hadith-tooltip"></div>
     <div id="rec-active-label"></div>
 
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').catch(function(err) {
+                console.warn('Service worker registration failed:', err);
+            });
+        });
+    }
+    </script>
     <script src="js/sura-data.js"></script>
     <script src="js/sura-picker.js"></script>
     <script src="js/buckwalter.js"></script>

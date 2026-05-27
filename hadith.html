@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>احادیث مرتبط با آیه</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="قرآن">
+    <link rel="apple-touch-icon" href="favicon.svg">
     <style>
         @font-face {
             font-family: 'BLotus';
@@ -1394,6 +1399,7 @@
                 html += '<a class="hadith-link" href="stat.html" title="آمار سوره">آمار سوره</a>';
                 html += '<a class="hadith-link" href="hadith.html" title="نمایش حدیث‌ها">حدیث</a>';
                 html += '<a class="hadith-link" href="commentary.html" title="نمایش تفسیر">تفسیر</a>';
+                html += '<a class="hadith-link" href="offline.html" title="دانلود برای استفاده آفلاین">آفلاین</a>';
                 html += '</div>';
                 html += '<div class="hadith-settings-section">';
                 html += '<div class="hadith-links-title">منبع حدیث</div>';
@@ -2169,6 +2175,15 @@
 
             run();
         })();
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').catch(function(err) {
+                console.warn('Service worker registration failed:', err);
+            });
+        });
+    }
     </script>
 </body>
 </html>
