@@ -616,6 +616,23 @@
                '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation' +
                '&language=fa' + getTranslationParam() + '&per_page=300';
     }
+    function bismillahUrl() {
+        return 'https://api.quran.com/api/v4/verses/by_key/1:1' +
+               '?words=true&word_fields=v1_page,code_v1,line_number,text_uthmani,translation' +
+               '&language=fa' + getTranslationParam();
+    }
+    function chaptersUrl() {
+        return 'https://api.quran.com/api/v4/chapters?language=fa';
+    }
+
+    /* Fetched once per batch so the page can render any sura offline:
+       - bismillah is shown before every sura except 1 and 9
+       - chapters list is used for verse-key → page mapping and metadata. */
+    async function prefetchSharedText() {
+        var b = await safeFetch(bismillahUrl());
+        var c = await safeFetch(chaptersUrl());
+        return !!(b && b.ok) && !!(c && c.ok);
+    }
 
     async function safeFetch(url, init) {
         try {
@@ -806,6 +823,11 @@
         document.getElementById('btn-cancel').style.display = '';
         setProgressBar(0);
         setProgressText('شروع دانلود... (۰/' + progress.total + ')');
+
+        if (selections.some(function(s) { return s.text; })) {
+            setProgressText('در حال دریافت بسم‌الله و فهرست سوره‌ها...');
+            await prefetchSharedText();
+        }
 
         for (var i = 0; i < selections.length; i++) {
             if (cancelRequested) break;
