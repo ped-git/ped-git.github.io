@@ -163,6 +163,22 @@ speech[black]::before {
   text-indent: -4mm;
 }
 
+.boxed.underline-black-2 {
+  border-bottom: 1px solid rgb(180, 180, 180);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
+.boxed.underline-black-3 {
+  border-bottom: 1px solid rgb(220, 220, 220);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 0px 0px;
+}
+
 .boxed.underline-gradient {
   border-bottom: 1px solid;
   border-image: linear-gradient(to left, black, white);
@@ -195,6 +211,14 @@ speech[black]::before {
   border-right: 0;
   border-top: 0;
   padding: 0px 0px; ;
+}
+
+.boxed.underline-blackdashed2-far {
+  border-bottom: 1px dashed rgb(200, 200, 200);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  padding: 3px 0mm;
 }
 
 .boxed.underline-blackdashed3 {
